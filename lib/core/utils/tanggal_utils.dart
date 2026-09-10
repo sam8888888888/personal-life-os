@@ -108,3 +108,9 @@ String fmtTanggalId(DateTime tgl) => DateFormat('d MMMM yyyy', 'id_ID').format(t
 
 /// Format tanggal pendek: Sen, 9 Sep 2026
 String fmtTanggalPendek(DateTime tgl) => DateFormat('EEE, d MMM yyyy', 'id_ID').format(tgl);
+
+/// "September 2026"
+String fmtBulanId(DateTime tgl) => DateFormat('MMMM yyyy', 'id_ID').format(tgl);
+
+/// "Sep 2026"
+String fmtBulanPendekId(DateTime tgl) => DateFormat('MMM yyyy', 'id_ID').format(tgl);
