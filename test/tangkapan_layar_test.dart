@@ -16,6 +16,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:personal_life_os/app_router.dart';
+import 'package:personal_life_os/core/notifikasi/jejak.dart';
+import 'package:personal_life_os/core/notifikasi/layanan_notifikasi.dart';
+import 'package:personal_life_os/core/notifikasi/model_pengingat.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
 import 'package:personal_life_os/core/theme/app_tema.dart';
 import 'package:personal_life_os/data/database/database.dart';
@@ -52,6 +55,7 @@ void main() {
   });
 
   setUp(() async {
+    penentuJejak = () async => null; // tanpa berkas jejak saat merender
     // Data contoh: 7 template + pemasukan Rp 12.000.000 + satu sudah dibayar.
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     await PengaturanRepository(db).isiContohData();
@@ -68,10 +72,16 @@ void main() {
     await _db.close();
   });
 
-  Future<void> potret(WidgetTester tester, String nama, String rute) async {
+  Future<void> potret(WidgetTester tester, String nama, String rute,
+      {bool layananDemo = false, String prefiks = 'f2'}) async {
     await tester.binding.setSurfaceSize(const Size(420, 900));
     await tester.pumpWidget(ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(_db)],
+      overrides: [
+        databaseProvider.overrideWithValue(_db),
+        // Layar F3 memakai layanan contoh agar tangkapan layar stabil.
+        if (layananDemo)
+          layananNotifikasiProvider.overrideWithValue(_LayananDemo()),
+      ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: AppTema.terang().copyWith(
@@ -91,7 +101,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
 
     await expectLater(find.byType(MaterialApp),
-        matchesGoldenFile('goldens/f2_$nama.png'));
+        matchesGoldenFile('goldens/${prefiks}_$nama.png'));
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 50));
@@ -110,6 +120,46 @@ void main() {
       skip: !_fontTersedia);
   testWidgets('tangkapan layar form', (t) => potret(t, 'form_tambah', '/tambah'),
       skip: !_fontTersedia);
+
+  // ---- F3: layar pengingat & izin -----------------------------------------
+  testWidgets('tangkapan layar pengingat',
+      (t) => potret(t, 'pengingat', '/pengingat',
+          layananDemo: true, prefiks: 'f3'),
+      skip: !_fontTersedia);
+}
+
+/// Layanan notifikasi contoh: hasil tetap agar tangkapan layar stabil.
+class _LayananDemo implements LayananNotifikasi {
+  @override
+  Future<void> siapkan() async {}
+
+  @override
+  Future<StatusIzinPengingat> statusIzin() async =>
+      const StatusIzinPengingat(notifikasiDiizinkan: true, alarmTepatDiizinkan: false);
+
+  @override
+  Future<bool> mintaIzinNotifikasi() async => true;
+
+  @override
+  Future<bool> mintaIzinAlarmTepat() async => true;
+
+  @override
+  Future<void> pasangJadwal(List<Pengingat> daftar) async {}
+
+  @override
+  Future<void> batalkanSemua() async {}
+
+  @override
+  Future<void> jadwalkanSatu(Pengingat p) async {}
+
+  @override
+  Future<void> tampilkanUji({Duration tunda = const Duration(seconds: 10)}) async {}
+
+  @override
+  Future<List<({int id, String? judul, DateTime? waktu})>> tertunda() async => [
+        (id: 1, judul: 'Listrik PLN — 3 hari lagi', waktu: DateTime.now().add(const Duration(days: 3))),
+        (id: 2, judul: 'Internet IndiHome — besok', waktu: DateTime.now().add(const Duration(days: 1))),
+      ];
 }
 
 late AppDatabase _db;

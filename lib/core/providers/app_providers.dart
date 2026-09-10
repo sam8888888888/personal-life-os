@@ -1,9 +1,16 @@
 /// Provider global: database, repositori, pemasukan bulanan, statistik dasbor.
 library;
 
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../notifikasi/layanan_notifikasi.dart';
+import '../notifikasi/layanan_notifikasi_lokal.dart';
+import '../notifikasi/model_pengingat.dart';
+import '../notifikasi/perencana_pengingat.dart';
+import '../notifikasi/penyinkron_pengingat.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/pengaturan_repository.dart';
 import '../../data/repository/tagihan_repository.dart';
@@ -34,6 +41,45 @@ final kategoriProvider = StreamProvider.autoDispose<List<KategoriData>>((ref) {
   final db = ref.watch(databaseProvider);
   return (db.select(db.kategori)..orderBy([(k) => OrderingTerm.asc(k.urutan)]))
       .watch();
+});
+
+// ---------------------------------------------------------------------------
+// Pengingat (F3)
+// ---------------------------------------------------------------------------
+
+/// Layanan notifikasi nyata (plugin Android).
+final layananNotifikasiProvider = Provider<LayananNotifikasi>((ref) {
+  final l = LayananNotifikasiLokal();
+  unawaited(l.siapkan());
+  return l;
+});
+
+/// Penyinkron jadwal pengingat.
+final penyinkronPengingatProvider = Provider<PenyinkronPengingat>(
+    (ref) => PenyinkronPengingat(
+          repo: ref.watch(tagihanRepoProvider),
+          layanan: ref.watch(layananNotifikasiProvider),
+        ));
+
+/// Perencana murni (dipakai uji & pratinjau).
+final perencanaPengingatProvider =
+    Provider<PerencanaPengingat>((ref) => const PerencanaPengingat());
+
+/// Pengingat berikutnya menurut data tagihan saat ini.
+final pengingatBerikutnyaProvider =
+    FutureProvider.autoDispose<List<Pengingat>>((ref) async {
+  final tagihan = await ref.watch(semuaTagihanProvider.future);
+  final daftar = ref
+      .watch(perencanaPengingatProvider)
+      .rencanakan(tagihan: tagihan, sekarang: DateTime.now());
+  return daftar.take(20).toList(growable: false);
+});
+
+/// Ringkasan izin & jumlah pengingat (untuk badge di Pengaturan).
+final statusIzinPengingatProvider =
+    FutureProvider.autoDispose<StatusIzinPengingat>((ref) async {
+  final l = ref.watch(layananNotifikasiProvider);
+  return l.statusIzin();
 });
 
 /// Pemasukan bulan berjalan. Format kunci: "YYYY-MM".

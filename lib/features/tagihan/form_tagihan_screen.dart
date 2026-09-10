@@ -32,7 +32,8 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
 
   DateTime _jatuhTempo = DateTime.now();
   Frekuensi _frekuensi = Frekuensi.bulanan;
-  Set<int> _lead = {7, 1};
+  // FR-10: default cerdas H-3, H-1, dan hari-H.
+  Set<int> _lead = {3, 1, 0};
   TimeOfDay _jam = const TimeOfDay(hour: 9, minute: 0);
   PrioritasTagihan _prioritas = PrioritasTagihan.biasa;
   int? _kategoriId;

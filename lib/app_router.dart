@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/kalender/kalender_screen.dart';
+import 'features/pengingat/pengingat_screen.dart';
 import 'features/pengaturan/pengaturan_screen.dart';
 import 'features/ringkasan/ringkasan_screen.dart';
 import 'features/tagihan/daftar_tagihan_screen.dart';
@@ -27,6 +28,11 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/tambah',
       builder: (c, s) => const HalamanJudul(
           judul: 'Tambah Tagihan', isi: FormTagihanScreen()),
+    ),
+    GoRoute(
+      path: '/pengingat',
+      builder: (c, s) => const HalamanJudul(
+          judul: 'Pengingat & Izin', isi: PengingatScreen()),
     ),
     GoRoute(
       path: '/ubah/:id',

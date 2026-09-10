@@ -31,31 +31,31 @@ const daftarTemplate = <TemplateTagihan>[
       nama: 'Listrik PLN',
       perkiraanSen: 30000000, // Rp 300.000
       frekuensi: Frekuensi.bulanan,
-      leadHari: [7, 3, 1],
+      leadHari: [7, 3, 1, 0],
       catatan: 'Token/listrik pascabayar'),
   TemplateTagihan(
-      nama: 'Air PDAM', perkiraanSen: 12000000, frekuensi: Frekuensi.bulanan, leadHari: [5, 1]),
+      nama: 'Air PDAM', perkiraanSen: 12000000, frekuensi: Frekuensi.bulanan, leadHari: [5, 1, 0]),
   TemplateTagihan(
-      nama: 'Internet rumah', perkiraanSen: 35000000, frekuensi: Frekuensi.bulanan, leadHari: [7, 1]),
+      nama: 'Internet rumah', perkiraanSen: 35000000, frekuensi: Frekuensi.bulanan, leadHari: [7, 1, 0]),
   TemplateTagihan(
       nama: 'BPJS Kesehatan',
       perkiraanSen: 15000000,
       frekuensi: Frekuensi.bulanan,
-      leadHari: [10, 3, 1],
+      leadHari: [10, 3, 1, 0],
       catatan: 'Jatuh tempo tiap tanggal 15'),
   TemplateTagihan(
-      nama: 'Langganan streaming', perkiraanSen: 5400000, frekuensi: Frekuensi.bulanan, leadHari: [3]),
+      nama: 'Langganan streaming', perkiraanSen: 5400000, frekuensi: Frekuensi.bulanan, leadHari: [3, 0]),
   TemplateTagihan(
       nama: 'Cicilan motor',
       perkiraanSen: 85000000,
       frekuensi: Frekuensi.bulanan,
-      leadHari: [7, 3, 1],
+      leadHari: [7, 3, 1, 0],
       catatan: 'Cek tanggal jatuh tempo di kontrak'),
   TemplateTagihan(
       nama: 'Pajak kendaraan (STNK)',
       perkiraanSen: 2500000,
       frekuensi: Frekuensi.tahunan,
-      leadHari: [60, 30, 14, 7, 1],
+      leadHari: [60, 30, 14, 7, 1, 0],
       catatan: 'Pengingat jauh hari karena wajib perpanjangan'),
 ];
 

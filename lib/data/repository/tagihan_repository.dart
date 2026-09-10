@@ -23,6 +23,11 @@ class TagihanRepository {
   Stream<List<TagihanData>> watchSemua() =>
       (db.select(db.tagihan)..orderBy([(t) => OrderingTerm.desc(t.id)])).watch();
 
+  /// Ambil semua tagihan sekali (bukan stream) — dipakai penyinkron pengingat
+  /// dan pekerja latar yang tidak butuh pembaruan langsung.
+  Future<List<TagihanData>> ambilSemua() =>
+      (db.select(db.tagihan)..orderBy([(t) => OrderingTerm.asc(t.jatuhTempo)])).get();
+
   Future<TagihanData> tambah(TagihanCompanion c) =>
       db.into(db.tagihan).insertReturning(c);
 

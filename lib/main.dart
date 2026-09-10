@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app_router.dart';
+import 'core/notifikasi/kerja_latar.dart';
+import 'core/notifikasi/layanan_notifikasi_lokal.dart';
+import 'core/notifikasi/pemantau_pengingat.dart';
 import 'core/theme/app_tema.dart';
 import 'data/repository/demo_seeder.dart';
 
@@ -11,7 +16,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID'); // format tanggal Indonesia
   await seedDemoJikaDiminta(); // hanya aktif bila dibangun dengan --dart-define=DEMO_SEED=true
-  runApp(const ProviderScope(child: PersonalLifeOsApp()));
+  // F3: siapkan notifikasi + pekerja latar (tidak memblokir tampilan).
+  unawaited(siapkanPengingatSaatMulai());
+  runApp(const ProviderScope(
+      child: PemantauPengingat(child: PersonalLifeOsApp())));
+}
+
+/// Siapkan layanan notifikasi & daftarkan pekerja latar Workmanager.
+Future<void> siapkanPengingatSaatMulai() async {
+  try {
+    await initializeDateFormatting('id_ID');
+    await LayananNotifikasiLokal().siapkan();
+    await daftarkanKerjaLatar();
+  } catch (e) {
+    debugPrint('siapkanPengingatSaatMulai gagal: $e');
+  }
 }
 
 class PersonalLifeOsApp extends StatelessWidget {

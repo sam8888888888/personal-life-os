@@ -114,3 +114,36 @@ String fmtBulanId(DateTime tgl) => DateFormat('MMMM yyyy', 'id_ID').format(tgl);
 
 /// "Sep 2026"
 String fmtBulanPendekId(DateTime tgl) => DateFormat('MMM yyyy', 'id_ID').format(tgl);
+
+
+// ---------------------------------------------------------------------------
+// Format aman tanpa data locale (dipakai notifikasi & pekerja latar).
+//
+// Notifikasi bisa dibangun di isolate latar (Workmanager / aksi notifikasi)
+// yang TIDAK menjalankan main(), sehingga initializeDateFormatting('id_ID')
+// belum tentu dipanggil. Format di bawah tidak butuh data locale.
+// ---------------------------------------------------------------------------
+
+const List<String> _bulanPanjangId = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+];
+
+const List<String> _bulanSingkatId = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+];
+
+const List<String> _hariSingkatId = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+
+/// "9 September 2026" tanpa bergantung data locale intl.
+String fmtTanggalAman(DateTime t) =>
+    '${t.day} ${_bulanPanjangId[t.month - 1]} ${t.year}';
+
+/// "Kam, 10 Sep 2026" tanpa bergantung data locale intl.
+String fmtTanggalPendekAman(DateTime t) =>
+    '${_hariSingkatId[t.weekday - 1]}, ${t.day} ${_bulanSingkatId[t.month - 1]} ${t.year}';
+
+/// "09:00"
+String fmtJam(DateTime t) =>
+    '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';

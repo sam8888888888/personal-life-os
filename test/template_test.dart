@@ -14,6 +14,8 @@ void main() {
     expect(daftarTemplate.map((e) => e.nama), contains('Listrik PLN'));
     expect(daftarTemplate.every((e) => e.perkiraanSen > 0), isTrue);
     expect(daftarTemplate.every((e) => e.leadHari.isNotEmpty), isTrue);
+    // FR-10: setiap template selalu menyertakan pengingat hari-H.
+    expect(daftarTemplate.every((e) => e.leadHari.contains(0)), isTrue);
   });
 
   test('isi dari template masuk ke database', () async {
@@ -24,7 +26,7 @@ void main() {
     expect(semua.length, 7);
     final pln = semua.firstWhere((e) => e.nama == 'Listrik PLN');
     expect(pln.jatuhTempo, DateTime(2026, 9, 15));
-    expect(teksKeLead(pln.pengingatLeadHari), [7, 3, 1]);
+    expect(teksKeLead(pln.pengingatLeadHari), [7, 3, 1, 0]);
     expect(pln.frekuensi, 'bulanan');
     expect(pln.kodeMataUang, 'IDR');
   });
@@ -34,6 +36,6 @@ void main() {
         daftarTemplate.where((e) => e.nama.contains('STNK')).toList(),
         tanggalAwal: DateTime(2026, 9, 15));
     final t = await db.select(db.tagihan).getSingle();
-    expect(teksKeLead(t.pengingatLeadHari), [60, 30, 14, 7, 1]);
+    expect(teksKeLead(t.pengingatLeadHari), [60, 30, 14, 7, 1, 0]);
   });
 }
