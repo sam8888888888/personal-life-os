@@ -6,7 +6,7 @@
 | Produk | Personal Life OS — Android (Flutter) |
 | Dokumen | Blueprint & PRD Fitur v2.0 — *bahan upgrade fitur selanjutnya* |
 | Versi | 2.0 (DRAFT) |
-| Tanggal | 13 Sep 2026, 01:20 WIB (12 Sep 18:20 UTC) |
+| Tanggal | 12 Sep 2026, 17:35 UTC (13 Sep 00:35 WIB / 01:35 MYT) |
 | Status | **DRAFT — menunggu tinjauan & keputusan Papi** |
 | Penyusun | Aaron Salahuddin (perapian ide + verifikasi teknis) |
 | Sumber | (1) Hasil obrolan Papi dengan ChatGPT (dokumen `fitur baru personal life os.txt`) · (2) PRD Personal Life OS v1.6 (FR-01…FR-59) · (3) PRD Perbaikan v1.0 (PB-01…PB-16) · (4) kode nyata di `/home/aaron/lifeos-penyempurnaan` |
