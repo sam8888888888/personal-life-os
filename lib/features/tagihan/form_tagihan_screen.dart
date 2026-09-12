@@ -1,6 +1,7 @@
 /// Form tambah/ubah tagihan — UC-1: tambah tagihan < 30 detik.
 library;
 
+import '../../core/utils/waktu.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +31,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
   final _catatan = TextEditingController();
   final _tautan = TextEditingController();
 
-  DateTime _jatuhTempo = DateTime.now();
+  DateTime _jatuhTempo = waktuSekarang();
   Frekuensi _frekuensi = Frekuensi.bulanan;
   // FR-10: default cerdas H-3, H-1, dan hari-H.
   Set<int> _lead = {3, 1, 0};

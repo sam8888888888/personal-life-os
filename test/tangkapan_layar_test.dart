@@ -5,6 +5,7 @@
 /// Hasil PNG muncul di test/goldens/, lalu disalin ke folder demo/.
 library;
 
+import 'package:personal_life_os/core/utils/waktu.dart';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -24,8 +25,20 @@ import 'package:personal_life_os/core/theme/app_tema.dart';
 import 'package:personal_life_os/data/database/database.dart';
 import 'package:personal_life_os/data/repository/pengaturan_repository.dart';
 
-const _fontDasar =
-    '/workspace/tools/flutter/bin/cache/artifacts/material_fonts/';
+/// Font Roboto dari Flutter SDK. Dicari di beberapa lokasi agar uji
+/// tangkapan layar tetap bisa jalan di mesin build mana pun.
+String _cariFontDasar() {
+  const kandidat = [
+    '/workspace/tools/flutter/bin/cache/artifacts/material_fonts/',
+    '/opt/tools/flutter/bin/cache/artifacts/material_fonts/',
+  ];
+  for (final p in kandidat) {
+    if (Directory(p).existsSync()) return p;
+  }
+  return kandidat.first;
+}
+
+final String _fontDasar = _cariFontDasar();
 
 Future<void> _muatFont(String nama, List<String> berkas) async {
   final loader = FontLoader(nama);
@@ -41,9 +54,14 @@ Future<void> _muatFont(String nama, List<String> berkas) async {
 final bool _fontTersedia =
     File('${_fontDasar}Roboto-Regular.ttf').existsSync();
 
+/// Waktu dikunci supaya tangkapan layar tidak berubah saat tanggal berganti
+/// (kalender menandai "hari ini", label "besok"/"N hari lagi").
+final DateTime _waktuUji = DateTime(2026, 9, 10, 9, 0);
+
 void main() {
   setUpAll(() async {
     await initializeDateFormatting('id_ID');
+    pakaiSumberWaktu(() => _waktuUji);
     await _muatFont('Roboto', [
       'Roboto-Regular.ttf',
       'Roboto-Medium.ttf',
@@ -58,7 +76,7 @@ void main() {
     penentuJejak = () async => null; // tanpa berkas jejak saat merender
     // Data contoh: 7 template + pemasukan Rp 12.000.000 + satu sudah dibayar.
     final db = AppDatabase.forTesting(NativeDatabase.memory());
-    await PengaturanRepository(db).isiContohData();
+    await PengaturanRepository(db).isiContohData(acuan: _waktuUji);
     final daftar = await (db.select(db.tagihan)
           ..orderBy([(t) => OrderingTerm.asc(t.jatuhTempo)]))
         .get();
@@ -71,6 +89,8 @@ void main() {
   tearDown(() async {
     await _db.close();
   });
+
+  tearDownAll(pakaiWaktuAsli);
 
   Future<void> potret(WidgetTester tester, String nama, String rute,
       {bool layananDemo = false, String prefiks = 'f2'}) async {
@@ -157,8 +177,8 @@ class _LayananDemo implements LayananNotifikasi {
 
   @override
   Future<List<({int id, String? judul, DateTime? waktu})>> tertunda() async => [
-        (id: 1, judul: 'Listrik PLN — 3 hari lagi', waktu: DateTime.now().add(const Duration(days: 3))),
-        (id: 2, judul: 'Internet IndiHome — besok', waktu: DateTime.now().add(const Duration(days: 1))),
+        (id: 1, judul: 'Listrik PLN — 3 hari lagi', waktu: waktuSekarang().add(const Duration(days: 3))),
+        (id: 2, judul: 'Internet IndiHome — besok', waktu: waktuSekarang().add(const Duration(days: 1))),
       ];
 }
 

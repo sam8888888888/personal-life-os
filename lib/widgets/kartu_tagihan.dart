@@ -1,6 +1,7 @@
 /// Widget kartu tagihan — dipakai di dasbor, daftar, dan kalender.
 library;
 
+import '../core/utils/waktu.dart';
 import 'package:flutter/material.dart';
 
 import '../core/utils/tanggal_utils.dart';
@@ -26,7 +27,7 @@ class KartuTagihan extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final skema = Theme.of(context).colorScheme;
-    final hari = selisihHari(DateTime.now(), tagihan.jatuhTempo);
+    final hari = selisihHari(waktuSekarang(), tagihan.jatuhTempo);
     final (labelWaktu, warnaBadge) = _badge(skema, hari);
     final judul = tagihan.nama;
 

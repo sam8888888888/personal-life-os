@@ -1,6 +1,7 @@
 /// Provider global: database, repositori, pemasukan bulanan, statistik dasbor.
 library;
 
+import '../utils/waktu.dart';
 import 'dart:async';
 
 import 'package:drift/drift.dart';
@@ -71,7 +72,7 @@ final pengingatBerikutnyaProvider =
   final tagihan = await ref.watch(semuaTagihanProvider.future);
   final daftar = ref
       .watch(perencanaPengingatProvider)
-      .rencanakan(tagihan: tagihan, sekarang: DateTime.now());
+      .rencanakan(tagihan: tagihan, sekarang: waktuSekarang());
   return daftar.take(20).toList(growable: false);
 });
 
@@ -89,7 +90,7 @@ String kunciBulan(DateTime t) =>
 final pemasukanBulanIniProvider =
     StreamProvider.autoDispose<int>((ref) {
   final db = ref.watch(databaseProvider);
-  final bulan = kunciBulan(DateTime.now());
+  final bulan = kunciBulan(waktuSekarang());
   return (db.select(db.pemasukanBulanan)
         ..where((p) => p.bulan.equals(bulan)))
       .watch()

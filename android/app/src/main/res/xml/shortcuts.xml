@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Aksi cepat (tahan ikon aplikasi): langsung menuju halaman yang dituju. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="tambah_tagihan"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/aksi_tambah_pendek"
+        android:shortcutLongLabel="@string/aksi_tambah_panjang">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.personallifeos.personal_life_os"
+            android:targetClass="com.personallifeos.personal_life_os.MainActivity">
+            <extra android:name="rute" android:value="/tambah" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="tagihan_hari_ini"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/aksi_hari_pendek"
+        android:shortcutLongLabel="@string/aksi_hari_panjang">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.personallifeos.personal_life_os"
+            android:targetClass="com.personallifeos.personal_life_os.MainActivity">
+            <extra android:name="rute" android:value="/" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="pengingat"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/aksi_pengingat_pendek"
+        android:shortcutLongLabel="@string/aksi_pengingat_panjang">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.personallifeos.personal_life_os"
+            android:targetClass="com.personallifeos.personal_life_os.MainActivity">
+            <extra android:name="rute" android:value="/pengingat" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

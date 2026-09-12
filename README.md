@@ -23,7 +23,7 @@ export ANDROID_SDK_ROOT=/workspace/android-sdk
 
 flutter pub get
 flutter analyze          # harus: No issues found
-flutter test             # harus: All tests passed
+flutter test             # harus: All tests passed (80 uji, waktu dikunci)
 flutter run -d <device>  # jalankan di perangkat/emulator
 flutter build apk --debug   # hasil: build/app/outputs/flutter-apk/app-debug.apk
 
@@ -44,6 +44,7 @@ flutter test test/tangkapan_layar_test.dart --update-goldens
 
 ## Struktur
 - `lib/core/utils/` — logika murni (tanggal/rollover, uang) yang diuji unit
+- `lib/core/utils/waktu.dart` — sumber waktu tunggal (bisa dikunci saat uji)
 - `lib/data/model/` — enum & model
 - `lib/data/database/` — tabel Drift, koneksi, migrasi, seed kategori
 - `lib/data/repository/` — CRUD, aturan pelunasan, pengaturan, pengisi data contoh

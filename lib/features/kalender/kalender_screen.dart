@@ -1,6 +1,7 @@
 /// Kalender bulanan (UC-2): melihat semua tagihan bulan ini per tanggal.
 library;
 
+import '../../core/utils/waktu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,7 +25,7 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
   @override
   void initState() {
     super.initState();
-    final n = DateTime.now();
+    final n = waktuSekarang();
     _bulan = DateTime(n.year, n.month);
     _pilih = DateTime(n.year, n.month, n.day);
   }
@@ -163,7 +164,7 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
 
   Widget _selTanggal(int hari, List<TagihanData> daftar) {
     final skema = Theme.of(context).colorScheme;
-    final iniHariIni = DateTime.now();
+    final iniHariIni = waktuSekarang();
     final adalahHariIni = _bulan.year == iniHariIni.year &&
         _bulan.month == iniHariIni.month &&
         hari == iniHariIni.day;

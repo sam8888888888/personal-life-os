@@ -2,6 +2,7 @@
 /// dan tagihan terdekat. Halaman pertama yang dilihat pengguna.
 library;
 
+import '../../core/utils/waktu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +27,7 @@ class RingkasanScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Gagal memuat data: $e')),
         data: (daftar) {
-          final sekarang = DateTime.now();
+          final sekarang = waktuSekarang();
           final bulanIni = daftar.where((t) =>
               t.jatuhTempo.year == sekarang.year &&
               t.jatuhTempo.month == sekarang.month);

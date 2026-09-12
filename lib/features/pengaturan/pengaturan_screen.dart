@@ -1,6 +1,7 @@
 /// Pengaturan: pemasukan bulanan (bahan hitung "uang tersisa"), data & info.
 library;
 
+import '../../core/utils/waktu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bulan = DateTime.now();
+    final bulan = waktuSekarang();
     final pemasukan = ref.watch(pemasukanBulanIniProvider);
 
     pemasukan.whenData((v) {
@@ -111,7 +112,7 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
     }
     await ref
         .read(pengaturanRepoProvider)
-        .simpanPemasukan(DateTime.now(), rupiahKeSen(n));
+        .simpanPemasukan(waktuSekarang(), rupiahKeSen(n));
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Pemasukan tersimpan.')));

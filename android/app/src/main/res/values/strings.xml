@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Aksi cepat dari ikon aplikasi (A2). -->
+    <string name="aksi_tambah_pendek">Tambah tagihan</string>
+    <string name="aksi_tambah_panjang">Tambah tagihan baru</string>
+    <string name="aksi_hari_pendek">Hari ini</string>
+    <string name="aksi_hari_panjang">Lihat tagihan hari ini</string>
+    <string name="aksi_pengingat_pendek">Pengingat</string>
+    <string name="aksi_pengingat_panjang">Buka pengingat &amp; izin</string>
+</resources>
