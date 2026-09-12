@@ -85,18 +85,15 @@ Future<int> buatTagihan({
   return t.id;
 }
 
-/// Payload persis seperti yang dibawa notifikasi nyata (membawa periode).
-Future<String> payloadNyata(int tagihanId,
-    {AksiNotifikasi aksi = AksiNotifikasi.sudahBayar}) async {
+/// Payload **persis** seperti yang dibawa notifikasi nyata (konteks + periode).
+/// Aksi TIDAK lagi ada di payload (PB-01) — aksi dikirim terpisah sebagai
+/// actionId, sama seperti perilaku Android.
+Future<String> payloadNyata(int tagihanId) async {
   final rencana = const PerencanaPengingat(sertakanRingkasanMingguan: false)
       .rencanakan(tagihan: await repo.ambilSemua(), sekarang: sekarang);
   final p = rencana.firstWhere((x) => x.tagihanId == tagihanId,
       orElse: () => throw StateError('tidak ada pengingat untuk tagihan $tagihanId'));
-  final teks = p.payloadDenganPeriode(p.periode!);
-  if (aksi == AksiNotifikasi.sudahBayar) return teks;
-  return PayloadPengingat(
-          tagihanId: tagihanId, aksi: aksi, periode: p.periode)
-      .toJson();
+  return p.payloadDenganPeriode(p.periode!);
 }
 
 void main() {
@@ -264,7 +261,10 @@ void main() {
       final payload = await payloadNyata(id);
 
       final hasil = await tanganiAksiPengingat(payload,
-          db: db, layanan: layanan, sekarang: sekarang);
+          actionId: AksiNotifikasi.sudahBayar,
+          db: db,
+          layanan: layanan,
+          sekarang: sekarang);
 
       expect(hasil.berhasil, isTrue, reason: hasil.pesan);
       final t = await (db.select(db.tagihan)..where((x) => x.id.equals(id))).getSingle();
@@ -278,11 +278,13 @@ void main() {
       final id = await buatTagihan(jatuhTempo: DateTime(2026, 9, 15));
       // Payload nyata dari jadwal (membawa periode 15 Sep 2026).
       final payload = await payloadNyata(id);
-      final pertama = await tanganiAksiPengingat(payload, db: db, sekarang: sekarang);
+      final pertama = await tanganiAksiPengingat(payload,
+          actionId: AksiNotifikasi.sudahBayar, db: db, sekarang: sekarang);
       expect(pertama.berhasil, isTrue);
 
       // Pengguna menekan aksi pada notifikasi yang sama (periode sudah lunas).
-      final kedua = await tanganiAksiPengingat(payload, db: db, sekarang: sekarang);
+      final kedua = await tanganiAksiPengingat(payload,
+          actionId: AksiNotifikasi.sudahBayar, db: db, sekarang: sekarang);
 
       expect(kedua.berhasil, isTrue);
       expect(kedua.pesan, contains('sudah dibayar'));
@@ -297,8 +299,10 @@ void main() {
       final id = await buatTagihan(
           nama: 'STNK', jatuhTempo: DateTime(2026, 9, 15), frekuensi: 'sekali');
       final payload = await payloadNyata(id);
-      await tanganiAksiPengingat(payload, db: db, sekarang: sekarang);
-      final kedua = await tanganiAksiPengingat(payload, db: db, sekarang: sekarang);
+      await tanganiAksiPengingat(payload,
+          actionId: AksiNotifikasi.sudahBayar, db: db, sekarang: sekarang);
+      final kedua = await tanganiAksiPengingat(payload,
+          actionId: AksiNotifikasi.sudahBayar, db: db, sekarang: sekarang);
 
       expect(kedua.pesan, contains('sudah bertanda lunas'));
       expect(await db.select(db.riwayatPembayaran).get(), hasLength(1));
@@ -307,10 +311,13 @@ void main() {
     test('"Tunda 1 jam" menjadwalkan satu notifikasi +1 jam', () async {
       final id = await buatTagihan(jatuhTempo: DateTime(2026, 9, 15));
       final layanan = LayananPalsu();
-      final payload = await payloadNyata(id, aksi: AksiNotifikasi.tundaSatuJam);
+      final payload = await payloadNyata(id);
 
       final hasil = await tanganiAksiPengingat(payload,
-          db: db, layanan: layanan, sekarang: sekarang);
+          actionId: AksiNotifikasi.tundaSatuJam,
+          db: db,
+          layanan: layanan,
+          sekarang: sekarang);
       expect(hasil.berhasil, isTrue);
       expect(layanan.satu.length, 1);
       expect(layanan.satu.first.waktu, sekarang.add(const Duration(hours: 1)));
@@ -318,26 +325,26 @@ void main() {
     });
 
     test('tagihan tidak dikenal ditolak dengan pesan jelas', () async {
-      final payload = PayloadPengingat(
-              tagihanId: 9999, aksi: AksiNotifikasi.sudahBayar)
-          .toJson();
-      final hasil = await tanganiAksiPengingat(payload, db: db, sekarang: sekarang);
+      final payload = const PayloadPengingat(tagihanId: 9999).toJson();
+      final hasil = await tanganiAksiPengingat(payload,
+          actionId: AksiNotifikasi.sudahBayar, db: db, sekarang: sekarang);
       expect(hasil.berhasil, isFalse);
       expect(hasil.pesan, contains('tidak ditemukan'));
     });
 
     test('payload kosong / rusak ditolak, tidak melempar', () async {
       for (final teks in [null, '', 'bukan-json', '{"aksi":"sudah_bayar"}']) {
-        final hasil = await tanganiAksiPengingat(teks, db: db, sekarang: sekarang);
+        final hasil = await tanganiAksiPengingat(teks,
+            actionId: AksiNotifikasi.sudahBayar, db: db, sekarang: sekarang);
         expect(hasil.berhasil, isFalse);
       }
     });
 
     test('aksi "buka aplikasi" tidak mengubah data', () async {
       final id = await buatTagihan(jatuhTempo: DateTime(2026, 9, 15));
-      final payload =
-          PayloadPengingat(tagihanId: id, aksi: AksiNotifikasi.buka).toJson();
-      final hasil = await tanganiAksiPengingat(payload, db: db, sekarang: sekarang);
+      final payload = await payloadNyata(id);
+      final hasil = await tanganiAksiPengingat(payload,
+          actionId: AksiNotifikasi.buka, db: db, sekarang: sekarang);
       expect(hasil.berhasil, isTrue);
       final t = await (db.select(db.tagihan)..where((x) => x.id.equals(id))).getSingle();
       expect(t.jatuhTempo, DateTime(2026, 9, 15));

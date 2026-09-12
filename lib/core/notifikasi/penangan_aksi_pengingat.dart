@@ -34,23 +34,31 @@ class HasilAksi {
 /// Jalankan aksi dari payload notifikasi.
 ///
 /// [db] boleh null: fungsi akan membuka database sendiri (kasus pekerja latar).
+/// PB-01: [actionId] adalah **sumber kebenaran** aksi (tombol yang ditekan).
+/// Payload hanya membawa konteks (tagihanId, notifId, periode). Bila [actionId]
+/// null/kosong/tidak dikenal, aksi dianggap "buka aplikasi" — tidak pernah
+/// menandai lunas. Dengan begitu menyentuh notifikasi (tanpa tombol) aman.
 Future<HasilAksi> tanganiAksiPengingat(
   String? payloadTeks, {
+  AksiNotifikasi? actionId,
   AppDatabase? db,
   LayananNotifikasi? layanan,
   DateTime? sekarang,
 }) async {
-  final p = PayloadPengingat.urai(payloadTeks);
-  if (p == null) {
-    final h = HasilAksi(berhasil: false, pesan: 'Payload notifikasi tidak dikenal');
-    await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'payload': payloadTeks});
+  final aksi = actionId ?? AksiNotifikasi.buka;
+
+  // "Buka aplikasi" tidak pernah menyentuh data, seburuk apa pun payload-nya.
+  if (aksi == AksiNotifikasi.buka) {
+    final h = HasilAksi(berhasil: true, pesan: 'Membuka aplikasi');
+    await catatJejak({'jenis': 'aksi', 'hasil': h.pesan});
     return h;
   }
 
-  if (p.aksi == AksiNotifikasi.buka) {
+  final p = PayloadPengingat.urai(payloadTeks);
+  if (p == null) {
     final h = HasilAksi(
-        berhasil: true, pesan: 'Membuka aplikasi', tagihanId: p.tagihanId, aksi: p.aksi);
-    await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': p.tagihanId});
+        berhasil: false, pesan: 'Payload notifikasi tidak dikenal', aksi: aksi);
+    await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'payload': payloadTeks});
     return h;
   }
 
@@ -64,13 +72,27 @@ Future<HasilAksi> tanganiAksiPengingat(
 
     if (t == null) {
       final h = HasilAksi(
-          berhasil: false, pesan: 'Tagihan #${p.tagihanId} tidak ditemukan', aksi: p.aksi);
+          berhasil: false, pesan: 'Tagihan #${p.tagihanId} tidak ditemukan', aksi: aksi);
       await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': p.tagihanId});
       return h;
     }
 
-    switch (p.aksi) {
+    switch (aksi) {
       case AksiNotifikasi.sudahBayar:
+        // PB-02: tanpa tanggal periode kita tidak tahu periode mana yang dibayar
+        // -> jangan pernah menandai lunas.
+        if (p.periode == null) {
+          final h = HasilAksi(
+            berhasil: false,
+            pesan: 'Tidak ada tanggal periode pada notifikasi ini. '
+                'Buka aplikasi untuk menandai lunas.',
+            tagihanId: p.tagihanId,
+            aksi: aksi,
+          );
+          await catatJejak(
+              {'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': p.tagihanId});
+          return h;
+        }
         // Notifikasi lama (periode sudah dibayar / berganti) tidak boleh
         // menandai lunas periode berikutnya.
         final periodeNotif = p.periode;
@@ -81,7 +103,7 @@ Future<HasilAksi> tanganiAksiPengingat(
             pesan: '${t.nama} periode ${fmtTanggalAman(periodeNotif)} sudah dibayar; '
                 'periode aktif sekarang ${fmtTanggalAman(t.jatuhTempo)}',
             tagihanId: t.id,
-            aksi: p.aksi,
+            aksi: aksi,
           );
           await catatJejak({
             'jenis': 'aksi',
@@ -97,7 +119,7 @@ Future<HasilAksi> tanganiAksiPengingat(
             berhasil: true,
             pesan: '${t.nama} sudah bertanda lunas sebelumnya',
             tagihanId: t.id,
-            aksi: p.aksi,
+            aksi: aksi,
           );
           await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': t.id});
           return h;
@@ -112,7 +134,7 @@ Future<HasilAksi> tanganiAksiPengingat(
               ? '${t.nama} ditandai lunas · periode berikutnya ${fmtTanggalAman(sesudah.jatuhTempo)}'
               : '${t.nama} ditandai lunas (tagihan sekali)',
           tagihanId: t.id,
-          aksi: p.aksi,
+          aksi: aksi,
         );
         // Segarkan jadwal setelah pembayaran (pengingat periode baru).
         if (layanan != null) {
@@ -128,9 +150,12 @@ Future<HasilAksi> tanganiAksiPengingat(
           id: idNotifikasi(t.id, slotTunda),
           tagihanId: t.id,
           waktu: kapan,
-          kanal: t.jatuhTempo.isBefore(DateTime.now())
+          kanal: t.jatuhTempo.isBefore(sekarang ?? DateTime.now())
               ? KanalNotifikasi.terlambat
               : KanalNotifikasi.tagihan,
+          // PB-02: pengingat tunda juga membawa periode, agar aksi "sudah bayar"
+          // pada notifikasi tunda tidak menandai lunas periode yang salah.
+          periode: t.jatuhTempo,
           judul: 'Diingatkan lagi: ${t.nama}',
           isi: 'Jatuh tempo ${fmtTanggalAman(t.jatuhTempo)}. '
               '${(t.jumlahSen ?? 0) > 0 ? 'Jumlah ${fmtRpDariSen(t.jumlahSen!)}' : 'Tanpa nominal'}',
@@ -141,7 +166,7 @@ Future<HasilAksi> tanganiAksiPengingat(
           pesan: '${t.nama} diingatkan lagi pukul '
               '${kapan.hour.toString().padLeft(2, '0')}:${kapan.minute.toString().padLeft(2, '0')}',
           tagihanId: t.id,
-          aksi: p.aksi,
+          aksi: aksi,
         );
         await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': t.id});
         return h;
@@ -151,7 +176,7 @@ Future<HasilAksi> tanganiAksiPengingat(
     }
   } catch (e) {
     final h = HasilAksi(
-        berhasil: false, pesan: 'Gagal memproses aksi: $e', aksi: p.aksi);
+        berhasil: false, pesan: 'Gagal memproses aksi: $e', aksi: aksi);
     await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': p.tagihanId});
     return h;
   } finally {

@@ -91,24 +91,39 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
         styleInformation: BigTextStyleInformation(p.isi),
         ticker: p.judul,
         // FR-11: aksi dari notifikasi tanpa membuka aplikasi.
-        actions: const <AndroidNotificationAction>[
-          AndroidNotificationAction(
-            'sudah_bayar',
-            '✓ Sudah bayar',
-            showsUserInterface: false,
-            cancelNotification: true,
-          ),
-          AndroidNotificationAction(
-            'tunda_1_jam',
-            'Tunda 1 jam',
-            showsUserInterface: false,
-          ),
-          AndroidNotificationAction(
-            'buka',
-            'Buka aplikasi',
-            showsUserInterface: true,
-          ),
-        ],
+        // PB-16: notifikasi uji (tagihanId 0) tidak menawarkan "Sudah bayar",
+        // supaya tidak ada aksi yang berakhir "tagihan tidak ditemukan".
+        actions: p.tagihanId > 0
+            ? const <AndroidNotificationAction>[
+                AndroidNotificationAction(
+                  'sudah_bayar',
+                  '✓ Sudah bayar',
+                  showsUserInterface: false,
+                  cancelNotification: true,
+                ),
+                AndroidNotificationAction(
+                  'tunda_1_jam',
+                  'Tunda 1 jam',
+                  showsUserInterface: false,
+                ),
+                AndroidNotificationAction(
+                  'buka',
+                  'Buka aplikasi',
+                  showsUserInterface: true,
+                ),
+              ]
+            : const <AndroidNotificationAction>[
+                AndroidNotificationAction(
+                  'tunda_1_jam',
+                  'Tunda 1 jam',
+                  showsUserInterface: false,
+                ),
+                AndroidNotificationAction(
+                  'buka',
+                  'Buka aplikasi',
+                  showsUserInterface: true,
+                ),
+              ],
       ),
     );
   }
@@ -212,7 +227,12 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
 
   Future<void> _saatAksiDipilih(NotificationResponse r) async {
     // Isolate utama: aplikasi terlihat. Buka database aplikasi lewat handler.
-    final hasil = await tanganiAksiPengingat(r.payload, layanan: this);
+    // PB-01: aksi diambil dari tombol yang benar-benar ditekan.
+    final hasil = await tanganiAksiPengingat(
+      r.payload,
+      actionId: AksiNotifikasi.dariId(r.actionId),
+      layanan: this,
+    );
     await catatJejak({'jenis': 'aksi_ui', 'aksi': r.actionId, 'hasil': hasil.pesan});
   }
 
@@ -221,7 +241,11 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
     DartPluginRegistrant.ensureInitialized();
     unawaited(initializeDateFormatting('id_ID'));
     // Isolate latar: buka database sendiri.
-    unawaited(tanganiAksiPengingat(r.payload, layanan: LayananNotifikasiLokal()));
+    unawaited(tanganiAksiPengingat(
+      r.payload,
+      actionId: AksiNotifikasi.dariId(r.actionId),
+      layanan: LayananNotifikasiLokal(),
+    ));
   }
 }
 

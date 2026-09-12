@@ -75,22 +75,26 @@ class Pengingat {
   /// menandai lunas periode yang salah).
   final DateTime? periode;
 
-  /// Payload JSON yang dibawa notifikasi (dipakai handler aksi).
+  /// Payload JSON yang dibawa notifikasi = **konteks saja** (PB-01).
   ///
-  /// [periodeReferensi] disertakan agar notifikasi lama TIDAK menandai lunas
-  /// periode berikutnya setelah tagihan berganti periode (rollover).
+  /// Sejak perbaikan ini payload TIDAK lagi memuat "aksi": aksi ditentukan oleh
+  /// tombol yang benar-benar ditekan (`NotificationResponse.actionId`). Dengan
+  /// begitu menekan "Buka aplikasi" atau menyentuh notifikasi tidak akan pernah
+  /// disalahartikan sebagai "Sudah bayar".
+  ///
+  /// [periodeReferensi] wajib disertakan agar notifikasi lama tidak menandai
+  /// lunas periode berikutnya setelah tagihan berganti periode (rollover).
   String payloadDenganPeriode(DateTime periodeReferensi) => jsonEncode({
         'tagihanId': tagihanId,
-        'aksi': AksiNotifikasi.sudahBayar.id,
         'notifId': id,
         'periode': periodeReferensi.toIso8601String(),
         if (hariSebelum != null) 'hariSebelum': hariSebelum,
       });
 
-  /// Payload tanpa referensi periode (mis. notifikasi uji).
+  /// Payload tanpa referensi periode (mis. notifikasi uji/diagnostik).
+  /// Aksi "sudah bayar" akan ditolak bila periode tidak diketahui (PB-02).
   String get payload => jsonEncode({
         'tagihanId': tagihanId,
-        'aksi': AksiNotifikasi.sudahBayar.id,
         'notifId': id,
         if (hariSebelum != null) 'hariSebelum': hariSebelum,
       });
@@ -102,17 +106,15 @@ class Pengingat {
       '${terlambat ? ' TERLAMBAT' : ''})';
 }
 
-/// Isi payload notifikasi yang sudah diurai.
+/// Isi payload notifikasi yang sudah diurai — **konteks saja** (PB-01).
 class PayloadPengingat {
   const PayloadPengingat({
     required this.tagihanId,
-    required this.aksi,
     this.notifId,
     this.periode,
   });
 
   final int tagihanId;
-  final AksiNotifikasi aksi;
   final int? notifId;
 
   /// Periode jatuh tempo yang dirujuk notifikasi (null = tidak diketahui).
@@ -121,7 +123,6 @@ class PayloadPengingat {
   /// Bentuk JSON payload (kebalikan dari [urai]).
   String toJson() => jsonEncode({
         'tagihanId': tagihanId,
-        'aksi': aksi.id,
         if (notifId != null) 'notifId': notifId,
         if (periode != null) 'periode': periode!.toIso8601String(),
       });
@@ -135,7 +136,6 @@ class PayloadPengingat {
       if (id is! int) return null;
       return PayloadPengingat(
         tagihanId: id,
-        aksi: AksiNotifikasi.dariId(m['aksi'] as String?) ?? AksiNotifikasi.buka,
         notifId: m['notifId'] is int ? m['notifId'] as int : null,
         periode: DateTime.tryParse(m['periode']?.toString() ?? ''),
       );
