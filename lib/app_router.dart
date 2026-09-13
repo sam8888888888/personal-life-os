@@ -4,6 +4,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'features/ibadah/jadwal_sholat_screen.dart';
+import 'features/ibadah/kalender_hijriah_screen.dart';
 import 'features/kalender/kalender_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
 import 'features/pengaturan/pengaturan_screen.dart';
@@ -33,6 +35,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/pengingat',
       builder: (c, s) => const HalamanJudul(
           judul: 'Pengingat & Izin', isi: PengingatScreen()),
+    ),
+    GoRoute(
+      path: '/ibadah/jadwal-sholat',
+      builder: (c, s) => const JadwalSholatScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/kalender-hijriah',
+      builder: (c, s) => const KalenderHijriahScreen(),
     ),
     GoRoute(
       path: '/ubah/:id',
