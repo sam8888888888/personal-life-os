@@ -1,0 +1,21 @@
+﻿#,Aplikasi,Kategori,Platform,Model harga,Fitur terbaik,Pelajaran untuk produk kita
+1,BillOut,Khusus pengingat tagihan,Android + iOS,Gratis,Notifikasi personal s/d H-7; banyak frekuensi; kalender; shared bill; laporan mingguan; tanpa bank; tanpa akun,Privasi & tanpa akun = keunggulan; shared bill untuk rumah tangga
+2,Prism Money (legacy),Khusus pengingat + bayar,iOS/Android,Gratis (tutup Feb 2024),Semua tagihan 1 dasbor; deteksi otomatis + manual; bayar dari app,Produk harus punya nilai unik & model pendapatan agar bertahan
+3,Mint (legacy),Manajer keuangan,iOS/Android/Web,Gratis (tutup Mar 2024),Semua akun 1 tempat; alert tagihan,Gratis penuh tanpa produk jelas tidak berkelanjutan
+4,TimelyBills,Reminder + budget,iOS/Android,Gratis + Pro,Reminder pintar; AI prediksi & peringatan overspend; anggaran keluarga; 161+ mata uang,Reminder harus 'pintar' bukan sekadar terjadwal
+5,My Finances - Bills Reminder,Khusus reminder,Android,Gratis,Kontrol semua pemasukan/pengeluaran; kontrol kartu kredit; tabungan bulanan/tahunan,Cakup cicilan & kartu kredit agar lebih lengkap
+6,Bills Organizer & Reminder,Khusus reminder,iOS,Gratis,Lunas langsung dari notifikasi; kalender status; grafik; ekspor CSV; kunci app; URL bayar,Aksi cepat dari notifikasi & ekspor data itu penting
+7,Monarch Money,Manajer keuangan + tagihan,iOS/Android/Web,$99/thn,Kalender tagihan berwarna; deteksi otomatis; notif H-3; konteks saldo & net worth; pasangan,"Konteks keuangan (saldo, anggaran) menambah nilai reminder"
+8,Rocket Money,Langganan + tagihan,iOS/Android/Web,Gratis + $7-14/bln,Deteksi otomatis langganan; peringatan naik harga; bantuan batalkan; negosiasi (fee kontroversial),Modul 'langganan' terpisah itu diminati; fee besar memicu keluhan
+9,Quicken Simplifi,Manajer keuangan + tagihan,iOS/Android/Web,"~$3,49-6,99/bln",Spending plan: pendapatan-tagihan-belanja = sisa; watchlist tagihan,'Uang tersisa setelah tagihan' = konsep yang jelas & disukai
+10,Origin,Manajer keuangan + tagihan,iOS/Android/Web,$99/thn,Tab recurring otomatis; AI mengingatkan tagihan lupa; tautan pembatalan,AI proaktif bisa jadi pembeda (fase lanjut)
+11,Wallet by BudgetBakers,Manajer keuangan + tagihan,iOS/Android/Web,Gratis + Premium,Planned payments auto tercatat; reminder; kalender bayar; arus kas; multi-mata uang,Otomatisasi pencatatan saat jatuh tempo mengurangi beban manual
+12,PocketSmith,Manajer keuangan (forecast),iOS/Android/Web,"Gratis + $9,99/bln",Proyeksi arus kas s/d 60 tahun; kalender; multi-mata uang,Proyeksi 'bulan depan aman atau tidak' sangat bernilai
+13,Goodbudget,Budget amplop,iOS/Android/Web,Gratis + $8/bln,Transaksi terjadwal; amplop tagihan; isi amplop otomatis saat gajian,Metode 'sisihkan dulu saat gajian' relevan untuk gaya bayar Indonesia
+14,Bobby,Pelacak langganan,iOS,Gratis + bayar sekali,Minimalis; ikon & warna; total bulanan; notif; tanpa bank; sekali bayar,Model sekali bayar diterima untuk aplikasi alat; kesederhanaan itu fitur
+15,Copilot,Manajer keuangan,iOS (+Android),"$7,92-13/bln",Bagian recurring khusus; deteksi otomatis 10.000+ institusi; AI kategori,Pemisahan 'sudah bayar vs akan datang' memudahkan kontrol
+16,PocketGuard,Manajer keuangan + tagihan,iOS/Android/Web,"Gratis + $6,25/bln",In My Pocket: uang sisa setelah tagihan; peringatan perpanjangan H-3; peringatan kenaikan harga,Fitur andalan 'uang sisa' sederhana tapi kuat
+17,Finny,Pelacak langganan,iOS/Android,Gratis + Pro murah,Privasi-first tanpa bank; aturan berulang; reminder; input AI dari teks/suara/screenshot,Input cepat (screenshot email tagihan) mengurangi gesekan
+18,Emma,Manajer keuangan + langganan,iOS/Android,Gratis + Premium,Temukan langganan; bill reminders; peringatan kenaikan harga; laporan mingguan; cashback,Laporan mingguan & peringatan perubahan harga disukai
+19,Splitwise,Berbagi tagihan,iOS/Android/Web,Gratis + Pro,Kelompok; bagi tagihan; pengingat otomatis utang; rekonsiliasi sederhana,Fitur berbagi tagihan (rumah tangga) menambah retensi
+20,DANA My Bills (Indonesia),Fitur tagihan dompet digital,Android/iOS,Gratis,Pusat tagihan; pengingat saat tagihan tersedia; auto-debit terjadwal; bayar instan,Pasar lokal butuh kemudahan bayar; tapi tersegmentasi per ekosistem -> posisi netral = celah

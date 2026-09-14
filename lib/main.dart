@@ -1,0 +1,73 @@
+import 'package:flutter/services.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+import 'app_router.dart';
+import 'core/notifikasi/kerja_latar.dart';
+import 'core/notifikasi/layanan_notifikasi_lokal.dart';
+import 'core/notifikasi/pemantau_pengingat.dart';
+import 'core/theme/app_tema.dart';
+import 'data/repository/demo_seeder.dart';
+
+/// A2: kanal aksi cepat dari ikon aplikasi (shortcut Android).
+const MethodChannel _kanalRute = MethodChannel('lifeos/rute');
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID'); // format tanggal Indonesia
+  await seedDemoJikaDiminta(); // hanya aktif bila dibangun dengan --dart-define=DEMO_SEED=true
+  // F3: siapkan notifikasi + pekerja latar (tidak memblokir tampilan).
+  unawaited(siapkanPengingatSaatMulai());
+  // A2: bila aplikasi dibuka dari aksi cepat saat sudah berjalan.
+  _kanalRute.setMethodCallHandler((panggilan) async {
+    if (panggilan.method == 'ruteBaru' && panggilan.arguments is String) {
+      appRouter.go(panggilan.arguments as String);
+    }
+    return null;
+  });
+  runApp(const ProviderScope(
+      child: PemantauPengingat(child: PersonalLifeOsApp())));
+  // A2: bila aplikasi dibuka dari aksi cepat dari kondisi tertutup.
+  try {
+    final rute = await _kanalRute.invokeMethod<String>('ruteAwal');
+    if (rute != null && rute.isNotEmpty) appRouter.go(rute);
+  } catch (e) {
+    debugPrint('ruteAwal gagal: $e');
+  }
+}
+
+/// Siapkan layanan notifikasi & daftarkan pekerja latar Workmanager.
+Future<void> siapkanPengingatSaatMulai() async {
+  try {
+    await initializeDateFormatting('id_ID');
+    await LayananNotifikasiLokal().siapkan();
+    await daftarkanKerjaLatar();
+  } catch (e) {
+    debugPrint('siapkanPengingatSaatMulai gagal: $e');
+  }
+}
+
+class PersonalLifeOsApp extends StatelessWidget {
+  const PersonalLifeOsApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Personal Life OS',
+      debugShowCheckedModeBanner: false,
+      theme: AppTema.terang(),
+      locale: const Locale('id', 'ID'),
+      supportedLocales: const [Locale('id', 'ID'), Locale('en', 'US')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      routerConfig: appRouter,
+    );
+  }
+}
