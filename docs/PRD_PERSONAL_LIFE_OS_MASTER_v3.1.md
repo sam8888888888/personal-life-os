@@ -4,10 +4,11 @@
 | Item | Keterangan |
 |---|---|
 | Produk | Personal Life OS — aplikasi Android (Flutter) |
-| Dokumen | **PRD MASTER v3.0 — INI SATU-SATUNYA DOKUMEN YANG DIPAKAI** |
-| Versi | 3.0 (menggabungkan PRD v1.6 + PRD Perbaikan v1.0 + Blueprint v2.1) |
+| Dokumen | **PRD MASTER v3.1 — INI SATU-SATUNYA DOKUMEN YANG DIPAKAI** |
+| Versi | **3.1** (3.0 = gabungan PRD v1.6 + PRD Perbaikan v1.0 + Blueprint v2.1; 3.1 = perbaikan konsistensi fase) |
 | Tanggal | 13 Sep 2026, 02:55 WIB |
 | Status | **DISETUJUI PAPI** — keputusan produk ada di §0 |
+| Catatan revisi v3.1 | Kolom **Fase** untuk FR-76, FR-86, FR-87, FR-88, FR-90 disamakan dengan keputusan §0 (V1.5). Temuan Dinda 14 Sep 2026 — benar, dokumen sebelumnya tidak konsisten. |
 | Penyusun | Aaron Salahuddin |
 | Pemakai dokumen | Papi (pemilik produk) · Dinda (eksekutor fitur) · Aaron (fondasi & audit) |
 | Cakupan fitur | **FR-01 … FR-152** (59 fitur lama yang sudah disetujui + 93 fitur baru) |
@@ -30,6 +31,9 @@ Papi menyerahkan pemilihan kepada rekomendasi Aaron dan menyetujui seluruh 7 but
 | 7 | Nama produk | **Tetap "Personal Life OS"** | Branding, dokumen, dan repo memakai nama ini |
 
 **Urutan yang berlaku:** Fondasi (PB) → V1.5 (12 fitur) → V2 → V3 → V4.
+
+**Dua fitur pendukung yang WAJIB ikut V1.5** (agar 12 fitur di atas berdiri benar):
+**FR-65** (satu sumber data untuk Today ↔ Kalender) dan **FR-67** (bahasa & format lokal).
 
 ## 0.1 Peta dokumen (agar tidak ada lagi kebingungan)
 
@@ -435,7 +439,7 @@ Prio (P0 wajib · P1 penting · P2 bila cukup) · Est (S ≤3 hari · M 4–8 ha
 | FR-73 | **Financial Calendar** — gabungan: pemasukan, tagihan, langganan, cicilan, utang, pengeluaran terencana dalam satu kalender | P0 | V1.5 | M | Tidak | Satu tampilan bulan memuat semua jenis; bisa menjawab "berapa uang harus tersedia sebelum tanggal 25" (uji dengan data contoh) |
 | FR-74 | **Debt Manager** — daftar utang: pokok, bunga, minimum bayar, tanggal jatuh tempo, sisa | P0 | V2 | M | Tidak | Total utang & sisa per utang akurat; pembayaran mengurangi pokok sesuai skema yang dipilih |
 | FR-75 | **Debt Strategy (Avalanche / Snowball)** — simulasi: estimasi lunas (bulan), bunga terselamatkan | P1 | V2 | M | Tidak | Dua simulasi menghasilkan angka berbeda pada data uji; rumus & asumsi ditampilkan (bukan kotak hitam) |
-| FR-76 | **Net Worth Tracker** — aset (kas, bank, investasi, properti, kendaraan, emas, kripto, bisnis) − kewajiban (kartu kredit, KPR, pinjaman, cicilan) + grafik tren bulanan | P1 | V2 | M | Tidak | Nilai bersih = aset − kewajiban (uji hitung); grafik menyimpan riwayat bulanan dan tidak berubah retroaktif |
+| FR-76 | **Net Worth Tracker** — aset (kas, bank, investasi, properti, kendaraan, emas, kripto, bisnis) − kewajiban (kartu kredit, KPR, pinjaman, cicilan) + grafik tren bulanan | P0 | V1.5 | M | Tidak | Nilai bersih = aset − kewajiban (uji hitung); grafik menyimpan riwayat bulanan dan tidak berubah retroaktif |
 | FR-77 | **Laporan Keuangan Bulanan** *(memperluas FR-45)* — PDF/Excel: arus kas, kategori, utang, kekayaan bersih, langganan | P1 | V2 | M | Tidak | Berkas dapat dibuka di luar aplikasi; angka identik dengan yang tampil di aplikasi |
 
 ### 7.2 Modul 2 — Action & Goal OS (FR-78 … FR-85)
@@ -462,11 +466,11 @@ Prio (P0 wajib · P1 penting · P2 bila cukup) · Est (S ≤3 hari · M 4–8 ha
 
 | ID | Fitur | Prio | Fase | Est | Online | Kriteria terima (ringkas) |
 |---|---|---|---|---|---|---|
-| FR-86 | **Jadwal Sholat** — 5 waktu sesuai lokasi; pilih lokasi otomatis atau kota manual; pilih metode perhitungan, konvensi Ashar (madhhab), dan penyesuaian menit | P0 | V2 | M | Ya (cache) | Waktu berbeda saat lokasi/metode diganti (uji 2 kota × 2 metode); nilai tersimpan sehingga besok tetap tampil walau offline, dengan penanda "dihitung untuk <kota>, <tanggal>" |
-| FR-87 | **Adzan & Pengingat Sholat** — mode: adzan, 5 menit sebelum, saat masuk waktu, pengingat setelah waktu berjalan + pilihan suara/dering | P0 | V2 | M | Tidak | Tiap mode bisa dipilih per waktu sholat; pengingat berbunyi walau aplikasi tertutup; tidak ada pengingat berulang tanpa henti |
-| FR-88 | **Pelacakan Sholat 5 Waktu** — tombol cepat ✓ per waktu; status "selesai / belum tercatat" | P0 | V2 | S | Tidak | Menandai satu waktu ≤2 ketukan; status hari ini tampil di Today; tidak ada istilah menghakimi |
+| FR-86 | **Jadwal Sholat** — 5 waktu sesuai lokasi; pilih lokasi otomatis atau kota manual; pilih metode perhitungan, konvensi Ashar (madhhab), dan penyesuaian menit | P0 | V1.5 | M | Ya (cache) | Waktu berbeda saat lokasi/metode diganti (uji 2 kota × 2 metode); nilai tersimpan sehingga besok tetap tampil walau offline, dengan penanda "dihitung untuk <kota>, <tanggal>" |
+| FR-87 | **Adzan & Pengingat Sholat** — mode: adzan, 5 menit sebelum, saat masuk waktu, pengingat setelah waktu berjalan + pilihan suara/dering | P0 | V1.5 | M | Tidak | Tiap mode bisa dipilih per waktu sholat; pengingat berbunyi walau aplikasi tertutup; tidak ada pengingat berulang tanpa henti |
+| FR-88 | **Pelacakan Sholat 5 Waktu** — tombol cepat ✓ per waktu; status "selesai / belum tercatat" | P0 | V1.5 | S | Tidak | Menandai satu waktu ≤2 ketukan; status hari ini tampil di Today; tidak ada istilah menghakimi |
 | FR-89 | **Riwayat & Konsistensi Sholat** — rekap mingguan/bulanan per waktu (mis. "Subuh 24/30 tercatat"), bukan skor keimanan | P1 | V2 | S | Tidak | Angka rekap cocok dengan data mentah (uji hitung); label memakai "tercatat" |
-| FR-90 | **Kalender Hijriah** — tanggal Hijriah + hari besar, dengan **pilihan acuan kalender** (mis. rujukan resmi negara/pilihan pengguna) | P0 | V2 | M | Ya (cache) | Tanggal Hijriah berubah sesuai acuan yang dipilih; ada catatan bahwa penetapan awal bulan tertentu bisa berbeda; tetap tampil offline dari data tersimpan |
+| FR-90 | **Kalender Hijriah** — tanggal Hijriah + hari besar, dengan **pilihan acuan kalender** (mis. rujukan resmi negara/pilihan pengguna) | P0 | V1.5 | M | Ya (cache) | Tanggal Hijriah berubah sesuai acuan yang dipilih; ada catatan bahwa penetapan awal bulan tertentu bisa berbeda; tetap tampil offline dari data tersimpan |
 | FR-91 | **Ramadan Mode** — dashboard otomatis saat Ramadan: imsak, subuh, maghrib, puasa hari ini, sholat, bacaan, sedekah | P0 | V2 | M | Ya (cache) | Mode aktif otomatis pada rentang Ramadan; menampilkan hitungan hari ke-berapa; tidak mengubah data modul lain |
 | FR-92 | **Pelacakan Puasa** — Ramadan, Senin-Kamis, Ayyamul Bidh, puasa sunnah lain, qadha, custom | P1 | V2 | M | Tidak | Target qadha diisi pengguna sendiri (aplikasi tidak menetapkan kewajiban); rekap per jenis akurat |
 | FR-93 | **Pelacakan Quran** — bacaan, mendengar, hafalan, murajaah + target harian (mis. 1 halaman/hari) | P1 | V2 | M | Tidak | Progres & target tampil di Today bila modul aktif; penanda selesai/belum tanpa hukuman |
