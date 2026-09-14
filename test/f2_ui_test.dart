@@ -62,7 +62,9 @@ void main() {
     await t.pump();
   }
 
-  Future<void> buka(WidgetTester t, {String awal = '/'}) async {
+  // Sejak V1.5 alamat "/" mengarah ke tab Hari Ini, jadi uji F2 yang memakai
+  // layar Ringkasan harus membuka "/ringkasan" langsung.
+  Future<void> buka(WidgetTester t, {String awal = '/ringkasan'}) async {
     await layarPonsel(t);
     await t.pumpWidget(ProviderScope(
       overrides: [databaseProvider.overrideWithValue(db)],
@@ -204,8 +206,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    // pindah ke dasbor: uang tersisa = Rp 8.000.000
-    await tester.tap(find.byIcon(Icons.dashboard_outlined));
+    // Pindah ke dasbor lewat jalur baru: tab Uang -> "Dasbor uang"
+    // (pintasan lama di layar Pengaturan sudah tidak dipakai sejak 5 tab).
+    await buka(tester, awal: '/uang');
+    await tester.tap(find.text('Dasbor uang'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
     expect(find.text('Rp 8.000.000'), findsWidgets);

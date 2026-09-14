@@ -1,5 +1,5 @@
 /// Uji asap (smoke test): aplikasi utama bisa dijalankan dan menampilkan
-/// empat tab navigasi utama.
+/// lima tab navigasi utama (V1.5).
 library;
 
 import 'package:drift/native.dart';
@@ -16,7 +16,7 @@ import 'package:personal_life_os/data/database/database.dart';
 void main() {
   setUpAll(() async => initializeDateFormatting('id_ID'));
 
-  testWidgets('Aplikasi tampil dengan 4 tab utama', (tester) async {
+  testWidgets('Aplikasi tampil dengan 5 tab utama', (tester) async {
     await tester.binding.setSurfaceSize(const Size(420, 900));
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(() async {
@@ -41,11 +41,15 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    expect(find.text('Ringkasan'), findsWidgets);
-    expect(find.text('Tagihan'), findsWidgets);
-    expect(find.text('Kalender'), findsWidgets);
-    expect(find.text('Pengaturan'), findsWidgets);
-    expect(find.text('Uang tersisa bulan ini'), findsOneWidget);
+    // V1.5: navigasi bawah kini 5 tab.
+    expect(find.text('Hari Ini'), findsWidgets);
+    expect(find.text('Uang'), findsWidgets);
+    expect(find.text('Kerja'), findsWidgets);
+    expect(find.text('Ibadah'), findsWidgets);
+    expect(find.text('Lainnya'), findsWidgets);
+    // Tab pertama = layar Hari Ini (Modul 0), bukan Ringkasan lagi.
+    expect(find.text('Pilar hari ini'), findsOneWidget);
+    expect(find.text('Assalamualaikum, Anda'), findsOneWidget);
 
     // timer drift dituntaskan sebelum pohon widget dibongkar
     await tester.pumpWidget(const SizedBox.shrink());
