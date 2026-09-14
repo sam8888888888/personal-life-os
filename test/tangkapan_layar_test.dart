@@ -5,8 +5,8 @@
 /// Hasil PNG muncul di test/goldens/, lalu disalin ke folder demo/.
 library;
 
-import dart:convert;
-import package:personal_life_os/core/utils/waktu.dart;
+import 'dart:convert';
+import 'package:personal_life_os/core/utils/waktu.dart';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
