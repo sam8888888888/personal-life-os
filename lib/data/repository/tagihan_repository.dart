@@ -55,12 +55,43 @@ class TagihanRepository {
   /// Tandai lunas: catat riwayat, geser periode berikutnya
   /// (day-clamping 31 Jan -> 28/29 Feb). Tagihan sekali -> nonaktif.
   Future<RiwayatPembayaranData> tandaiLunas(int id,
-      {DateTime? tanggalBayar, int? jumlahOverrideSen}) async {
+      {DateTime? tanggalBayar,
+      int? jumlahOverrideSen,
+      DateTime? periodeYangDibayar}) async {
     return db.transaction(() async {
       final t = await (db.select(db.tagihan)..where((x) => x.id.equals(id)))
           .getSingle();
       final tglBayar = tanggalBayar ?? DateTime.now();
       final periode = t.jatuhTempo;
+
+      // PB-06: SATU PERIODE = SATU PEMBAYARAN (idempoten).
+      //
+      // [periodeYangDibayar] = periode yang dilihat/dimaksud pemanggil (dari
+      // kartu di layar atau dari payload notifikasi). Bila periode itu bukan
+      // periode aktif lagi, artinya aksi datang dari tampilan/notifikasi lama:
+      //   - sudah pernah dibayar -> kembalikan catatannya (tidak menggandakan,
+      //     tidak menggeser periode dua kali),
+      //   - belum pernah dibayar -> tolak dengan pesan jelas.
+      // Tanpa [periodeYangDibayar], pemeriksaan tetap memakai periode aktif.
+      Future<RiwayatPembayaranData?> cariCatatan(DateTime p) =>
+          (db.select(db.riwayatPembayaran)
+                ..where((r) =>
+                    r.tagihanId.equals(id) & r.periodeJatuhTempo.equals(p))
+                ..orderBy([(r) => OrderingTerm.desc(r.id)])
+                ..limit(1))
+              .getSingleOrNull();
+
+      if (periodeYangDibayar != null &&
+          selisihHari(periode, periodeYangDibayar) != 0) {
+        final sudahDibayar = await cariCatatan(periodeYangDibayar);
+        if (sudahDibayar != null) return sudahDibayar;
+        throw StateError(
+            'Aksi ini untuk periode ${fmtTanggalAman(periodeYangDibayar)}, '
+            'sedangkan periode aktif sekarang ${fmtTanggalAman(periode)}.');
+      }
+
+      final catatanAktif = await cariCatatan(periode);
+      if (catatanAktif != null) return catatanAktif;
       final telat = selisihHari(periode, tglBayar);
       final jumlah = jumlahOverrideSen ?? t.jumlahSen ?? 0;
 

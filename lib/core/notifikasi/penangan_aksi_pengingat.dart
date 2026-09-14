@@ -124,7 +124,9 @@ Future<HasilAksi> tanganiAksiPengingat(
           await catatJejak({'jenis': 'aksi', 'hasil': h.pesan, 'tagihanId': t.id});
           return h;
         }
-        await repo.tandaiLunas(t.id, tanggalBayar: sekarang ?? DateTime.now());
+        await repo.tandaiLunas(t.id,
+            tanggalBayar: sekarang ?? DateTime.now(),
+            periodeYangDibayar: p.periode);
         final sesudah = await (basis.select(basis.tagihan)
               ..where((x) => x.id.equals(t.id)))
             .getSingle();

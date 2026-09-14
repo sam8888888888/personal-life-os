@@ -20,20 +20,22 @@ class PengaturanRepository {
   Future<void> simpanPemasukan(DateTime bulan, int jumlahSen,
       {String sumber = 'Gaji'}) async {
     final kunci = '${bulan.year}-${bulan.month.toString().padLeft(2, '0')}';
-    final ada = await (db.select(db.pemasukanBulanan)
-          ..where((p) => p.bulan.equals(kunci)))
-        .getSingleOrNull();
-    if (ada == null) {
-      await db.into(db.pemasukanBulanan).insert(PemasukanBulananCompanion.insert(
+    // PB-07: upsert atomic — satu bulan = satu baris, aman dari dua proses
+    // yang menyimpan bersamaan (indeks unik `bulan` menjaminnya di database).
+    await db.into(db.pemasukanBulanan).insert(
+          PemasukanBulananCompanion.insert(
             bulan: kunci,
             jumlahSen: Value(jumlahSen),
             sumber: Value(sumber),
-          ));
-    } else {
-      await (db.update(db.pemasukanBulanan)..where((p) => p.id.equals(ada.id)))
-          .write(PemasukanBulananCompanion(
-              jumlahSen: Value(jumlahSen), sumber: Value(sumber)));
-    }
+          ),
+          onConflict: DoUpdate(
+            (_) => PemasukanBulananCompanion(
+              jumlahSen: Value(jumlahSen),
+              sumber: Value(sumber),
+            ),
+            target: [db.pemasukanBulanan.bulan],
+          ),
+        );
   }
 
   /// Isi contoh data untuk demo/uji: 7 template + pemasukan bulan ini.

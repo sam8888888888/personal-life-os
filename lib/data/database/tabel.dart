@@ -59,6 +59,10 @@ class RiwayatPembayaran extends Table {
   DateTimeColumn get tanggalBayar => dateTime()();
   IntColumn get telatHari => integer().nullable()();
   TextColumn get via => text().withDefault(const Constant('manual'))();
+
+  // PB-05: jaminan "satu periode = satu pembayaran" dipasang lewat indeks unik
+  // di `database.dart` (migrasi). Anotasi `uniqueKeys` butuh regenerasi
+  // database.g.dart (build_runner) yang belum dipakai proyek ini.
 }
 
 /// Pemasukan bulanan (untuk "uang tersisa" / dasbor — FR-33).
@@ -68,6 +72,9 @@ class PemasukanBulanan extends Table {
   TextColumn get bulan => text()();
   IntColumn get jumlahSen => integer().withDefault(const Constant(0))();
   TextColumn get sumber => text().withDefault(const Constant('Gaji'))();
+
+  // PB-07: jaminan "satu bulan = satu baris" dipasang lewat indeks unik di
+  // `database.dart` (migrasi).
 }
 
 /// Pengaturan aplikasi (kunci-nilai).

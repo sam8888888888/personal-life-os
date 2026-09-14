@@ -43,6 +43,31 @@ int slotTerlambat(int hariKe) => 90 + (hariKe % 10);
 /// Slot untuk pengingat yang ditunda 1 jam (FR-11).
 const int slotTunda = 89;
 
+/// PB-04: tentukan ID jadwal yang HARUS dibatalkan saat sinkronisasi.
+///
+/// Aturan: batalkan hanya jadwal yang tidak ada di rencana. Pengecualian
+/// penting — pengingat "Tunda 1 jam" (slot [slotTunda]) milik tagihan yang
+/// masih ada di rencana DIPERTAHANKAN, supaya tunda tidak hilang setiap kali
+/// jadwal disegarkan (buka aplikasi, ubah tagihan, pekerja latar).
+/// Tunda milik tagihan yang sudah tidak ada tetap dibatalkan.
+Set<int> idJadwalDibatalkan({
+  required Iterable<int> tertunda,
+  required Iterable<int> rencana,
+  required Iterable<int> tagihanRencana,
+}) {
+  final idRencana = rencana.toSet();
+  final tagihanHidup = tagihanRencana.toSet();
+  final buang = <int>{};
+  for (final id in tertunda) {
+    if (idRencana.contains(id)) continue;
+    final slot = id % 100;
+    final tagihanId = id ~/ 100;
+    if (slot == slotTunda && tagihanHidup.contains(tagihanId)) continue;
+    buang.add(id);
+  }
+  return buang;
+}
+
 class PerencanaPengingat {
   const PerencanaPengingat({
     this.horizon = const Duration(days: 35),

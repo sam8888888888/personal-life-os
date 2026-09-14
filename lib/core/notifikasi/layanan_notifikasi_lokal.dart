@@ -135,7 +135,21 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
   @override
   Future<void> pasangJadwal(List<Pengingat> daftar) async {
     await siapkan();
-    await batalkanSemua();
+    // PB-04: jangan "batalkan semua" — batalkan hanya jadwal yang tidak ada di
+    // rencana, dan pertahankan "Tunda 1 jam" milik tagihan yang masih ada.
+    final tertunda = await _plugin.pendingNotificationRequests();
+    final buang = idJadwalDibatalkan(
+      tertunda: tertunda.map((n) => n.id),
+      rencana: daftar.map((p) => p.id),
+      tagihanRencana: daftar.map((p) => p.tagihanId),
+    );
+    for (final id in buang) {
+      try {
+        await _plugin.cancel(id: id);
+      } catch (e) {
+        debugPrint('gagal batalkan jadwal $id: $e');
+      }
+    }
     for (final p in daftar) {
       try {
         await _jadwalkan(p);

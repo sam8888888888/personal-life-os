@@ -101,7 +101,7 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
                           tagihan: t,
                           onTap: () => context.push('/ubah/${t.id}'),
                           onTandaiLunas:
-                              t.lunas ? null : () => _aksiLunas(context, t.id),
+                              t.lunas ? null : () => _aksiLunas(context, t.id, t.jatuhTempo),
                           onUndoLunas:
                               t.lunas ? () => _aksiUndo(context, t.id) : null,
                         );
@@ -123,8 +123,11 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
         ),
       );
 
-  Future<void> _aksiLunas(BuildContext context, int id) async {
-    final r = await ref.read(tagihanRepoProvider).tandaiLunas(id);
+  Future<void> _aksiLunas(BuildContext context, int id, DateTime periode) async {
+    // PB-06: periode yang terlihat di layar dikirim ikut, penjaga anti ganda.
+    final r = await ref
+        .read(tagihanRepoProvider)
+        .tandaiLunas(id, periodeYangDibayar: periode);
     if (!context.mounted) return;
     final berikut = fmtTanggalId(r.periodeJatuhTempo);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(

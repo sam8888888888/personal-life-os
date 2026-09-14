@@ -92,7 +92,7 @@ class RingkasanScreen extends ConsumerWidget {
                 ...terdekat.map((t) => KartuTagihan(
                       tagihan: t,
                       onTap: () => context.push('/ubah/${t.id}'),
-                      onTandaiLunas: () => _lunas(context, ref, t.id),
+                      onTandaiLunas: () => _lunas(context, ref, t.id, t.jatuhTempo),
                     )),
             ],
           );
@@ -194,8 +194,13 @@ class RingkasanScreen extends ConsumerWidget {
         ),
       );
 
-  Future<void> _lunas(BuildContext context, WidgetRef ref, int id) async {
-    await ref.read(tagihanRepoProvider).tandaiLunas(id);
+  Future<void> _lunas(BuildContext context, WidgetRef ref, int id,
+      DateTime periode) async {
+    // PB-06: kirim periode yang SEDANG dilihat pengguna, supaya dua ketukan
+    // beruntun tidak menggeser periode dua kali.
+    await ref
+        .read(tagihanRepoProvider)
+        .tandaiLunas(id, periodeYangDibayar: periode);
     if (context.mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Ditandai sudah dibayar')));
