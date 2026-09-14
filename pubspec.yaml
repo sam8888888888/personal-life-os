@@ -48,7 +48,8 @@ dependencies:
   flutter_timezone: ^5.1.0
   workmanager: ^0.10.10
   device_info_plus: ^13.2.0
-
+  adhan_dart: ^2.0.1
+  hijri_core: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
