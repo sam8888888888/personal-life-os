@@ -68,6 +68,16 @@ Set<int> idJadwalDibatalkan({
   return buang;
 }
 
+/// PB-09: ID jadwal yang DIRENCANAKAN tetapi belum benar-benar terpasang.
+/// Dipakai sinkronisasi untuk memverifikasi hasil, bukan sekadar mengasumsikan.
+List<int> idJadwalGagalTerpasang({
+  required Iterable<int> direncanakan,
+  required Iterable<int> terpasang,
+}) {
+  final ada = terpasang.toSet();
+  return [for (final id in direncanakan) if (!ada.contains(id)) id];
+}
+
 class PerencanaPengingat {
   const PerencanaPengingat({
     this.horizon = const Duration(days: 35),

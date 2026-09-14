@@ -19,7 +19,35 @@ class StatusIzinPengingat {
   bool get siap => notifikasiDiizinkan;
 }
 
+/// Hasil satu kali sinkronisasi jadwal (PB-09) — dipakai untuk memberi tahu
+/// pengguna secara jujur apakah seluruh jadwal benar-benar terpasang.
+class HasilPasang {
+  const HasilPasang({
+    required this.direncanakan,
+    required this.terpasang,
+    required this.idGagal,
+    required this.waktu,
+  });
+
+  final int direncanakan;
+  final int terpasang;
+  final List<int> idGagal;
+  final DateTime waktu;
+
+  bool get lengkap => idGagal.isEmpty;
+
+  String get ringkas => lengkap
+      ? '$terpasang dari $direncanakan jadwal terpasang'
+      : '${idGagal.length} dari $direncanakan jadwal GAGAL terpasang';
+}
+
 abstract class LayananNotifikasi {
+  /// Hasil sinkronisasi terakhir (null = belum pernah).
+  HasilPasang? get hasilPasangTerakhir => null;
+
+  /// Apakah penjadwal benar-benar siap dipakai (PB-10: jujur walau init gagal).
+  bool get siap => false;
+
   /// Siapkan plugin, kanal, dan zona waktu. Aman dipanggil berulang.
   Future<void> siapkan();
 
@@ -45,5 +73,9 @@ abstract class LayananNotifikasi {
   Future<void> tampilkanUji({Duration tunda = const Duration(seconds: 10)});
 
   /// Daftar pengingat yang benar-benar tertunda di sistem (bukti nyata).
+  ///
+  /// PB-12: [waktu] BOLEH null — Android tidak selalu memberi waktu eksekusi
+  /// pasti untuk jadwal tertunda. Pemanggil tidak boleh menampilkan waktu yang
+  /// tidak benar-benar diketahui.
   Future<List<({int id, String? judul, DateTime? waktu})>> tertunda();
 }

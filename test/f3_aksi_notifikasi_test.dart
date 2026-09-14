@@ -18,6 +18,13 @@ import 'package:personal_life_os/data/database/database.dart';
 import 'package:personal_life_os/data/repository/tagihan_repository.dart';
 
 class LayananPalsu implements LayananNotifikasi {
+  // PB-09/PB-10: bagian diagnostik antarmuka (nilai bawaan untuk uji).
+  @override
+  HasilPasang? get hasilPasangTerakhir => null;
+
+  @override
+  bool get siap => true;
+
   List<Pengingat> terpasang = const [];
   List<Pengingat> satu = const [];
 

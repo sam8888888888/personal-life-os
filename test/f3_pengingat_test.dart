@@ -16,6 +16,13 @@ import 'package:personal_life_os/data/repository/tagihan_repository.dart';
 
 /// Layanan notifikasi palsu: mencatat apa yang "dipasang", tanpa plugin Android.
 class LayananPalsu implements LayananNotifikasi {
+  // PB-09/PB-10: bagian diagnostik antarmuka (nilai bawaan untuk uji).
+  @override
+  HasilPasang? get hasilPasangTerakhir => null;
+
+  @override
+  bool get siap => true;
+
   List<Pengingat> terpasang = const [];
   List<Pengingat> satu = const [];
   List<Duration> uji = const [];
@@ -354,6 +361,13 @@ void main() {
 }
 
 class _LayananRusak implements LayananNotifikasi {
+  // PB-09/PB-10: bagian diagnostik antarmuka (nilai bawaan untuk uji).
+  @override
+  HasilPasang? get hasilPasangTerakhir => null;
+
+  @override
+  bool get siap => true;
+
   @override
   Future<void> siapkan() async {}
   @override

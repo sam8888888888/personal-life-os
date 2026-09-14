@@ -141,7 +141,10 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
       ),
     );
     if (yakin != true) return;
-    await ref.read(pengaturanRepoProvider).hapusSemuaData();
+    // PB-11: bawa serta layanan notifikasi agar jadwal lama ikut dibatalkan.
+    await ref
+        .read(pengaturanRepoProvider)
+        .hapusSemuaData(layanan: ref.read(layananNotifikasiProvider));
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Semua data dihapus.')));

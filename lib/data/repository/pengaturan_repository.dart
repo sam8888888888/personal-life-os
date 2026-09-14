@@ -3,6 +3,8 @@ library;
 
 import 'package:drift/drift.dart';
 
+import '../../core/notifikasi/jejak.dart';
+import '../../core/notifikasi/layanan_notifikasi.dart';
 import '../database/database.dart';
 import 'template_tagihan.dart';
 
@@ -47,11 +49,20 @@ class PengaturanRepository {
   }
 
   /// Hapus seluruh data (dipakai untuk pengaturan ulang / uji).
-  Future<void> hapusSemuaData() async {
+  ///
+  /// PB-11: sekaligus membatalkan notifikasi yang masih terjadwal. Tanpa ini ada
+  /// jendela waktu di mana data sudah kosong tetapi pengingat lama masih hidup
+  /// (mis. aplikasi ditutup tepat setelah penghapusan).
+  Future<void> hapusSemuaData({LayananNotifikasi? layanan}) async {
     await db.transaction(() async {
       await db.delete(db.riwayatPembayaran).go();
       await db.delete(db.tagihan).go();
       await db.delete(db.pemasukanBulanan).go();
     });
+    try {
+      await layanan?.batalkanSemua();
+    } catch (e) {
+      await catatJejak({'jenis': 'hapus_data', 'galat': 'batalkan notifikasi: $e'});
+    }
   }
 }

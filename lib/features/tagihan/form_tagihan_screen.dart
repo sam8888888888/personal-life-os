@@ -50,6 +50,8 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
     final t = await (db.select(db.tagihan)..where((x) => x.id.equals(widget.id!)))
         .getSingleOrNull();
     if (t == null) return;
+    // PB-14: jangan menyentuh state kalau layar sudah ditutup.
+    if (!mounted) return;
     setState(() {
       _nama.text = t.nama;
       _jumlah.text = t.jumlahSen == null ? '' : (t.jumlahSen! / 100).round().toString();
@@ -320,7 +322,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
           tautanBayar: Value(_tautan.text.trim().isEmpty ? null : _tautan.text.trim()),
         ));
       } else {
-        await repo.ubah(
+        final diubah = await repo.ubah(
           TagihanCompanion(
             nama: Value(_nama.text.trim()),
             jumlahSen: Value(jumlahSen),
@@ -335,6 +337,17 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
           ),
           id: widget.id!,
         );
+        // PB-13: jangan bilang "tersimpan" kalau tidak ada baris yang berubah
+        // (mis. tagihan sudah dihapus di layar lain).
+        if (diubah == 0) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text(
+                    'Perubahan tidak diterapkan: tagihan tidak ditemukan '
+                    '(mungkin sudah dihapus).')));
+          }
+          return;
+        }
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

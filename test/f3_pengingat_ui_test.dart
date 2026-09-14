@@ -25,6 +25,13 @@ late LayananUji layanan;
 
 /// Layanan palsu: mencatat permintaan izin, uji, dan jadwal.
 class LayananUji implements LayananNotifikasi {
+  // PB-09/PB-10: bagian diagnostik antarmuka (nilai bawaan untuk uji).
+  @override
+  HasilPasang? get hasilPasangTerakhir => null;
+
+  @override
+  bool get siap => true;
+
   List<Pengingat> terpasang = const [];
   int izinDiminta = 0;
   int alarmDiminta = 0;

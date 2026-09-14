@@ -24,6 +24,10 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
   StatusIzinPengingat? _izin;
   List<({int id, String? judul, DateTime? waktu})> _tertunda = const [];
   List<String> _jejak = const [];
+  // PB-09/PB-10: hasil sinkronisasi terakhir & status penjadwal — ditampilkan
+  // apa adanya supaya pengguna tahu kalau ada jadwal yang gagal terpasang.
+  HasilPasang? _hasilPasang;
+  bool _penjadwalSiap = false;
 
   @override
   void initState() {
@@ -41,6 +45,8 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
     setState(() {
       _izin = izin;
       _tertunda = tertunda;
+      _hasilPasang = l.hasilPasangTerakhir;
+      _penjadwalSiap = l.siap;
       _jejak = jejak
           .map((j) => [
                 j['jenis']?.toString() ?? '-',
@@ -137,6 +143,8 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
             const SizedBox(height: 8),
             _barisCek('Izin notifikasi', siap),
             _barisCek('Izin alarm tepat (waktu presisi)', alarm),
+            // PB-10: jujur kalau layanan pengingat belum berhasil disiapkan.
+            _barisCek('Layanan pengingat siap', _penjadwalSiap),
             if (izin != null)
               for (final c in izin.catatan) ...[
                 const SizedBox(height: 6),
@@ -147,6 +155,9 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
       ),
     );
   }
+
+  String _jam(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
   Widget _barisCek(String label, bool ok) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 2),
@@ -300,6 +311,26 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
               const SizedBox(height: 6),
               Text('Pengingat tertunda di sistem: ${_tertunda.length}'),
               Text('Aplikasi memantau ${_tertunda.length} jadwal Android.'),
+              // PB-12: Android tidak memberi waktu pasti untuk jadwal tertunda —
+              // jangan menampilkan waktu yang tidak benar-benar diketahui.
+              if (_tertunda.any((t) => t.waktu == null))
+                Text(
+                  'Catatan: sistem Android tidak menyediakan waktu pasti untuk '
+                  'jadwal tertunda; angka di atas adalah jumlah yang benar-benar terpasang.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              // PB-09: hasil sinkronisasi terakhir, termasuk kegagalan.
+              if (_hasilPasang != null) ...[
+                const SizedBox(height: 6),
+                Text('Sinkron terakhir ${_jam(_hasilPasang!.waktu)} — '
+                    '${_hasilPasang!.ringkas}'),
+                if (!_hasilPasang!.lengkap)
+                  Text(
+                    'Jadwal yang gagal: ${_hasilPasang!.idGagal.join(', ')}. '
+                    'Coba tekan "Segarkan jadwal" sekali lagi.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+              ],
               const SizedBox(height: 8),
               const Text('Jejak terakhir:', style: TextStyle(fontWeight: FontWeight.w600)),
               if (_jejak.isEmpty) const Text('- belum ada jejak -'),

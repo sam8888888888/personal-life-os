@@ -25,6 +25,13 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
   final FlutterLocalNotificationsPlugin _plugin;
   bool _siap = false;
   bool _alarmTepat = false;
+  HasilPasang? _hasilPasang;
+
+  @override
+  HasilPasang? get hasilPasangTerakhir => _hasilPasang;
+
+  @override
+  bool get siap => _siap;
 
   static const _ikonAndroid = '@mipmap/ic_launcher';
 
@@ -36,22 +43,34 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
   Future<void> siapkan() async {
     if (_siap) return;
     try {
-      tzdata.initializeTimeZones();
-      await _aturZonaWaktu();
-      await _plugin.initialize(
-        settings: const InitializationSettings(
-          android: AndroidInitializationSettings(_ikonAndroid),
-        ),
-        onDidReceiveNotificationResponse: _saatAksiDipilih,
-        onDidReceiveBackgroundNotificationResponse: _saatAksiLatarDipilih,
-      );
-      await _buatKanal();
-      _alarmTepat = (await _android?.canScheduleExactNotifications()) ?? false;
+      await lakukanInisialisasi();
+      _siap = true; // hanya bila SELURUH inisialisasi berhasil
     } catch (e) {
-      // Jangan gagalkan aplikasi: pengingat tidak aktif, fitur lain tetap jalan.
+      // PB-10: JANGAN menandai siap saat gagal — biar pemanggilan berikutnya
+      // benar-benar mencoba lagi (sebelumnya satu kegagalan membuat instance ini
+      // tidak pernah mencoba pulih). Aplikasi tetap tidak ikut gagal.
+      _siap = false;
       debugPrint('LayananNotifikasiLokal.siapkan gagal: $e');
+      await catatJejak({'jenis': 'siapkan_gagal', 'galat': '$e'});
     }
-    _siap = true;
+  }
+
+  /// Inisialisasi nyata ke plugin Android. Dipisah supaya bisa diuji tanpa
+  /// perangkat (uji mensubstitusi method ini untuk mensimulasikan kegagalan).
+  @protected
+  @visibleForTesting
+  Future<void> lakukanInisialisasi() async {
+    tzdata.initializeTimeZones();
+    await _aturZonaWaktu();
+    await _plugin.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings(_ikonAndroid),
+      ),
+      onDidReceiveNotificationResponse: _saatAksiDipilih,
+      onDidReceiveBackgroundNotificationResponse: _saatAksiLatarDipilih,
+    );
+    await _buatKanal();
+    _alarmTepat = (await _android?.canScheduleExactNotifications()) ?? false;
   }
 
   Future<void> _aturZonaWaktu() async {
@@ -156,6 +175,49 @@ class LayananNotifikasiLokal implements LayananNotifikasi {
       } catch (e) {
         debugPrint('gagal jadwalkan ${p.id}: $e');
       }
+    }
+
+    // PB-09: verifikasi hasil nyata. Baca ulang apa yang benar-benar terpasang,
+    // ulangi sekali untuk yang gagal, lalu simpan hasilnya supaya bisa dilihat
+    // pengguna — kegagalan tidak lagi hanya jadi debugPrint yang tidak terlihat.
+    var gagal = await _idBelumTerpasang(daftar);
+    if (gagal.isNotEmpty) {
+      for (final p in daftar.where((x) => gagal.contains(x.id))) {
+        try {
+          await _jadwalkan(p);
+        } catch (_) {
+          // sengaja: kegagalan kedua dicatat di jejak di bawah
+        }
+      }
+      gagal = await _idBelumTerpasang(daftar);
+    }
+
+    _hasilPasang = HasilPasang(
+      direncanakan: daftar.length,
+      terpasang: daftar.length - gagal.length,
+      idGagal: gagal,
+      waktu: DateTime.now(),
+    );
+    if (gagal.isNotEmpty) {
+      await catatJejak({
+        'jenis': 'sinkron_tidak_lengkap',
+        'galat': 'jadwal gagal terpasang: ${gagal.join(', ')}',
+      });
+    }
+  }
+
+  /// ID rencana yang belum muncul di daftar jadwal sistem.
+  Future<List<int>> _idBelumTerpasang(List<Pengingat> daftar) async {
+    try {
+      final terpasang =
+          (await _plugin.pendingNotificationRequests()).map((n) => n.id);
+      return idJadwalGagalTerpasang(
+        direncanakan: daftar.map((p) => p.id),
+        terpasang: terpasang,
+      );
+    } catch (e) {
+      debugPrint('verifikasi jadwal gagal: $e');
+      return const [];
     }
   }
 

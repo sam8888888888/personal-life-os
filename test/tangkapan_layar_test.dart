@@ -150,6 +150,13 @@ void main() {
 
 /// Layanan notifikasi contoh: hasil tetap agar tangkapan layar stabil.
 class _LayananDemo implements LayananNotifikasi {
+  // PB-09/PB-10: bagian diagnostik antarmuka (nilai bawaan untuk uji).
+  @override
+  HasilPasang? get hasilPasangTerakhir => null;
+
+  @override
+  bool get siap => true;
+
   @override
   Future<void> siapkan() async {}
 
