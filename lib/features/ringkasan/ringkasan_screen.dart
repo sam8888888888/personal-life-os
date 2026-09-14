@@ -18,6 +18,9 @@ class RingkasanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final aktif = ref.watch(tagihanAktifProvider);
+    // PB-08: angka bulan ini memakai riwayat pembayaran + tagihan belum lunas,
+    // sehingga pembayaran yang sudah dilakukan tidak hilang setelah rollover.
+    final ringkas = ref.watch(ringkasanBulanProvider);
     final pemasukan = ref.watch(pemasukanBulanIniProvider);
     final skema = Theme.of(context).colorScheme;
 
@@ -28,12 +31,11 @@ class RingkasanScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Gagal memuat data: $e')),
         data: (daftar) {
           final sekarang = waktuSekarang();
-          final bulanIni = daftar.where((t) =>
-              t.jatuhTempo.year == sekarang.year &&
-              t.jatuhTempo.month == sekarang.month);
-          final totalBulanIni = bulanIni.fold<int>(0, (a, t) => a + (t.jumlahSen ?? 0));
-          final belumBayar = bulanIni.where((t) => !t.lunas);
-          final totalBelumBayar = belumBayar.fold<int>(0, (a, t) => a + (t.jumlahSen ?? 0));
+          final dataBulan = ringkas.value;
+          final totalBulanIni = dataBulan?.totalSen ?? 0;
+          final totalBelumBayar = dataBulan?.belumSen ?? 0;
+          final jumlahBelum = dataBulan?.jumlahBelum ?? 0;
+          final jumlahBaris = dataBulan?.baris.length ?? 0;
           final masuk = pemasukan.value ?? 0;
           final sisa = masuk - totalBelumBayar;
           final terdekat = daftar
@@ -56,16 +58,25 @@ class RingkasanScreen extends ConsumerWidget {
                               fontSize: 15, fontWeight: FontWeight.w600)),
                     ),
                     const SizedBox(width: 8),
-                    Text('${bulanIni.length} tagihan',
+                    Text('$jumlahBaris tagihan',
                         style: TextStyle(color: skema.onSurfaceVariant)),
                   ],
                 ),
               ),
               _barisInfo(context, 'Total tagihan bulan ini', fmtRpDariSen(totalBulanIni)),
               _barisInfo(context, 'Sudah dibayar',
-                  fmtRpDariSen(totalBulanIni - totalBelumBayar),
+                  fmtRpDariSen(dataBulan?.dibayarSen ?? 0),
                   warna: const Color(0xFF2E7D32)),
-              _barisInfo(context, 'Belum dibayar (${belumBayar.length} tagihan)',
+              if ((dataBulan?.dibayarSen ?? 0) > 0)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
+                  child: Text(
+                    'Termasuk pembayaran yang sudah dicatat pada periode ini.',
+                    style: TextStyle(
+                        fontSize: 12, color: skema.onSurfaceVariant),
+                  ),
+                ),
+              _barisInfo(context, 'Belum dibayar ($jumlahBelum tagihan)',
                   fmtRpDariSen(totalBelumBayar),
                   warna: const Color(0xFFC62828)),
               const SizedBox(height: 12),

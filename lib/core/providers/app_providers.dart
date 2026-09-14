@@ -87,6 +87,23 @@ final statusIzinPengingatProvider =
 String kunciBulan(DateTime t) =>
     '${t.year}-${t.month.toString().padLeft(2, '0')}';
 
+/// PB-08: angka ringkas bulan berjalan = catatan pembayaran + tagihan belum lunas.
+/// Ikut dihitung ulang setiap data tagihan berubah (mis. setelah menandai lunas).
+final ringkasanBulanProvider =
+    FutureProvider.autoDispose<RingkasanBulan>((ref) async {
+  ref.watch(tagihanAktifProvider);
+  final repo = ref.watch(tagihanRepoProvider);
+  return repo.ringkasanBulan(waktuSekarang());
+});
+
+/// PB-08: daftar periode satu bulan (dipakai kalender).
+final periodeBulanProvider = FutureProvider.autoDispose
+    .family<List<BarisPeriode>, ({int tahun, int bulan})>((ref, kunci) async {
+  ref.watch(tagihanAktifProvider);
+  final repo = ref.watch(tagihanRepoProvider);
+  return repo.periodeBulan(DateTime(kunci.tahun, kunci.bulan));
+});
+
 final pemasukanBulanIniProvider =
     StreamProvider.autoDispose<int>((ref) {
   final db = ref.watch(databaseProvider);

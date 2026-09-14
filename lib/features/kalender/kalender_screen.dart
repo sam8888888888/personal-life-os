@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
-import '../../data/database/database.dart';
+import '../../data/repository/tagihan_repository.dart';
 
 class KalenderScreen extends ConsumerStatefulWidget {
   const KalenderScreen({super.key});
@@ -32,26 +32,24 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final async = ref.watch(tagihanAktifProvider);
+    // PB-08: kalender memakai GABUNGAN catatan pembayaran + tagihan belum lunas,
+    // supaya tagihan yang sudah dibayar tidak hilang dari tanggal aslinya.
+    final async = ref
+        .watch(periodeBulanProvider((tahun: _bulan.year, bulan: _bulan.month)));
     final skema = Theme.of(context).colorScheme;
 
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Gagal memuat: $e')),
-      data: (semua) {
-        final bulanIni = semua
-            .where((t) =>
-                t.jatuhTempo.year == _bulan.year && t.jatuhTempo.month == _bulan.month)
-            .toList();
-        final perTanggal = <int, List<TagihanData>>{};
-        for (final t in bulanIni) {
-          perTanggal.putIfAbsent(t.jatuhTempo.day, () => []).add(t);
+      data: (barisBulan) {
+        final perTanggal = <int, List<BarisPeriode>>{};
+        for (final b in barisBulan) {
+          perTanggal.putIfAbsent(b.periode.day, () => []).add(b);
         }
         final terpilih = _pilih == null
-            ? const <TagihanData>[]
-            : (perTanggal[_pilih!.day] ?? const <TagihanData>[]);
-        final totalBulan =
-            bulanIni.fold<int>(0, (a, t) => a + (t.jumlahSen ?? 0));
+            ? const <BarisPeriode>[]
+            : (perTanggal[_pilih!.day] ?? const <BarisPeriode>[]);
+        final totalBulan = barisBulan.fold<int>(0, (a, b) => a + b.jumlahSen);
 
         return Column(
           children: [
@@ -70,7 +68,7 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
                         Text(fmtBulanId(_bulan),
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w700)),
-                        Text('${bulanIni.length} tagihan · ${fmtRpDariSen(totalBulan)}',
+                        Text('${barisBulan.length} tagihan · ${fmtRpDariSen(totalBulan)}',
                             style:
                                 TextStyle(fontSize: 12, color: skema.onSurfaceVariant)),
                       ],
@@ -109,18 +107,16 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
                           child: Text(fmtTanggalId(_pilih!),
                               style: const TextStyle(fontWeight: FontWeight.w600)),
                         ),
-                        ...terpilih.map((t) => ListTile(
+                        ...terpilih.map((b) => ListTile(
                               leading: Icon(
-                                  t.lunas ? Icons.check_circle : Icons.circle_outlined,
-                                  color: t.lunas ? skema.primary : skema.error),
-                              title: Text(t.nama),
-                              subtitle: Text(t.lunas ? 'Sudah dibayar' : 'Belum dibayar'),
-                              trailing: Text(
-                                  t.jumlahSen == null
-                                      ? '—'
-                                      : fmtRpDariSen(t.jumlahSen!),
+                                  b.lunas ? Icons.check_circle : Icons.circle_outlined,
+                                  color: b.lunas ? skema.primary : skema.error),
+                              title: Text(b.nama),
+                              subtitle: Text(
+                                  b.lunas ? 'Sudah dibayar' : 'Belum dibayar'),
+                              trailing: Text(fmtRpDariSen(b.jumlahSen),
                                   style: const TextStyle(fontWeight: FontWeight.w600)),
-                              onTap: () => context.push('/ubah/${t.id}'),
+                              onTap: () => context.push('/ubah/${b.tagihanId}'),
                             )),
                       ],
                     ),
@@ -131,7 +127,7 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
     );
   }
 
-  Widget _gridBulan(Map<int, List<TagihanData>> perTanggal) {
+  Widget _gridBulan(Map<int, List<BarisPeriode>> perTanggal) {
     final skema = Theme.of(context).colorScheme;
     final pertama = DateTime(_bulan.year, _bulan.month, 1);
     final jumlahHari = DateTime(_bulan.year, _bulan.month + 1, 0).day;
@@ -162,7 +158,7 @@ class _KalenderScreenState extends ConsumerState<KalenderScreen> {
     );
   }
 
-  Widget _selTanggal(int hari, List<TagihanData> daftar) {
+  Widget _selTanggal(int hari, List<BarisPeriode> daftar) {
     final skema = Theme.of(context).colorScheme;
     final iniHariIni = waktuSekarang();
     final adalahHariIni = _bulan.year == iniHariIni.year &&

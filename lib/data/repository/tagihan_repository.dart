@@ -195,4 +195,92 @@ class TagihanRepository {
     }
     return total;
   }
+
+  /// PB-08: satu baris PERIODE untuk tampilan bulan.
+  ///
+  /// Berbeda dari [TagihanData] yang hanya menyimpan keadaan sekarang, baris ini
+  /// mewakili kejadian: bisa berasal dari catatan pembayaran (sudah dibayar) atau
+  /// dari tagihan aktif yang belum dibayar pada bulan tersebut.
+  Future<List<BarisPeriode>> periodeBulan(DateTime bulan) async {
+    final awal = DateTime(bulan.year, bulan.month, 1);
+    final akhir = DateTime(bulan.year, bulan.month + 1, 0);
+    final tagihan = await ambilSemua();
+    final namaTagihan = {for (final t in tagihan) t.id: t.nama};
+
+    final catatan = await (db.select(db.riwayatPembayaran)
+          ..where((r) =>
+              r.periodeJatuhTempo.isBiggerOrEqualValue(awal) &
+              r.periodeJatuhTempo.isSmallerOrEqualValue(akhir))
+          ..orderBy([(r) => OrderingTerm.asc(r.periodeJatuhTempo)]))
+        .get();
+
+    final hasil = <BarisPeriode>[
+      for (final r in catatan)
+        BarisPeriode(
+          tagihanId: r.tagihanId,
+          nama: namaTagihan[r.tagihanId] ?? 'Tagihan #${r.tagihanId}',
+          periode: r.periodeJatuhTempo,
+          jumlahSen: r.jumlahSen,
+          lunas: true,
+          tanggalBayar: r.tanggalBayar,
+          dariRiwayat: true,
+        ),
+      for (final t in tagihan.where((t) =>
+          t.statusAktif &&
+          !t.lunas &&
+          !t.jatuhTempo.isBefore(awal) &&
+          !t.jatuhTempo.isAfter(akhir) &&
+          !catatan.any((r) =>
+              r.tagihanId == t.id &&
+              selisihHari(r.periodeJatuhTempo, t.jatuhTempo) == 0)))
+        BarisPeriode(
+          tagihanId: t.id,
+          nama: t.nama,
+          periode: t.jatuhTempo,
+          jumlahSen: t.jumlahSen ?? 0,
+          lunas: false,
+        ),
+    ]..sort((a, b) => a.periode.compareTo(b.periode));
+    return hasil;
+  }
+
+  /// PB-08: ringkasan angka satu bulan (dipakai dasbor).
+  Future<RingkasanBulan> ringkasanBulan(DateTime bulan) async =>
+      RingkasanBulan(baris: await periodeBulan(bulan));
+}
+
+/// Satu periode tagihan pada tampilan bulan (PB-08).
+class BarisPeriode {
+  const BarisPeriode({
+    required this.tagihanId,
+    required this.nama,
+    required this.periode,
+    required this.jumlahSen,
+    required this.lunas,
+    this.tanggalBayar,
+    this.dariRiwayat = false,
+  });
+
+  final int tagihanId;
+  final String nama;
+  final DateTime periode;
+  final int jumlahSen;
+  final bool lunas;
+  final DateTime? tanggalBayar;
+
+  /// true = berasal dari catatan pembayaran (sudah dibayar).
+  final bool dariRiwayat;
+}
+
+/// Angka ringkas satu bulan untuk dasbor (PB-08).
+class RingkasanBulan {
+  const RingkasanBulan({required this.baris});
+
+  final List<BarisPeriode> baris;
+
+  int get totalSen => baris.fold<int>(0, (a, b) => a + b.jumlahSen);
+  int get dibayarSen =>
+      baris.where((b) => b.lunas).fold<int>(0, (a, b) => a + b.jumlahSen);
+  int get belumSen => totalSen - dibayarSen;
+  int get jumlahBelum => baris.where((b) => !b.lunas).length;
 }
