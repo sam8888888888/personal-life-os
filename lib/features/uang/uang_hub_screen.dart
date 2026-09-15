@@ -1,9 +1,9 @@
 /// Tab Uang (V1.5) — pintu masuk pekerjaan uang.
 ///
-/// Isi yang sudah ada dipakai ulang: Dasbor Uang (RingkasanScreen), Daftar
-/// Tagihan, dan Kalender Uang. Modul V1.5 lain (Langganan/Cashflow/Budget/
-/// Harta Bersih) belum punya data karena fondasi basis data belum diserahkan,
-/// jadi ditulis apa adanya — bukan angka contoh (III-11).
+/// Isi lama dipakai ulang: Dasbor Uang (RingkasanScreen), Daftar Tagihan, dan
+/// Kalender Uang. Empat modul V1.5 (Arus kas FR-71, Anggaran FR-72, Langganan
+/// FR-68, Kekayaan bersih FR-76) sudah berjalan di atas fondasi data skema v3
+/// dan dibuka dari sini.
 library;
 
 import 'package:flutter/material.dart';
@@ -74,38 +74,42 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Menyusul', style: tema.textTheme.titleSmall),
+          Text('Kelola uang', style: tema.textTheme.titleSmall),
           const SizedBox(height: 8),
-          const Card(
+          Card(
             margin: EdgeInsets.zero,
             child: Column(
               children: [
                 ListTile(
-                  enabled: false,
-                  leading: Icon(Icons.autorenew_outlined),
-                  title: Text('Langganan (FR-68)'),
-                  subtitle: Text('Menunggu fondasi data — rancangan tabel sudah siap'),
+                  leading: const Icon(Icons.swap_vert_outlined),
+                  title: const Text('Arus kas'),
+                  subtitle: const Text('Catat pengeluaran & pemasukan (FR-71)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/transaksi'),
                 ),
-                Divider(height: 1),
+                const Divider(height: 1),
                 ListTile(
-                  enabled: false,
-                  leading: Icon(Icons.swap_vert_outlined),
-                  title: Text('Arus kas (FR-71)'),
-                  subtitle: Text('Menunggu tabel transaksi'),
+                  leading: const Icon(Icons.pie_chart_outline),
+                  title: const Text('Anggaran bulanan'),
+                  subtitle: const Text('Batas belanja per kategori (FR-72)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/anggaran'),
                 ),
-                Divider(height: 1),
+                const Divider(height: 1),
                 ListTile(
-                  enabled: false,
-                  leading: Icon(Icons.pie_chart_outline),
-                  title: Text('Anggaran (FR-72)'),
-                  subtitle: Text('Menunggu tabel anggaran'),
+                  leading: const Icon(Icons.autorenew_outlined),
+                  title: const Text('Langganan'),
+                  subtitle: const Text('Layanan berulang & masa berhenti (FR-68)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/langganan'),
                 ),
-                Divider(height: 1),
+                const Divider(height: 1),
                 ListTile(
-                  enabled: false,
-                  leading: Icon(Icons.savings_outlined),
-                  title: Text('Harta bersih (FR-76)'),
-                  subtitle: Text('Menunggu tabel aset & utang'),
+                  leading: const Icon(Icons.savings_outlined),
+                  title: const Text('Kekayaan bersih'),
+                  subtitle: const Text('Aset, utang & tren bulanan (FR-76)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/kekayaan'),
                 ),
               ],
             ),

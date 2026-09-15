@@ -26,7 +26,13 @@ import 'package:personal_life_os/core/ibadah/penyimpanan_jadwal.dart';
 import 'package:personal_life_os/core/ibadah/penyimpanan_log_sholat.dart';
 import 'package:personal_life_os/core/theme/app_tema.dart';
 import 'package:personal_life_os/data/database/database.dart';
+import 'package:personal_life_os/data/repository/anggaran_repository.dart';
+import 'package:personal_life_os/data/repository/aset_repository.dart';
+import 'package:personal_life_os/data/repository/kategori_transaksi_repository.dart';
+import 'package:personal_life_os/data/repository/langganan_repository.dart';
 import 'package:personal_life_os/data/repository/pengaturan_repository.dart';
+import 'package:personal_life_os/data/repository/transaksi_repository.dart';
+import 'package:personal_life_os/data/model/enums.dart';
 import 'package:personal_life_os/features/ibadah/jadwal_sholat_screen.dart';
 import 'package:personal_life_os/features/hari_ini/briefing_pagi_screen.dart';
 import 'package:personal_life_os/features/ibadah/kalender_hijriah_screen.dart';
@@ -98,6 +104,112 @@ void main() {
   });
 
   tearDownAll(pakaiWaktuAsli);
+
+  // ---- Data contoh modul uang V1.5 (FR-68/71/72/76) -----------------------
+  // Hanya dipakai oleh tangkapan layar modul uang, supaya tangkapan layar
+  // lama (F2/F3/F4/F5) tidak ikut berubah.
+  Future<void> isiUangDemo() async {
+    int rp(int n) => n * 100; // rupiah -> sen
+    final kat = await KategoriTransaksiRepository(_db).ambilSemua();
+    int idKategori(String kode) => kat.firstWhere((k) => k.kode == kode).id;
+
+    final trx = TransaksiRepository(_db);
+    Future<void> tulis(String id, String jenis, int hari, int sen, String kode,
+            String catatan) =>
+        trx.simpan(TransaksiCompanion.insert(
+          idTransaksi: id,
+          jenis: Value(jenis),
+          tanggal: DateTime(2026, 9, hari),
+          jumlahSen: sen,
+          kategoriId: Value(idKategori(kode)),
+          catatan: Value(catatan),
+        ));
+    await tulis('demo-1', 'pemasukan', 1, rp(12000000), 'masuk_gaji', 'Gaji September');
+    await tulis('demo-2', 'pemasukan', 9, rp(2500000), 'masuk_freelance', 'Proyek situs');
+    await tulis('demo-3', 'pengeluaran', 3, rp(45000), 'kel_makan', 'Sarapan & kopi');
+    await tulis('demo-4', 'pengeluaran', 5, rp(78500), 'kel_makan', 'Makan keluarga');
+    await tulis('demo-5', 'pengeluaran', 4, rp(25000), 'kel_transportasi', 'Ojek online');
+    await tulis('demo-6', 'pengeluaran', 6, rp(120000), 'kel_hiburan', 'Bioskop');
+    await tulis('demo-7', 'pengeluaran', 8, rp(350000), 'kel_belanja', 'Belanja bulanan');
+
+    final ang = AnggaranRepository(_db);
+    await ang.simpan(periode: '2026-09', kategoriId: 0, batasSen: rp(5000000));
+    await ang.simpan(
+        periode: '2026-09',
+        kategoriId: idKategori('kel_makan'),
+        batasSen: rp(900000));
+    await ang.simpan(
+        periode: '2026-09',
+        kategoriId: idKategori('kel_transportasi'),
+        batasSen: rp(600000));
+    // Sengaja di bawah realisasi (Rp 120.000) supaya peringatan 100% terlihat.
+    await ang.simpan(
+        periode: '2026-09',
+        kategoriId: idKategori('kel_hiburan'),
+        batasSen: rp(100000));
+
+    final lang = LanggananRepository(_db);
+    await lang.tambah(
+        nama: 'Netflix Premium',
+        nominalSen: rp(186000),
+        tanggalMulai: DateTime(2026, 9, 5),
+        kategoriId: idKategori('kel_hiburan'));
+    await lang.tambah(
+        nama: 'Spotify Family',
+        nominalSen: rp(86900),
+        tanggalMulai: DateTime(2026, 9, 12),
+        kategoriId: idKategori('kel_hiburan'));
+    final berhenti = await lang.tambah(
+        nama: 'Gym (berhenti)',
+        nominalSen: rp(350000),
+        tanggalMulai: DateTime(2026, 8, 1));
+    await lang.hentikan(berhenti.id);
+
+    final aset = AsetRepository(_db);
+    final tabungan = await aset.tambahAset(
+        nama: 'Tabungan BCA', jenis: JenisAset.bank, nilaiAwalSen: rp(25000000));
+    final reksa = await aset.tambahAset(
+        nama: 'Reksa Dana Pasar Uang',
+        jenis: JenisAset.investasi,
+        nilaiAwalSen: rp(10000000));
+    await aset.tambahAset(
+        nama: 'Emas Antam 10 g', jenis: JenisAset.emas, nilaiAwalSen: rp(14500000));
+    final kk = await aset.tambahKewajiban(
+        nama: 'Kartu Kredit BCA',
+        jenis: JenisKewajiban.kartuKredit,
+        saldoAwalSen: rp(3500000));
+    await aset.tambahKewajiban(
+        nama: 'Cicilan motor',
+        jenis: JenisKewajiban.cicilan,
+        saldoAwalSen: rp(8000000));
+
+    // Riwayat nilai 3 bulan supaya grafik tren punya isi.
+    for (final (bulan, faktor) in const [
+      ('2026-07', 0.9),
+      ('2026-08', 0.95),
+      ('2026-09', 1.0),
+    ]) {
+      final lampau = bulan != '2026-09';
+      await aset.simpanNilaiAset(
+          asetId: tabungan.id,
+          bulan: bulan,
+          nilaiSen: rp((25000000 * faktor).round()),
+          paksa: lampau,
+          alasan: lampau ? 'contoh data demo' : null);
+      await aset.simpanNilaiAset(
+          asetId: reksa.id,
+          bulan: bulan,
+          nilaiSen: rp((10000000 * faktor).round()),
+          paksa: lampau,
+          alasan: lampau ? 'contoh data demo' : null);
+      await aset.simpanNilaiKewajiban(
+          kewajibanId: kk.id,
+          bulan: bulan,
+          nilaiSen: rp((3500000 * faktor).round()),
+          paksa: lampau,
+          alasan: lampau ? 'contoh data demo' : null);
+    }
+  }
 
   Future<void> potret(WidgetTester tester, String nama, String rute,
       {bool layananDemo = false, String prefiks = 'f2'}) async {
@@ -314,6 +426,27 @@ void main() {
   testWidgets('tangkapan layar pelacakan sholat',
       (t) => potretPelacakan(t, 'pelacakan_sholat'),
       skip: !_fontTersedia);
+
+  // ---- Modul uang V1.5 (FR-68/71/72/76) -----------------------------------
+  testWidgets('tangkapan layar arus kas', (t) async {
+    await isiUangDemo();
+    await potret(t, 'arus_kas', '/uang/transaksi', prefiks: 'f6');
+  }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar anggaran', (t) async {
+    await isiUangDemo();
+    await potret(t, 'anggaran', '/uang/anggaran', prefiks: 'f6');
+  }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar langganan', (t) async {
+    await isiUangDemo();
+    await potret(t, 'langganan', '/uang/langganan', prefiks: 'f6');
+  }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar kekayaan', (t) async {
+    await isiUangDemo();
+    await potret(t, 'kekayaan', '/uang/kekayaan', prefiks: 'f6');
+  }, skip: !_fontTersedia);
 }
 
 /// Layanan notifikasi contoh: hasil tetap agar tangkapan layar stabil.

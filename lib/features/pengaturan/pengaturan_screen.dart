@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/providers/app_providers.dart';
+import '../../core/utils/mata_uang.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
+import 'mata_uang_pengaturan.dart';
 
 class PengaturanScreen extends ConsumerStatefulWidget {
   const PengaturanScreen({super.key});
@@ -21,10 +23,21 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
   final _pemasukan = TextEditingController();
   bool _terisi = false;
 
+  /// FR-67: simpan pilihan mata uang lalu perbarui seluruh label uang.
+  Future<void> _ubahMataUang(MataUang m) async {
+    final db = ref.read(databaseProvider);
+    await simpanMataUang(db, m);
+    if (!mounted) return;
+    setState(() {});
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Mata uang diubah ke ${m.label}')));
+  }
+
   @override
   Widget build(BuildContext context) {
     final bulan = waktuSekarang();
     final pemasukan = ref.watch(pemasukanBulanIniProvider);
+    final mataUangSekarang = ref.watch(mataUangProvider).value ?? mataUangAktif;
 
     pemasukan.whenData((v) {
       if (!_terisi && v > 0) {
@@ -53,6 +66,25 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
           onPressed: _simpanPemasukan,
           icon: const Icon(Icons.savings),
           label: const Text('Simpan pemasukan'),
+        ),
+        const Divider(height: 40),
+        const Text('Mata uang',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        const Text('Dipakai untuk semua angka uang di aplikasi. '
+            'Bawaan: Rupiah (Rp).'),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<MataUang>(
+          key: const Key('pilih_mata_uang'),
+          isExpanded: true,
+          initialValue: mataUangSekarang,
+          decoration: const InputDecoration(labelText: 'Mata uang'),
+          items: MataUang.values
+              .map((m) => DropdownMenuItem(value: m, child: Text(m.label)))
+              .toList(),
+          onChanged: (m) {
+            if (m != null) _ubahMataUang(m);
+          },
         ),
         const Divider(height: 40),
         const Text('Data',

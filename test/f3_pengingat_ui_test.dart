@@ -204,6 +204,12 @@ void main() {
     ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    // Layar Pengaturan punya tambahan bagian "Mata uang" (FR-67), sehingga
+    // baris pengingat bisa berada di bawah lipatan dan belum dibangun.
+    if (find.text('Pengingat & izin').evaluate().isEmpty) {
+      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.pumpAndSettle(const Duration(milliseconds: 50));
+    }
     expect(find.text('Pengingat & izin'), findsOneWidget);
     await ketukTerlihat(tester, find.text('Pengingat & izin'));
     await tester.pump();

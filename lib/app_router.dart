@@ -23,6 +23,10 @@ import 'features/pengaturan/pengaturan_screen.dart';
 import 'features/ringkasan/ringkasan_screen.dart';
 import 'features/tagihan/daftar_tagihan_screen.dart';
 import 'features/tagihan/form_tagihan_screen.dart';
+import 'features/uang/anggaran/anggaran_screen.dart';
+import 'features/uang/kekayaan/kekayaan_screen.dart';
+import 'features/uang/langganan/langganan_screen.dart';
+import 'features/uang/transaksi/daftar_transaksi_screen.dart';
 import 'features/uang/uang_hub_screen.dart';
 
 /// Membuat router baru (dipakai aplikasi & uji UI).
@@ -76,6 +80,23 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/ibadah/pelacakan',
       builder: (c, s) => const PelacakanSholatScreen(),
+    ),
+    // Modul uang V1.5 (FR-68/71/72/76) — layar penuh di atas kerangka tab.
+    GoRoute(
+      path: '/uang/transaksi',
+      builder: (c, s) => const DaftarTransaksiScreen(),
+    ),
+    GoRoute(
+      path: '/uang/anggaran',
+      builder: (c, s) => const AnggaranScreen(),
+    ),
+    GoRoute(
+      path: '/uang/langganan',
+      builder: (c, s) => const LanggananScreen(),
+    ),
+    GoRoute(
+      path: '/uang/kekayaan',
+      builder: (c, s) => const KekayaanScreen(),
     ),
     GoRoute(
       path: '/ubah/:id',

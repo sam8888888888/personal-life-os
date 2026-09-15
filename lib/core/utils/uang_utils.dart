@@ -1,12 +1,10 @@
 /// Utilitas uang — PURE. Format Rupiah & parsing input cepat.
 library;
 
-import 'package:intl/intl.dart';
+import 'mata_uang.dart';
 
-final _fmtRp = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-
-/// 1250000 -> "Rp 1.250.000"
-String fmtRp(num jumlah) => _fmtRp.format(jumlah);
+/// 1250000 -> "Rp 1.250.000" (mengikuti mata uang aktif, FR-67)
+String fmtRp(num jumlah) => fmtUang(jumlah);
 
 /// "Rp 1.250.000" / "1.250.000" / "1,250,000" -> 1250000
 num? parseRupiah(String? s) {
@@ -45,5 +43,5 @@ num? parseRupiah(String? s) {
 /// Rp 150.000 -> 15000000 sen (satuan terkecil; IDR tanpa desimal).
 int rupiahKeSen(num jumlah) => (jumlah * 100).round();
 
-/// 15000000 sen -> "Rp 150.000"
-String fmtRpDariSen(int sen) => fmtRp(sen / 100);
+/// 15000000 sen -> "Rp 150.000" (mengikuti mata uang aktif, FR-67)
+String fmtRpDariSen(int sen) => fmtUangDariSen(sen);

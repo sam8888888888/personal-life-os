@@ -20,6 +20,7 @@ import 'package:personal_life_os/core/ibadah/penyimpanan_jadwal.dart';
 import 'package:personal_life_os/core/ibadah/penyimpanan_log_sholat.dart';
 import 'package:personal_life_os/core/notifikasi/layanan_notifikasi.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
+import 'package:personal_life_os/core/utils/waktu.dart';
 import 'package:personal_life_os/core/theme/app_tema.dart';
 import 'package:personal_life_os/data/database/database.dart';
 import 'package:personal_life_os/data/repository/tagihan_repository.dart';
@@ -297,17 +298,36 @@ void main() {
       await tutup(t);
     });
 
-    testWidgets('Uang hub: dasbor/daftar/kalender + modul menyusul tidak aktif',
+    testWidgets('Uang hub: dasbor/daftar/kalender + pintu 4 modul V1.5 aktif',
         (t) async {
       await isiTigaTagihan();
       await tampilkan(t, UangHubScreen(jamSekarang: () => jamPagi));
       expect(find.text('Dasbor uang'), findsOneWidget);
       expect(find.text('Daftar tagihan'), findsOneWidget);
       expect(find.text('Kalender uang'), findsOneWidget);
-      await gulirKe(t, find.text('Langganan (FR-68)'));
-      expect(find.text('Langganan (FR-68)'), findsOneWidget);
-      expect(find.text('Anggaran (FR-72)'), findsOneWidget);
+      await gulirKe(t, find.text('Kekayaan bersih'));
+      expect(find.text('Arus kas'), findsOneWidget);
+      expect(find.text('Anggaran bulanan'), findsOneWidget);
+      expect(find.text('Langganan'), findsOneWidget);
+      expect(find.text('Kekayaan bersih'), findsOneWidget);
       await tutup(t);
+    });
+
+    testWidgets('rute 4 modul uang V1.5 bisa dibuka lewat router', (t) async {
+      const tujuan = {
+        '/uang/transaksi': 'Arus Kas',
+        '/uang/anggaran': 'Anggaran bulanan',
+        '/uang/langganan': 'Langganan',
+        '/uang/kekayaan': 'Kekayaan Bersih',
+      };
+      for (final r in tujuan.entries) {
+        await bukaRouter(t, awal: r.key);
+        await t.pumpAndSettle(const Duration(milliseconds: 50));
+        expect(find.text(r.value), findsWidgets,
+            reason: 'judul ${r.value} tidak muncul di ${r.key}');
+        expect(t.takeException(), isNull);
+        await tutup(t);
+      }
     });
   });
 
@@ -440,6 +460,62 @@ void main() {
         (t) async {
       await bukaRouter(t, awal: '/ringkasan');
       expect(find.text('Uang tersisa bulan ini'), findsOneWidget);
+      await tutup(t);
+    });
+  });
+
+  // ---- FR-65: Today dan Kalender membaca satu sumber data -------------------
+  // Kriteria PRD: "Menambah item di satu tempat langsung tampil di tempat lain
+  // (uji: tambah -> muncul di dua tempat)".
+  group('FR-65 sinkron Today <-> Kalender', () {
+    testWidgets('tagihan baru langsung tampil di Today lalu terlihat di Kalender',
+        (t) async {
+      pakaiSumberWaktu(() => jamPagi);
+      addTearDown(pakaiWaktuAsli);
+
+      await bukaRouter(t, awal: '/today');
+      expect(find.text('Listrik PLN'), findsNothing);
+
+      // Ditambah lewat repository (bukan lewat layar): membuktikan Today
+      // mengikuti data bersama, bukan salinan sendiri.
+      await t.runAsync(() => tambah(
+          nama: 'Listrik PLN',
+          jatuhTempo: DateTime(2026, 9, 13),
+          jumlahSen: 45000000));
+      // Aliran Drift butuh beberapa siklus pump sebelum baris dibangun.
+      for (var i = 0; i < 12; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      await gulirKe(t, find.text('Listrik PLN'));
+      expect(find.text('Listrik PLN'), findsWidgets);
+      await tutup(t);
+
+      await bukaRouter(t, awal: '/kalender');
+      expect(find.text('Listrik PLN'), findsWidgets);
+      await tutup(t);
+    });
+
+    testWidgets(
+        'tagihan yang sudah dibayar keluar dari Today, tetap tercatat di Kalender',
+        (t) async {
+      pakaiSumberWaktu(() => jamPagi);
+      addTearDown(pakaiWaktuAsli);
+      await tambah(
+          nama: 'BPJS', jatuhTempo: DateTime(2026, 9, 13), jumlahSen: 15000000);
+      await t.runAsync(() async {
+        final repo = TagihanRepository(db);
+        final id = (await repo.ambilSemua()).first.id;
+        await repo.tandaiLunas(id, tanggalBayar: DateTime(2026, 9, 13));
+      });
+
+      await bukaRouter(t, awal: '/today');
+      expect(find.text('BPJS'), findsNothing);
+      await tutup(t);
+
+      // PB-08: kalender menggabungkan catatan pembayaran + tagihan belum lunas,
+      // jadi pembayaran masa lalu tidak hilang dari tanggalnya.
+      await bukaRouter(t, awal: '/kalender');
+      expect(find.text('BPJS'), findsWidgets);
       await tutup(t);
     });
   });
