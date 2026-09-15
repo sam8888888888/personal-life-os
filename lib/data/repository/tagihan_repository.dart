@@ -39,7 +39,25 @@ class TagihanRepository {
   }
 
   /// Hapus permanen beserta riwayatnya.
+  ///
+  /// Skema v3 (langganan & kas) — baris lain **tidak** ikut dihapus:
+  /// * `Langganan` yang menaut tagihan ini ditutup (`berhenti`) dan tautannya
+  ///   dikosongkan, supaya tidak ada langganan yang menunjuk tagihan hilang;
+  /// * `Transaksi` yang bertaut tetap ada, hanya `tagihanId` dikosongkan —
+  ///   uangnya benar-benar keluar, jadi riwayat kas tidak boleh hilang diam
+  ///   diam (aturan MASTER: baris jangan hilang, nilai dikosongkan + catatan).
   Future<void> hapus(int id) => db.transaction(() async {
+        await (db.update(db.langganan)..where((l) => l.tagihanId.equals(id)))
+            .write(LanggananCompanion(
+          tagihanId: const Value(null),
+          status: Value(StatusLangganan.berhenti.nilaiDb),
+          diubahPada: Value(DateTime.now()),
+        ));
+        await (db.update(db.transaksi)..where((t) => t.tagihanId.equals(id)))
+            .write(TransaksiCompanion(
+          tagihanId: const Value(null),
+          diubahPada: Value(DateTime.now()),
+        ));
         await (db.delete(db.riwayatPembayaran)
               ..where((r) => r.tagihanId.equals(id)))
             .go();

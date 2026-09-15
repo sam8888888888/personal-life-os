@@ -53,11 +53,27 @@ class PengaturanRepository {
   /// PB-11: sekaligus membatalkan notifikasi yang masih terjadwal. Tanpa ini ada
   /// jendela waktu di mana data sudah kosong tetapi pengingat lama masih hidup
   /// (mis. aplikasi ditutup tepat setelah penghapusan).
+  ///
+  /// Skema v3: tabel kas & kekayaan ikut dikosongkan supaya "hapus semua data"
+  /// benar-benar bersih (tidak menyisakan transaksi/aset/laporan lama).
+  /// Kategori bawaan (`bawaanSistem = true`) tetap disisakan — sama seperti
+  /// kategori tagihan bawaan yang tidak pernah dihapus.
   Future<void> hapusSemuaData({LayananNotifikasi? layanan}) async {
     await db.transaction(() async {
       await db.delete(db.riwayatPembayaran).go();
       await db.delete(db.tagihan).go();
       await db.delete(db.pemasukanBulanan).go();
+      // Skema v3 — urutan: riwayat nilai dulu, baru induknya.
+      await db.delete(db.nilaiAsetBulanan).go();
+      await db.delete(db.nilaiKewajibanBulanan).go();
+      await db.delete(db.transaksi).go();
+      await db.delete(db.anggaranBulanan).go();
+      await db.delete(db.langganan).go();
+      await db.delete(db.aset).go();
+      await db.delete(db.kewajiban).go();
+      await (db.delete(db.kategoriTransaksi)
+            ..where((k) => k.bawaanSistem.equals(false)))
+          .go();
     });
     try {
       await layanan?.batalkanSemua();
