@@ -19,6 +19,18 @@ enum KanalNotifikasi {
     'plo_ringkasan',
     'Ringkasan mingguan',
     'Ringkasan tagihan pekan ini (Senin pagi)',
+  ),
+  /// FR-63: briefing pagi (dijadwalkan modul fitur lewat SumberPengingatTambahan).
+  briefing(
+    'plo_briefing',
+    'Ringkasan pagi',
+    'Ringkasan pagi: agenda, tagihan terdekat, jadwal sholat',
+  ),
+  /// FR-87: pengingat waktu sholat (sebelum / tepat / sesudah waktu).
+  sholat(
+    'plo_sholat',
+    'Pengingat sholat',
+    'Pengingat waktu sholat menurut hitungan aplikasi',
   );
 
   const KanalNotifikasi(this.id, this.nama, this.deskripsi);

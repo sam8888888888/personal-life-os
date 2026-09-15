@@ -31,6 +31,106 @@ const int maksHariTerlambat = 7;
 /// Jam ringkasan mingguan (Senin pagi).
 const int jamRingkasanMingguan = 8;
 
+// ---------------------------------------------------------------------------
+// FR-63 briefing pagi & FR-87 pengingat sholat (momok tambahan)
+// ---------------------------------------------------------------------------
+//
+// ID memakai rentang cadangan (>= batasIdKhusus) supaya tidak pernah bentrok
+// dengan ID tagihan — sama pola dengan ringkasan mingguan & notifikasi uji.
+
+/// Jam briefing pagi bawaan (FR-63).
+const String jamBriefingBawaan = '06:00';
+
+/// Berapa hari ke depan briefing dijadwalkan sekaligus.
+const int hariBriefingKeDepan = 7;
+
+/// Berapa hari ke depan pengingat sholat dijadwalkan sekaligus.
+///
+/// Sengaja dibatasi: pekerja latar + sinkronisasi saat aplikasi dibuka
+/// menyegarkan jadwal, sedangkan menumpuk ratusan alarm (35 hari × 5 waktu)
+/// berisiko ditolak sistem. 7 hari × 5 waktu = 35 alarm per pilihan mode.
+const int hariSholatKeDepan = 7;
+
+/// ID briefing pagi untuk hari ke-[i] (i = 0 … [hariBriefingKeDepan] − 1).
+int idBriefingPagiKe(int i) => batasIdKhusus + 10 + i;
+
+/// ID pengingat sholat ke-[i] (i = 0 … jumlah waktu × [hariSholatKeDepan] − 1).
+int idSholatKe(int i) => batasIdKhusus + 100 + i;
+
+/// Pilihan mode pengingat per waktu sholat (FR-87).
+enum ModePengingatSholat {
+  sebelum('sebelum'),
+  tepat('tepat'),
+  sesudah('sesudah');
+
+  const ModePengingatSholat(this.nilaiDb);
+  final String nilaiDb;
+
+  static ModePengingatSholat dariDb(String? v) => ModePengingatSholat.values
+      .firstWhere((e) => e.nilaiDb == v, orElse: () => ModePengingatSholat.tepat);
+
+  String get label => switch (this) {
+        ModePengingatSholat.sebelum => 'Sebelum waktu',
+        ModePengingatSholat.tepat => 'Saat masuk waktu',
+        ModePengingatSholat.sesudah => 'Setelah waktu',
+      };
+}
+
+/// Satu waktu sholat yang ingin diingatkan — data disiapkan modul fitur
+/// (nama waktu, jam menurut perhitungannya, dan pilihan mode pengguna).
+class JadwalPengingatSholat {
+  const JadwalPengingatSholat({
+    required this.nama,
+    required this.jam,
+    this.mode = ModePengingatSholat.tepat,
+    this.menitGeser = 0,
+  });
+
+  /// Nama waktu, mis. "Subuh".
+  final String nama;
+
+  /// Jam masuk waktu `HH:mm` (waktu lokal) menurut perhitungan aplikasi.
+  final String jam;
+
+  final ModePengingatSholat mode;
+
+  /// Menit geser (0–120) untuk mode [ModePengingatSholat.sebelum]
+  /// (mis. 5 = lima menit sebelum) dan [ModePengingatSholat.sesudah].
+  final int menitGeser;
+
+  /// Waktu pengingat pada hari [hari] (jam pada [hari] diabaikan).
+  DateTime waktuPada(DateTime hari) {
+    final (j, m) = jamDariTeks(jam);
+    final dasar = DateTime(hari.year, hari.month, hari.day, j, m);
+    final geser = menitGeser.clamp(0, 120);
+    return switch (mode) {
+      ModePengingatSholat.sebelum => dasar.subtract(Duration(minutes: geser)),
+      ModePengingatSholat.tepat => dasar,
+      ModePengingatSholat.sesudah => dasar.add(Duration(minutes: geser)),
+    };
+  }
+
+  /// Judul notifikasi — menyebut fakta, tidak menilai (PRD §III-11).
+  String get judul => switch (mode) {
+        ModePengingatSholat.sebelum => menitGeser > 0
+            ? '$menitGeser menit lagi $nama'
+            : 'Menjelang $nama',
+        ModePengingatSholat.tepat => 'Waktu $nama $jam',
+        ModePengingatSholat.sesudah => 'Sudah masuk waktu $nama',
+      };
+
+  /// Isi notifikasi — selalu menyebut "menurut hitungan aplikasi", tanpa
+  /// kata menghakimi seperti "belum sholat".
+  String get isi => switch (mode) {
+        ModePengingatSholat.sebelum =>
+          'Menurut hitungan aplikasi, $nama masuk pukul $jam.',
+        ModePengingatSholat.tepat =>
+          'Menurut hitungan aplikasi, $nama masuk pukul $jam.',
+        ModePengingatSholat.sesudah =>
+          '$nama masuk pukul $jam. Catat bila sudah Anda lakukan.',
+      };
+}
+
 /// Ubah "ID tagihan + slot" menjadi ID notifikasi Android yang stabil.
 ///
 /// Rentang hasil: 0 … 1.000.000.099 (slot 0…99), selalu di bawah
@@ -89,9 +189,16 @@ class PerencanaPengingat {
   final bool sertakanRingkasanMingguan;
 
   /// Susun seluruh pengingat untuk [tagihan] pada saat [sekarang].
+  ///
+  /// [sertakanBriefingPagi] menyalakan briefing pagi harian (FR-63);
+  /// [jadwalSholat] berisi pengingat waktu sholat (FR-87) — keduanya opsional
+  /// supaya pemanggil lama tidak berubah perilakunya.
   List<Pengingat> rencanakan({
     required List<TagihanData> tagihan,
     required DateTime sekarang,
+    bool sertakanBriefingPagi = false,
+    String jamBriefingPagi = jamBriefingBawaan,
+    List<JadwalPengingatSholat> jadwalSholat = const [],
   }) {
     final batasAwal = sekarang.add(const Duration(minutes: 1));
     final batasAkhir = sekarang.add(horizon);
@@ -109,8 +216,95 @@ class PerencanaPengingat {
       if (r != null) hasil.add(r);
     }
 
+    // FR-63 & FR-87: pengingat tambahan dari modul fitur.
+    if (sertakanBriefingPagi) {
+      hasil.addAll(
+          _briefingPagi(tagihan, sekarang, batasAwal, batasAkhir, jamBriefingPagi));
+    }
+    hasil.addAll(_pengingatSholat(jadwalSholat, sekarang, batasAwal, batasAkhir));
+
     hasil.sort((a, b) => a.waktu.compareTo(b.waktu));
     return hasil;
+  }
+
+  /// FR-63: satu notifikasi briefing per hari pada [jamBriefing] (bawaan 06:00).
+  ///
+  /// Isinya sengaja pendek: jumlah & total tagihan 7 hari ke depan. Menyentuh
+  /// notifikasi ini membuka aplikasi (aksi "buka"), tidak pernah menandai lunas
+  /// — payload-nya konteks saja (`tagihanId = 0`).
+  List<Pengingat> _briefingPagi(
+    List<TagihanData> tagihan,
+    DateTime sekarang,
+    DateTime batasAwal,
+    DateTime batasAkhir,
+    String jamBriefing,
+  ) {
+    final (j, m) = jamDariTeks(jamBriefing);
+    final hasil = <Pengingat>[];
+    for (var i = 0; i < hariBriefingKeDepan; i++) {
+      final hari = DateTime(sekarang.year, sekarang.month, sekarang.day + i);
+      final waktu = DateTime(hari.year, hari.month, hari.day, j, m);
+      if (waktu.isBefore(batasAwal) || waktu.isAfter(batasAkhir)) continue;
+      final (jumlah, total) = _tagihanDalam(
+        tagihan,
+        DateTime(hari.year, hari.month, hari.day),
+        DateTime(hari.year, hari.month, hari.day + 7),
+      );
+      hasil.add(Pengingat(
+        id: idBriefingPagiKe(i),
+        tagihanId: 0,
+        waktu: waktu,
+        kanal: KanalNotifikasi.briefing,
+        judul: 'Ringkasan pagi siap',
+        isi: jumlah == 0
+            ? 'Buka aplikasi untuk melihat agenda hari ini.'
+            : '$jumlah tagihan dalam 7 hari ke depan (${fmtRpDariSen(total)}).',
+      ));
+    }
+    return hasil;
+  }
+
+  /// FR-87: satu notifikasi per waktu sholat per hari, maksimum
+  /// [hariSholatKeDepan] hari ke depan. Tidak ada pengingat berulang.
+  List<Pengingat> _pengingatSholat(
+    List<JadwalPengingatSholat> jadwal,
+    DateTime sekarang,
+    DateTime batasAwal,
+    DateTime batasAkhir,
+  ) {
+    if (jadwal.isEmpty) return const [];
+    final hasil = <Pengingat>[];
+    for (var hari = 0; hari < hariSholatKeDepan; hari++) {
+      final tanggal = DateTime(sekarang.year, sekarang.month, sekarang.day + hari);
+      for (var i = 0; i < jadwal.length; i++) {
+        final s = jadwal[i];
+        final waktu = s.waktuPada(tanggal);
+        if (waktu.isBefore(batasAwal) || waktu.isAfter(batasAkhir)) continue;
+        hasil.add(Pengingat(
+          id: idSholatKe(hari * jadwal.length + i),
+          tagihanId: 0,
+          waktu: waktu,
+          kanal: KanalNotifikasi.sholat,
+          judul: s.judul,
+          isi: s.isi,
+        ));
+      }
+    }
+    return hasil;
+  }
+
+  /// Jumlah & total tagihan aktif belum lunas dalam rentang [dari, sampai).
+  (int, int) _tagihanDalam(
+      List<TagihanData> tagihan, DateTime dari, DateTime sampai) {
+    var jumlah = 0;
+    var total = 0;
+    for (final t in tagihan) {
+      if (!t.statusAktif || t.lunas) continue;
+      if (t.jatuhTempo.isBefore(dari) || !t.jatuhTempo.isBefore(sampai)) continue;
+      jumlah++;
+      total += t.jumlahSen ?? 0;
+    }
+    return (jumlah, total);
   }
 
   List<Pengingat> _pengingatLead(

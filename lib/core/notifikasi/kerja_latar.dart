@@ -17,6 +17,22 @@ import 'penyinkron_pengingat.dart';
 /// Nama unik pekerjaan berkala.
 const String tugasSinkronPengingat = 'plo.pengingat.sinkron';
 
+/// Titik pendaftaran sumber pengingat **untuk pekerja latar** (FR-63/FR-87).
+///
+/// Isolate latar tidak mewarisi variabel statis apa pun dari isolate utama,
+/// jadi modul fitur yang ingin pengingatnya ikut disegarkan di latar mendaftar
+/// di sini — satu baris per modul, mis.:
+///
+/// ```dart
+/// RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
+/// ```
+///
+/// Tanpa pendaftaran di sini, pengingat tambahan tetap berbunyi untuk jadwal
+/// yang sudah terpasang, tetapi tidak diperpanjang oleh pekerja latar.
+void daftarkanSumberPengingatLatar() {
+  // Sengaja dikosongkan: pemilik modul fitur yang mengisi (lihat doc di atas).
+}
+
 /// Titik masuk pekerja latar (wajib anotasi agar tidak dibuang saat build rilis).
 @pragma('vm:entry-point')
 void pengirimPengingatLatar() {
@@ -24,6 +40,7 @@ void pengirimPengingatLatar() {
     DartPluginRegistrant.ensureInitialized();
     // Isolate latar tidak menjalankan main(): siapkan format tanggal sendiri.
     await initializeDateFormatting('id_ID');
+    daftarkanSumberPengingatLatar();
     final layanan = LayananNotifikasiLokal();
     AppDatabase? db;
     try {

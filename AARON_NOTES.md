@@ -63,3 +63,7 @@ Hentikan container bila tidak dipakai (hemat RAM): `sudo -n docker stop aaron-li
   cocokkan mutasi, arsip bukti bayar + laporan bulanan.
 - **Paket C:** enkripsi database + biometrik + blokir screenshot, modul Life Engine, mode rumah tangga,
   input suara/Telegram, rapikan QC.
+
+## 15 Sep 2026 — JALUR DITUTUP (serahan total ke Dinda)
+
+Perintah Papi: "Biar dikerjakan oleh Dinda. Total serahkan ke dia." Seluruh fondasi (PB-01..PB-16, skema v3, notifikasi FR-63/87) sudah ada di cabang `v15-notifikasi-aaron` dan sudah didorong ke repo Dinda. Jalur ini berhenti; tidak ada pekerjaan lanjutan di sini tanpa perintah Papi. Rincian: docs/SERAHAN_TOTAL_AARON_KE_DINDA.md
