@@ -66,7 +66,8 @@ const List<String> tabelV3 = <String>[
   'nilai_kewajiban_bulanan',
 ];
 
-/// Isi seluruh 13 tabel dengan data nyata (sebagian lewat repositori asli).
+/// Isi tabel inti (13 tabel skema v3) dengan data nyata (sebagian lewat
+/// repositori asli). Tabel skema v4 ikut ter-ekspor walau kosong.
 Future<void> isiData() async {
   final tagihan = TagihanRepository(db);
   final t = await tagihan.tambah(TagihanCompanion.insert(
@@ -260,18 +261,20 @@ void main() {
       expect(hasil.namaBerkas, 'plo_backup_20260915_0800.json');
       expect(File(hasil.path).existsSync(), isTrue);
       expect(File(hasil.path).lengthSync(), greaterThan(0));
-      expect(hasil.totalBaris, 45,
-          reason: '10+1+1+1+1+24+1+1+1+1+1+1+1 = 45 baris pada 13 tabel');
+      expect(hasil.totalBaris, 51,
+          reason: '45 baris (13 tabel inti) + 6 template perawatan (skema v4)');
 
       final Map<String, dynamic> isi =
           jsonDecode(File(hasil.path).readAsStringSync()) as Map<String, dynamic>;
       expect(isi['format'], 'plo-backup');
-      expect(isi['versiSkema'], 3);
+      expect(isi['versiSkema'], 4);
       expect(isi['versiAplikasi'], versiAplikasiCadangan);
       expect(DateTime.tryParse(isi['dibuatPada'] as String), jamUji);
 
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
-      expect(tabel.length, 13, reason: 'semua tabel Drift ikut ter-ekspor');
+      expect(tabel.length, db.allTables.length,
+          reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
+      expect(tabel.length, 36, reason: '13 tabel v3 + 23 tabel v4 = 36');
       expect(tabel.keys, contains('tagihan'));
       expect(tabel.keys, contains('pengaturan'));
       for (final t in tabelV3) {
@@ -464,7 +467,7 @@ void main() {
 
       final lihat = await cadangan.pratinjau(hasil.path);
       expect(lihat.namaBerkas, hasil.namaBerkas);
-      expect(lihat.versiSkema, 3);
+      expect(lihat.versiSkema, 4);
       expect(lihat.versiAplikasi, versiAplikasiCadangan);
       expect(lihat.dibuatPada, jamUji);
       expect(lihat.diubahBerkasPada, isA<DateTime>());
@@ -585,16 +588,16 @@ void main() {
           label: 'format salah');
     });
 
-    test('versi skema 4 (lebih baru dari aplikasi)', () async {
-      await tolakBerkas('plo_backup_v4.json',
+    test('versi skema 5 (lebih baru dari aplikasi)', () async {
+      await tolakBerkas('plo_backup_v5.json',
           jsonEncode(<String, Object?>{
             'format': 'plo-backup',
-            'versiSkema': 4,
+            'versiSkema': 5,
             'versiAplikasi': '9.9.9',
             'tabel': <String, Object?>{},
           }),
-          <String>['versi 4', 'Perbarui aplikasi', 'tidak diubah'],
-          label: 'versiSkema 4');
+          <String>['versi 5', 'Perbarui aplikasi', 'tidak diubah'],
+          label: 'versiSkema 5');
     });
 
     test('versi skema hilang', () async {
@@ -728,7 +731,7 @@ void main() {
       final tabel = isiPengaman['tabel'] as Map<String, dynamic>;
       expect((tabel['tagihan'] as List<dynamic>), isEmpty);
       expect((tabel['kategori'] as List<dynamic>).length, 10);
-      expect(isiPengaman['versiSkema'], 3);
+      expect(isiPengaman['versiSkema'], 4);
 
       // Daftar berkas: terbaru lebih dahulu.
       expect(daftar.first.diubahPada.isAfter(daftar.last.diubahPada) ||
@@ -769,6 +772,78 @@ void main() {
   // ------------------------------------------------------------------
   // 7. BAHASA (PRD §III-11)
   // ------------------------------------------------------------------
+
+  group('FR-136 cadangan memuat tabel pilar V2 (skema v4)', () {
+    test('data tabel v4 ikut ter-ekspor & pulih utuh', () async {
+      await isiData();
+      // Data pada tabel skema v4 (Pilar Kehidupan).
+      final tujuanId = await db.into(db.tujuan).insert(TujuanCompanion.insert(
+          idTujuan: 'tj_uji',
+          nama: 'Sehat bugar',
+          area: const Value('kesehatan')));
+      await db.into(db.tugas).insert(TugasCompanion.insert(
+          idTugas: 'tg_uji',
+          nama: 'Olahraga pagi',
+          tujuanId: Value(tujuanId),
+          jatuhTempo: Value(DateTime(2026, 9, 16))));
+      final kebiasaanId = await db.into(db.kebiasaan).insert(
+          KebiasaanCompanion.insert(idKebiasaan: 'kb_uji', nama: 'Minum air'));
+      await db.into(db.logKebiasaan).insert(LogKebiasaanCompanion.insert(
+          kebiasaanId: kebiasaanId, tanggal: DateTime(2026, 9, 15)));
+      await db.into(db.catatanAir).insert(CatatanAirCompanion.insert(
+          waktu: DateTime(2026, 9, 15, 7), jumlahMl: const Value(300)));
+
+      final hasil = await cadangan.ekspor();
+
+      final Map<String, dynamic> isi =
+          jsonDecode(File(hasil.path).readAsStringSync()) as Map<String, dynamic>;
+      final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
+      expect(
+          tabel.keys,
+          containsAll(<String>[
+            'tujuan',
+            'proyek',
+            'tugas',
+            'kebiasaan',
+            'log_kebiasaan',
+            'perawatan',
+            'ukuran_tubuh',
+            'tidur',
+            'obat',
+            'catatan_air',
+            'dokumen',
+            'audit_log',
+            'notifikasi_riwayat',
+            'tunda_pengingat',
+            'log_puasa',
+            'log_quran',
+            'log_dzikir',
+            'refleksi_muhasabah',
+          ]),
+          reason: 'seluruh tabel pilar V2 harus ada di berkas cadangan');
+      expect((tabel['tugas'] as List<dynamic>), hasLength(1));
+      expect((tabel['catatan_air'] as List<dynamic>), hasLength(1));
+
+      // HP baru: seluruh tabel dikosongkan, lalu dipulihkan dari berkas.
+      await kosongkanSemua();
+      expect(await db.select(db.tugas).get(), isEmpty);
+
+      final impor = await cadangan.impor(hasil.path, sudahDikonfirmasi: true);
+      expect(impor.berhasil, isTrue, reason: impor.pesan);
+      expect(impor.tabelTidakCocok, isEmpty);
+
+      final tugas = await db.select(db.tugas).get();
+      expect(tugas, hasLength(1));
+      expect(tugas.single.idTugas, 'tg_uji');
+      expect(tugas.single.nama, 'Olahraga pagi');
+      expect(tugas.single.tujuanId, tujuanId);
+      expect(await db.select(db.logKebiasaan).get(), hasLength(1));
+      expect((await db.select(db.catatanAir).get()).single.jumlahMl, 300);
+      expect(await db.select(db.tujuan).get(), hasLength(1));
+      // Template perawatan bawaan juga pulih dari berkas (bukan seed ulang).
+      expect(await db.select(db.perawatan).get(), hasLength(6));
+    });
+  });
 
   group('Bahasa III-11', () {
     test('pesan layanan pada keadaan sulit tidak memakai kata terlarang',
@@ -835,7 +910,7 @@ void main() {
       final Map<String, dynamic> isi =
           jsonDecode(berkas.readAsStringSync()) as Map<String, dynamic>;
       expect(isi['format'], 'plo-backup');
-      expect(isi['versiSkema'], 3);
+      expect(isi['versiSkema'], 4);
       expect((isi['tabel'] as Map<String, dynamic>)['tagihan'], hasLength(1));
 
       await gulirKe(t, find.byKey(const Key('jumlah_baris_tagihan')));
@@ -866,7 +941,7 @@ void main() {
       await ketukNyata(t, kunciBerkas);
       await gulirKe(t, find.byKey(const Key('pratinjau_impor')));
       expect(find.byKey(const Key('pratinjau_impor')), findsOneWidget);
-      expect(find.textContaining('Versi skema: 3'), findsOneWidget);
+      expect(find.textContaining('Versi skema: 4'), findsOneWidget);
       expect(find.textContaining('Dibuat: 15 September 2026'), findsOneWidget);
       expect(find.byKey(const Key('pratinjau_baris_tagihan')), findsOneWidget);
       expect(find.text('tagihan: 1 baris'), findsOneWidget);
@@ -952,17 +1027,21 @@ void main() {
       expect(namaBerkas, hasLength(1));
 
       final Finder kunciBerkas = find.byKey(Key('impor_berkas_${namaBerkas.first}'));
+      final Set<String> kumpulanAwal = <String>{...teksTampil(t)};
       await gulirKe(t, kunciBerkas);
       await ketukNyata(t, kunciBerkas);
 
-      final Set<String> kumpulan = <String>{...teksTampil(t)};
+      // Kumpulkan teks mulai dari posisi paling atas (bagian atas layar bisa
+      // terlewat kalau langsung menggulir ke bawah). Catatan: daftar tabel di
+      // layar ini bertambah setiap skema baru, jadi jumlah gulir dibuat lega.
+      final Set<String> kumpulan = <String>{...kumpulanAwal, ...teksTampil(t)};
       for (var i = 0; i < 6; i++) {
         await t.drag(find.byType(Scrollable).first, const Offset(0, -220));
         await t.pump(const Duration(milliseconds: 120));
         kumpulan.addAll(teksTampil(t));
       }
-      for (var i = 0; i < 8; i++) {
-        await t.drag(find.byType(Scrollable).first, const Offset(0, 220));
+      for (var i = 0; i < 14; i++) {
+        await t.drag(find.byType(Scrollable).first, const Offset(0, 400));
         await t.pump(const Duration(milliseconds: 120));
         kumpulan.addAll(teksTampil(t));
       }

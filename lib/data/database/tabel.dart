@@ -316,3 +316,448 @@ class NilaiKewajibanBulanan extends Table {
 
   // Unik (kewajiban_id, bulan) & unik (idempotensi) lewat indeks SQL.
 }
+
+
+// ---------------------------------------------------------------------------
+// SKEMA v4 — PILAR KEHIDUPAN (V2), ditambahkan Dinda 15 Sep 2026
+// ---------------------------------------------------------------------------
+//
+// Aturan yang dipegang di seluruh blok ini:
+//  1. Tabel BARU saja — tidak ada kolom tabel lama yang diubah, jadi migrasi
+//     v3 -> v4 tidak pernah menyentuh data pengguna.
+//  2. Tidak ada tabel yang menyimpan nilai turunan yang bisa dihitung
+//     (mis. durasi tidur, total air harian) kecuali bila nilainya ditulis
+//     pengguna sendiri dan harus bertahan apa adanya (mis. `durasiMenit` tidur
+//     disimpan karena jam tidur bisa lintas tengah malam & pengguna boleh
+//     mengoreksi hasil hitungan).
+//  3. Nilai uang selalu bilangan bulat dalam satuan terkecil (sen).
+//  4. Nilai kesehatan memakai `real` supaya berat 72,5 kg tidak dibulatkan.
+//  5. Setiap kolom yang dipakai untuk "satu baris per kunci bisnis" diberi
+//     indeks UNIK lewat SQL di `database.dart` (gaya PB-05/PB-07), bukan
+//     anotasi tabel, supaya jaminan tetap ada walau `database.g.dart`
+//     diregenerasi.
+
+// =========================== AKSI & TUJUAN (FR-78/79/80/83) ================
+
+/// Tujuan (FR-78) — puncak rantai Goal -> Project -> Task.
+///
+/// `targetAngka` + `satuan` dipakai untuk tujuan terukur (mis. 12 buku/bulan);
+/// `targetTeks` untuk tujuan yang tidak berupa angka. Keduanya boleh kosong:
+/// aplikasi tidak memaksa pengguna mengukur hidupnya dengan angka.
+class Tujuan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
+  TextColumn get idTujuan => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  /// Area hidup: pribadi / keluarga / kerja / keuangan / ibadah / kesehatan.
+  TextColumn get area => text().withDefault(const Constant('pribadi'))();
+  TextColumn get targetTeks => text().nullable()();
+  IntColumn get targetAngka => integer().nullable()();
+  TextColumn get satuan => text().nullable()();
+  DateTimeColumn get tanggalTarget => dateTime().nullable()();
+  /// aktif / tercapai / dijeda / arsip.
+  TextColumn get status => text().withDefault(const Constant('aktif'))();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get selesaiPada => dateTime().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_tujuan) lewat indeks SQL di `database.dart`.
+}
+
+/// Proyek (FR-78) — kumpulan tugas di bawah satu tujuan.
+///
+/// `tujuanId` boleh null: proyek boleh berdiri sendiri. Menghapus tujuan tidak
+/// menghapus proyek (kolom ini disetel null oleh repository), supaya pekerjaan
+/// pengguna tidak hilang karena satu salah ketuk.
+class Proyek extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get idProyek => text()();
+  IntColumn get tujuanId => integer().nullable().references(Tujuan, #id)();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get catatan => text().nullable()();
+  /// aktif / selesai / dijeda / arsip.
+  TextColumn get status => text().withDefault(const Constant('aktif'))();
+  DateTimeColumn get tenggat => dateTime().nullable()();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  DateTimeColumn get selesaiPada => dateTime().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_proyek) lewat indeks SQL di `database.dart`.
+}
+
+/// Tugas (FR-78/79) — satuan pekerjaan terkecil; boleh menempel ke proyek,
+/// langsung ke tujuan, atau berdiri sendiri (tugas cepat FR-79).
+class Tugas extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get idTugas => text()();
+  IntColumn get tujuanId => integer().nullable().references(Tujuan, #id)();
+  IntColumn get proyekId => integer().nullable().references(Proyek, #id)();
+  TextColumn get nama => text().withLength(min: 1, max: 200)();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get jatuhTempo => dateTime().nullable()();
+  /// Jam pengingat "HH:mm"; null = tanpa jam (pengingat memakai jam bawaan).
+  TextColumn get jamPengingat => text().nullable()();
+  /// sekali / harian / mingguan / bulanan / kustom_hari (memakai mesin
+  /// tagihan agar tidak ada dua mesin pengulangan di aplikasi).
+  TextColumn get frekuensi => text().withDefault(const Constant('sekali'))();
+  IntColumn get kustomHariN => integer().nullable()();
+  TextColumn get prioritas => text().withDefault(const Constant('biasa'))();
+  /// Lead days notifikasi, teks "1,0". "0" = pada hari itu.
+  TextColumn get pengingatLeadHari => text().withDefault(const Constant('1'))();
+  TextColumn get kanalPengingat => text().withDefault(const Constant('push'))();
+  BoolColumn get selesai => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get selesaiPada => dateTime().nullable()();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_tugas) lewat indeks SQL di `database.dart`.
+}
+
+/// Kebiasaan (FR-80) — maksimal 5 yang dipromosikan ke Today (dijaga di
+/// lapisan fitur, bukan di basis data, supaya pengguna tidak terkunci).
+class Kebiasaan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get idKebiasaan => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get ikon => text().withDefault(const Constant('repeat'))();
+  TextColumn get warna => text().withDefault(const Constant('#4A90D9'))();
+  /// Target berapa kali per minggu (1–7). Bukan hukuman bila tidak tercapai.
+  IntColumn get targetPerMinggu => integer().withDefault(const Constant(7))();
+  /// true = tampil di Today (maksimal 5 baris, diatur lapisan fitur).
+  BoolColumn get dipromosikan => boolean().withDefault(const Constant(false))();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_kebiasaan) lewat indeks SQL di `database.dart`.
+}
+
+/// Riwayat kebiasaan per hari (FR-80) — satu baris per kebiasaan per tanggal.
+///
+/// `nilai` berupa pecahan (0,0–1,0) supaya kebiasaan "minum 8 gelas" bisa
+/// dicatat setengah jalan tanpa memaksa selesai/belum.
+class LogKebiasaan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get kebiasaanId => integer().references(Kebiasaan, #id)();
+  DateTimeColumn get tanggal => dateTime()();
+  RealColumn get nilai => real().withDefault(const Constant(1))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (kebiasaan_id, tanggal) lewat indeks SQL di `database.dart`.
+}
+
+/// Perawatan berkala (FR-83) — oli, servis AC, pajak, filter, ulang tahun.
+///
+/// `berikutnya` disimpan (bukan selalu dihitung) karena pengguna boleh
+/// menetapkan tanggal yang berbeda dari hasil hitungan interval.
+class Perawatan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  /// kendaraan / rumah / dokumen / keluarga / perangkat / lain.
+  TextColumn get kategori => text().withDefault(const Constant('lain'))();
+  IntColumn get intervalHari => integer().withDefault(const Constant(365))();
+  DateTimeColumn get terakhirDilakukan => dateTime().nullable()();
+  DateTimeColumn get berikutnya => dateTime()();
+  /// Kode template bawaan (mis. `oli_mobil`); null = dibuat pengguna sendiri.
+  TextColumn get templateKode => text().nullable()();
+  /// Lead days notifikasi, teks "7,1".
+  TextColumn get leadHari => text().withDefault(const Constant('7,1'))();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  TextColumn get kanalPengingat => text().withDefault(const Constant('push'))();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+// =========================== KESEHATAN (FR-101/102/103/106/111) ===========
+//
+// Prinsip modul (PRD §7.4): aplikasi MENCATAT & MENUNJUKKAN TREN, tidak
+// mendiagnosis. Tidak ada kolom "status bahaya", tidak ada saran dosis.
+
+/// Satu angka tubuh yang dicatat pengguna (FR-101): berat, tekanan darah,
+/// lingkar perut, gula darah, dst. Satuan disimpan apa adanya.
+class UkuranTubuh extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// berat / sistolik / diastolik / lingkar_perut / gula_darah / suhu / lain.
+  TextColumn get jenis => text()();
+  RealColumn get nilai => real()();
+  TextColumn get satuan => text().withDefault(const Constant('kg'))();
+  DateTimeColumn get tanggal => dateTime()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Aktivitas fisik (FR-102).
+class Aktivitas extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// jalan / lari / sepeda / renang / gym / peregangan / olahraga / rumah.
+  TextColumn get jenis => text()();
+  IntColumn get durasiMenit => integer()();
+  /// Jarak dalam km; boleh kosong untuk aktivitas tanpa jarak.
+  RealColumn get jarakKm => real().nullable()();
+  /// ringan / sedang / berat.
+  TextColumn get intensitas => text().withDefault(const Constant('sedang'))();
+  DateTimeColumn get tanggal => dateTime()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Tidur (FR-103) — satu baris per "malam" (tanggal bangun).
+///
+/// `durasiMenit` disimpan karena dihitung sekali dari jam tidur & jam bangun
+/// (termasuk lintas tengah malam) lalu boleh dikoreksi pengguna.
+class Tidur extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Tanggal (hari bangun) — kunci "satu catatan per malam".
+  DateTimeColumn get tanggal => dateTime()();
+  DateTimeColumn get jamTidur => dateTime()();
+  DateTimeColumn get jamBangun => dateTime()();
+  IntColumn get durasiMenit => integer()();
+  /// Kualitas 1–5 (persepsi pengguna, bukan penilaian aplikasi); null = tidak diisi.
+  IntColumn get kualitas => integer().nullable()();
+  IntColumn get tidurSiangMenit => integer().withDefault(const Constant(0))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (tanggal) lewat indeks SQL di `database.dart`.
+}
+
+/// Obat/vitamin (FR-106). `dosisTeks` diambil apa adanya dari label/kemasan —
+/// aplikasi TIDAK menghitung atau menyarankan dosis.
+class Obat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get dosisTeks => text().nullable()();
+  IntColumn get jumlahPerMinum => integer().withDefault(const Constant(1))();
+  /// tablet / kapsul / ml / tetes / sachet / lain.
+  TextColumn get satuan => text().withDefault(const Constant('tablet'))();
+  DateTimeColumn get mulai => dateTime().nullable()();
+  DateTimeColumn get selesai => dateTime().nullable()();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Jam minum obat (FR-106) — satu baris per jam, mis. 08:00 dan 20:00.
+class JadwalObat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get obatId => integer().references(Obat, #id)();
+  /// "HH:mm".
+  TextColumn get jam => text()();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+}
+
+/// Catatan "sudah diminum" (FR-106) — satu baris per jadwal per waktu rencana.
+class MinumObat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get obatId => integer().references(Obat, #id)();
+  IntColumn get jadwalId => integer().nullable().references(JadwalObat, #id)();
+  DateTimeColumn get waktuRencana => dateTime()();
+  DateTimeColumn get waktuMinum => dateTime().nullable()();
+  /// diminum / ditunda / dilewati. Bukan penilaian: hanya keadaan catatan.
+  TextColumn get status => text().withDefault(const Constant('diminum'))();
+  TextColumn get catatan => text().nullable()();
+
+  // Unik (obat_id, waktu_rencana) lewat indeks SQL di `database.dart`.
+}
+
+/// Pencatat air (FR-111) — satu baris per gelas/botol; total harian dihitung.
+class CatatanAir extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get waktu => dateTime()();
+  IntColumn get jumlahMl => integer().withDefault(const Constant(250))();
+  TextColumn get catatan => text().nullable()();
+}
+
+// =========================== DOKUMEN (FR-128/129) =========================
+
+/// Brankas dokumen (FR-128) + masa berlaku (FR-129).
+///
+/// `berkasNama` = nama berkas DI DALAM folder aplikasi (bukan path penuh),
+/// supaya cadangan/pemulihan di perangkat lain tetap bisa menemukannya.
+class Dokumen extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get idDokumen => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  /// ktp / kk / paspor / sim / stnk / sertifikat / ijazah / kontrak / polis /
+  /// anak / lain.
+  TextColumn get jenis => text().withDefault(const Constant('lain'))();
+  TextColumn get nomor => text().nullable()();
+  /// Nama pemilik dokumen (untuk dokumen anggota keluarga).
+  TextColumn get pemilik => text().nullable()();
+  DateTimeColumn get terbit => dateTime().nullable()();
+  DateTimeColumn get berlakuSampai => dateTime().nullable()();
+  TextColumn get berkasNama => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  /// Lead days berlapis FR-129, teks "90,30,7,1".
+  TextColumn get leadHari => text().withDefault(const Constant('90,30,7,1'))();
+  TextColumn get kanalPengingat => text().withDefault(const Constant('push'))();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  /// Kapan terakhir ditandai "sudah diperpanjang" (jejak, bukan penilaian).
+  DateTimeColumn get diperpanjangPada => dateTime().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_dokumen) lewat indeks SQL di `database.dart`.
+}
+
+// =========================== PLATFORM (FR-136/137/138/139/147/148) ========
+
+/// Audit log lokal (FR-138) — mencatat perubahan angka penting.
+///
+/// Lokal, tanpa telemetri. `nilaiSebelum`/`nilaiSesudah` disimpan sebagai teks
+/// supaya bisa memuat nominal, tanggal, atau status tanpa kolom tambahan.
+class AuditLog extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get waktu => dateTime()();
+  /// tagihan / transaksi / langganan / aset / kewajiban / tugas / kesehatan /
+  /// dokumen / pengaturan / notifikasi / lain.
+  TextColumn get modul => text()();
+  /// buat / ubah / hapus / tandai / tunda / pulihkan / ekspor / impor.
+  TextColumn get aksi => text()();
+  TextColumn get entitas => text().nullable()();
+  TextColumn get entitasId => text().nullable()();
+  TextColumn get nilaiSebelum => text().nullable()();
+  TextColumn get nilaiSesudah => text().nullable()();
+  /// Kalimat siap tampil, mis. "Tagihan #18 ditandai lunas".
+  TextColumn get ringkas => text()();
+  /// sumber: layar / pengingat / kerja_latar / impor.
+  TextColumn get sumber => text().withDefault(const Constant('layar'))();
+}
+
+/// Riwayat notifikasi (FR-147) — untuk Notification Center.
+class NotifikasiRiwayat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get pengingatId => integer().nullable()();
+  DateTimeColumn get waktu => dateTime()();
+  /// mendesak / penting / biasa.
+  TextColumn get tingkat => text().withDefault(const Constant('biasa'))();
+  TextColumn get kanal => text().withDefault(const Constant('push'))();
+  TextColumn get judul => text()();
+  TextColumn get isi => text()();
+  /// baru / dibaca / selesai / ditunda.
+  TextColumn get status => text().withDefault(const Constant('baru'))();
+  DateTimeColumn get selesaiPada => dateTime().nullable()();
+  /// Modul asal: tagihan / sholat / briefing / tugas / obat / dokumen / lain.
+  TextColumn get sumber => text().withDefault(const Constant('lain'))();
+}
+
+/// Penundaan pengingat (FR-148).
+///
+/// **Jatuh tempo asli tidak pernah diubah** oleh tabel ini — hanya waktu
+/// pengingat yang ditunda. Satu baris per pengingat (ditunda lagi = diperbarui).
+class TundaPengingat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get pengingatId => integer()();
+  DateTimeColumn get kapan => dateTime()();
+  TextColumn get alasan => text().nullable()();
+  /// Berapa kali pengingat ini sudah ditunda (batas dijaga lapisan fitur).
+  IntColumn get jumlahTunda => integer().withDefault(const Constant(1))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (pengingat_id) lewat indeks SQL di `database.dart`.
+}
+
+// =========================== UANG LANJUTAN (FR-73/74/75/77) ===============
+
+/// Pembayaran kewajiban/utang (FR-74) — memisahkan pokok & bunga.
+class PembayaranKewajiban extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get kewajibanId => integer().references(Kewajiban, #id)();
+  DateTimeColumn get tanggal => dateTime()();
+  IntColumn get jumlahSen => integer()();
+  /// Bagian pokok (mengurangi sisa utang) — boleh 0 bila skema bunga dulu.
+  IntColumn get pokokSen => integer().withDefault(const Constant(0))();
+  IntColumn get bungaSen => integer().withDefault(const Constant(0))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Pengeluaran terencana (FR-73) — uang yang HARUS tersedia sebelum tanggal
+/// tertentu, tetapi belum menjadi transaksi.
+class PengeluaranTerencana extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  IntColumn get jumlahSen => integer()();
+  DateTimeColumn get tanggal => dateTime()();
+  IntColumn get kategoriId => integer().nullable()();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  BoolColumn get sudahTerjadi => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+// =========================== IBADAH LANJUTAN (FR-91/92/93/95/100) =========
+
+/// Pelacakan puasa (FR-92) — satu baris per tanggal per jenis puasa.
+class LogPuasa extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get tanggal => dateTime()();
+  /// ramadan / senin_kamis / ayyamul_bidh / sunnah / qadha / custom.
+  TextColumn get jenis => text()();
+  /// puasa / tidak. "tidak" dicatat apa adanya, tanpa penilaian.
+  TextColumn get status => text().withDefault(const Constant('puasa'))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (tanggal, jenis) lewat indeks SQL di `database.dart`.
+}
+
+/// Pelacakan Quran (FR-93) — baca, dengar, hafal baru, murajaah.
+class LogQuran extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get tanggal => dateTime()();
+  /// baca / dengar / hafal / murajaah.
+  TextColumn get jenis => text()();
+  RealColumn get jumlah => real().withDefault(const Constant(0))();
+  /// halaman / ayat / menit / juz.
+  TextColumn get satuan => text().withDefault(const Constant('halaman'))();
+  /// Surah/ayat bila pengguna mengisi (mis. "Al-Baqarah 1-5").
+  TextColumn get bagian => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Dzikir & doa (FR-95) — penghitung per sesi.
+class LogDzikir extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get tanggal => dateTime()();
+  /// pagi / petang / sebelum_tidur / custom.
+  TextColumn get jenis => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  IntColumn get target => integer().withDefault(const Constant(33))();
+  IntColumn get tercatat => integer().withDefault(const Constant(0))();
+  DateTimeColumn get selesaiPada => dateTime().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Refleksi malam / muhasabah (FR-100) — satu baris per tanggal.
+///
+/// Semua kolom bernilai "sudah/belum saya lakukan hari ini" dari sudut pandang
+/// pengguna, BUKAN penilaian aplikasi. Tidak ada kolom skor.
+class RefleksiMuhasabah extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  DateTimeColumn get tanggal => dateTime()();
+  /// Lima daftar refleksi bawaan PRD; null = tidak diisi (bukan berarti tidak).
+  BoolColumn get sholatTerjaga => boolean().nullable()();
+  BoolColumn get mengingatAllah => boolean().nullable()();
+  BoolColumn get membantuOrang => boolean().nullable()();
+  BoolColumn get menghindariDisesali => boolean().nullable()();
+  BoolColumn get belajar => boolean().nullable()();
+  BoolColumn get bersyukur => boolean().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (tanggal) lewat indeks SQL di `database.dart`.
+}

@@ -4,7 +4,7 @@
 /// ```json
 /// {
 ///   "format": "plo-backup",
-///   "versiSkema": 3,
+///   "versiSkema": 4,
 ///   "versiAplikasi": "1.0.0+1",
 ///   "dibuatPada": "2026-09-15T08:00:00.000",
 ///   "tabel": { "<namaTabel>": [ { "<kolom>": nilai } ] }
@@ -41,7 +41,7 @@ const String formatCadangan = 'plo-backup';
 /// Versi skema database yang dikenal aplikasi ini.
 ///
 /// Samakan dengan `schemaVersion` di `lib/data/database/database.dart`.
-const int versiSkemaAplikasi = 3;
+const int versiSkemaAplikasi = 4;
 
 /// Versi aplikasi yang ditulis ke berkas cadangan.
 ///

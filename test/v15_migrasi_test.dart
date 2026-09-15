@@ -125,9 +125,15 @@ void main() {
     expect(pemasukan.single.bulan, '2026-09');
     expect(pemasukan.single.jumlahSen, 1200000000);
 
-    // 3. Versi skema di database sudah naik ke 3.
+    // 3. Versi skema di database naik ke versi terakhir aplikasi: v2 -> v3 -> v4
+    //    (v4 menambah 23 tabel pilar kehidupan, tanpa mengubah tabel lama).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 3);
+    expect(versi.data.values.first, 4);
+    final tabel = await db
+        .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
+        .get();
+    final nama = tabel.map((r) => r.data['name'] as String).toSet();
+    expect(nama, containsAll(<String>['tujuan', 'tugas', 'audit_log']));
   });
 
   test('indeks unik lama & baru tetap berlaku setelah migrasi', () async {

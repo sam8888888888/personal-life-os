@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
+import '../../core/utils/waktu.dart';
 import '../repository/template_kategori_transaksi.dart';
 import 'tabel.dart';
 
@@ -25,13 +26,43 @@ part 'database.g.dart';
   Kewajiban,
   NilaiAsetBulanan,
   NilaiKewajibanBulanan,
+  // Skema v4 — Pilar Kehidupan (V2), ditambahkan Dinda 15 Sep 2026.
+  // Aksi & tujuan (FR-78/79/80/83)
+  Tujuan,
+  Proyek,
+  Tugas,
+  Kebiasaan,
+  LogKebiasaan,
+  Perawatan,
+  // Kesehatan (FR-101/102/103/106/111)
+  UkuranTubuh,
+  Aktivitas,
+  Tidur,
+  Obat,
+  JadwalObat,
+  MinumObat,
+  CatatanAir,
+  // Dokumen (FR-128/129)
+  Dokumen,
+  // Platform (FR-136/137/138/139/147/148)
+  AuditLog,
+  NotifikasiRiwayat,
+  TundaPengingat,
+  // Uang lanjutan (FR-73/74/75/77)
+  PembayaranKewajiban,
+  PengeluaranTerencana,
+  // Ibadah lanjutan (FR-91/92/93/95/100)
+  LogPuasa,
+  LogQuran,
+  LogDzikir,
+  RefleksiMuhasabah,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -39,8 +70,10 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
           await _pasangIndeksUnik();
           await _pasangIndeksUnikV3();
+          await _pasangIndeksUnikV4();
           await _seedKategori();
           await seedKategoriTransaksi();
+          await _seedPerawatanV4();
         },
         onUpgrade: (m, dari, ke) async {
           if (dari < 2) {
@@ -70,14 +103,22 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             debugPrint('migrasi v3 selesai (tabel kas & kekayaan dibuat, '
                 'kategori transaksi: ${jml.length})');
           }
+          if (dari < 4) {
+            // v4: 23 tabel BARU untuk V2 (pilar kehidupan). Tidak ada kolom
+            // tabel lama yang diubah, jadi data pengguna tidak tersentuh.
+            await _buatTabelV4(m);
+            await _pasangIndeksUnikV4();
+            await _seedPerawatanV4();
+            debugPrint('migrasi v4 selesai (tabel pilar kehidupan dibuat)');
+          }
         },
       );
 
   /// PB-05 & PB-07: indeks unik penjaga integritas.
   ///
   /// Dipasang lewat SQL (bukan anotasi tabel) karena `database.g.dart` dilacak
-  /// git dan proyek ini belum memakai build_runner — dengan cara ini jaminan
-  /// tetap berlaku tanpa regenerasi kode.
+  /// git: build_runner dipakai untuk membuat tabel, tetapi jaminan unik sengaja
+  /// TIDAK bergantung pada hasil regenerasi (aturan "never-regenerate" PB-05/PB-07).
   Future<void> _pasangIndeksUnik() async {
     await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_riwayat_periode '
         'ON riwayat_pembayaran(tagihan_id, periode_jatuh_tempo)');
@@ -191,6 +232,133 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
         ),
         mode: InsertMode.insertOrIgnore,
       );
+    }
+  }
+
+  /// Skema v4: 23 tabel baru pilar kehidupan (V2).
+  Future<void> _buatTabelV4(Migrator m) async {
+    await m.createTable(tujuan);
+    await m.createTable(proyek);
+    await m.createTable(tugas);
+    await m.createTable(kebiasaan);
+    await m.createTable(logKebiasaan);
+    await m.createTable(perawatan);
+    await m.createTable(ukuranTubuh);
+    await m.createTable(aktivitas);
+    await m.createTable(tidur);
+    await m.createTable(obat);
+    await m.createTable(jadwalObat);
+    await m.createTable(minumObat);
+    await m.createTable(catatanAir);
+    await m.createTable(dokumen);
+    await m.createTable(auditLog);
+    await m.createTable(notifikasiRiwayat);
+    await m.createTable(tundaPengingat);
+    await m.createTable(pembayaranKewajiban);
+    await m.createTable(pengeluaranTerencana);
+    await m.createTable(logPuasa);
+    await m.createTable(logQuran);
+    await m.createTable(logDzikir);
+    await m.createTable(refleksiMuhasabah);
+  }
+
+  /// Skema v4: indeks unik & indeks pencarian.
+  ///
+  /// Gaya sama dengan v3 (SQL, bukan anotasi tabel) supaya jaminan tetap ada
+  /// walau `database.g.dart` diregenerasi. Indeks unik pada kolom nullable
+  /// tetap mengizinkan banyak NULL di SQLite (mis. tugas tanpa proyek).
+  Future<void> _pasangIndeksUnikV4() async {
+    // Aksi & tujuan
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_tujuan_id '
+        'ON tujuan(id_tujuan)');
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_proyek_id '
+        'ON proyek(id_proyek)');
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_tugas_id '
+        'ON tugas(id_tugas)');
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_kebiasaan_id '
+        'ON kebiasaan(id_kebiasaan)');
+    await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_log_kebiasaan_hari '
+        'ON log_kebiasaan(kebiasaan_id, tanggal)');
+    await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_tugas_jatuh_tempo ON tugas(jatuh_tempo)');
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_perawatan_berikutnya '
+        'ON perawatan(berikutnya)');
+    // Kesehatan
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_ukuran_jenis_tanggal '
+        'ON ukuran_tubuh(jenis, tanggal)');
+    await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_aktivitas_tanggal ON aktivitas(tanggal)');
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_tidur_tanggal '
+        'ON tidur(tanggal)');
+    await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_minum_obat_rencana '
+        'ON minum_obat(obat_id, waktu_rencana)');
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_catatan_air_waktu '
+        'ON catatan_air(waktu)');
+    // Dokumen
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_dokumen_id '
+        'ON dokumen(id_dokumen)');
+    await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_dokumen_berlaku ON dokumen(berlaku_sampai)');
+    // Platform
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_audit_waktu '
+        'ON audit_log(waktu)');
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_notif_riwayat_waktu '
+        'ON notifikasi_riwayat(waktu)');
+    await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_notif_riwayat_status ON notifikasi_riwayat(status)');
+    await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_tunda_pengingat_id '
+        'ON tunda_pengingat(pengingat_id)');
+    // Uang lanjutan
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_bayar_kewajiban '
+        'ON pembayaran_kewajiban(kewajiban_id, tanggal)');
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_rencana_tanggal '
+        'ON pengeluaran_terencana(tanggal)');
+    // Ibadah lanjutan
+    await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_log_puasa_hari_jenis '
+        'ON log_puasa(tanggal, jenis)');
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_log_quran_tanggal '
+        'ON log_quran(tanggal)');
+    await customStatement('CREATE INDEX IF NOT EXISTS idx_log_dzikir_tanggal '
+        'ON log_dzikir(tanggal)');
+    await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_refleksi_tanggal '
+        'ON refleksi_muhasabah(tanggal)');
+  }
+
+  /// Template perawatan berkala bawaan (FR-83).
+  ///
+  /// Hanya diisi bila tabel masih KOSONG: pengguna yang sudah menyusun daftar
+  /// perawatannya sendiri tidak boleh mendapat tambahan tak diminta saat
+  /// pembaruan aplikasi. Tanggal `berikutnya` = hari ini + interval, sehingga
+  /// tidak ada pengingat yang langsung berbunyi pada hari pemasangan.
+  Future<void> _seedPerawatanV4() async {
+    final ada = await (selectOnly(perawatan)..addColumns([perawatan.id])).get();
+    if (ada.isNotEmpty) return;
+    final hariIni = waktuSekarang();
+    final awalHari = DateTime(hariIni.year, hariIni.month, hariIni.day);
+    // (templateKode, nama, kategori, intervalHari)
+    const template = [
+      ('oli_mesin', 'Servis & ganti oli kendaraan', 'kendaraan', 180),
+      ('servis_ac', 'Servis AC', 'rumah', 180),
+      ('filter_air', 'Ganti filter air', 'rumah', 90),
+      ('pajak_kendaraan', 'Bayar pajak kendaraan', 'dokumen', 365),
+      ('cadangan_data', 'Periksa cadangan data', 'perangkat', 30),
+      ('periksa_gigi', 'Periksa gigi', 'keluarga', 180),
+    ];
+    for (final (i, t) in template.indexed) {
+      await into(perawatan).insert(PerawatanCompanion.insert(
+        nama: t.$2,
+        kategori: Value(t.$3),
+        intervalHari: Value(t.$4),
+        berikutnya: awalHari.add(Duration(days: t.$4)),
+        templateKode: Value(t.$1),
+        leadHari: const Value('7,1'),
+        urutan: Value(i),
+      ));
     }
   }
 
