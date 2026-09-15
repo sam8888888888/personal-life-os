@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/notifikasi/jejak.dart';
 import '../../core/notifikasi/layanan_notifikasi.dart';
@@ -114,6 +115,11 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
         _panduan(),
         const SizedBox(height: 12),
         _diagnostik(),
+        const SizedBox(height: 12),
+        // FR-147: pintu masuk ke Pusat Notifikasi (riwayat, tandai dibaca,
+        // tandai selesai, tunda). Ditaruh di dasar daftar supaya tata letak
+        // layar lama tidak bergeser (uji lama & tangkapan layar tetap sama).
+        _pintuPusatNotifikasi(),
         const SizedBox(height: 24),
       ],
     );
@@ -169,6 +175,20 @@ class _PengingatScreenState extends ConsumerState<PengingatScreen> {
             Expanded(child: Text(label)),
             Text(ok ? 'Aktif' : 'Belum', style: Theme.of(context).textTheme.bodySmall),
           ],
+        ),
+      );
+
+  /// FR-147: pintu masuk ke Pusat Notifikasi (riwayat, tandai dibaca/selesai,
+  /// tunda). Diletakkan di dasar daftar agar tidak menggeser tata letak lama.
+  Widget _pintuPusatNotifikasi() => Card(
+        child: ListTile(
+          key: const Key('buka_pusat_notifikasi'),
+          leading: const Icon(Icons.notifications_none),
+          title: const Text('Pusat notifikasi'),
+          subtitle: const Text(
+              'Riwayat pengingat: tandai dibaca, tandai selesai, atau tunda.'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => context.push('/notifikasi'),
         ),
       );
 

@@ -302,8 +302,10 @@ void main() {
       expect(find.text('Ringkasan pagi'), findsOneWidget);
       expect(find.text('Pengingat & Izin'), findsOneWidget);
       expect(find.text('Pengaturan'), findsOneWidget);
-      await gulirKe(t, find.textContaining('versi 0.5.0'));
-      expect(find.textContaining('versi 0.5.0'), findsOneWidget);
+      await gulirKe(t, find.textContaining('versi 0.6.0'));
+      expect(find.textContaining('versi 0.6.0'), findsOneWidget);
+      expect(find.byKey(const Key('buka_cari')), findsOneWidget);
+      expect(find.byKey(const Key('buka_kesehatan')), findsOneWidget);
       await tutup(t);
     });
 

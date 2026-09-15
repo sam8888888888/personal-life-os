@@ -18,13 +18,31 @@ import 'features/hari_ini/kerja_screen.dart';
 import 'features/hari_ini/lainnya_screen.dart';
 import 'features/ibadah/jadwal_sholat_screen.dart';
 import 'features/ibadah/kalender_hijriah_screen.dart';
+import 'features/ibadah/dzikir_screen.dart';
+import 'features/ibadah/muhasabah_screen.dart';
 import 'features/ibadah/pelacakan_sholat_screen.dart';
+import 'features/ibadah/puasa_screen.dart';
+import 'features/ibadah/quran_screen.dart';
+import 'features/ibadah/ramadan_screen.dart';
 import 'features/ibadah/pengingat_ibadah_screen.dart';
 import 'features/ibadah/pengaturan_ibadah.dart';
 import 'features/ibadah/rekap_sholat_screen.dart';
+import 'features/aksi/aksi_hub_screen.dart';
+import 'features/aksi/kebiasaan_screen.dart';
+import 'features/aksi/perawatan_screen.dart';
+import 'features/aksi/tugas_screen.dart';
+import 'features/aksi/tujuan_screen.dart';
+import 'features/cari/pencarian_screen.dart';
 import 'features/kalender/kalender_screen.dart';
+import 'features/kesehatan/aktivitas_screen.dart';
+import 'features/kesehatan/air_screen.dart';
+import 'features/kesehatan/kesehatan_hub_screen.dart';
+import 'features/kesehatan/obat_screen.dart';
+import 'features/kesehatan/tidur_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
+import 'features/platform/audit_log_screen.dart';
+import 'features/platform/pusat_notifikasi_screen.dart';
 import 'features/pengaturan/backup_screen.dart';
 import 'features/pengaturan/pengaturan_screen.dart';
 import 'features/ringkasan/ringkasan_screen.dart';
@@ -81,6 +99,15 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/cadangan',
       builder: (c, s) => const BackupScreen(),
     ),
+    // Platform V2: catatan aktivitas (FR-138) & pusat notifikasi (FR-147/148).
+    GoRoute(
+      path: '/audit',
+      builder: (c, s) => const AuditLogScreen(),
+    ),
+    GoRoute(
+      path: '/notifikasi',
+      builder: (c, s) => const PusatNotifikasiScreen(),
+    ),
     GoRoute(
       path: '/briefing',
       builder: (c, s) => const BriefingPagiScreen(),
@@ -111,6 +138,27 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/ibadah/rekap',
       builder: (c, s) => const RekapSholatScreen(),
     ),
+    // Modul ibadah lanjutan V2 (FR-91/92/93/95/100).
+    GoRoute(
+      path: '/ibadah/ramadan',
+      builder: (c, s) => const RamadanScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/puasa',
+      builder: (c, s) => const PuasaScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/quran',
+      builder: (c, s) => const QuranScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/dzikir',
+      builder: (c, s) => const DzikirScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/muhasabah',
+      builder: (c, s) => const MuhasabahScreen(),
+    ),
     GoRoute(
       path: '/ibadah/pengingat',
       builder: (c, s) => Consumer(builder: (c, ref, _) {
@@ -140,6 +188,47 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/laporan/beban-tagihan',
       builder: (c, s) => const BebanTagihanScreen(),
+    ),
+    // Modul aksi & tujuan V2 (FR-78/79/80/83).
+    GoRoute(
+      path: '/aksi',
+      builder: (c, s) => const AksiHubScreen(),
+      routes: [
+        GoRoute(path: 'tujuan', builder: (c, s) => const TujuanScreen()),
+        GoRoute(path: 'tugas', builder: (c, s) => const TugasScreen()),
+        GoRoute(
+            path: 'kebiasaan', builder: (c, s) => const KebiasaanScreen()),
+        GoRoute(
+            path: 'perawatan', builder: (c, s) => const PerawatanScreen()),
+      ],
+    ),
+    // FR-139 — pencarian satu pintu lintas modul.
+    GoRoute(
+      path: '/cari',
+      builder: (c, s) => const PencarianScreen(),
+    ),
+    // Modul kesehatan V2 (FR-101/102/103/106/111).
+    GoRoute(
+      path: '/kesehatan',
+      builder: (c, s) => const KesehatanHubScreen(),
+      routes: [
+        GoRoute(
+          path: 'aktivitas',
+          builder: (c, s) => const AktivitasScreen(),
+        ),
+        GoRoute(
+          path: 'tidur',
+          builder: (c, s) => const TidurScreen(),
+        ),
+        GoRoute(
+          path: 'obat',
+          builder: (c, s) => const ObatScreen(),
+        ),
+        GoRoute(
+          path: 'air',
+          builder: (c, s) => const AirScreen(),
+        ),
+      ],
     ),
     GoRoute(
       path: '/ubah/:id',
@@ -184,7 +273,17 @@ class KerangkaNavigasi extends StatelessWidget {
     1: ['/uang', '/ringkasan', '/tagihan', '/kalender', '/ubah'],
     2: ['/kerja'],
     3: ['/ibadah'],
-    4: ['/lainnya', '/pengaturan', '/pengingat', '/cadangan'],
+    4: [
+      '/lainnya',
+      '/pengaturan',
+      '/pengingat',
+      '/cadangan',
+      '/audit',
+      '/notifikasi',
+      '/cari',
+      '/aksi',
+      '/kesehatan',
+    ],
   };
 
   int _indeks(BuildContext context) {
