@@ -13,6 +13,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:personal_life_os/core/utils/waktu.dart';
 
 import '../../core/ibadah/kalender_hijriah.dart';
 import '../../core/ibadah/kota_indonesia.dart';
@@ -63,7 +64,7 @@ class _StatePelacakanSholat extends State<PelacakanSholatScreen> {
   /// null = catatan hari ini masih dibaca.
   CatatanSholat? _catatan;
 
-  DateTime get _sekarang => (widget.jamSekarang ?? DateTime.now)();
+  DateTime get _sekarang => (widget.jamSekarang ?? waktuSekarang)();
 
   PenyimpananLogSholat get _log => widget.penyimpananLog ?? PenyimpananLogSholat();
 

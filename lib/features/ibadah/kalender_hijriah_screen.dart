@@ -5,6 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:personal_life_os/core/utils/waktu.dart';
 
 import '../../core/ibadah/kalender_hijriah.dart';
 import '../../core/ibadah/model_sholat.dart';
@@ -33,7 +34,7 @@ class _StateKalenderHijriah extends State<KalenderHijriahScreen> {
   late int _tahun;
   late int _bulan;
 
-  DateTime get _sekarang => (widget.jamSekarang ?? DateTime.now)();
+  DateTime get _sekarang => (widget.jamSekarang ?? waktuSekarang)();
 
   /// Tanggal sipil menurut jam perangkat (BUKAN UTC): kalender dipakai untuk
   /// "hari ini" pengguna, jadi jam 06.00 WIB harus tetap terbaca tanggal yang

@@ -6,6 +6,7 @@
 library;
 
 import '../../core/ibadah/model_log_sholat.dart';
+import '../../core/utils/waktu.dart';
 import '../../core/ibadah/penyimpanan_log_sholat.dart';
 
 Future<int?> bacaJumlahSholatHariIni({
@@ -14,7 +15,7 @@ Future<int?> bacaJumlahSholatHariIni({
 }) async {
   try {
     final simpan = penyimpanan ?? PenyimpananLogSholat();
-    final sekarang = jamSekarang?.call() ?? DateTime.now();
+    final sekarang = jamSekarang?.call() ?? waktuSekarang();
     final catatan = await simpan.ambil(tanggalKunci(sekarang));
     // 0 catatan diperlakukan sama dengan "belum ada catatan": tidak memberi
     // kesan penilaian (III-11).

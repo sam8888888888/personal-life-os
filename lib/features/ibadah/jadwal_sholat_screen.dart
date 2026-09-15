@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:personal_life_os/core/utils/waktu.dart';
 
 import '../../core/ibadah/kalender_hijriah.dart';
 import '../../core/ibadah/kota_indonesia.dart';
@@ -48,7 +49,7 @@ class _StateJadwalSholat extends State<JadwalSholatScreen> {
   late List<JadwalSholatHarian> _rentang;
   DateTime? _tersimpan;
 
-  DateTime get _sekarang => (widget.jamSekarang ?? DateTime.now)();
+  DateTime get _sekarang => (widget.jamSekarang ?? waktuSekarang)();
 
   @override
   void initState() {

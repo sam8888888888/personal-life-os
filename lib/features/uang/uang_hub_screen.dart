@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:personal_life_os/core/utils/waktu.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -26,7 +27,7 @@ class UangHubScreen extends ConsumerStatefulWidget {
 }
 
 class _UangHubScreenState extends ConsumerState<UangHubScreen> {
-  DateTime get _sekarang => widget.jamSekarang?.call() ?? DateTime.now();
+  DateTime get _sekarang => widget.jamSekarang?.call() ?? waktuSekarang();
 
   @override
   Widget build(BuildContext context) {
