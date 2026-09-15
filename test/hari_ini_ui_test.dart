@@ -277,11 +277,13 @@ void main() {
       await tutup(t);
     });
 
-    testWidgets('Ibadah hub: pintu jadwal, pelacakan, kalender + catatan jujur',
+    testWidgets(
+        'Ibadah hub: pintu jadwal, pelacakan, riwayat, kalender + catatan jujur',
         (t) async {
       await tampilkan(t, const IbadahHubScreen());
       expect(find.text('Jadwal sholat'), findsOneWidget);
       expect(find.text('Pelacakan 5 waktu'), findsOneWidget);
+      expect(find.text('Riwayat & konsistensi'), findsOneWidget);
       expect(find.text('Kalender Hijriah'), findsOneWidget);
       await gulirKe(t, find.textContaining('bukan jadwal resmi'));
       expect(find.textContaining('bukan jadwal resmi'), findsOneWidget);
@@ -445,6 +447,37 @@ void main() {
       // layar FR-88 benar-benar terbuka lewat tab Ibadah.
       expect(find.text('Pelacakan Sholat'), findsOneWidget);
       expect(find.text('Jadwal sholat'), findsNothing); // sudah pindah layar
+      await tutup(t);
+    });
+
+    testWidgets('dari tab Ibadah bisa membuka riwayat rekap (FR-89)',
+        (t) async {
+      await bukaRouter(t, awal: '/ibadah');
+      await t.tap(find.text('Riwayat & konsistensi'));
+      await t.pump();
+      for (var i = 0; i < 55; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      // Layar FR-89 terbuka lewat tab Ibadah. Isi angka bergantung berkas
+      // catatan di perangkat, jadi yang dipastikan di sini judul + kalimat
+      // netralnya (bahasa "tercatat", bukan penilaian).
+      expect(find.text('Riwayat sholat'), findsOneWidget);
+      expect(find.textContaining('bukan berarti tidak dikerjakan'),
+          findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('rute /ibadah/rekap membuka layar riwayat (FR-89)', (t) async {
+      await bukaRouter(t, awal: '/ibadah/rekap');
+      // Tanpa penyimpanan yang disuntik, berkas catatan tidak bisa dibaca di
+      // lingkungan uji; layar harus tetap tenang (tidak berputar selamanya)
+      // dan menampilkan kalimat jujur.
+      for (var i = 0; i < 55; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Riwayat sholat'), findsOneWidget);
+      expect(find.byKey(const Key('pilih_7')), findsOneWidget);
+      expect(find.byKey(const Key('pilih_30')), findsOneWidget);
       await tutup(t);
     });
 

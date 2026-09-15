@@ -36,6 +36,14 @@ class IbadahHubScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.insights_outlined),
+                  title: const Text('Riwayat & konsistensi'),
+                  subtitle: const Text('Rekap 7/30 hari, memakai kata "tercatat"'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ibadah/rekap'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.calendar_month_outlined),
                   title: const Text('Kalender Hijriah'),
                   subtitle: const Text('Acuan Umm al-Qura atau FCNA · koreksi hari'),

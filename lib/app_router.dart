@@ -17,6 +17,7 @@ import 'features/hari_ini/lainnya_screen.dart';
 import 'features/ibadah/jadwal_sholat_screen.dart';
 import 'features/ibadah/kalender_hijriah_screen.dart';
 import 'features/ibadah/pelacakan_sholat_screen.dart';
+import 'features/ibadah/rekap_sholat_screen.dart';
 import 'features/kalender/kalender_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
 import 'features/pengaturan/pengaturan_screen.dart';
@@ -80,6 +81,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/ibadah/pelacakan',
       builder: (c, s) => const PelacakanSholatScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/rekap',
+      builder: (c, s) => const RekapSholatScreen(),
     ),
     // Modul uang V1.5 (FR-68/71/72/76) — layar penuh di atas kerangka tab.
     GoRoute(

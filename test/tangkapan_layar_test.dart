@@ -23,6 +23,7 @@ import 'package:personal_life_os/core/notifikasi/layanan_notifikasi.dart';
 import 'package:personal_life_os/core/notifikasi/model_pengingat.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
 import 'package:personal_life_os/core/ibadah/penyimpanan_jadwal.dart';
+import 'package:personal_life_os/features/ibadah/rekap_sholat_screen.dart';
 import 'package:personal_life_os/core/ibadah/penyimpanan_log_sholat.dart';
 import 'package:personal_life_os/core/theme/app_tema.dart';
 import 'package:personal_life_os/data/database/database.dart';
@@ -447,6 +448,60 @@ void main() {
     await isiUangDemo();
     await potret(t, 'kekayaan', '/uang/kekayaan', prefiks: 'f6');
   }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar rekap sholat',
+      (t) => potretRekap(t, 'rekap_sholat'),
+      skip: !_fontTersedia);
+}
+
+/// Tangkapan layar FR-89. Berkas log ditulis ke folder sementara (IO sinkron),
+/// lalu layar dibangun langsung dengan jam tetap supaya hasilnya stabil.
+Future<void> potretRekap(WidgetTester tester, String nama) async {
+  final Directory dir = Directory.systemTemp.createTempSync('potret_rekap_');
+  File('${dir.path}${Platform.pathSeparator}log_sholat.json')
+      .writeAsStringSync(jsonEncode(<String, Object>{
+    'versi': 1,
+    'diubah': '2026-09-07T00:00:00.000Z',
+    'hari': <String, Object>{
+      '2026-09-01': <String>['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'],
+      '2026-09-02': <String>['subuh', 'dzuhur'],
+      '2026-09-03': <String>['subuh', 'maghrib', 'isya'],
+      '2026-09-04': <String>[],
+      '2026-09-05': <String>['subuh'],
+      '2026-09-06': <String>['subuh', 'ashar'],
+      '2026-09-07': <String>['subuh', 'dzuhur', 'ashar', 'maghrib'],
+    },
+  }));
+
+  await tester.binding.setSurfaceSize(const Size(420, 900));
+  await tester.pumpWidget(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: AppTema.terang().copyWith(
+      textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Roboto'),
+    ),
+    locale: const Locale('id', 'ID'),
+    supportedLocales: const <Locale>[Locale('id', 'ID'), Locale('en', 'US')],
+    localizationsDelegates: const <LocalizationsDelegate<Object>>[
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: RekapSholatScreen(
+      penyimpananLog: PenyimpananLogSholat(
+          penentuFolder: () => Future<Directory>.value(dir)),
+      jamSekarang: () => DateTime(2026, 9, 7, 9, 0),
+    ),
+  ));
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 700));
+
+  await expectLater(
+      find.byType(MaterialApp), matchesGoldenFile('goldens/f7_$nama.png'));
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.binding.setSurfaceSize(null);
+  dir.deleteSync(recursive: true);
 }
 
 /// Layanan notifikasi contoh: hasil tetap agar tangkapan layar stabil.

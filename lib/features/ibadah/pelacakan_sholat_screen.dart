@@ -22,6 +22,7 @@ import '../../core/ibadah/model_sholat.dart';
 import '../../core/ibadah/penghitung_sholat.dart';
 import '../../core/ibadah/penyimpanan_jadwal.dart';
 import '../../core/ibadah/penyimpanan_log_sholat.dart';
+import 'rekap_sholat_screen.dart';
 
 class PelacakanSholatScreen extends StatefulWidget {
   const PelacakanSholatScreen({
@@ -186,6 +187,14 @@ class _StatePelacakanSholat extends State<PelacakanSholatScreen> {
                   label: const Text('Kosongkan catatan hari ini'),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              key: const Key('buka_rekap'),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                  builder: (_) => const RekapSholatScreen())),
+              icon: const Icon(Icons.insights_outlined),
+              label: const Text('Lihat riwayat 7 hari'),
             ),
             const SizedBox(height: 12),
             Text('Lima waktu wajib hari ini',
