@@ -40,6 +40,50 @@ class PengaturanRepository {
         );
   }
 
+  /// Baca satu nilai pengaturan (null = belum pernah diisi).
+  ///
+  /// Dipakai saklar & pilihan pengguna yang tidak butuh tabel sendiri, mis.
+  /// "briefing pagi aktif" (FR-63) dan mode pengingat per waktu sholat (FR-87).
+  Future<String?> baca(String kunci) async {
+    final baris = await (db.select(db.pengaturan)
+          ..where((p) => p.kunci.equals(kunci)))
+        .getSingleOrNull();
+    return baris?.nilai;
+  }
+
+  /// Simpan (upsert) satu nilai pengaturan.
+  Future<void> simpan(String kunci, String nilai) async {
+    await db.into(db.pengaturan).insert(
+          PengaturanCompanion.insert(kunci: kunci, nilai: nilai),
+          onConflict: DoUpdate(
+            (_) => PengaturanCompanion(nilai: Value(nilai)),
+            target: [db.pengaturan.kunci],
+          ),
+        );
+  }
+
+  /// Hapus satu pengaturan (kembali ke nilai bawaan aplikasi).
+  Future<void> hapusPengaturan(String kunci) async {
+    await (db.delete(db.pengaturan)..where((p) => p.kunci.equals(kunci))).go();
+  }
+
+  /// Baca teks dengan nilai bawaan bila kosong/tidak ada.
+  Future<String> bacaTeks(String kunci, String bawaan) async {
+    final teks = (await baca(kunci))?.trim() ?? '';
+    return teks.isEmpty ? bawaan : teks;
+  }
+
+  /// Baca angka dengan nilai bawaan bila kosong/tidak sah.
+  Future<int> bacaAngka(String kunci, int bawaan) async =>
+      int.tryParse((await baca(kunci))?.trim() ?? '') ?? bawaan;
+
+  /// Baca saklar: "true"/"1"/"ya" = aktif; kosong = [bawaan]; selain itu mati.
+  Future<bool> bacaSaklar(String kunci, {bool bawaan = false}) async {
+    final teks = (await baca(kunci))?.trim().toLowerCase() ?? '';
+    if (teks.isEmpty) return bawaan;
+    return teks == 'true' || teks == '1' || teks == 'ya';
+  }
+
   /// Isi contoh data untuk demo/uji: 7 template + pemasukan bulan ini.
   Future<int> isiContohData({DateTime? acuan}) async {
     final tgl = acuan ?? DateTime.now();
