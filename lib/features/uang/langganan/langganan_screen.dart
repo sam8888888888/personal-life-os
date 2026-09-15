@@ -13,7 +13,6 @@
 /// menyalahkan pengguna.
 library;
 
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -496,20 +495,9 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
       labelYa: 'Hapus',
     );
     if (yakin != true) return;
-    final db = ref.read(databaseProvider);
-    await db.transaction(() async {
-      // Tagihan tertaut dihidupkan lagi supaya pengingat tidak mati diam-diam
-      // (aturan sama seperti `LanggananRepository.lepasTautan`).
-      final tagihanId = l.tagihanId;
-      if (tagihanId != null) {
-        await (db.update(db.tagihan)..where((t) => t.id.equals(tagihanId)))
-            .write(TagihanCompanion(
-          statusAktif: const Value(true),
-          diubahPada: Value(DateTime.now()),
-        ));
-      }
-      await (db.delete(db.langganan)..where((x) => x.id.equals(l.id))).go();
-    });
+    // Aturan hapus (hidupkan tagihan tertaut, riwayat tetap) ada di repository,
+    // bukan di layar — satu tempat untuk semua pemanggil.
+    await ref.read(repoLanggananProvider).hapus(l.id);
     if (!mounted) return;
     _pesan('Baris langganan "${l.nama}" dihapus.');
   }

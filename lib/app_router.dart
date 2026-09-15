@@ -6,11 +6,13 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'features/hari_ini/baca_catatan_sholat.dart';
 import 'features/hari_ini/briefing_pagi_screen.dart';
 import 'features/hari_ini/hari_ini_screen.dart';
+import 'core/providers/app_providers.dart';
 import 'features/hari_ini/ibadah_hub_screen.dart';
 import 'features/hari_ini/kerja_screen.dart';
 import 'features/hari_ini/lainnya_screen.dart';
@@ -18,6 +20,7 @@ import 'features/ibadah/jadwal_sholat_screen.dart';
 import 'features/ibadah/kalender_hijriah_screen.dart';
 import 'features/ibadah/pelacakan_sholat_screen.dart';
 import 'features/ibadah/pengingat_ibadah_screen.dart';
+import 'features/ibadah/pengaturan_ibadah.dart';
 import 'features/ibadah/rekap_sholat_screen.dart';
 import 'features/kalender/kalender_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
@@ -82,9 +85,15 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/briefing',
       builder: (c, s) => const BriefingPagiScreen(),
     ),
+    // Satu pintu setelan hitungan sholat: kota, metode, madzhab, dan ihtiyati
+    // dibaca/disimpan dari sumber yang sama oleh ketiga layar di bawah.
     GoRoute(
       path: '/ibadah/jadwal-sholat',
-      builder: (c, s) => const JadwalSholatScreen(),
+      builder: (c, s) => Consumer(builder: (c, ref, _) {
+        return JadwalSholatScreen(
+            setelan: PengaturanIbadah.dariRepository(
+                ref.read(pengaturanRepoProvider)));
+      }),
     ),
     GoRoute(
       path: '/ibadah/kalender-hijriah',
@@ -92,7 +101,11 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     ),
     GoRoute(
       path: '/ibadah/pelacakan',
-      builder: (c, s) => const PelacakanSholatScreen(),
+      builder: (c, s) => Consumer(builder: (c, ref, _) {
+        return PelacakanSholatScreen(
+            setelan: PengaturanIbadah.dariRepository(
+                ref.read(pengaturanRepoProvider)));
+      }),
     ),
     GoRoute(
       path: '/ibadah/rekap',
@@ -100,7 +113,11 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     ),
     GoRoute(
       path: '/ibadah/pengingat',
-      builder: (c, s) => const PengingatIbadahScreen(),
+      builder: (c, s) => Consumer(builder: (c, ref, _) {
+        return PengingatIbadahScreen(
+            setelan: PengaturanIbadah.dariRepository(
+                ref.read(pengaturanRepoProvider)));
+      }),
     ),
     // Modul uang V1.5 (FR-68/71/72/76) — layar penuh di atas kerangka tab.
     GoRoute(

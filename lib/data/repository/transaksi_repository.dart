@@ -46,7 +46,9 @@ class TransaksiRepository {
     return (db.select(db.transaksi)
           ..where((t) =>
               t.tanggal.isBiggerOrEqualValue(r.awal) &
-              t.tanggal.isSmallerOrEqualValue(r.akhir))
+              // Batas atas EKSKLUSIF: awal bulan berikutnya. Memakai tengah
+              // malam hari terakhir akan membuang transaksi hari itu.
+              t.tanggal.isSmallerThanValue(r.akhirEksklusif))
           ..orderBy([
             (t) => OrderingTerm.asc(t.tanggal),
             (t) => OrderingTerm.asc(t.id),
@@ -59,7 +61,8 @@ class TransaksiRepository {
     return (db.select(db.transaksi)
           ..where((t) =>
               t.tanggal.isBiggerOrEqualValue(r.awal) &
-              t.tanggal.isSmallerOrEqualValue(r.akhir))
+              // Batas atas EKSKLUSIF (lihat `rentangBulan`).
+              t.tanggal.isSmallerThanValue(r.akhirEksklusif))
           ..orderBy([
             (t) => OrderingTerm.asc(t.tanggal),
             (t) => OrderingTerm.asc(t.id),

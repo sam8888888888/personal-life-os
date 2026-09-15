@@ -95,6 +95,14 @@ void main() {
       expect(await setelan.metode(), MetodeHitungSholat.kemenag);
       expect(await setelan.asharHanafi(), isFalse);
       expect(await setelan.ihtiyatiMenit(), 0);
+      // Koreksi boleh maju (negatif) — layar Jadwal Sholat menawarkan -3..+3.
+      await setelan.simpanIhtiyatiMenit(-2);
+      expect(await setelan.ihtiyatiMenit(), -2);
+      await setelan.simpanIhtiyatiMenit(-9);
+      expect(await setelan.ihtiyatiMenit(), -3, reason: 'dibatasi -3');
+      await setelan.simpanIhtiyatiMenit(9);
+      expect(await setelan.ihtiyatiMenit(), 3, reason: 'dibatasi +3');
+      await setelan.simpanIhtiyatiMenit(0);
       for (final WaktuSholat w in WaktuSholat.wajibSaja) {
         expect(await setelan.mode(w), ModePengingatSholat.tepat);
         expect(await setelan.geser(w), 0);
@@ -110,7 +118,10 @@ void main() {
       await setelan.simpanIhtiyatiMenit(99);
       expect(await setelan.ihtiyatiMenit(), ihtiyatiMaksimal);
       await setelan.simpanIhtiyatiMenit(-4);
-      expect(await setelan.ihtiyatiMenit(), 0);
+      expect(await setelan.ihtiyatiMenit(), ihtiyatiMinimal,
+          reason: 'koreksi boleh maju sampai -3 (satu pintu)');
+      await setelan.simpanIhtiyatiMenit(-99);
+      expect(await setelan.ihtiyatiMenit(), ihtiyatiMinimal);
 
       await setelan.simpanGeser(WaktuSholat.subuh, 999);
       expect(await setelan.geser(WaktuSholat.subuh), geserMaksimal);
@@ -327,7 +338,8 @@ void main() {
       await gulirKe(t, find.byKey(const Key('saklar_sholat')));
       expect(find.byKey(const Key('saklar_sholat')), findsOneWidget);
       // Saklar sholat bawaan mati → rinciannya tidak ditampilkan.
-      expect(find.byKey(const Key('pilih_kota')), findsNothing);
+      expect(find.byKey(const Key('ringkasan_sumber_hitungan')), findsNothing);
+      expect(find.byKey(const Key('buka_jadwal_sholat')), findsNothing);
       final SwitchListTile s = t.widget<SwitchListTile>(
           find.byKey(const Key('saklar_sholat')));
       expect(s.value, isFalse);
@@ -351,9 +363,46 @@ void main() {
       await t.tap(find.byKey(const Key('saklar_sholat')));
       await t.pumpAndSettle();
       expect(await PengaturanIbadah(simpan).pengingatSholatAktif(), isTrue);
-      await gulirKe(t, find.byKey(const Key('pilih_kota')));
-      expect(find.byKey(const Key('pilih_kota')), findsOneWidget);
-      expect(find.byKey(const Key('pilih_metode')), findsOneWidget);
+      // Kota & cara perhitungan TIDAK lagi dipilih di layar ini (satu pintu);
+      // yang tampil hanya ringkasan + pintu menuju layar Jadwal Sholat.
+      await gulirKe(t, find.byKey(const Key('ringkasan_sumber_hitungan')));
+      expect(find.byKey(const Key('ringkasan_sumber_hitungan')), findsOneWidget);
+      expect(find.byKey(const Key('pilih_kota')), findsNothing);
+      expect(find.byKey(const Key('pilih_metode')), findsNothing);
+      expect(find.byKey(const Key('pilih_ihtiyati')), findsNothing);
+      expect(find.byKey(const Key('saklar_hanafi')), findsNothing);
+      await gulirKe(t, find.byKey(const Key('buka_jadwal_sholat')));
+      expect(find.byKey(const Key('buka_jadwal_sholat')), findsOneWidget);
+      await t.binding.setSurfaceSize(null);
+    });
+
+    // Satu pintu: pilihan kota/metode/madzhab/koreksi dimiliki layar Jadwal
+    // Sholat, jadi layar ini hanya MENAMPILKAN nilai tersimpan — dan tidak
+    // menulis apa pun ke kunci itu.
+    testWidgets('ringkasan memakai setelan tersimpan & tidak menulis ulang',
+        (t) async {
+      simpan.isi[kunciPengingatSholat] = 'true';
+      simpan.isi[kunciKotaSholat] = 'Surabaya';
+      simpan.isi[kunciMetodeSholat] = MetodeHitungSholat.mwl.kode;
+      simpan.isi[kunciAsharHanafi] = 'true';
+      simpan.isi[kunciIhtiyatiSholat] = '-2';
+      await bukaLayar(t);
+      await gulirKe(t, find.byKey(const Key('ringkasan_sumber_hitungan')));
+      final Text ringkas = t.widget<Text>(
+          find.byKey(const Key('ringkasan_sumber_hitungan')));
+      expect(ringkas.data, contains('Kota Surabaya'));
+      expect(ringkas.data, contains(MetodeHitungSholat.mwl.label));
+      expect(ringkas.data, contains('madzhab Hanafi'));
+      expect(ringkas.data, contains('-2 menit'));
+      // Pratinjau memakai kota tersimpan (bukan Jakarta bawaan).
+      final Text catatan = t.widget<Text>(find.byKey(const Key('catatan_jadwal')));
+      expect(catatan.data, contains('untuk Surabaya'));
+      // Layar tidak menulis ulang kunci milik layar Jadwal Sholat.
+      expect(simpan.isi[kunciKotaSholat], 'Surabaya');
+      expect(simpan.isi[kunciMetodeSholat], MetodeHitungSholat.mwl.kode);
+      expect(simpan.isi[kunciAsharHanafi], 'true');
+      expect(simpan.isi[kunciIhtiyatiSholat], '-2');
+      expect(await PengaturanIbadah(simpan).ihtiyatiMenit(), -2);
       await t.binding.setSurfaceSize(null);
     });
 

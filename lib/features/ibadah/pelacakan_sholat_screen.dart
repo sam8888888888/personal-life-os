@@ -22,6 +22,7 @@ import '../../core/ibadah/model_sholat.dart';
 import '../../core/ibadah/penghitung_sholat.dart';
 import '../../core/ibadah/penyimpanan_jadwal.dart';
 import '../../core/ibadah/penyimpanan_log_sholat.dart';
+import 'pengaturan_ibadah.dart';
 import 'rekap_sholat_screen.dart';
 
 class PelacakanSholatScreen extends StatefulWidget {
@@ -31,14 +32,19 @@ class PelacakanSholatScreen extends StatefulWidget {
     this.kotaAwal,
     this.penyimpanan,
     this.penyimpananLog,
+    this.setelan,
   });
 
   /// Sumber waktu. Isinya INSTAN sebenarnya (boleh `.toUtc()`), sama seperti
   /// [JadwalSholatScreen]: tanggal sipil dihitung di zona kota pilihan.
   final DateTime Function()? jamSekarang;
 
-  /// Kota awal; null = Jakarta.
+  /// Kota awal; null = kota tersimpan (bila ada), jika tidak Jakarta.
   final KotaSholat? kotaAwal;
+
+  /// Setelan bersama (satu pintu dengan layar Jadwal Sholat); null = layar
+  /// memakai bawaannya sendiri.
+  final PengaturanIbadah? setelan;
 
   /// Simpanan jadwal sholat (FR-86); null = folder dokumen aplikasi.
   final PenyimpananJadwal? penyimpanan;
@@ -51,8 +57,9 @@ class PelacakanSholatScreen extends StatefulWidget {
 }
 
 class _StatePelacakanSholat extends State<PelacakanSholatScreen> {
-  /// Metode hitung cadangan bila simpanan jadwal belum ada.
-  static const MetodeHitungSholat _metode = MetodeHitungSholat.kemenag;
+  /// Metode hitung cadangan bila simpanan jadwal belum ada; ikut pilihan
+  /// tersimpan supaya hasilnya sama dengan layar Jadwal Sholat.
+  MetodeHitungSholat _metode = MetodeHitungSholat.kemenag;
 
   late KotaSholat _kota;
 
@@ -88,6 +95,29 @@ class _StatePelacakanSholat extends State<PelacakanSholatScreen> {
     _hitungUlang();
     unawaited(_muatCatatan());
     unawaited(_pakaiSimpananJadwal());
+    unawaited(_muatSetelan());
+  }
+
+  /// Ambil kota & metode dari setelan bersama supaya jam yang ditampilkan di
+  /// sini sama dengan jam di layar Jadwal Sholat (dulu layar ini selalu Jakarta).
+  Future<void> _muatSetelan() async {
+    final PengaturanIbadah? s = widget.setelan;
+    if (s == null) return;
+    try {
+      final KotaSholat kota = await s.kota();
+      final MetodeHitungSholat metode =
+          await s.metode().timeout(const Duration(seconds: 5));
+      if (!mounted) return;
+      setState(() {
+        // Kota yang diminta pemanggil (mis. tautan pintasan) tidak ditimpa.
+        if (widget.kotaAwal == null) _kota = kota;
+        _metode = metode;
+        _hitungUlang();
+      });
+      await _pakaiSimpananJadwal();
+    } catch (_) {
+      // Setelan tidak terbaca: hitungan bawaan tetap tampil.
+    }
   }
 
   void _hitungUlang() {

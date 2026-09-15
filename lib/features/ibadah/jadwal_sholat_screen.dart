@@ -5,6 +5,8 @@
 /// "perhitungan", bukan jadwal resmi.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:personal_life_os/core/utils/waktu.dart';
 
@@ -13,18 +15,31 @@ import '../../core/ibadah/kota_indonesia.dart';
 import '../../core/ibadah/model_sholat.dart';
 import '../../core/ibadah/penghitung_sholat.dart';
 import '../../core/ibadah/penyimpanan_jadwal.dart';
+import 'pengaturan_ibadah.dart';
 
+/// Layar **satu pintu** untuk pilihan hitungan sholat.
+///
+/// Kota, cara perhitungan, madzhab Ashar, dan koreksi ihtiyati di layar ini
+/// disimpan lewat [PengaturanIbadah] — simpanan yang sama yang dibaca layar
+/// Pengingat Ibadah (FR-87) dan Pelacakan Sholat (FR-88). Sebelumnya kedua
+/// layar punya pilihan sendiri, sehingga pengingat bisa berbunyi untuk kota
+/// yang berbeda dari jadwal yang dilihat pengguna.
 class JadwalSholatScreen extends StatefulWidget {
   const JadwalSholatScreen({
     super.key,
     this.kotaAwal,
     this.jamSekarang,
     this.penyimpanan,
+    this.setelan,
     this.jumlahHariSimpan = 7,
   });
 
-  /// Kota awal; null = Jakarta.
+  /// Kota awal; null = kota tersimpan (bila ada), jika tidak Jakarta.
   final KotaSholat? kotaAwal;
+
+  /// Setelan bersama; null = layar tidak menyimpan pilihan apa pun
+  /// (dipakai pengujian dan pemanggilan berdiri sendiri).
+  final PengaturanIbadah? setelan;
 
   /// Sumber waktu (bisa diganti saat pengujian).
   final DateTime Function()? jamSekarang;
@@ -58,6 +73,50 @@ class _StateJadwalSholat extends State<JadwalSholatScreen> {
         daftarKotaIndonesia.firstWhere((KotaSholat k) => k.nama == 'Jakarta');
     _hitungUlang();
     WidgetsBinding.instance.addPostFrameCallback((_) => _simpanKeCache());
+    unawaited(_muatSetelan());
+  }
+
+  /// Baca pilihan tersimpan (satu pintu bersama layar Pengingat Ibadah).
+  ///
+  /// Batas 5 detik: sumber setelan yang tidak menjawab tidak boleh membuat
+  /// layar menggantung di bawaan tanpa kabar.
+  Future<void> _muatSetelan() async {
+    final PengaturanIbadah? s = widget.setelan;
+    if (s == null) return;
+    try {
+      final KotaSholat kota = await s.kota();
+      final MetodeHitungSholat metode = await s.metode();
+      final bool hanafi = await s.asharHanafi();
+      final int ihtiyati =
+          await s.ihtiyatiMenit().timeout(const Duration(seconds: 5));
+      if (!mounted) return;
+      setState(() {
+        // Kota yang diminta pemanggil (mis. tautan pintasan) tidak ditimpa.
+        if (widget.kotaAwal == null) _kota = kota;
+        _metode = metode;
+        _hanafi = hanafi;
+        _ihtiyati = ihtiyati;
+        _hitungUlang();
+      });
+      await _simpanKeCache();
+    } catch (_) {
+      // Setelan tidak terbaca: hitungan bawaan tetap tampil.
+    }
+  }
+
+  /// Simpan pilihan ke setelan bersama. Gagal menyimpan tidak menghalangi
+  /// hitungan di layar — pengguna hanya kehilangan pilihan tersimpan.
+  Future<void> _simpanSetelan() async {
+    final PengaturanIbadah? s = widget.setelan;
+    if (s == null) return;
+    try {
+      await s.simpanKota(_kota).timeout(const Duration(seconds: 5));
+      await s.simpanMetode(_metode).timeout(const Duration(seconds: 5));
+      await s.simpanAsharHanafi(_hanafi).timeout(const Duration(seconds: 5));
+      await s.simpanIhtiyatiMenit(_ihtiyati).timeout(const Duration(seconds: 5));
+    } catch (_) {
+      // diabaikan dengan sengaja
+    }
   }
 
   Map<WaktuSholat, int> get _koreksi => <WaktuSholat, int>{
@@ -110,6 +169,7 @@ class _StateJadwalSholat extends State<JadwalSholatScreen> {
       _kota = pilih;
       _hitungUlang();
     });
+    await _simpanSetelan();
     await _simpanKeCache();
   }
 
@@ -120,6 +180,7 @@ class _StateJadwalSholat extends State<JadwalSholatScreen> {
       _ihtiyati = baru;
       _hitungUlang();
     });
+    unawaited(_simpanSetelan());
     _simpanKeCache();
   }
 
@@ -246,6 +307,7 @@ class _StateJadwalSholat extends State<JadwalSholatScreen> {
                         _metode = m;
                         _hitungUlang();
                       });
+                      unawaited(_simpanSetelan());
                       _simpanKeCache();
                     },
                   ),
@@ -260,6 +322,7 @@ class _StateJadwalSholat extends State<JadwalSholatScreen> {
                       _hanafi = v;
                       _hitungUlang();
                     });
+                    unawaited(_simpanSetelan());
                     _simpanKeCache();
                   },
                 ),

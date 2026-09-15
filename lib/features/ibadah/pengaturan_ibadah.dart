@@ -45,6 +45,10 @@ const String kotaSholatBawaan = 'Jakarta';
 /// Menit ihtiyati tertinggi yang ditawarkan antarmuka.
 const int ihtiyatiMaksimal = 3;
 
+/// Menit ihtiyati terendah (koreksi boleh maju) — layar Jadwal Sholat
+/// menawarkan -3..+3, jadi simpanan harus menerima nilai negatif juga.
+const int ihtiyatiMinimal = -3;
+
 /// Menit geser tertinggi yang ditawarkan antarmuka (batas rencana: 120).
 const int geserMaksimal = 120;
 
@@ -183,11 +187,13 @@ class PengaturanIbadah {
   Future<void> simpanAsharHanafi(bool hanafi) =>
       simpanan.simpan(kunciAsharHanafi, hanafi ? 'true' : 'false');
 
-  Future<int> ihtiyatiMenit() async {
-    final int m = await simpanan.bacaAngka(kunciIhtiyatiSholat, 0);
-    return m < 0 ? 0 : (m > ihtiyatiMaksimal ? ihtiyatiMaksimal : m);
-  }
+  Future<int> ihtiyatiMenit() async =>
+      _batasiIhtiyati(await simpanan.bacaAngka(kunciIhtiyatiSholat, 0));
 
-  Future<void> simpanIhtiyatiMenit(int menit) => simpanan.simpan(kunciIhtiyatiSholat,
-      '${menit < 0 ? 0 : (menit > ihtiyatiMaksimal ? ihtiyatiMaksimal : menit)}');
+  Future<void> simpanIhtiyatiMenit(int menit) =>
+      simpanan.simpan(kunciIhtiyatiSholat, '${_batasiIhtiyati(menit)}');
+
+  static int _batasiIhtiyati(int menit) => menit < ihtiyatiMinimal
+      ? ihtiyatiMinimal
+      : (menit > ihtiyatiMaksimal ? ihtiyatiMaksimal : menit);
 }

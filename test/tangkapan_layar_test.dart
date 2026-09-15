@@ -319,6 +319,9 @@ void main() {
           expect(find.text('Pengingat Ibadah'), findsOneWidget);
           expect(find.byKey(const Key('saklar_briefing')), findsOneWidget);
           expect(find.byKey(const Key('saklar_sholat')), findsOneWidget);
+          // Satu pintu: layar ini tidak lagi punya pemilih kota/metode.
+          expect(find.byKey(const Key('pilih_kota')), findsNothing);
+          expect(t.takeException() == null, isTrue);
         });
   }, skip: !_fontTersedia);
 

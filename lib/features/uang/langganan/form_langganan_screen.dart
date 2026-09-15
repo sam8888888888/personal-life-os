@@ -6,7 +6,6 @@
 /// repository.
 library;
 
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -53,7 +52,6 @@ class _FormLanggananScreenState extends ConsumerState<FormLanggananScreen> {
   DateTime _tanggalMulai = waktuSekarang();
   bool _perpanjang = true;
   int? _kategoriId;
-  LanggananData? _lama;
   bool _memuat = false;
 
   @override
@@ -78,7 +76,6 @@ class _FormLanggananScreenState extends ConsumerState<FormLanggananScreen> {
     setState(() {
       _memuat = false;
       if (l == null) return;
-      _lama = l;
       _nama.text = l.nama;
       // Nominal disimpan dalam sen; ditampilkan dalam rupiah utuh.
       _nominal.text = (l.nominalSen / 100).round().toString();
@@ -279,20 +276,10 @@ class _FormLanggananScreenState extends ConsumerState<FormLanggananScreen> {
           siklus: _siklus,
           perpanjangOtomatis: _perpanjang,
           kategoriId: _kategoriId,
+          // Pilihan "Tanpa kategori" berarti kosongkan, bukan "tidak diubah".
+          kosongkanKategori: _kategoriId == null,
           catatan: catatan,
         );
-        // `ubah()` tidak bisa mengosongkan kolom (nilai null = "tidak diubah"),
-        // jadi penghapusan kategori dijalankan langsung — ini satu-satunya jalan
-        // supaya pengguna bisa membatalkan kategori, bukan terjebak dengannya.
-        final lama = _lama;
-        if (_kategoriId == null && lama != null && lama.kategoriId != null) {
-          final db = ref.read(databaseProvider);
-          await (db.update(db.langganan)..where((x) => x.id.equals(widget.id!)))
-              .write(LanggananCompanion(
-            kategoriId: const Value(null),
-            diubahPada: Value(DateTime.now()),
-          ));
-        }
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

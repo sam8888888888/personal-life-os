@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../database/database.dart';
 import '../model/enums.dart';
+import 'periode.dart';
 
 class TagihanRepository {
   TagihanRepository(this.db);
@@ -172,13 +173,16 @@ class TagihanRepository {
       {DateTime? acuan}) {
     final sekarang = acuan ?? DateTime.now();
     final dari = DateTime(sekarang.year, sekarang.month, sekarang.day);
-    final sampai = dari.add(Duration(days: dalamHari));
+    // Batas atas EKSKLUSIF: awal hari setelah hari terakhir jendela. Memakai
+    // tengah malam hari terakhir akan membuang tagihan hari itu.
+    final sampaiEksklusif =
+        DateTime(dari.year, dari.month, dari.day + dalamHari + 1);
     return (db.select(db.tagihan)
           ..where((t) =>
               t.statusAktif.equals(true) &
               t.lunas.equals(false) &
               t.jatuhTempo.isBiggerOrEqualValue(dari) &
-              t.jatuhTempo.isSmallerOrEqualValue(sampai))
+              t.jatuhTempo.isSmallerThanValue(sampaiEksklusif))
           ..orderBy([(t) => OrderingTerm.asc(t.jatuhTempo)]))
         .watch();
   }
@@ -198,14 +202,15 @@ class TagihanRepository {
   /// Total tagihan aktif belum lunas dalam bulan kalender [bulan] (sen).
   /// Dipakai dasbor "tagihan bulan ini" (FR-08/FR-33).
   Future<int> totalBelumBayarBulanSen(DateTime bulan) async {
-    final awal = DateTime(bulan.year, bulan.month, 1);
-    final akhir = DateTime(bulan.year, bulan.month + 1, 0);
+    // Batas atas EKSKLUSIF (awal bulan berikutnya): memakai tengah malam
+    // tanggal terakhir akan mengecilkan total bila tagihan punya jam.
+    final r = rentangBulan(bulan);
     final daftar = await (db.select(db.tagihan)
           ..where((t) =>
               t.statusAktif.equals(true) &
               t.lunas.equals(false) &
-              t.jatuhTempo.isBiggerOrEqualValue(awal) &
-              t.jatuhTempo.isSmallerOrEqualValue(akhir)))
+              t.jatuhTempo.isBiggerOrEqualValue(r.awal) &
+              t.jatuhTempo.isSmallerThanValue(r.akhirEksklusif)))
         .get();
     var total = 0;
     for (final t in daftar) {
@@ -220,15 +225,17 @@ class TagihanRepository {
   /// mewakili kejadian: bisa berasal dari catatan pembayaran (sudah dibayar) atau
   /// dari tagihan aktif yang belum dibayar pada bulan tersebut.
   Future<List<BarisPeriode>> periodeBulan(DateTime bulan) async {
-    final awal = DateTime(bulan.year, bulan.month, 1);
-    final akhir = DateTime(bulan.year, bulan.month + 1, 0);
+    // Batas atas EKSKLUSIF: awal bulan berikutnya (lihat `rentangBulan`).
+    final r = rentangBulan(bulan);
+    final awal = r.awal;
+    final akhirEksklusif = r.akhirEksklusif;
     final tagihan = await ambilSemua();
     final namaTagihan = {for (final t in tagihan) t.id: t.nama};
 
     final catatan = await (db.select(db.riwayatPembayaran)
           ..where((r) =>
               r.periodeJatuhTempo.isBiggerOrEqualValue(awal) &
-              r.periodeJatuhTempo.isSmallerOrEqualValue(akhir))
+              r.periodeJatuhTempo.isSmallerThanValue(akhirEksklusif))
           ..orderBy([(r) => OrderingTerm.asc(r.periodeJatuhTempo)]))
         .get();
 
@@ -247,7 +254,7 @@ class TagihanRepository {
           t.statusAktif &&
           !t.lunas &&
           !t.jatuhTempo.isBefore(awal) &&
-          !t.jatuhTempo.isAfter(akhir) &&
+          t.jatuhTempo.isBefore(akhirEksklusif) &&
           !catatan.any((r) =>
               r.tagihanId == t.id &&
               selisihHari(r.periodeJatuhTempo, t.jatuhTempo) == 0)))

@@ -5,8 +5,11 @@
 /// pengingat/waktu/hari) — semuanya ditulis apa adanya di layar.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/ibadah/kota_indonesia.dart';
 import '../../core/ibadah/model_sholat.dart';
@@ -278,85 +281,7 @@ class _PengingatIbadahScreenState extends ConsumerState<PengingatIbadahScreen> {
   List<Widget> _pilihanSholat() {
     final Map<WaktuSholat, DateTime> pratinjau = _pratinjau();
     return <Widget>[
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        child: DropdownButtonFormField<String>(
-          key: const Key('pilih_kota'),
-          initialValue: _kota.nama,
-          isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Kota untuk hitungan',
-            border: OutlineInputBorder(),
-          ),
-          items: <DropdownMenuItem<String>>[
-            for (final KotaSholat k in daftarKotaIndonesia)
-              DropdownMenuItem<String>(value: k.nama, child: Text(k.labelLengkap)),
-          ],
-          onChanged: (String? nama) {
-            if (nama == null) return;
-            final KotaSholat k = daftarKotaIndonesia
-                .firstWhere((KotaSholat x) => x.nama == nama);
-            setState(() => _kota = k);
-            _ubah((PengaturanIbadah s) => s.simpanKota(k), 'Kota diubah ke $nama.');
-          },
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        child: DropdownButtonFormField<String>(
-          key: const Key('pilih_metode'),
-          initialValue: _metode.kode,
-          isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Cara perhitungan',
-            border: OutlineInputBorder(),
-          ),
-          items: <DropdownMenuItem<String>>[
-            for (final MetodeHitungSholat m in MetodeHitungSholat.values)
-              DropdownMenuItem<String>(value: m.kode, child: Text(m.label)),
-          ],
-          onChanged: (String? kode) {
-            if (kode == null) return;
-            final MetodeHitungSholat m = MetodeHitungSholat.dariKode(kode);
-            setState(() => _metode = m);
-            _ubah((PengaturanIbadah s) => s.simpanMetode(m),
-                'Cara perhitungan diubah ke ${m.label}.');
-          },
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-        child: DropdownButtonFormField<int>(
-          key: const Key('pilih_ihtiyati'),
-          initialValue: _ihtiyati,
-          decoration: const InputDecoration(
-            labelText: 'Koreksi kehati-hatian',
-            border: OutlineInputBorder(),
-          ),
-          items: <DropdownMenuItem<int>>[
-            const DropdownMenuItem<int>(value: 0, child: Text('Tanpa koreksi')),
-            for (int m = 1; m <= ihtiyatiMaksimal; m++)
-              DropdownMenuItem<int>(value: m, child: Text('+$m menit')),
-          ],
-          onChanged: (int? m) {
-            if (m == null) return;
-            setState(() => _ihtiyati = m);
-            _ubah((PengaturanIbadah s) => s.simpanIhtiyatiMenit(m),
-                'Koreksi diubah ke +$m menit.');
-          },
-        ),
-      ),
-      SwitchListTile(
-        key: const Key('saklar_hanafi'),
-        value: _hanafi,
-        title: const Text('Ashar madzhab Hanafi'),
-        subtitle: const Text('Menghitung Ashar lebih sore dari madzhab Syafi\'i'),
-        onChanged: (bool v) {
-          setState(() => _hanafi = v);
-          _ubah((PengaturanIbadah s) => s.simpanAsharHanafi(v),
-              v ? 'Ashar memakai madzhab Hanafi.' : 'Ashar memakai madzhab Syafi\'i.');
-        },
-      ),
+      _bagianSumberHitungan(),
       const Divider(height: 8),
       for (final WaktuSholat w in WaktuSholat.wajibSaja) _barisWaktu(w, pratinjau),
       Padding(
@@ -366,14 +291,51 @@ class _PengingatIbadahScreenState extends ConsumerState<PengingatIbadahScreen> {
           '${_teksPratinjau(pratinjau)}. Ini perhitungan aplikasi, bukan jadwal '
           'resmi, jadi bisa berbeda 1–2 menit dari jadwal masjid setempat. '
           'Hari-hari berikutnya memakai hitungan hari ini, jadi bisa bergeser '
-          'beberapa menit. Kota & cara perhitungan di sini khusus untuk '
-          'pengingat; layar Jadwal Sholat punya pilihan sendiri. Notifikasi '
-          'hanya berbunyi bila izin notifikasi untuk aplikasi ini sudah '
-          'diberikan di pengaturan HP.',
+          'beberapa menit. Kota & cara perhitungan dipakai bersama layar Jadwal '
+          'Sholat (satu pintu): diubah di salah satu, keduanya ikut berubah. '
+          'Notifikasi hanya berbunyi bila izin notifikasi untuk aplikasi ini '
+          'sudah diberikan di pengaturan HP.',
           key: const Key('catatan_jadwal'),
         ),
       ),
     ];
+  }
+
+  /// Kota & cara perhitungan tidak lagi dipilih di layar ini: pilihannya
+  /// disimpan bersama layar Jadwal Sholat supaya pengingat tidak berbunyi untuk
+  /// kota yang berbeda dari jadwal yang dilihat pengguna.
+  Widget _bagianSumberHitungan() {
+    final String ashar = _hanafi ? 'madzhab Hanafi' : 'madzhab Syafi\'i';
+    final String koreksi = _ihtiyati == 0
+        ? 'tanpa koreksi'
+        : '${_ihtiyati > 0 ? '+' : ''}$_ihtiyati menit';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Kota ${_kota.nama} · ${_metode.label} · Ashar $ashar · $koreksi',
+            key: const Key('ringkasan_sumber_hitungan'),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              key: const Key('buka_jadwal_sholat'),
+              icon: const Icon(Icons.schedule_outlined),
+              label: const Text('Atur kota & cara perhitungan'),
+              onPressed: () async {
+                await context.push('/ibadah/jadwal-sholat');
+                // Setelah kembali, baca lagi supaya pratinjau memakai pilihan
+                // terbaru (satu pintu: disimpan di layar Jadwal Sholat).
+                if (mounted) unawaited(_siapkan());
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   String _teksPratinjau(Map<WaktuSholat, DateTime> jadwal) {

@@ -8,12 +8,23 @@ library;
 String kunciBulan(DateTime tanggal) =>
     '${tanggal.year}-${tanggal.month.toString().padLeft(2, '0')}';
 
-/// Rentang satu bulan kalender: [awal] pukul 00:00 tanggal 1 dan [akhir]
-/// tanggal terakhir bulan itu (jam 00:00, batas inklusif untuk perbandingan
-/// tanggal-tengah-malam).
-({DateTime awal, DateTime akhir}) rentangBulan(DateTime bulan) => (
+/// Rentang satu bulan kalender.
+///
+/// * [awal] — pukul 00:00 tanggal 1 (batas bawah, inklusif).
+/// * [akhir] — pukul 00:00 tanggal terakhir (batas *tampilan* bulan itu).
+/// * [akhirEksklusif] — pukul 00:00 tanggal 1 bulan berikutnya.
+///
+/// **Pakai [akhirEksklusif] untuk menyaring baris.** Cacat yang pernah terjadi:
+/// penyaringan memakai `akhir` (tengah malam tanggal terakhir), sehingga
+/// transaksi pukul 08:00 di hari terakhir bulan itu ikut terbuang dari daftar
+/// dan dari total. Batas atas yang benar adalah awal bulan berikutnya
+/// (bandingkan dengan `<`, bukan `<=`).
+({DateTime awal, DateTime akhir, DateTime akhirEksklusif}) rentangBulan(
+        DateTime bulan) =>
+    (
       awal: DateTime(bulan.year, bulan.month, 1),
       akhir: DateTime(bulan.year, bulan.month + 1, 0),
+      akhirEksklusif: DateTime(bulan.year, bulan.month + 1, 1),
     );
 
 /// Bulan (tengah malam tanggal 1) dari kunci `YYYY-MM`; null bila tidak sah.

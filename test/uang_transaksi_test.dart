@@ -245,6 +245,29 @@ void main() {
       expect(daftar.map((t) => t.idTransaksi).toList(), ['trx_03', 'trx_20']);
     });
 
+    // Cacat batas bulan (ditemukan 15 Sep 2026): penyaringan memakai tengah
+    // malam tanggal terakhir, sehingga transaksi di HARI terakhir bulan itu
+    // (pukul 00:00 lebih) hilang dari daftar sekaligus dari total ringkasan.
+    test('batas bulan: hari terakhir ikut, tanggal 1 bulan berikutnya tidak',
+        () async {
+      await catat(
+          id: 'trx_akhir_bulan',
+          jenis: JenisArus.pengeluaran,
+          sen: 111000,
+          tanggal: DateTime(2026, 9, 30, 23, 59, 59));
+      await catat(
+          id: 'trx_awal_oktober',
+          jenis: JenisArus.pengeluaran,
+          sen: 222000,
+          tanggal: DateTime(2026, 10, 1));
+
+      final daftar = await trx.ambilBulan(bulanSeptember);
+      expect(daftar.map((t) => t.idTransaksi).toList(), ['trx_akhir_bulan']);
+      expect((await trx.ringkasanBulan(bulanSeptember)).pengeluaranSen, 111000);
+      expect((await trx.ambilBulan(DateTime(2026, 10, 5))).map((t) => t.idTransaksi).toList(),
+          ['trx_awal_oktober']);
+    });
+
     test('simpan idempoten: idTransaksi sama tidak menggandakan baris',
         () async {
       final a = await catat(

@@ -437,6 +437,65 @@ void main() {
       expect((await langganan.ambilSatu(l.id))?.tagihanId, isNull);
     });
 
+    test('hapus: baris hilang, tagihan tertaut hidup lagi, riwayat tetap',
+        () async {
+      final tid = await tagihanBaru('Langganan dihapus');
+      final l = await langganan.tambah(
+        nama: 'Langganan dihapus',
+        nominalSen: 5000000,
+        tanggalMulai: DateTime(2026, 1, 1),
+        tagihanId: tid,
+      );
+      await langganan.pause(l.id); // pengingat mati dulu
+      // Riwayat pembayaran bulan lalu — tidak boleh ikut terhapus.
+      await db.into(db.riwayatPembayaran).insert(RiwayatPembayaranCompanion.insert(
+            tagihanId: tid,
+            periodeJatuhTempo: DateTime(2026, 8, 1),
+            jumlahSen: 5000000,
+            tanggalBayar: DateTime(2026, 8, 2),
+          ));
+
+      await langganan.hapus(l.id);
+
+      expect(await langganan.ambilSatu(l.id), isNull);
+      expect(await langganan.watchSemua().first, isEmpty);
+      final t = await (db.select(db.tagihan)..where((x) => x.id.equals(tid)))
+          .getSingle();
+      expect(t.statusAktif, isTrue,
+          reason: 'pengingat tidak boleh mati diam-diam setelah baris dihapus');
+      expect(await db.select(db.riwayatPembayaran).get(), hasLength(1));
+    });
+
+    test('hapus menolak id yang tidak ada & kategori bisa dikosongkan',
+        () async {
+      await expectLater(langganan.hapus(9999), throwsA(isA<StateError>()));
+
+      final kat = await (db.select(db.kategoriTransaksi)
+            ..where((k) => k.kode.equals('kel_makan')))
+          .getSingle();
+      final l = await langganan.tambah(
+        nama: 'Berlangganan makan',
+        nominalSen: 1000,
+        tanggalMulai: DateTime(2026, 1, 1),
+        kategoriId: kat.id,
+      );
+      expect((await langganan.ambilSatu(l.id))?.kategoriId, kat.id);
+
+      await langganan.ubah(l.id, kosongkanKategori: true);
+      expect((await langganan.ambilSatu(l.id))?.kategoriId, isNull,
+          reason: '"Tanpa kategori" harus benar-benar mengosongkan kolom');
+
+      // Ubah tanpa menyebut kategori tidak boleh mengubah kolom itu.
+      await langganan.ubah(l.id, kategoriId: kat.id);
+      await langganan.ubah(l.id, nama: 'Nama baru');
+      expect((await langganan.ambilSatu(l.id))?.kategoriId, kat.id);
+
+      await expectLater(
+        langganan.ubah(l.id, kategoriId: kat.id, kosongkanKategori: true),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
     test('total biaya bulanan: siklus tahunan dinormalkan ke bulan', () async {
       await langganan.tambah(
         nama: 'Tahunan',
@@ -658,6 +717,8 @@ void main() {
       final r = rentangBulan(DateTime(2026, 2, 10));
       expect(r.awal, DateTime(2026, 2, 1));
       expect(r.akhir, DateTime(2026, 2, 28));
+      // Batas atas yang dipakai penyaringan: awal bulan berikutnya.
+      expect(r.akhirEksklusif, DateTime(2026, 3, 1));
     });
   });
 }

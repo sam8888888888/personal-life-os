@@ -88,6 +88,12 @@ class LanggananRepository {
         ..orderBy([(l) => OrderingTerm.asc(l.nama)]))
       .get();
 
+  /// Ubah sebagian kolom. `null` berarti **tidak diubah** (bukan "kosongkan").
+  ///
+  /// Untuk mengosongkan kategori langganan, pakai [kosongkanKategori] = true:
+  /// kolom `kategoriId` bertipe nullable, jadi `kategoriId: null` tidak bisa
+  /// dibedakan dari "tidak diubah". Sebelum ini layar terpaksa menulis langsung
+  /// ke tabel — aturan itu sekarang tinggal di satu tempat.
   Future<int> ubah(
     int id, {
     String? nama,
@@ -95,12 +101,17 @@ class LanggananRepository {
     Frekuensi? siklus,
     bool? perpanjangOtomatis,
     int? kategoriId,
+    bool kosongkanKategori = false,
     String? metodeBayar,
     String? tautanBayar,
     String? catatan,
   }) async {
     if (nominalSen != null && nominalSen < 0) {
       throw ArgumentError('Nominal langganan tidak boleh negatif.');
+    }
+    if (kosongkanKategori && kategoriId != null) {
+      throw ArgumentError(
+          'Pilih salah satu: kategoriId diisi, atau kosongkanKategori = true.');
     }
     return (db.update(db.langganan)..where((l) => l.id.equals(id)))
         .write(LanggananCompanion(
@@ -110,7 +121,9 @@ class LanggananRepository {
       perpanjangOtomatis: perpanjangOtomatis == null
           ? const Value.absent()
           : Value(perpanjangOtomatis),
-      kategoriId: kategoriId == null ? const Value.absent() : Value(kategoriId),
+      kategoriId: kosongkanKategori
+          ? const Value(null)
+          : (kategoriId == null ? const Value.absent() : Value(kategoriId)),
       metodeBayar:
           metodeBayar == null ? const Value.absent() : Value(metodeBayar),
       tautanBayar:
@@ -149,6 +162,30 @@ class LanggananRepository {
     ));
     final l = await ambilSatu(id);
     if (l != null) await _selaraskanPengingat(l);
+  }
+
+  /// Hapus baris langganan (FR-68).
+  ///
+  /// Aturan yang dijaga di sini — bukan di layar — supaya semua pemanggil sama:
+  /// * tagihan tertaut **dihidupkan kembali** (pengingat tidak boleh mati
+  ///   diam-diam; lebih aman pengingat berlebih yang bisa dimatikan pengguna);
+  /// * tagihan dan **riwayat pembayaran tidak dihapus** — uangnya benar-benar
+  ///   keluar, jadi riwayat tetap tersimpan;
+  /// * satu transaksi database: kalau gagal, tidak ada yang setengah jalan.
+  ///
+  /// Untuk sekadar menghentikan pengingat, pakai [hentikan] atau [pause].
+  Future<void> hapus(int id, {bool hidupkanTagihanTertaut = true}) async {
+    final l = await ambilSatu(id);
+    if (l == null) {
+      throw StateError('Langganan tidak ditemukan.');
+    }
+    await db.transaction(() async {
+      final tagihanId = l.tagihanId;
+      if (hidupkanTagihanTertaut && tagihanId != null) {
+        await _setTagihanAktif(tagihanId, true);
+      }
+      await (db.delete(db.langganan)..where((x) => x.id.equals(id))).go();
+    });
   }
 
   /// Lepas tautan. Tagihan dihidupkan kembali supaya pengingat tidak mati
