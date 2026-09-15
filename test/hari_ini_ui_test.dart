@@ -29,6 +29,7 @@ import 'package:personal_life_os/features/hari_ini/hari_ini_screen.dart';
 import 'package:personal_life_os/features/hari_ini/ibadah_hub_screen.dart';
 import 'package:personal_life_os/features/hari_ini/kerja_screen.dart';
 import 'package:personal_life_os/features/ibadah/pelacakan_sholat_screen.dart';
+import 'package:personal_life_os/features/pengaturan/backup_screen.dart';
 import 'package:personal_life_os/features/hari_ini/lainnya_screen.dart';
 import 'package:personal_life_os/features/uang/uang_hub_screen.dart';
 
@@ -140,8 +141,14 @@ void main() {
   /// baris yang terlihat).
   Future<void> gulirKe(WidgetTester t, Finder target, {int maks = 8}) async {
     for (var i = 0; i < maks; i++) {
-      if (target.evaluate().isNotEmpty) return;
+      if (target.evaluate().isNotEmpty) break;
       await t.drag(find.byType(Scrollable).first, const Offset(0, -220));
+      await t.pump(const Duration(milliseconds: 120));
+    }
+    // Widget bisa sudah dibangun tetapi masih di bawah lipatan; ketukan ke
+    // widget di luar layar akan meleset, jadi pastikan terlihat dulu.
+    if (target.evaluate().isNotEmpty) {
+      await t.ensureVisible(target);
       await t.pump(const Duration(milliseconds: 120));
     }
   }
@@ -478,6 +485,101 @@ void main() {
       expect(find.text('Riwayat sholat'), findsOneWidget);
       expect(find.byKey(const Key('pilih_7')), findsOneWidget);
       expect(find.byKey(const Key('pilih_30')), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('dari tab Ibadah bisa membuka Pengingat Ibadah (FR-63 & FR-87)',
+        (t) async {
+      await bukaRouter(t, awal: '/ibadah');
+      await t.tap(find.byKey(const Key('buka_pengingat_ibadah')));
+      await t.pump();
+      for (var i = 0; i < 55; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Pengingat Ibadah'), findsOneWidget);
+      expect(find.text('Ringkasan pagi'), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('rute /ibadah/pengingat membuka setelan pengingat (FR-63 & FR-87)',
+        (t) async {
+      await bukaRouter(t, awal: '/ibadah/pengingat');
+      for (var i = 0; i < 55; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      // Pembacaan setelan boleh lambat/gagal di lingkungan uji; layar tetap
+      // harus tenang (tidak berputar selamanya) dan menampilkan pilihannya.
+      expect(find.text('Pengingat Ibadah'), findsOneWidget);
+      expect(find.byKey(const Key('saklar_briefing')), findsOneWidget);
+      expect(find.byKey(const Key('saklar_sholat')), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('Uang hub punya pintu grafik beban tagihan (FR-28)', (t) async {
+      await bukaRouter(t, awal: '/uang');
+      await gulirKe(t, find.byKey(const Key('buka_beban_tagihan')));
+      expect(find.byKey(const Key('buka_beban_tagihan')), findsOneWidget);
+      await t.tap(find.byKey(const Key('buka_beban_tagihan')));
+      await t.pump();
+      for (var i = 0; i < 40; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Beban tagihan'), findsWidgets);
+      expect(t.takeException(), isNull);
+      await tutup(t);
+    });
+
+    testWidgets('rute /laporan/beban-tagihan bisa dibuka (FR-28)', (t) async {
+      await bukaRouter(t, awal: '/laporan/beban-tagihan');
+      for (var i = 0; i < 40; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Beban tagihan'), findsWidgets);
+      expect(find.byKey(const Key('grafik_beban')), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('rute /tagihan/kategori membuka kelola kategori (FR-08)',
+        (t) async {
+      await bukaRouter(t, awal: '/tagihan/kategori');
+      for (var i = 0; i < 40; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.text('Kategori tagihan'), findsWidgets);
+      expect(find.byKey(const Key('tambah_kategori_tagihan')), findsOneWidget);
+      expect(t.takeException(), isNull);
+      await tutup(t);
+    });
+
+    testWidgets('Pengaturan punya pintu cadangan & rute /cadangan (FR-24)',
+        (t) async {
+      await bukaRouter(t, awal: '/pengaturan');
+      for (var i = 0; i < 30; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      await gulirKe(t, find.byKey(const Key('buka_cadangan')));
+      expect(find.byKey(const Key('buka_cadangan')), findsOneWidget);
+      await t.tap(find.byKey(const Key('buka_cadangan')));
+      await t.pump();
+      for (var i = 0; i < 70; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      // Layar cadangan menunggu folder dokumen dari lapisan platform; di
+      // dalam uji lapisan itu tidak menjawab sehingga baru selesai setelah
+      // batas waktu 5 detik. Lihat cacat 17 di laporan.
+      expect(find.byKey(const Key('ekspor_sekarang')), findsOneWidget);
+      expect(t.takeException(), isNull);
+      await tutup(t);
+    });
+
+    testWidgets('rute /cadangan bisa dibuka langsung (FR-24)', (t) async {
+      await bukaRouter(t, awal: '/cadangan');
+      for (var i = 0; i < 70; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+      expect(find.byType(BackupScreen), findsOneWidget);
+      expect(find.text('Cadangan & Pemulihan'), findsWidgets);
+      expect(find.byKey(const Key('ekspor_sekarang')), findsOneWidget);
       await tutup(t);
     });
 

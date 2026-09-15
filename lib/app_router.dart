@@ -17,12 +17,16 @@ import 'features/hari_ini/lainnya_screen.dart';
 import 'features/ibadah/jadwal_sholat_screen.dart';
 import 'features/ibadah/kalender_hijriah_screen.dart';
 import 'features/ibadah/pelacakan_sholat_screen.dart';
+import 'features/ibadah/pengingat_ibadah_screen.dart';
 import 'features/ibadah/rekap_sholat_screen.dart';
 import 'features/kalender/kalender_screen.dart';
+import 'features/laporan/beban_tagihan_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
+import 'features/pengaturan/backup_screen.dart';
 import 'features/pengaturan/pengaturan_screen.dart';
 import 'features/ringkasan/ringkasan_screen.dart';
 import 'features/tagihan/daftar_tagihan_screen.dart';
+import 'features/tagihan/kelola_kategori_tagihan_screen.dart';
 import 'features/tagihan/form_tagihan_screen.dart';
 import 'features/uang/anggaran/anggaran_screen.dart';
 import 'features/uang/kekayaan/kekayaan_screen.dart';
@@ -57,6 +61,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       ],
     ),
     GoRoute(
+      path: '/tagihan/kategori',
+      builder: (c, s) => const KelolaKategoriTagihanScreen(),
+    ),
+    GoRoute(
       path: '/tambah',
       builder: (c, s) => const HalamanJudul(
           judul: 'Tambah Tagihan', isi: FormTagihanScreen()),
@@ -65,6 +73,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/pengingat',
       builder: (c, s) => const HalamanJudul(
           judul: 'Pengingat & Izin', isi: PengingatScreen()),
+    ),
+    GoRoute(
+      path: '/cadangan',
+      builder: (c, s) => const BackupScreen(),
     ),
     GoRoute(
       path: '/briefing',
@@ -86,6 +98,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/ibadah/rekap',
       builder: (c, s) => const RekapSholatScreen(),
     ),
+    GoRoute(
+      path: '/ibadah/pengingat',
+      builder: (c, s) => const PengingatIbadahScreen(),
+    ),
     // Modul uang V1.5 (FR-68/71/72/76) — layar penuh di atas kerangka tab.
     GoRoute(
       path: '/uang/transaksi',
@@ -102,6 +118,11 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/uang/kekayaan',
       builder: (c, s) => const KekayaanScreen(),
+    ),
+    // Laporan: beban tagihan per bulan (FR-28).
+    GoRoute(
+      path: '/laporan/beban-tagihan',
+      builder: (c, s) => const BebanTagihanScreen(),
     ),
     GoRoute(
       path: '/ubah/:id',
@@ -146,7 +167,7 @@ class KerangkaNavigasi extends StatelessWidget {
     1: ['/uang', '/ringkasan', '/tagihan', '/kalender', '/ubah'],
     2: ['/kerja'],
     3: ['/ibadah'],
-    4: ['/lainnya', '/pengaturan', '/pengingat'],
+    4: ['/lainnya', '/pengaturan', '/pengingat', '/cadangan'],
   };
 
   int _indeks(BuildContext context) {

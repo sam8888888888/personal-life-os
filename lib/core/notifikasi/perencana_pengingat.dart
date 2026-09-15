@@ -126,8 +126,11 @@ class JadwalPengingatSholat {
           'Menurut hitungan aplikasi, $nama masuk pukul $jam.',
         ModePengingatSholat.tepat =>
           'Menurut hitungan aplikasi, $nama masuk pukul $jam.',
+        /// FR-86 kejujuran: jadwal ini hasil perhitungan aplikasi, bukan
+        /// jadwal resmi — disebut juga pada notifikasi mode sesudah.
         ModePengingatSholat.sesudah =>
-          '$nama masuk pukul $jam. Catat bila sudah Anda lakukan.',
+          'Menurut hitungan aplikasi, $nama masuk pukul $jam. '
+              'Catat bila sudah Anda lakukan.',
       };
 }
 

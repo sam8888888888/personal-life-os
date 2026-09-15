@@ -18,7 +18,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:personal_life_os/app_router.dart';
+import 'package:personal_life_os/core/ibadah/model_sholat.dart';
+import 'package:personal_life_os/core/ibadah/penghitung_sholat.dart';
 import 'package:personal_life_os/core/notifikasi/jejak.dart';
+import 'package:personal_life_os/core/notifikasi/perencana_pengingat.dart';
+import 'package:personal_life_os/features/ibadah/pengaturan_ibadah.dart';
 import 'package:personal_life_os/core/notifikasi/layanan_notifikasi.dart';
 import 'package:personal_life_os/core/notifikasi/model_pengingat.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
@@ -35,6 +39,7 @@ import 'package:personal_life_os/data/repository/pengaturan_repository.dart';
 import 'package:personal_life_os/data/repository/transaksi_repository.dart';
 import 'package:personal_life_os/data/model/enums.dart';
 import 'package:personal_life_os/features/ibadah/jadwal_sholat_screen.dart';
+import 'package:personal_life_os/features/pengaturan/backup_screen.dart';
 import 'package:personal_life_os/features/hari_ini/briefing_pagi_screen.dart';
 import 'package:personal_life_os/features/ibadah/kalender_hijriah_screen.dart';
 import 'package:personal_life_os/features/ibadah/pelacakan_sholat_screen.dart';
@@ -212,8 +217,14 @@ void main() {
     }
   }
 
+  /// [pumpLanjutan] menambah pump sebelum pengambilan gambar — dipakai layar
+  /// yang datanya datang dari basis data (butuh beberapa pump, bukan sekali).
+  /// [periksa] dipanggil sebelum gambar diambil, selagi pohon widget masih ada.
   Future<void> potret(WidgetTester tester, String nama, String rute,
-      {bool layananDemo = false, String prefiks = 'f2'}) async {
+      {bool layananDemo = false,
+      String prefiks = 'f2',
+      int pumpLanjutan = 0,
+      void Function(WidgetTester)? periksa}) async {
     await tester.binding.setSurfaceSize(const Size(420, 900));
     await tester.pumpWidget(ProviderScope(
       overrides: [
@@ -239,6 +250,10 @@ void main() {
     ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 700));
+    for (int i = 0; i < pumpLanjutan; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    periksa?.call(tester);
 
     await expectLater(find.byType(MaterialApp),
         matchesGoldenFile('goldens/${prefiks}_$nama.png'));
@@ -247,6 +262,65 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     await tester.binding.setSurfaceSize(null);
   }
+
+  // ---- Tangkapan layar P0 (FR-28) & V1.5 pengingat ibadah (FR-63/87) ------
+
+  /// Tambah tagihan contoh pada beberapa bulan supaya grafik beban berisi.
+  Future<void> isiBebanDemo() async {
+    final DateTime acuan = _waktuUji;
+    Future<void> tambah(String nama, int bulanLalu, int nominalRp) async {
+      await _db.into(_db.tagihan).insert(TagihanCompanion.insert(
+            nama: nama,
+            jumlahSen: Value(nominalRp * 100),
+            jatuhTempo:
+                DateTime(acuan.year, acuan.month - bulanLalu, 5, 9),
+          ));
+    }
+
+    await tambah('PLN rumah', 0, 450000);
+    await tambah('IndiHome', 0, 395000);
+    await tambah('BPJS keluarga', 1, 300000);
+    await tambah('Air PDAM', 2, 180000);
+    await tambah('Netflix', 3, 186000);
+  }
+
+  testWidgets('tangkapan layar beban tagihan (FR-28)', (t) async {
+    // Data disiapkan di luar zona waktu palsu supaya basis data selesai dibaca.
+    await t.runAsync(isiBebanDemo);
+    await potret(t, 'beban_tagihan', '/laporan/beban-tagihan',
+        prefiks: 'f8',
+        pumpLanjutan: 40,
+        periksa: (WidgetTester t) {
+          // Pastikan yang tertangkap bukan layar "memuat" (bukan berputar).
+          expect(find.byType(CircularProgressIndicator), findsNothing);
+          expect(find.byKey(const Key('grafik_beban')), findsOneWidget);
+          expect(find.text('Beban tagihan'), findsWidgets);
+          expect(find.textContaining('termasuk yang sudah dibayar'),
+              findsOneWidget);
+        });
+  }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar pengingat ibadah (FR-63 & FR-87)', (t) async {
+    await t.runAsync(() async {
+      final setelan =
+          PengaturanIbadah.dariRepository(PengaturanRepository(_db));
+      await setelan.simpanBriefingAktif(true);
+      await setelan.simpanJamBriefing('06:30');
+      await setelan.simpanPengingatSholatAktif(true);
+      await setelan.simpanMode(WaktuSholat.subuh, ModePengingatSholat.sebelum);
+      await setelan.simpanGeser(WaktuSholat.subuh, 10);
+      await setelan.simpanMetode(MetodeHitungSholat.kemenag);
+    });
+    await potret(t, 'pengingat_ibadah', '/ibadah/pengingat',
+        prefiks: 'f9',
+        pumpLanjutan: 40,
+        periksa: (WidgetTester t) {
+          expect(find.byType(CircularProgressIndicator), findsNothing);
+          expect(find.text('Pengingat Ibadah'), findsOneWidget);
+          expect(find.byKey(const Key('saklar_briefing')), findsOneWidget);
+          expect(find.byKey(const Key('saklar_sholat')), findsOneWidget);
+        });
+  }, skip: !_fontTersedia);
 
   testWidgets('tangkapan layar ringkasan',
       (t) => potret(t, 'ringkasan', '/ringkasan'),
@@ -449,9 +523,82 @@ void main() {
     await potret(t, 'kekayaan', '/uang/kekayaan', prefiks: 'f6');
   }, skip: !_fontTersedia);
 
-  testWidgets('tangkapan layar rekap sholat',
-      (t) => potretRekap(t, 'rekap_sholat'),
+  testWidgets('tangkapan layar cadangan (FR-24)',
+      (t) => potretCadangan(t, 'cadangan'),
       skip: !_fontTersedia);
+
+  // ---- FR-08: kelola kategori tagihan --------------------------------------
+  testWidgets('tangkapan layar kelola kategori (FR-08)', (t) async {
+    await potret(t, 'kategori_tagihan', '/tagihan/kategori',
+        prefiks: 'f11',
+        pumpLanjutan: 40,
+        periksa: (WidgetTester t) {
+          expect(find.byType(CircularProgressIndicator), findsNothing);
+          expect(find.byKey(const Key('tambah_kategori_tagihan')),
+              findsOneWidget);
+          expect(find.text('Kategori tagihan'), findsWidgets);
+        });
+  }, skip: !_fontTersedia);
+}
+
+/// Tangkapan layar FR-24. Folder dokumen disuntik ke folder sementara supaya
+/// daftar berkas cadangan pasti terbaca dan hasil gambar stabil.
+Future<void> potretCadangan(WidgetTester tester, String nama) async {
+  final Directory dir = Directory.systemTemp.createTempSync('potret_cadangan_');
+  File('${dir.path}${Platform.pathSeparator}plo_backup_20260910_0900.json')
+      .writeAsStringSync(jsonEncode(<String, Object>{
+    'format': 'plo-backup',
+    'versiSkema': 3,
+    'versiAplikasi': '1.0.0+1',
+    'dibuatPada': '2026-09-10T09:00:00.000Z',
+    'tabel': <String, Object>{
+      'tagihan': <Object>[],
+      'kategori': <Object>[],
+    },
+  }));
+  // Waktu ubah berkas dibekukan: layar menampilkan "Diubah <tanggal>", dan
+  // waktu berkas asli ikut berubah tiap kali uji dijalankan sehingga gambar
+  // emas tidak akan pernah cocok.
+  File('${dir.path}${Platform.pathSeparator}plo_backup_20260910_0900.json')
+      .setLastModifiedSync(DateTime(2026, 9, 10, 9, 0));
+
+  await tester.binding.setSurfaceSize(const Size(420, 900));
+  await tester.pumpWidget(ProviderScope(
+    overrides: [databaseProvider.overrideWithValue(_db)],
+    child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTema.terang().copyWith(
+        textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Roboto'),
+      ),
+      locale: const Locale('id', 'ID'),
+      supportedLocales: const <Locale>[Locale('id', 'ID'), Locale('en', 'US')],
+      localizationsDelegates: const <LocalizationsDelegate<Object>>[
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: BackupScreen(
+        folderCadangan: () => Future<Directory>.value(dir),
+        jamSekarang: () => DateTime(2026, 9, 10, 9, 0),
+      ),
+    ),
+  ));
+  await tester.pump();
+  for (int i = 0; i < 20; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+  expect(find.byType(CircularProgressIndicator), findsNothing);
+  expect(find.byKey(const Key('ekspor_sekarang')), findsOneWidget);
+  expect(find.byKey(const Key('impor_berkas_plo_backup_20260910_0900.json')),
+      findsOneWidget);
+
+  await expectLater(
+      find.byType(MaterialApp), matchesGoldenFile('goldens/f10_$nama.png'));
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.binding.setSurfaceSize(null);
+  dir.deleteSync(recursive: true);
 }
 
 /// Tangkapan layar FR-89. Berkas log ditulis ke folder sementara (IO sinkron),

@@ -204,10 +204,13 @@ void main() {
     ));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    // Layar Pengaturan punya tambahan bagian "Mata uang" (FR-67), sehingga
-    // baris pengingat bisa berada di bawah lipatan dan belum dibangun.
-    if (find.text('Pengingat & izin').evaluate().isEmpty) {
-      await tester.drag(find.byType(ListView), const Offset(0, -400));
+    // Layar Pengaturan makin panjang (bagian "Mata uang" FR-67 dan "Cadangan"
+    // FR-24), sehingga baris pengingat bisa berada di bawah lipatan dan belum
+    // dibangun. Gulir bertahap sampai baris itu benar-benar ada.
+    for (int i = 0;
+        i < 6 && find.text('Pengingat & izin').evaluate().isEmpty;
+        i++) {
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
       await tester.pumpAndSettle(const Duration(milliseconds: 50));
     }
     expect(find.text('Pengingat & izin'), findsOneWidget);

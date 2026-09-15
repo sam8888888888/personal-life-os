@@ -1,4 +1,7 @@
 /// Daftar Tagihan (UC-2 versi daftar): semua tagihan + filter + aksi lunas.
+///
+/// FR-08: tiap baris menampilkan ikon & warna kategorinya, dan daftar bisa
+/// disaring per kategori (termasuk "Tanpa kategori").
 library;
 
 import 'package:flutter/material.dart';
@@ -8,9 +11,14 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
+import '../../data/database/database.dart';
 import '../../widgets/kartu_tagihan.dart';
+import 'ikon_warna_kategori.dart';
 
 enum FilterTagihan { semua, belumDibayar, sudahDibayar, nonaktif }
+
+/// Penanda saringan "tanpa kategori" pada [DaftarTagihanScreen].
+const int saringTanpaKategori = -1;
 
 class DaftarTagihanScreen extends ConsumerStatefulWidget {
   const DaftarTagihanScreen({super.key});
@@ -22,24 +30,38 @@ class DaftarTagihanScreen extends ConsumerStatefulWidget {
 class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
   FilterTagihan _filter = FilterTagihan.belumDibayar;
 
+  /// null = semua kategori; [saringTanpaKategori] = tagihan tanpa kategori;
+  /// selain itu = id kategori yang dipilih pengguna.
+  int? _kategori;
+
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(semuaTagihanProvider);
+    // Daftar kategori (stream) — dipakai untuk ikon, warna, dan saringan.
+    final kategori = ref.watch(kategoriProvider).value ?? const <KategoriData>[];
+    final petaKategori = {for (final k in kategori) k.id: k};
+    // Kategori yang sudah dihapus tidak boleh menyaring jadi "kosong".
+    final kategoriEfektif = _kategori == null ||
+            _kategori == saringTanpaKategori ||
+            petaKategori.containsKey(_kategori)
+        ? _kategori
+        : null;
+
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Gagal memuat: $e')),
       data: (semua) {
         final terfilter = semua.where((t) {
-          switch (_filter) {
-            case FilterTagihan.semua:
-              return t.statusAktif;
-            case FilterTagihan.belumDibayar:
-              return t.statusAktif && !t.lunas;
-            case FilterTagihan.sudahDibayar:
-              return t.lunas;
-            case FilterTagihan.nonaktif:
-              return !t.statusAktif;
-          }
+          final lolosStatus = switch (_filter) {
+            FilterTagihan.semua => t.statusAktif,
+            FilterTagihan.belumDibayar => t.statusAktif && !t.lunas,
+            FilterTagihan.sudahDibayar => t.lunas,
+            FilterTagihan.nonaktif => !t.statusAktif,
+          };
+          if (!lolosStatus) return false;
+          if (kategoriEfektif == null) return true;
+          if (kategoriEfektif == saringTanpaKategori) return t.kategoriId == null;
+          return t.kategoriId == kategoriEfektif;
         }).toList()
           ..sort((a, b) => a.jatuhTempo.compareTo(b.jatuhTempo));
 
@@ -62,6 +84,7 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
                 ],
               ),
             ),
+            _barisSaringanKategori(kategori, kategoriEfektif),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -97,13 +120,22 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
                       itemCount: terfilter.length,
                       itemBuilder: (c, i) {
                         final t = terfilter[i];
-                        return KartuTagihan(
-                          tagihan: t,
-                          onTap: () => context.push('/ubah/${t.id}'),
-                          onTandaiLunas:
-                              t.lunas ? null : () => _aksiLunas(context, t.id, t.jatuhTempo),
-                          onUndoLunas:
-                              t.lunas ? () => _aksiUndo(context, t.id) : null,
+                        final k =
+                            t.kategoriId == null ? null : petaKategori[t.kategoriId];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            KartuTagihan(
+                              tagihan: t,
+                              onTap: () => context.push('/ubah/${t.id}'),
+                              onTandaiLunas: t.lunas
+                                  ? null
+                                  : () => _aksiLunas(context, t.id, t.jatuhTempo),
+                              onUndoLunas:
+                                  t.lunas ? () => _aksiUndo(context, t.id) : null,
+                            ),
+                            if (k != null) _lencanaKategori(t.id, k),
+                          ],
                         );
                       },
                     ),
@@ -122,6 +154,87 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
           onSelected: (_) => setState(() => _filter = nilai),
         ),
       );
+
+  /// Saringan per kategori (FR-08): ikon & warnanya ikut terlihat di chip.
+  Widget _barisSaringanKategori(List<KategoriData> kategori, int? dipilih) {
+    return SizedBox(
+      height: 50,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        children: [
+          _chipKategori(
+            kunci: 'kategori_semua',
+            label: 'Semua kategori',
+            ikon: Icons.apps,
+            warna: Theme.of(context).colorScheme.primary,
+            dipilih: dipilih == null,
+            onPilih: () => setState(() => _kategori = null),
+          ),
+          for (final k in kategori)
+            _chipKategori(
+              kunci: 'kategori_chip_${k.id}',
+              label: k.nama,
+              ikon: ikonTagihan(k.ikon),
+              warna: warnaTagihan(k.warna),
+              dipilih: dipilih == k.id,
+              onPilih: () => setState(() => _kategori = k.id),
+            ),
+          _chipKategori(
+            kunci: 'kategori_tanpa',
+            label: 'Tanpa kategori',
+            ikon: Icons.label_off_outlined,
+            warna: Theme.of(context).colorScheme.outline,
+            dipilih: dipilih == saringTanpaKategori,
+            onPilih: () => setState(() => _kategori = saringTanpaKategori),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chipKategori({
+    required String kunci,
+    required String label,
+    required IconData ikon,
+    required Color warna,
+    required bool dipilih,
+    required VoidCallback onPilih,
+  }) =>
+      Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: FilterChip(
+          key: ValueKey(kunci),
+          avatar: Icon(ikon, size: 16, color: warna),
+          label: Text(label),
+          selected: dipilih,
+          onSelected: (_) => onPilih(),
+        ),
+      );
+
+  /// Label kecil di bawah kartu: ikon + warna + nama kategori tagihan.
+  Widget _lencanaKategori(int tagihanId, KategoriData k) {
+    final warna = warnaTagihan(k.warna);
+    return Padding(
+      key: ValueKey('lencana_kategori_$tagihanId'),
+      padding: const EdgeInsets.only(left: 30, right: 16, bottom: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(ikonTagihan(k.ikon), size: 14, color: warna),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              k.nama,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 12, color: warna, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _aksiLunas(BuildContext context, int id, DateTime periode) async {
     // PB-06: periode yang terlihat di layar dikirim ikut, penjaga anti ganda.

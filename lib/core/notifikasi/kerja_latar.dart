@@ -10,9 +10,11 @@ import 'package:workmanager/workmanager.dart';
 
 import '../../data/database/database.dart';
 import '../../data/repository/tagihan_repository.dart';
+import '../../features/ibadah/sumber_pengingat_ibadah.dart';
 import 'jejak.dart';
 import 'layanan_notifikasi_lokal.dart';
 import 'penyinkron_pengingat.dart';
+import 'sumber_pengingat_tambahan.dart';
 
 /// Nama unik pekerjaan berkala.
 const String tugasSinkronPengingat = 'plo.pengingat.sinkron';
@@ -30,7 +32,17 @@ const String tugasSinkronPengingat = 'plo.pengingat.sinkron';
 /// Tanpa pendaftaran di sini, pengingat tambahan tetap berbunyi untuk jadwal
 /// yang sudah terpasang, tetapi tidak diperpanjang oleh pekerja latar.
 void daftarkanSumberPengingatLatar() {
-  // Sengaja dikosongkan: pemilik modul fitur yang mengisi (lihat doc di atas).
+  // FR-63 & FR-87: pengingat ibadah (ringkasan pagi + waktu sholat).
+  RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
+}
+
+/// Titik pendaftaran sumber pengingat **untuk isolate utama** (aplikasi).
+///
+/// Dipanggil sekali saat aplikasi mulai. Wajib terpisah dari versi latar:
+/// isolate latar tidak mewarisi variabel statis isolate utama, jadi keduanya
+/// harus mendaftar sendiri-sendiri.
+void daftarkanSumberPengingatUtama() {
+  RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
 }
 
 /// Titik masuk pekerja latar (wajib anotasi agar tidak dibuang saat build rilis).

@@ -50,21 +50,15 @@ class IbadahHubScreen extends StatelessWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/kalender-hijriah'),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text('Menyusul', style: tema.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Card(
-            margin: EdgeInsets.zero,
-            child: Column(
-              children: const [
+                const Divider(height: 1),
                 ListTile(
-                  enabled: false,
-                  leading: Icon(Icons.notifications_active_outlined),
-                  title: Text('Adzan & pengingat waktu sholat'),
-                  subtitle: Text('Menunggu penyerahan fondasi notifikasi (FR-87)'),
+                  key: const Key('buka_pengingat_ibadah'),
+                  leading: const Icon(Icons.notifications_active_outlined),
+                  title: const Text('Ringkasan pagi & pengingat sholat'),
+                  subtitle: const Text(
+                      'Satu ringkasan sehari · pengingat 5 waktu (FR-63 & FR-87)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ibadah/pengingat'),
                 ),
               ],
             ),

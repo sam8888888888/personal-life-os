@@ -13,6 +13,8 @@ import '../../core/utils/uang_utils.dart';
 import '../../data/database/database.dart';
 import '../../data/model/enums.dart';
 import '../../data/repository/template_tagihan.dart';
+import 'ikon_warna_kategori.dart';
+import 'kelola_kategori_tagihan_screen.dart';
 
 class FormTagihanScreen extends ConsumerStatefulWidget {
   const FormTagihanScreen({super.key, this.id});
@@ -69,6 +71,21 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
     });
   }
 
+  /// Kategori yang masih ada di daftar. Kategori yang sudah dihapus (atau
+  /// daftar yang belum termuat) diperlakukan sebagai "Tanpa kategori".
+  int? _kategoriIdTerpakai(List<KategoriData> kategori) {
+    if (_kategoriId == null) return null;
+    return kategori.any((k) => k.id == _kategoriId) ? _kategoriId : null;
+  }
+
+  /// Pintu ke layar "Kategori tagihan" (FR-08). Daftar kategori di form ini
+  /// ikut segar sesudahnya karena `kategoriProvider` adalah stream.
+  Future<void> _bukaKelolaKategori() async {
+    await Navigator.of(context).push<void>(MaterialPageRoute<void>(
+      builder: (_) => const KelolaKategoriTagihanScreen(),
+    ));
+  }
+
   @override
   void dispose() {
     _nama.dispose();
@@ -81,6 +98,10 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
   @override
   Widget build(BuildContext context) {
     final kategori = ref.watch(kategoriProvider).value ?? const <KategoriData>[];
+    // FR-08: nilai dropdown HARUS ada di dalam daftar item, kalau tidak Flutter
+    // melempar galat. Kategori yang belum termuat atau sudah dihapus di layar
+    // "Kategori tagihan" diperlakukan sebagai "Tanpa kategori".
+    final nilaiKategori = _kategoriIdTerpakai(kategori);
     return Form(
       key: _formKey,
       // SingleChildScrollView + Column (bukan ListView): semua kolom tetap
@@ -138,17 +159,51 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
             },
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<int?>(
-            initialValue: _kategoriId,
-            decoration: const InputDecoration(labelText: 'Kategori'),
-            items: [
-              const DropdownMenuItem(value: null, child: Text('Tanpa kategori')),
-              ...kategori.map((k) =>
-                  DropdownMenuItem(value: k.id, child: Text(k.nama))),
-            ],
-            onChanged: (v) => setState(() => _kategoriId = v),
+          // Ikon & warna kategori ikut terlihat (FR-08).
+          KeyedSubtree(
+            key: const Key('dropdown_kategori'),
+            child: DropdownButtonFormField<int?>(
+              // Kunci ikut nilai: saat data kategori berubah, kolom ini dibuat
+              // ulang dengan nilai yang sah (tidak tertinggal di kategori yang
+              // sudah tidak ada).
+              key: ValueKey('pilih_kategori_$nilaiKategori'),
+              initialValue: nilaiKategori,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Kategori'),
+              items: [
+                const DropdownMenuItem(
+                    value: null,
+                    child: Row(children: [
+                      Icon(Icons.label_off_outlined, size: 18),
+                      SizedBox(width: 8),
+                      Text('Tanpa kategori'),
+                    ])),
+                ...kategori.map((k) => DropdownMenuItem(
+                      value: k.id,
+                      child: Row(children: [
+                        Icon(ikonTagihan(k.ikon),
+                            size: 18, color: warnaTagihan(k.warna)),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(k.nama,
+                              overflow: TextOverflow.ellipsis),
+                        ),
+                      ]),
+                    )),
+              ],
+              onChanged: (v) => setState(() => _kategoriId = v),
+            ),
           ),
-          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const Key('buka_kelola_kategori'),
+              onPressed: _bukaKelolaKategori,
+              icon: const Icon(Icons.tune, size: 18),
+              label: const Text('Kelola kategori'),
+            ),
+          ),
+          const SizedBox(height: 4),
           InkWell(
             onTap: _pilihTanggal,
             child: InputDecorator(
@@ -302,6 +357,12 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
       return;
     }
     final repo = ref.read(tagihanRepoProvider);
+    // KategoriId yang ditulis = yang terlihat di layar (bukan id kategori yang
+    // sudah dihapus di layar "Kategori tagihan").
+    final daftarKategori = ref.read(kategoriProvider).value;
+    final kategoriId = daftarKategori == null
+        ? _kategoriId
+        : _kategoriIdTerpakai(daftarKategori);
     final jumlahSen = rupiahKeSen(jumlahMentah);
     final jam = '${_jam.hour.toString().padLeft(2, '0')}:'
         '${_jam.minute.toString().padLeft(2, '0')}';
@@ -313,7 +374,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
           nama: _nama.text.trim(),
           jumlahSen: Value(jumlahSen),
           jatuhTempo: _jatuhTempo,
-          kategoriId: Value(_kategoriId),
+          kategoriId: Value(kategoriId),
           frekuensi: Value(_frekuensi.nilaiDb),
           pengingatLeadHari: Value(lead),
           pengingatJam: Value(jam),
@@ -327,7 +388,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
             nama: Value(_nama.text.trim()),
             jumlahSen: Value(jumlahSen),
             jatuhTempo: Value(_jatuhTempo),
-            kategoriId: Value(_kategoriId),
+            kategoriId: Value(kategoriId),
             frekuensi: Value(_frekuensi.nilaiDb),
             pengingatLeadHari: Value(lead),
             pengingatJam: Value(jam),

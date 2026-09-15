@@ -47,6 +47,8 @@ Future<void> siapkanPengingatSaatMulai() async {
   try {
     await initializeDateFormatting('id_ID');
     await LayananNotifikasiLokal().siapkan();
+    // FR-63 & FR-87: daftarkan pengingat ibadah di isolate utama.
+    daftarkanSumberPengingatUtama();
     await daftarkanKerjaLatar();
   } catch (e) {
     debugPrint('siapkanPengingatSaatMulai gagal: $e');
