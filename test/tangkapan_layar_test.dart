@@ -22,6 +22,7 @@ import 'package:personal_life_os/core/ibadah/model_sholat.dart';
 import 'package:personal_life_os/core/ibadah/penghitung_sholat.dart';
 import 'package:personal_life_os/core/notifikasi/jejak.dart';
 import 'package:personal_life_os/core/notifikasi/perencana_pengingat.dart';
+import 'package:personal_life_os/data/repository/dokumen_repository.dart';
 import 'package:personal_life_os/features/ibadah/pengaturan_ibadah.dart';
 import 'package:personal_life_os/core/notifikasi/layanan_notifikasi.dart';
 import 'package:personal_life_os/core/notifikasi/model_pengingat.dart';
@@ -506,6 +507,35 @@ void main() {
       skip: !_fontTersedia);
 
   // ---- Modul uang V1.5 (FR-68/71/72/76) -----------------------------------
+  /// Contoh dokumen penting untuk tangkapan layar FR-128/129.
+  Future<void> isiDokumenDemo() async {
+    final repo = DokumenRepository(_db, jamSekarang: () => _waktuUji);
+    await repo.simpan(
+        nama: 'KTP',
+        jenis: 'ktp',
+        nomor: '3171xxxxxxxx0001',
+        berlakuSampai: DateTime(2026, 11, 30),
+        berkasNama: 'ktp.jpg');
+    await repo.simpan(
+        nama: 'Paspor Indonesia',
+        jenis: 'paspor',
+        nomor: 'B1234567',
+        berlakuSampai: DateTime(2029, 4, 17),
+        berkasNama: 'paspor.pdf');
+    await repo.simpan(
+        nama: 'SIM A',
+        jenis: 'sim',
+        nomor: 'SIM-2233',
+        berlakuSampai: DateTime(2026, 9, 14),
+        berkasNama: 'sim.jpg');
+    await repo.simpan(
+        nama: 'Asuransi Kesehatan',
+        jenis: 'polis',
+        nomor: 'PLS-8899',
+        berlakuSampai: DateTime(2027, 1, 31),
+        berkasNama: 'polis.pdf');
+  }
+
   testWidgets('tangkapan layar arus kas', (t) async {
     await isiUangDemo();
     await potret(t, 'arus_kas', '/uang/transaksi', prefiks: 'f6');
@@ -540,6 +570,51 @@ void main() {
           expect(find.byKey(const Key('tambah_kategori_tagihan')),
               findsOneWidget);
           expect(find.text('Kategori tagihan'), findsWidgets);
+        });
+  }, skip: !_fontTersedia);
+
+  // ---- Batch 3 V2: kalender keuangan, laporan bulanan, dokumen -------------
+  testWidgets('tangkapan layar kalender keuangan (FR-73)', (t) async {
+    await isiUangDemo();
+    await potret(t, 'kalender_keuangan', '/kalender-keuangan',
+        prefiks: 'f12',
+        pumpLanjutan: 30,
+        periksa: (WidgetTester t) {
+          expect(find.text('Kalender Keuangan'), findsOneWidget);
+          expect(find.byKey(const Key('daftar_hari')), findsOneWidget);
+          expect(find.byKey(const Key('total_keluar')), findsOneWidget);
+          // Kalender harus benar-benar berisi: minimal satu titik peristiwa.
+          expect(
+              find.byWidgetPredicate((w) =>
+                  w.key is ValueKey<String> &&
+                  (w.key as ValueKey<String>).value.startsWith('titik_')),
+              findsWidgets,
+              reason: 'kalender kosong bukan bukti yang jujur');
+        });
+  }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar laporan bulanan (FR-77)', (t) async {
+    await isiUangDemo();
+    await potret(t, 'laporan_bulanan', '/laporan/bulanan',
+        prefiks: 'f12',
+        pumpLanjutan: 30,
+        periksa: (WidgetTester t) {
+          expect(find.text('Laporan Bulanan'), findsOneWidget);
+          // Tombol unduh ada di bawah daftar (di luar viewport), jadi yang
+          // dipastikan di sini adalah ringkasan bulan yang terlihat.
+          expect(find.byKey(const Key('label_bulan')), findsOneWidget);
+          expect(find.byKey(const Key('ringkasan_bulanan')), findsOneWidget);
+        });
+  }, skip: !_fontTersedia);
+
+  testWidgets('tangkapan layar dokumen (FR-128/129)', (t) async {
+    await isiDokumenDemo();
+    await potret(t, 'dokumen', '/dokumen',
+        prefiks: 'f12',
+        pumpLanjutan: 30,
+        periksa: (WidgetTester t) {
+          expect(find.text('Dokumen penting'), findsWidgets);
+          expect(find.textContaining('KTP'), findsWidgets);
         });
   }, skip: !_fontTersedia);
 }
