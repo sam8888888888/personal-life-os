@@ -1,4 +1,4 @@
-/// Layar "Pengeluaran terencana" (FR-70).
+/// Layar "Pengeluaran terencana" — fitur tambahan di luar nomor FR PRD.
 ///
 /// Pengeluaran terencana = uang yang HARUS tersedia sebelum tanggal tertentu,
 /// tetapi belum menjadi transaksi. Layar ini:

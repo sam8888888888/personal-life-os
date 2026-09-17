@@ -125,7 +125,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   key: const Key('buka_pengeluaran_terencana'),
                   leading: const Icon(Icons.event_available_outlined),
                   title: const Text('Pengeluaran terencana'),
-                  subtitle: const Text('Belanja besar yang sudah direncanakan (FR-69)'),
+                  subtitle: const Text('Belanja besar yang sudah direncanakan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/pengeluaran-terencana'),
                 ),

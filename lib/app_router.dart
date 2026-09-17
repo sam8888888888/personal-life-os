@@ -116,7 +116,7 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/notifikasi',
       builder: (c, s) => const PusatNotifikasiScreen(),
     ),
-    // Batch 2 V2: dokumen (FR-128/129) dan uang lanjutan (FR-69/70/74/75).
+    // Batch 2 V2: dokumen (FR-128/129) dan uang lanjutan (FR-74/75).
     GoRoute(
       path: '/dokumen',
       builder: (c, s) => const DokumenScreen(),

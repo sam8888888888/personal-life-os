@@ -1,5 +1,5 @@
-/// Provider modul uang lanjutan (FR-69 catat pembayaran, FR-70 pengeluaran
-/// terencana, FR-74 jadwal pembayaran, FR-75 strategi pelunasan).
+/// Provider modul uang lanjutan (FR-74 catat pembayaran & jadwal, FR-75
+/// strategi pelunasan, plus pengeluaran terencana sebagai fitur tambahan).
 ///
 /// Sengaja ditaruh di folder fitur ini - bukan di `lib/core/providers/` -
 /// supaya berkas bersama tidak perlu disentuh saat modul ini bertambah.

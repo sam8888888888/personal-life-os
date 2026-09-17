@@ -1,4 +1,4 @@
-/// Detail satu kewajiban (FR-69 + FR-74).
+/// Detail satu kewajiban (FR-74).
 ///
 /// Isi layar:
 /// * sisa utang, bagian pokok & bunga yang sudah dibayar, jadwal jatuh tempo;

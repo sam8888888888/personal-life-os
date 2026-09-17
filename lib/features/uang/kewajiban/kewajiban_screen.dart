@@ -1,4 +1,4 @@
-/// Layar "Hutang & kewajiban" (FR-69 + FR-74).
+/// Layar "Hutang & kewajiban" (FR-74).
 ///
 /// Isi layar:
 /// * total sisa utang seluruh kewajiban aktif;

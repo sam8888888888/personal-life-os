@@ -1,4 +1,4 @@
-/// Form tambah/ubah pengeluaran terencana (FR-70).
+/// Form tambah/ubah pengeluaran terencana — fitur tambahan di luar nomor FR PRD.
 ///
 /// Uang yang harus tersedia sebelum tanggal tertentu, tetapi belum menjadi
 /// transaksi. Kolom "aktif" mematikan baris dari hitungan tanpa menghapusnya.

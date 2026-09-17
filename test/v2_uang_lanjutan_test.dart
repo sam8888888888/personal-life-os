@@ -1,4 +1,4 @@
-/// Uji V2 uang lanjutan: FR-69 (catat pembayaran utang), FR-70 (pengeluaran
+/// Uji V2 uang lanjutan: FR-74 (catat pembayaran utang), pengeluaran
 /// terencana), FR-74 (prioritas & jadwal pembayaran), FR-75 (strategi
 /// pelunasan).
 ///
@@ -113,9 +113,9 @@ void main() {
   tearDown(() async => db.close());
 
   // =========================================================================
-  // FR-69 — catat pembayaran utang
+  // FR-74 — catat pembayaran utang
   // =========================================================================
-  group('FR-69 catat pembayaran utang', () {
+  group('FR-74 catat pembayaran utang', () {
     test('sisa utang = pokok acuan - bagian pokok yang dibayar; bunga tidak '
         'mengurangi sisa', () async {
       final k = await kewajiban('Kartu kredit',
@@ -584,9 +584,9 @@ void main() {
   });
 
   // =========================================================================
-  // FR-70 — pengeluaran terencana
+  // pengeluaran terencana (tambahan)
   // =========================================================================
-  group('FR-70 pengeluaran terencana', () {
+  group('pengeluaran terencana (tambahan)', () {
     test('tambah: tanggal dinormalkan ke 00:00 dan daftar urut tanggal', () async {
       final c = await rencana('Liburan',
           jumlahSen: rupiahKeSen(2000000), tanggal: DateTime(2026, 10, 1, 7, 30));
@@ -711,7 +711,7 @@ void main() {
   // =========================================================================
   // Layar
   // =========================================================================
-  group('layar kewajiban (FR-69 + FR-74)', () {
+  group('layar kewajiban (FR-74)', () {
     /// Menampilkan layar daftar kewajiban dengan jam uji 15 Sep 2026.
     Future<void> tampilkan(WidgetTester t) async {
       await t.binding.setSurfaceSize(const Size(420, 900));
@@ -930,7 +930,7 @@ void main() {
     });
   });
 
-  group('layar pengeluaran terencana (FR-70)', () {
+  group('layar pengeluaran terencana (tambahan)', () {
     Future<void> tampilkan(WidgetTester t) async {
       await t.binding.setSurfaceSize(const Size(420, 900));
       await t.pumpWidget(ProviderScope(

@@ -1,4 +1,4 @@
-/// Repositori pembayaran kewajiban/utang — FR-69 (catat pembayaran utang)
+/// Repositori pembayaran kewajiban/utang — FR-74 (catat pembayaran utang)
 /// dan FR-74 (prioritas & jadwal pembayaran).
 ///
 /// Aturan hitung yang dipegang berkas ini (semuanya diuji di

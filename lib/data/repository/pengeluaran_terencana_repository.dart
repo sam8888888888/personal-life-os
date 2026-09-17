@@ -1,4 +1,4 @@
-/// Repositori pengeluaran terencana — FR-70.
+/// Repositori pengeluaran terencana — fitur tambahan di luar nomor FR PRD.
 ///
 /// "Pengeluaran terencana" = uang yang HARUS tersedia sebelum tanggal tertentu,
 /// tetapi belum menjadi transaksi. Berkas ini sengaja tidak menyentuh tabel

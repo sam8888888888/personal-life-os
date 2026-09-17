@@ -1,4 +1,4 @@
-/// Form catat pembayaran kewajiban (FR-69).
+/// Form catat pembayaran kewajiban (FR-74).
 ///
 /// Dua angka dipisah dengan sengaja:
 /// * **jumlah pembayaran** = uang yang benar-benar keluar;
