@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/audit/audit_log.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
@@ -241,6 +242,18 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
     final r = await ref
         .read(tagihanRepoProvider)
         .tandaiLunas(id, periodeYangDibayar: periode);
+    // FR-138: catatan aktivitas ditulis dari layar (satu tulisan yang ditunggu
+    // per aksi pengguna).
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.tagihan,
+      aksi: AksiAudit.tandai,
+      entitas: 'tagihan',
+      entitasId: '$id',
+      sesudah: fmtTanggalAman(periode),
+      ringkas: 'Tagihan #$id ditandai lunas untuk periode '
+          '${fmtTanggalAman(periode)}.',
+    );
     if (!context.mounted) return;
     final berikut = fmtTanggalId(r.periodeJatuhTempo);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -254,6 +267,14 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
 
   Future<void> _aksiUndo(BuildContext context, int id) async {
     await ref.read(tagihanRepoProvider).undoLunas(id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.tagihan,
+      aksi: AksiAudit.ubah,
+      entitas: 'tagihan',
+      entitasId: '$id',
+      ringkas: 'Status lunas tagihan #$id dibatalkan.',
+    );
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Status lunas dibatalkan.')));

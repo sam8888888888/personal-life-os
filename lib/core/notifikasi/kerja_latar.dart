@@ -10,6 +10,7 @@ import 'package:workmanager/workmanager.dart';
 
 import '../../data/database/database.dart';
 import '../../data/repository/tagihan_repository.dart';
+import '../../features/dokumen/pengingat_dokumen.dart';
 import '../../features/ibadah/sumber_pengingat_ibadah.dart';
 import 'jejak.dart';
 import 'layanan_notifikasi_lokal.dart';
@@ -34,6 +35,8 @@ const String tugasSinkronPengingat = 'plo.pengingat.sinkron';
 void daftarkanSumberPengingatLatar() {
   // FR-63 & FR-87: pengingat ibadah (ringkasan pagi + waktu sholat).
   RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
+  // FR-129: pengingat masa berlaku dokumen.
+  daftarkanSumberPengingatDokumen();
 }
 
 /// Titik pendaftaran sumber pengingat **untuk isolate utama** (aplikasi).
@@ -43,6 +46,8 @@ void daftarkanSumberPengingatLatar() {
 /// harus mendaftar sendiri-sendiri.
 void daftarkanSumberPengingatUtama() {
   RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
+  // FR-129: pengingat masa berlaku dokumen.
+  daftarkanSumberPengingatDokumen();
 }
 
 /// Titik masuk pekerja latar (wajib anotasi agar tidak dibuang saat build rilis).

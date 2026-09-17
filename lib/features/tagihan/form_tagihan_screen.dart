@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/audit/audit_log.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
@@ -370,7 +371,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
 
     try {
       if (widget.id == null) {
-        await repo.tambah(TagihanCompanion.insert(
+        final baru = await repo.tambah(TagihanCompanion.insert(
           nama: _nama.text.trim(),
           jumlahSen: Value(jumlahSen),
           jatuhTempo: _jatuhTempo,
@@ -382,6 +383,12 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
           catatan: Value(_catatan.text.trim().isEmpty ? null : _catatan.text.trim()),
           tautanBayar: Value(_tautan.text.trim().isEmpty ? null : _tautan.text.trim()),
         ));
+        await _catatAudit(
+          AksiAudit.buat,
+          entitasId: '${baru.id}',
+          ringkas: 'Tagihan "${baru.nama}" dibuat, jatuh tempo '
+              '${fmtTanggalAman(baru.jatuhTempo)}.',
+        );
       } else {
         final diubah = await repo.ubah(
           TagihanCompanion(
@@ -400,6 +407,14 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
         );
         // PB-13: jangan bilang "tersimpan" kalau tidak ada baris yang berubah
         // (mis. tagihan sudah dihapus di layar lain).
+        if (diubah > 0) {
+          await _catatAudit(
+            AksiAudit.ubah,
+            entitasId: '${widget.id}',
+            ringkas: 'Tagihan "${_nama.text.trim()}" diubah, jatuh tempo '
+                '${fmtTanggalAman(_jatuhTempo)}.',
+          );
+        }
         if (diubah == 0) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -425,6 +440,27 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
     }
   }
 
+  /// FR-138: satu baris catatan aktivitas per aksi pengguna.
+  ///
+  /// Ditulis dari LAYAR (bukan dari repository) karena satu aksi pengguna hanya
+  /// melakukan SATU tulisan basis data yang ditunggu; tulisan kedua di dalam
+  /// method repository membuat uji widget macet (drift menunggu siklus pump).
+  Future<void> _catatAudit(
+    String aksi, {
+    required String entitasId,
+    required String ringkas,
+  }) async {
+    if (widget.id == null && aksi != AksiAudit.buat) return;
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.tagihan,
+      aksi: aksi,
+      entitas: 'tagihan',
+      entitasId: entitasId,
+      ringkas: ringkas,
+    );
+  }
+
   Future<void> _hapus() async {
     final yakin = await showDialog<bool>(
       context: context,
@@ -441,6 +477,11 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
     );
     if (yakin != true) return;
     await ref.read(tagihanRepoProvider).hapus(widget.id!);
+    await _catatAudit(
+      AksiAudit.hapus,
+      entitasId: '${widget.id}',
+      ringkas: 'Tagihan "${_nama.text.trim()}" dihapus beserta riwayatnya.',
+    );
     if (mounted) context.pop();
   }
 }
