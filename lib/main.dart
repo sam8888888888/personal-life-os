@@ -12,6 +12,7 @@ import 'core/notifikasi/layanan_notifikasi_lokal.dart';
 import 'core/notifikasi/pemantau_pengingat.dart';
 import 'core/theme/app_tema.dart';
 import 'features/pengaturan/mata_uang_pengaturan.dart';
+import 'features/pengaturan/penjaga_cadangan_otomatis.dart';
 import 'data/repository/demo_seeder.dart';
 
 /// A2: kanal aksi cepat dari ikon aplikasi (shortcut Android).
@@ -31,8 +32,9 @@ Future<void> main() async {
     return null;
   });
   runApp(const ProviderScope(
-      child: PemantauPengingat(
-          child: MuatMataUang(child: PersonalLifeOsApp()))));
+      child: PenjagaCadanganOtomatis(
+          child: PemantauPengingat(
+              child: MuatMataUang(child: PersonalLifeOsApp())))));
   // A2: bila aplikasi dibuka dari aksi cepat dari kondisi tertutup.
   try {
     final rute = await _kanalRute.invokeMethod<String>('ruteAwal');

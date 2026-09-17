@@ -18,20 +18,29 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audit/audit_log.dart';
+import '../../core/backup/cadangan_otomatis.dart';
 import '../../core/backup/ekspor_impor.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
+import '../../core/utils/waktu.dart';
+import '../ibadah/pengaturan_ibadah.dart';
+import 'cadangan_otomatis_layanan.dart';
 
 class BackupScreen extends ConsumerStatefulWidget {
   const BackupScreen({
     super.key,
     this.layanan,
+    this.layananOtomatis,
     this.folderCadangan,
     this.jamSekarang,
   });
 
   /// Layanan cadangan; bisa diganti saat pengujian.
   final LayananCadangan? layanan;
+
+  /// Layanan cadangan otomatis (FR-137); bisa diganti saat pengujian.
+  final LayananCadanganOtomatis? layananOtomatis;
 
   /// Folder cadangan; bisa diganti saat pengujian.
   final PenentuFolderCadangan? folderCadangan;
@@ -45,8 +54,14 @@ class BackupScreen extends ConsumerStatefulWidget {
 
 class _BackupScreenState extends ConsumerState<BackupScreen> {
   late final LayananCadangan _layanan;
+  late final LayananCadanganOtomatis _otomatis;
 
   List<BerkasCadangan> _berkas = const <BerkasCadangan>[];
+  bool _autoAktif = cadanganOtomatisAktifBawaan;
+  int _autoJeda = jedaCadanganOtomatisBawaan;
+  DateTime? _autoTerakhir;
+  HasilPeriksaKeutuhan? _autoPeriksa;
+  String? _pesanOtomatis;
   bool _memuat = true;
   bool _sibuk = false;
   String? _pesan;
@@ -65,7 +80,85 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           penentuFolder: widget.folderCadangan,
           jam: widget.jamSekarang,
         );
+    _otomatis = widget.layananOtomatis ??
+        LayananCadanganOtomatis(
+          setelan: SetelanBasisData(ref.read(pengaturanRepoProvider)),
+          cadangan: _layanan,
+          jam: widget.jamSekarang,
+        );
     _muatBerkas();
+    _muatOtomatis();
+  }
+
+  /// Baca setelan cadangan otomatis + hasil pemeriksaan terakhir.
+  Future<void> _muatOtomatis() async {
+    try {
+      final bool aktif =
+          await _otomatis.aktif().timeout(const Duration(seconds: 5));
+      final int jeda =
+          await _otomatis.jedaHari().timeout(const Duration(seconds: 5));
+      final DateTime? akhir =
+          await _otomatis.terakhir().timeout(const Duration(seconds: 5));
+      final HasilPeriksaKeutuhan? periksa =
+          await _otomatis.periksaTersimpan().timeout(const Duration(seconds: 5));
+      if (!mounted) return;
+      setState(() {
+        _autoAktif = aktif;
+        _autoJeda = jeda;
+        _autoTerakhir = akhir;
+        _autoPeriksa = periksa;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _pesanOtomatis = 'Setelan cadangan otomatis belum bisa dibaca: $e');
+    }
+  }
+
+  Future<void> _ubahAutoAktif(bool nilai) async {
+    setState(() {
+      _autoAktif = nilai;
+      _pesanOtomatis = null;
+    });
+    await _otomatis.setAktif(nilai);
+    await _muatOtomatis();
+  }
+
+  Future<void> _ubahAutoJeda(int hari) async {
+    setState(() {
+      _autoJeda = hari;
+      _pesanOtomatis = null;
+    });
+    await _otomatis.setJedaHari(hari);
+    await _muatOtomatis();
+  }
+
+  Future<void> _jalankanOtomatis() async {
+    setState(() {
+      _sibuk = true;
+      _pesanOtomatis = null;
+    });
+    final HasilCadanganOtomatis hasil = await _otomatis.jalankan(paksa: true);
+    if (!mounted) return;
+    setState(() {
+      _sibuk = false;
+      _pesanOtomatis = hasil.pesan;
+    });
+    await _muatBerkas();
+    await _muatOtomatis();
+  }
+
+  Future<void> _periksaKeutuhan() async {
+    setState(() {
+      _sibuk = true;
+      _pesanOtomatis = null;
+    });
+    final HasilPeriksaKeutuhan hasil = await _otomatis.periksaKeutuhan();
+    if (!mounted) return;
+    setState(() {
+      _sibuk = false;
+      _autoPeriksa = hasil;
+      _pesanOtomatis = hasil.pesan;
+    });
   }
 
   Future<void> _muatBerkas() async {
@@ -104,6 +197,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       pesan = e.pesan;
     } catch (e) {
       pesan = 'Cadangan belum bisa dibuat: $e';
+    }
+    // FR-138: catat aksi ekspor SETELAH berkas selesai ditulis, supaya isi
+    // cadangan tidak ikut berubah karena baris catatan ini.
+    if (hasil != null) {
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.pengaturan,
+        aksi: AksiAudit.ekspor,
+        entitas: 'cadangan',
+        sesudah: hasil.namaBerkas,
+        ringkas: 'Cadangan dibuat: ${hasil.namaBerkas} '
+            '(${hasil.totalBaris} baris).',
+      );
     }
     if (!mounted) return;
     setState(() {
@@ -196,6 +302,18 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
           berhasil: false,
           pesan: 'Pemulihan belum bisa dijalankan: $e');
     }
+    // FR-138: hanya aksi yang benar-benar berhasil yang dicatat, dan ditulis
+    // SESUDAH verifikasi baca-balik selesai.
+    if (hasil.berhasil) {
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.pengaturan,
+        aksi: AksiAudit.pulihkan,
+        entitas: 'cadangan',
+        sesudah: lihat.namaBerkas,
+        ringkas: 'Data dipulihkan dari berkas ${lihat.namaBerkas}.',
+      );
+    }
     if (!mounted) return;
     setState(() {
       _sibuk = false;
@@ -216,6 +334,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
               children: [
                 ..._bagianEkspor(),
+                const Divider(height: 36),
+                ..._bagianOtomatis(),
                 const Divider(height: 36),
                 ..._bagianImpor(),
                 if (_sibuk) ...[
@@ -281,6 +401,141 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
             ),
           ),
         ),
+      ],
+    ];
+  }
+
+  /// FR-137: setelan cadangan otomatis, status terakhir, dan pemeriksaan
+  /// keutuhan berkas cadangan.
+  List<Widget> _bagianOtomatis() {
+    final tema = Theme.of(context);
+    final DateTime sekarang = (widget.jamSekarang ?? waktuSekarang)();
+    final DateTime? akhir = _autoTerakhir;
+    final Duration? sisa = sisaWaktuCadangan(
+      aktif: _autoAktif,
+      terakhir: akhir,
+      sekarang: sekarang,
+      jedaHari: _autoJeda,
+    );
+    final HasilPeriksaKeutuhan? periksa = _autoPeriksa;
+    return [
+      Text('Cadangan otomatis', style: tema.textTheme.titleMedium),
+      const SizedBox(height: 6),
+      const Text(
+          'Bila dinyalakan, aplikasi membuat cadangan sendiri setiap kali '
+          'dibuka setelah jeda terlewat. Hanya tiga berkas cadangan otomatis '
+          'terbaru yang disimpan; berkas yang lebih lama dihapus. Cadangan '
+          'buatan Anda sendiri tidak pernah dihapus.'),
+      const SizedBox(height: 4),
+      const Text(
+          'Catatan: cadangan otomatis berjalan saat aplikasi dibuka. Saat '
+          'aplikasi tertutup, penjadwal sistem belum dipakai — jadi cadangan '
+          'menunggu sampai aplikasi dibuka lagi.'),
+      SwitchListTile(
+        key: const Key('saklar_cadangan_otomatis'),
+        contentPadding: EdgeInsets.zero,
+        value: _autoAktif,
+        onChanged: _sibuk ? null : (bool? v) => _ubahAutoAktif(v ?? false),
+        title: const Text('Buat cadangan otomatis'),
+        subtitle: Text(_autoAktif ? 'Menyala' : 'Mati'),
+      ),
+      Row(
+        children: [
+          const Text('Jeda'),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonFormField<int>(
+              key: const Key('jeda_cadangan_otomatis'),
+              initialValue: _autoJeda,
+              isExpanded: true,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: [
+                for (final int h in pilihanJedaCadanganHari)
+                  DropdownMenuItem<int>(value: h, child: Text('$h hari')),
+              ],
+              onChanged: _sibuk
+                  ? null
+                  : (int? v) => _ubahAutoJeda(v ?? jedaCadanganOtomatisBawaan),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8),
+      Text(
+        akhir == null
+            ? 'Cadangan otomatis belum pernah dijalankan.'
+            : 'Cadangan otomatis terakhir: ${fmtTanggalAman(akhir)} '
+                '${fmtJam(akhir)}',
+        key: const Key('status_cadangan_otomatis'),
+        style: tema.textTheme.bodySmall,
+      ),
+      if (_autoAktif)
+        Text(
+          sisa == null
+              ? 'Cadangan berikutnya: saat aplikasi dibuka.'
+              : sisa == Duration.zero
+                  ? 'Cadangan berikutnya: saat aplikasi dibuka.'
+                  : 'Cadangan berikutnya: sekitar '
+                      '${sisa.inDays > 0 ? '${sisa.inDays} hari ' : ''}'
+                      '${sisa.inHours % 24} jam lagi.',
+          key: const Key('sisa_cadangan_otomatis'),
+          style: tema.textTheme.bodySmall,
+        ),
+      const SizedBox(height: 12),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            key: const Key('jalankan_cadangan_otomatis'),
+            onPressed: _sibuk ? null : _jalankanOtomatis,
+            icon: const Icon(Icons.autorenew),
+            label: const Text('Jalankan sekarang'),
+          ),
+          OutlinedButton.icon(
+            key: const Key('periksa_keutuhan_cadangan'),
+            onPressed: _sibuk ? null : _periksaKeutuhan,
+            icon: const Icon(Icons.fact_check_outlined),
+            label: const Text('Periksa keutuhan berkas'),
+          ),
+        ],
+      ),
+      if (periksa != null) ...[
+        const SizedBox(height: 12),
+        Card(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Hasil pemeriksaan keutuhan',
+                    style: tema.textTheme.labelLarge),
+                const SizedBox(height: 4),
+                Text(
+                  periksa.pesan,
+                  key: const Key('hasil_periksa_keutuhan'),
+                  style: tema.textTheme.bodySmall,
+                ),
+                if (periksa.waktu != null)
+                  Text(
+                    'Diperiksa ${fmtTanggalAman(periksa.waktu!)} '
+                    '${fmtJam(periksa.waktu!)}'
+                    '${periksa.namaBerkas == null ? '' : ' · ${periksa.namaBerkas}'}',
+                    style: tema.textTheme.bodySmall,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+      if (_pesanOtomatis != null) ...[
+        const SizedBox(height: 12),
+        _kotakPesan(_pesanOtomatis!,
+            key: const Key('pesan_cadangan_otomatis')),
       ],
     ];
   }

@@ -885,12 +885,22 @@ void main() {
   group('FR-24 layar Cadangan & Pemulihan', () {
     testWidgets('keadaan kosong ditampilkan dengan jujur', (t) async {
       await tampilkan(t, BackupScreen(layanan: cadangan, jamSekarang: () => jamUji));
-      await gulirKe(t, find.byKey(const Key('cadangan_kosong')));
-
+      // Tombol ekspor ada di bagian atas; periksa SEBELUM menggulir karena
+      // ListView hanya membangun baris yang terlihat.
       expect(find.byKey(const Key('ekspor_sekarang')), findsOneWidget);
+
+      await gulirKe(t, find.byKey(const Key('cadangan_kosong')));
       expect(find.byKey(const Key('cadangan_kosong')), findsOneWidget);
       expect(find.textContaining('Belum ada berkas cadangan'), findsOneWidget);
-      expect(find.byType(ListTile), findsNothing,
+      // Tidak ada baris berkas palsu: baris berkas selalu berawalan
+      // "impor_berkas_". (Baris setelan lain seperti saklar cadangan otomatis
+      // memang ada dan bukan baris berkas.)
+      expect(
+          find.byWidgetPredicate((w) =>
+              w is ListTile &&
+              w.key is ValueKey<String> &&
+              (w.key as ValueKey<String>).value.startsWith('impor_berkas_')),
+          findsNothing,
           reason: 'tidak ada berkas -> tidak ada baris palsu');
       await tutup(t);
     });

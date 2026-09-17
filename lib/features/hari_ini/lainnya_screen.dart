@@ -101,6 +101,16 @@ class LainnyaScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_dokumen'),
+                  leading: const Icon(Icons.folder_outlined),
+                  title: const Text('Dokumen'),
+                  subtitle: const Text(
+                      'Masa berlaku berkas & pengingat sebelum kedaluwarsa (FR-128)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/dokumen'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_cadangan_lainnya'),
                   leading: const Icon(Icons.backup_outlined),
                   title: const Text('Data & cadangan'),
@@ -108,22 +118,6 @@ class LainnyaScreen extends StatelessWidget {
                       'Ekspor & pulihkan seluruh data, termasuk data pilar V2'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/cadangan'),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text('Menyusul', style: tema.textTheme.titleSmall),
-          const SizedBox(height: 8),
-          const Card(
-            margin: EdgeInsets.zero,
-            child: Column(
-              children: [
-                ListTile(
-                  enabled: false,
-                  leading: Icon(Icons.folder_outlined),
-                  title: Text('Dokumen'),
-                  subtitle: Text('Layar dokumen menyusul (FR-128)'),
                 ),
               ],
             ),

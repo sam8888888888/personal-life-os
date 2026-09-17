@@ -1,7 +1,8 @@
 /// Tab Kerja (V1.5 tipis) — agenda 7 hari ke depan + keadaan kosong jujur.
 ///
 /// Sumber agenda V1.5 = tabel tagihan/dokumen yang sudah ada (FR-65). Modul
-/// Tugas & Goal (FR-78/79) menyusul, jadi bagian itu menulis "Belum ada data".
+/// Tugas & Goal (FR-78/79, V2) sudah tersedia di layar Aksi & Tujuan, jadi
+/// bagian bawah tab ini menampilkan tugas yang belum selesai beserta pintunya.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,8 @@ import '../../core/hari_ini/penyusun_hari_ini.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../data/database/database.dart';
+import '../../data/repository/aksi_repository.dart';
+import '../aksi/aksi_providers.dart';
 import 'pemetaan_tagihan.dart';
 import 'warna_tingkat.dart';
 
@@ -28,6 +31,12 @@ class KerjaScreen extends ConsumerStatefulWidget {
 
 class _KerjaScreenState extends ConsumerState<KerjaScreen> {
   DateTime get _sekarang => widget.jamSekarang?.call() ?? waktuSekarang();
+
+  /// Tugas yang belum selesai (FR-78/79). Dibaca sekali, bukan tiap build.
+  late final Future<List<BarisTugas>> _tugas = ref
+      .read(repoAksiProvider)
+      .ambilTugas(selesai: false)
+      .timeout(const Duration(seconds: 5));
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +83,51 @@ class _KerjaScreenState extends ConsumerState<KerjaScreen> {
           const SizedBox(height: 16),
           Text('Tugas & Goal', style: tema.textTheme.titleSmall),
           const SizedBox(height: 8),
-          const _Kosong('Belum ada data — modul tugas menyusul'),
+          FutureBuilder<List<BarisTugas>>(
+            future: _tugas,
+            builder: (context, snap) {
+              if (snap.connectionState != ConnectionState.done) {
+                return const _Kosong('Membaca tugas…');
+              }
+              if (snap.hasError) {
+                return _Kosong('Tugas belum bisa dibaca: ${snap.error}');
+              }
+              final daftar = snap.data ?? const <BarisTugas>[];
+              if (daftar.isEmpty) {
+                return const _Kosong(
+                    'Belum ada tugas tersimpan. Buka Aksi & Tujuan untuk '
+                    'menambah tugas atau tujuan.');
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Kosong('${daftar.length} tugas belum selesai'),
+                  for (final t in daftar.take(4))
+                    Card(
+                      margin: const EdgeInsets.only(top: 8),
+                      child: ListTile(
+                        leading: const Icon(Icons.check_box_outline_blank),
+                        title: Text(t.nama,
+                            maxLines: 1, overflow: TextOverflow.ellipsis),
+                        subtitle: Text(t.prioritas),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 8),
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              key: const Key('buka_aksi_kerja'),
+              leading: const Icon(Icons.checklist_outlined),
+              title: const Text('Buka Aksi & Tujuan'),
+              subtitle: const Text('Tugas, tujuan, kebiasaan & perawatan (FR-78/79)'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/aksi'),
+            ),
+          ),
         ],
       ),
     );

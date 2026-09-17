@@ -1,4 +1,8 @@
-/// Morning Briefing (FR-63).
+/// Morning Briefing (FR-63) — kini Briefing Pagi Islami (FR-99).
+///
+/// Isi FR-99: sapaan "Assalamualaikum", tanggal Hijriah, waktu sholat
+/// berikutnya + hitung mundur, agenda hari ini, target Quran + adhkar pagi
+/// (kartu [KartuIbadahPagi]), dan blok cuaca.
 ///
 /// Blok cuaca dihilangkan saat offline, bukan menampilkan angka lama (§6.4).
 /// Cuaca belum punya sumber data, jadi ditulis apa adanya "Belum ada data".
@@ -19,6 +23,7 @@ import '../../core/ibadah/penghitung_sholat.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/uang_utils.dart';
 import '../../data/database/database.dart';
+import 'ibadah_pagi_card.dart';
 import 'pemetaan_tagihan.dart';
 import 'warna_tingkat.dart';
 
@@ -139,6 +144,9 @@ class _BriefingPagiScreenState extends ConsumerState<BriefingPagiScreen> {
               subtitle: Text(isi.sholatBerikutnya ?? 'Belum ada data jadwal sholat'),
             ),
           ),
+          const SizedBox(height: 12),
+          // FR-99: target Quran + adhkar pagi, ditandai sendiri oleh pengguna.
+          KartuIbadahPagi(sekarang: _sekarang),
           Card(
             margin: EdgeInsets.zero,
             child: ListTile(

@@ -272,8 +272,11 @@ void main() {
       await tampilkan(t, KerjaScreen(jamSekarang: () => jamPagi));
       expect(find.text('Agenda 7 hari ke depan'), findsOneWidget);
       expect(find.text('Belum ada agenda 7 hari ke depan'), findsOneWidget);
-      await gulirKe(t, find.text('Belum ada data — modul tugas menyusul'));
-      expect(find.text('Belum ada data — modul tugas menyusul'), findsOneWidget);
+      await gulirKe(t, find.textContaining('Belum ada tugas tersimpan'));
+      expect(find.textContaining('Belum ada tugas tersimpan'), findsOneWidget);
+      // Pintu ke modul Tugas & Goal (FR-78/79) harus ada di tab Kerja.
+      await gulirKe(t, find.byKey(const Key('buka_aksi_kerja')));
+      expect(find.byKey(const Key('buka_aksi_kerja')), findsOneWidget);
       await tutup(t);
     });
 
@@ -348,6 +351,9 @@ void main() {
       expect(find.text('Assalamualaikum, Anda'), findsOneWidget);
       expect(find.textContaining('Agenda hari ini'), findsOneWidget);
       expect(find.textContaining('Tagihan 7 hari ke depan'), findsOneWidget);
+      // Kartu ibadah pagi (FR-99) menambah tinggi layar, jadi tombolnya
+      // digulir dulu supaya masuk viewport.
+      await gulirKe(t, find.text('Mulai hari'));
       expect(find.text('Mulai hari'), findsOneWidget);
       expect(find.text('Tutup'), findsOneWidget);
       await tutup(t);
@@ -381,6 +387,72 @@ void main() {
       await gulirKe(t, find.text('Waktu sholat berikutnya'));
       expect(find.text('Waktu sholat berikutnya'), findsOneWidget);
       expect(find.textContaining('lagi'), findsWidgets);
+      await tutup(t);
+    });
+  });
+
+  group('FR-99 Briefing pagi Islami', () {
+    /// Kartu ibadah pagi membaca basis data lewat zona waktu palsu, jadi beri
+    /// beberapa siklus pump sampai tulisan "Memuat" hilang.
+    Future<void> tungguKartu(WidgetTester t) async {
+      for (int i = 0; i < 12; i++) {
+        await t.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    testWidgets('kartu ibadah pagi: target Quran bawaan + 4 adhkar', (t) async {
+      await tampilkan(t, BriefingPagiScreen(jamSekarang: () => jamPagi));
+      await tungguKartu(t);
+      await gulirKe(t, find.byKey(const ValueKey('quran_progres')));
+      expect(find.byKey(const ValueKey('quran_progres')), findsOneWidget);
+      expect(find.textContaining('dari target'), findsOneWidget);
+      expect(find.byKey(const ValueKey('adhkar_pagi')), findsOneWidget);
+      for (final nama in const [
+        'ayat_kursi',
+        'subhanallah',
+        'alhamdulillah',
+        'allahu_akbar',
+      ]) {
+        expect(find.byKey(ValueKey('adhkar_$nama')), findsOneWidget,
+            reason: 'adhkar $nama tidak tampil');
+      }
+      await tutup(t);
+    });
+
+    testWidgets('menandai adhkar menulis satu baris dzikir hari ini',
+        (t) async {
+      await tampilkan(t, BriefingPagiScreen(jamSekarang: () => jamPagi));
+      await tungguKartu(t);
+      await gulirKe(t, find.byKey(const ValueKey('adhkar_ayat_kursi')));
+      await t.tap(find.byKey(const ValueKey('adhkar_ayat_kursi')));
+      await tungguKartu(t);
+
+      final List<LogDzikirData>? baris =
+          await t.runAsync(() => db.select(db.logDzikir).get());
+      expect(baris == null, isFalse);
+      expect(baris!.length, 1, reason: 'harus satu baris dzikir');
+      expect(baris.first.nama, 'Ayat Kursi');
+      expect(baris.first.jenis, 'pagi');
+      expect(baris.first.tercatat, 1);
+
+      final jepretan = t.widget<CheckboxListTile>(
+          find.byKey(const ValueKey('adhkar_ayat_kursi')));
+      expect(jepretan.value, isTrue, reason: 'kotak harus tercentang');
+      await tutup(t);
+    });
+
+    testWidgets('progres Quran mengikuti catatan hari itu', (t) async {
+      // Satu tulisan saja di dalam runAsync (aturan uji drift + waktu palsu).
+      await t.runAsync(() => db.into(db.logQuran).insert(LogQuranCompanion.insert(
+            tanggal: DateTime(jamPagi.year, jamPagi.month, jamPagi.day),
+            jenis: 'baca',
+            jumlah: const Value<double>(3),
+            satuan: const Value<String>('halaman'),
+          )));
+      await tampilkan(t, BriefingPagiScreen(jamSekarang: () => jamPagi));
+      await tungguKartu(t);
+      await gulirKe(t, find.textContaining('Quran hari ini'));
+      expect(find.textContaining('3 halaman dari target 1 halaman'), findsOneWidget);
       await tutup(t);
     });
   });
@@ -656,4 +728,56 @@ void main() {
       await tutup(t);
     });
   });
+
+  group('Pintu V2 Batch 2 & 3', () {
+    testWidgets('Uang hub punya pintu modul uang lanjutan & laporan',
+        (t) async {
+      await bukaRouter(t, awal: '/uang');
+      const kunci = [
+        'buka_kewajiban',
+        'buka_pengeluaran_terencana',
+        'buka_strategi_pelunasan',
+        'buka_kalender_keuangan',
+        'buka_laporan_bulanan',
+      ];
+      for (final String k in kunci) {
+        await gulirKe(t, find.byKey(Key(k)), maks: 16);
+        expect(find.byKey(Key(k)), findsOneWidget, reason: k);
+      }
+      await t.tap(find.byKey(const Key('buka_laporan_bulanan')));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 700));
+      expect(find.text('Laporan Bulanan'), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('rute /kalender-keuangan membuka kalender keuangan (FR-73)',
+        (t) async {
+      await bukaRouter(t, awal: '/kalender-keuangan');
+      expect(find.text('Kalender Keuangan'), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('Lainnya punya pintu Dokumen penting (FR-128)', (t) async {
+      await bukaRouter(t, awal: '/lainnya');
+      await gulirKe(t, find.byKey(const Key('buka_dokumen')), maks: 14);
+      expect(find.byKey(const Key('buka_dokumen')), findsOneWidget);
+      await t.tap(find.byKey(const Key('buka_dokumen')));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 700));
+      expect(find.text('Dokumen penting'), findsOneWidget);
+      await tutup(t);
+    });
+
+    testWidgets('Kerja: pintu Aksi & Tujuan bisa diklik', (t) async {
+      await bukaRouter(t, awal: '/kerja');
+      await gulirKe(t, find.byKey(const Key('buka_aksi_kerja')), maks: 14);
+      await t.tap(find.byKey(const Key('buka_aksi_kerja')));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 700));
+      expect(find.textContaining('Aksi'), findsWidgets);
+      await tutup(t);
+    });
+  });
+
 }

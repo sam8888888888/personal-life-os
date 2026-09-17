@@ -33,6 +33,9 @@ import 'features/aksi/perawatan_screen.dart';
 import 'features/aksi/tugas_screen.dart';
 import 'features/aksi/tujuan_screen.dart';
 import 'features/cari/pencarian_screen.dart';
+import 'features/dokumen/dokumen_form_screen.dart';
+import 'features/dokumen/dokumen_screen.dart';
+import 'features/kalender/kalender_keuangan_screen.dart';
 import 'features/kalender/kalender_screen.dart';
 import 'features/kesehatan/aktivitas_screen.dart';
 import 'features/kesehatan/air_screen.dart';
@@ -40,6 +43,7 @@ import 'features/kesehatan/kesehatan_hub_screen.dart';
 import 'features/kesehatan/obat_screen.dart';
 import 'features/kesehatan/tidur_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
+import 'features/laporan/laporan_bulanan_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
 import 'features/platform/audit_log_screen.dart';
 import 'features/platform/pusat_notifikasi_screen.dart';
@@ -52,6 +56,10 @@ import 'features/tagihan/form_tagihan_screen.dart';
 import 'features/uang/anggaran/anggaran_screen.dart';
 import 'features/uang/kekayaan/kekayaan_screen.dart';
 import 'features/uang/langganan/langganan_screen.dart';
+import 'features/uang/kewajiban/detail_kewajiban_screen.dart';
+import 'features/uang/kewajiban/kewajiban_screen.dart';
+import 'features/uang/pengeluaran_terencana/pengeluaran_terencana_screen.dart';
+import 'features/uang/strategi_pelunasan/strategi_pelunasan_screen.dart';
 import 'features/uang/transaksi/daftar_transaksi_screen.dart';
 import 'features/uang/uang_hub_screen.dart';
 
@@ -107,6 +115,34 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/notifikasi',
       builder: (c, s) => const PusatNotifikasiScreen(),
+    ),
+    // Batch 2 V2: dokumen (FR-128/129) dan uang lanjutan (FR-69/70/74/75).
+    GoRoute(
+      path: '/dokumen',
+      builder: (c, s) => const DokumenScreen(),
+      routes: [
+        GoRoute(
+          path: 'tambah',
+          builder: (c, s) => const DokumenFormScreen(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/uang/kewajiban',
+      builder: (c, s) => const KewajibanScreen(),
+    ),
+    GoRoute(
+      path: '/uang/kewajiban/:id',
+      builder: (c, s) => DetailKewajibanScreen(
+          kewajibanId: int.parse(s.pathParameters['id']!)),
+    ),
+    GoRoute(
+      path: '/uang/pengeluaran-terencana',
+      builder: (c, s) => const PengeluaranTerencanaScreen(),
+    ),
+    GoRoute(
+      path: '/uang/strategi-pelunasan',
+      builder: (c, s) => const StrategiPelunasanScreen(),
     ),
     GoRoute(
       path: '/briefing',
@@ -188,6 +224,16 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/laporan/beban-tagihan',
       builder: (c, s) => const BebanTagihanScreen(),
+    ),
+    // Laporan bulanan + unduhan PDF/CSV (FR-77).
+    GoRoute(
+      path: '/laporan/bulanan',
+      builder: (c, s) => const LaporanBulananScreen(),
+    ),
+    // Kalender keuangan: semua kewajiban uang per tanggal (FR-73).
+    GoRoute(
+      path: '/kalender-keuangan',
+      builder: (c, s) => const KalenderKeuanganScreen(),
     ),
     // Modul aksi & tujuan V2 (FR-78/79/80/83).
     GoRoute(
@@ -283,6 +329,7 @@ class KerangkaNavigasi extends StatelessWidget {
       '/cari',
       '/aksi',
       '/kesehatan',
+      '/dokumen',
     ],
   };
 
