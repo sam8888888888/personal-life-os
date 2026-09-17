@@ -24,6 +24,7 @@ import 'package:personal_life_os/data/database/database.dart';
 import 'package:personal_life_os/data/repository/pengaturan_repository.dart';
 import 'package:personal_life_os/features/ibadah/pengaturan_ibadah.dart';
 import 'package:personal_life_os/features/ibadah/pengingat_ibadah_screen.dart';
+import 'package:personal_life_os/features/dokumen/pengingat_dokumen.dart';
 import 'package:personal_life_os/features/ibadah/sumber_pengingat_ibadah.dart';
 
 /// Tanggal uji tetap supaya hasil hitung dapat dibandingkan dengan hitungan
@@ -286,15 +287,24 @@ void main() {
     test('daftarkanSumberPengingatUtama mendaftar sekali (aman diulang)', () {
       daftarkanSumberPengingatUtama();
       daftarkanSumberPengingatUtama();
-      expect(RegistriSumberPengingat.daftar.length, 1);
-      expect(RegistriSumberPengingat.daftar.first,
-          isA<SumberPengingatIbadah>());
+      // FR-63/87 (ibadah) dan FR-129 (dokumen) — dua sumber, masing-masing satu.
+      expect(
+          RegistriSumberPengingat.daftar.whereType<SumberPengingatIbadah>().length,
+          1);
+      expect(
+          RegistriSumberPengingat.daftar.whereType<SumberPengingatDokumen>().length,
+          1);
       expect(RegistriSumberPengingat.kosong, isFalse);
     });
 
     test('pendaftaran latar memakai sumber yang sama', () {
       daftarkanSumberPengingatLatar();
-      expect(RegistriSumberPengingat.daftar.single, isA<SumberPengingatIbadah>());
+      expect(
+          RegistriSumberPengingat.daftar.whereType<SumberPengingatIbadah>().length,
+          1);
+      expect(
+          RegistriSumberPengingat.daftar.whereType<SumberPengingatDokumen>().length,
+          1);
     });
   });
 
