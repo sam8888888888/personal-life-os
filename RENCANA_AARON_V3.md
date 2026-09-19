@@ -57,7 +57,9 @@ Setiap batch ditulis di berkas ini: perintah uji yang dijalankan, hasil nyata, b
 | **B — FR-64, FR-66** | SELESAI | `0da9dbf` | kartu hari berat + tinjauan malam; 9 uji baru |
 | **B — FR-81, FR-85** | SELESAI | `dcd3a38` | metrik pemulihan & konsistensi mingguan; 5 uji baru |
 | **B — FR-82** | SELESAI | `7677cc3` | skema v5 (visi, area_hidup, tujuan.area_id) + rantai rencana; 6 uji baru; **total 817 uji hijau** |
-| C — FR-65, FR-67, FR-89 | belum mulai | — | — |
+| **C — FR-65, FR-67, FR-89** | SELESAI | `2cfaf6e` | FR-65 uji silang sumber agenda bersama (2 uji), FR-67 locale tanggal ikut mata uang (4 uji), FR-89 sudah ada sejak Dinda (diverifikasi: layar + rute + 12 uji) — **status daftar sisa dikoreksi** |
+| D — fitur lama P0/P1 (FR-21 mode gelap, FR-29 riwayat pembayaran, FR-24/28 sudah ada) | belum mulai | — | — |
+
 
 
 Catatan teknis A2:
