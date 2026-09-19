@@ -12,6 +12,7 @@ import 'core/notifikasi/layanan_notifikasi_lokal.dart';
 import 'core/notifikasi/pemantau_pengingat.dart';
 import 'core/theme/app_tema.dart';
 import 'features/pengaturan/mata_uang_pengaturan.dart';
+import 'features/pengaturan/mode_tema_pengaturan.dart';
 import 'features/pengaturan/penjaga_cadangan_otomatis.dart';
 import 'data/repository/demo_seeder.dart';
 
@@ -36,7 +37,8 @@ Future<void> main() async {
   runApp(const ProviderScope(
       child: PenjagaCadanganOtomatis(
           child: PemantauPengingat(
-              child: MuatMataUang(child: PersonalLifeOsApp())))));
+              child: MuatMataUang(
+                  child: MuatModeTema(child: PersonalLifeOsApp()))))));
   // A2: bila aplikasi dibuka dari aksi cepat dari kondisi tertutup.
   try {
     final rute = await _kanalRute.invokeMethod<String>('ruteAwal');
@@ -60,15 +62,20 @@ Future<void> siapkanPengingatSaatMulai() async {
   }
 }
 
-class PersonalLifeOsApp extends StatelessWidget {
+class PersonalLifeOsApp extends ConsumerWidget {
   const PersonalLifeOsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // FR-21 — terang / gelap / ikut sistem. Ukuran teks tetap mengikuti
+    // pengaturan sistem perangkat.
+    final modeTema = ref.watch(modeTemaProvider).value ?? ModeTema.sistem;
     return MaterialApp.router(
       title: 'Personal Life OS',
       debugShowCheckedModeBanner: false,
       theme: AppTema.terang(),
+      darkTheme: AppTema.gelap(),
+      themeMode: modeTema.mode,
       locale: const Locale('id', 'ID'),
       supportedLocales: const [Locale('id', 'ID'), Locale('en', 'US')],
       localizationsDelegates: const [

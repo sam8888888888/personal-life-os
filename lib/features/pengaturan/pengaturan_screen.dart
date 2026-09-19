@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/mata_uang.dart';
+import 'mode_tema_pengaturan.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
 import 'mata_uang_pengaturan.dart';
@@ -22,6 +23,16 @@ class PengaturanScreen extends ConsumerStatefulWidget {
 class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
   final _pemasukan = TextEditingController();
   bool _terisi = false;
+
+  /// FR-21: simpan pilihan tema (terang / gelap / ikut sistem).
+  Future<void> _ubahModeTema(ModeTema m) async {
+    final db = ref.read(databaseProvider);
+    await simpanModeTema(db, m);
+    ref.invalidate(modeTemaProvider);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Tema diubah ke ${m.label}')));
+  }
 
   /// FR-67: simpan pilihan mata uang lalu perbarui seluruh label uang.
   Future<void> _ubahMataUang(MataUang m) async {
@@ -38,6 +49,9 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
     final bulan = waktuSekarang();
     final pemasukan = ref.watch(pemasukanBulanIniProvider);
     final mataUangSekarang = ref.watch(mataUangProvider).value ?? mataUangAktif;
+    // FR-21 — tema: terang / gelap / ikut sistem (bawaan: ikut sistem).
+    final modeTemaSekarang =
+        ref.watch(modeTemaProvider).value ?? ModeTema.sistem;
 
     pemasukan.whenData((v) {
       if (!_terisi && v > 0) {
@@ -84,6 +98,25 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
               .toList(),
           onChanged: (m) {
             if (m != null) _ubahMataUang(m);
+          },
+        ),
+        const Divider(height: 40),
+        const Text('Tema',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        const Text('Terang, gelap, atau mengikuti pengaturan sistem. '
+            'Ukuran teks tetap mengikuti pengaturan sistem perangkat.'),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<ModeTema>(
+          key: const Key('pilih_mode_tema'),
+          isExpanded: true,
+          initialValue: modeTemaSekarang,
+          decoration: const InputDecoration(labelText: 'Tema'),
+          items: ModeTema.values
+              .map((m) => DropdownMenuItem(value: m, child: Text(m.label)))
+              .toList(),
+          onChanged: (m) {
+            if (m != null) _ubahModeTema(m);
           },
         ),
         const Divider(height: 40),

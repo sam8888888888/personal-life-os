@@ -41,4 +41,44 @@ class AppTema {
       fontFamilyFallback: const ['Roboto', 'Segoe UI', 'Arial'],
     );
   }
+
+  /// FR-21 — tema gelap. Warna tetap dari [seed] yang sama supaya identitas
+  /// visual aplikasi tidak berubah; kontras dijaga untuk pemakaian malam.
+  static ThemeData gelap() {
+    final skema = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+    );
+    return ThemeData(
+      colorScheme: skema,
+      useMaterial3: true,
+      scaffoldBackgroundColor: const Color(0xFF101410),
+      appBarTheme: AppBarTheme(
+        backgroundColor: skema.surface,
+        foregroundColor: skema.onSurface,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      cardTheme: CardThemeData(
+        elevation: 0,
+        color: skema.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: skema.outlineVariant),
+        ),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(),
+        isDense: true,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size.fromHeight(48),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      listTileTheme: const ListTileThemeData(minVerticalPadding: 6),
+      fontFamilyFallback: const ['Roboto', 'Segoe UI', 'Arial'],
+    );
+  }
 }
