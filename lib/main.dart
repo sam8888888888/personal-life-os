@@ -20,7 +20,9 @@ const MethodChannel _kanalRute = MethodChannel('lifeos/rute');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('id_ID'); // format tanggal Indonesia
+  // FR-67 — dua locale: Indonesia (bawaan) & Malaysia (saat mata uang Ringgit).
+  await initializeDateFormatting('id_ID');
+  await initializeDateFormatting('ms_MY');
   await seedDemoJikaDiminta(); // hanya aktif bila dibangun dengan --dart-define=DEMO_SEED=true
   // F3: siapkan notifikasi + pekerja latar (tidak memblokir tampilan).
   unawaited(siapkanPengingatSaatMulai());
@@ -48,6 +50,7 @@ Future<void> main() async {
 Future<void> siapkanPengingatSaatMulai() async {
   try {
     await initializeDateFormatting('id_ID');
+    await initializeDateFormatting('ms_MY');
     await LayananNotifikasiLokal().siapkan();
     // FR-63 & FR-87: daftarkan pengingat ibadah di isolate utama.
     daftarkanSumberPengingatUtama();

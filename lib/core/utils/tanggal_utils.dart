@@ -4,6 +4,8 @@ library;
 
 import 'package:intl/intl.dart';
 
+import 'mata_uang.dart';
+
 import '../../data/model/enums.dart';
 
 /// Tambah n bulan dengan penjepitan akhir bulan.
@@ -92,7 +94,7 @@ DateTime? parseTanggal(String? s) {
   }
   for (final fmt in ['d MMMM yyyy', 'd MMM yyyy']) {
     try {
-      return DateFormat(fmt, 'id_ID').parse(v);
+      return DateFormat(fmt, localeTanggalAktif).parse(v);
     } catch (_) {}
   }
   return null;
@@ -104,16 +106,20 @@ bool validTanggal(int tahun, int bulan, int hari) {
 }
 
 /// Format tanggal pendek Indonesia: 9 September 2026
-String fmtTanggalId(DateTime tgl) => DateFormat('d MMMM yyyy', 'id_ID').format(tgl);
+String fmtTanggalId(DateTime tgl) =>
+    DateFormat('d MMMM yyyy', localeTanggalAktif).format(tgl);
 
 /// Format tanggal pendek: Sen, 9 Sep 2026
-String fmtTanggalPendek(DateTime tgl) => DateFormat('EEE, d MMM yyyy', 'id_ID').format(tgl);
+String fmtTanggalPendek(DateTime tgl) =>
+    DateFormat('EEE, d MMM yyyy', localeTanggalAktif).format(tgl);
 
 /// "September 2026"
-String fmtBulanId(DateTime tgl) => DateFormat('MMMM yyyy', 'id_ID').format(tgl);
+String fmtBulanId(DateTime tgl) =>
+    DateFormat('MMMM yyyy', localeTanggalAktif).format(tgl);
 
 /// "Sep 2026"
-String fmtBulanPendekId(DateTime tgl) => DateFormat('MMM yyyy', 'id_ID').format(tgl);
+String fmtBulanPendekId(DateTime tgl) =>
+    DateFormat('MMM yyyy', localeTanggalAktif).format(tgl);
 
 
 // ---------------------------------------------------------------------------
@@ -124,25 +130,47 @@ String fmtBulanPendekId(DateTime tgl) => DateFormat('MMM yyyy', 'id_ID').format(
 // belum tentu dipanggil. Format di bawah tidak butuh data locale.
 // ---------------------------------------------------------------------------
 
-const List<String> _bulanPanjangId = [
-  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-];
+/// Nama bulan/hari per locale — dipakai varian "aman" di bawah.
+///
+/// Disimpan sebagai tabel (bukan mengandalkan data locale intl) karena
+/// notifikasi bisa dibangun di isolate latar yang belum memanggil
+/// `initializeDateFormatting`. Tambahkan locale baru di sini + di
+/// `initializeDateFormatting` (`lib/main.dart`).
+const Map<String, List<String>> _bulanPanjangLokal = {
+  'id_ID': [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  ],
+  'ms_MY': [
+    'Januari', 'Februari', 'Mac', 'April', 'Mei', 'Jun',
+    'Julai', 'Ogos', 'September', 'Oktober', 'November', 'Disember',
+  ],
+};
 
-const List<String> _bulanSingkatId = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-];
+const Map<String, List<String>> _bulanSingkatLokal = {
+  'id_ID': ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+  'ms_MY': ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun',
+    'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'],
+};
 
-const List<String> _hariSingkatId = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+const Map<String, List<String>> _hariSingkatLokal = {
+  'id_ID': ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+  'ms_MY': ['Isn', 'Sel', 'Rab', 'Kha', 'Jum', 'Sab', 'Ahd'],
+};
 
-/// "9 September 2026" tanpa bergantung data locale intl.
+List<String> _pilihLokal(Map<String, List<String>> peta) =>
+    peta[localeTanggalAktif] ?? peta['id_ID']!;
+
+/// "9 September 2026" (atau "9 Ogos 2026" pada locale Malaysia) —
+/// tanpa bergantung data locale intl.
 String fmtTanggalAman(DateTime t) =>
-    '${t.day} ${_bulanPanjangId[t.month - 1]} ${t.year}';
+    '${t.day} ${_pilihLokal(_bulanPanjangLokal)[t.month - 1]} ${t.year}';
 
-/// "Kam, 10 Sep 2026" tanpa bergantung data locale intl.
+/// "Kam, 10 Sep 2026" (atau "Kha, 10 Sep 2026") tanpa data locale intl.
 String fmtTanggalPendekAman(DateTime t) =>
-    '${_hariSingkatId[t.weekday - 1]}, ${t.day} ${_bulanSingkatId[t.month - 1]} ${t.year}';
+    '${_pilihLokal(_hariSingkatLokal)[t.weekday - 1]}, ${t.day} '
+    '${_pilihLokal(_bulanSingkatLokal)[t.month - 1]} ${t.year}';
 
 /// "09:00"
 String fmtJam(DateTime t) =>

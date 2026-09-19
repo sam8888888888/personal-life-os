@@ -25,6 +25,12 @@ MataUang _aktif = MataUang.idr;
 /// Mata uang yang sedang dipakai aplikasi (bawaan: Rupiah).
 MataUang get mataUangAktif => _aktif;
 
+/// Locale untuk format tanggal & waktu (FR-67).
+///
+/// Satu saklar untuk dua hal: mengganti mata uang ke Ringgit juga memakai
+/// format tanggal Malaysia — bukan cuma simbol uangnya.
+String get localeTanggalAktif => _aktif.locale;
+
 /// Ganti mata uang aktif — dipanggil saat aplikasi mulai dan dari Pengaturan.
 void pakaiMataUang(MataUang m) => _aktif = m;
 
