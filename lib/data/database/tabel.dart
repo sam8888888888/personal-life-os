@@ -339,6 +339,44 @@ class NilaiKewajibanBulanan extends Table {
 
 // =========================== AKSI & TUJUAN (FR-78/79/80/83) ================
 
+/// Visi (FR-82) — puncak rantai: Visi -> Area hidup -> Tujuan -> Proyek -> Tugas.
+///
+/// Vision boleh kosong: aplikasi tidak memaksa pengguna menulis visi dulu
+/// sebelum bisa mencatat tujuan. Menghapus visi **tidak** menghapus isi di
+/// bawahnya (area hanya dilepas) — itu yang dijaga repository.
+class Visi extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
+  TextColumn get idVisi => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 160)();
+  TextColumn get keterangan => text().nullable()();
+  /// aktif / tercapai / arsip.
+  TextColumn get status => text().withDefault(const Constant('aktif'))();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_visi) lewat indeks SQL di `database.dart`.
+}
+
+/// Area hidup (FR-82) — lapisan antara visi dan tujuan.
+///
+/// `visiId` boleh null: area bisa berdiri tanpa visi, dan melepas visi tidak
+/// menghapus area.
+class AreaHidup extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get idArea => text()();
+  IntColumn get visiId => integer().nullable().references(Visi, #id)();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get keterangan => text().nullable()();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+
+  // Unik (id_area) lewat indeks SQL di `database.dart`.
+}
+
 /// Tujuan (FR-78) — puncak rantai Goal -> Project -> Task.
 ///
 /// `targetAngka` + `satuan` dipakai untuk tujuan terukur (mis. 12 buku/bulan);
@@ -351,6 +389,9 @@ class Tujuan extends Table {
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   /// Area hidup: pribadi / keluarga / kerja / keuangan / ibadah / kesehatan.
   TextColumn get area => text().withDefault(const Constant('pribadi'))();
+  /// Penyambung ke tabel `area_hidup` (FR-82). null = belum disambungkan;
+  /// tujuan lama tidak kehilangan apa pun saat kolom ini ditambahkan.
+  IntColumn get areaId => integer().nullable().references(AreaHidup, #id)();
   TextColumn get targetTeks => text().nullable()();
   IntColumn get targetAngka => integer().nullable()();
   TextColumn get satuan => text().nullable()();

@@ -26,6 +26,10 @@ part 'database.g.dart';
   Kewajiban,
   NilaiAsetBulanan,
   NilaiKewajibanBulanan,
+  // Skema v5 — Rantai rencana (FR-82), ditambahkan Aaron 19 Sep 2026:
+  // Visi -> Area hidup -> (Tujuan v4) -> Proyek -> Tugas.
+  Visi,
+  AreaHidup,
   // Skema v4 — Pilar Kehidupan (V2), ditambahkan Dinda 15 Sep 2026.
   // Aksi & tujuan (FR-78/79/80/83)
   Tujuan,
@@ -62,7 +66,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -71,6 +75,7 @@ class AppDatabase extends _$AppDatabase {
           await _pasangIndeksUnik();
           await _pasangIndeksUnikV3();
           await _pasangIndeksUnikV4();
+          await _pasangIndeksUnikV5();
           await _seedKategori();
           await seedKategoriTransaksi();
           await _seedPerawatanV4();
@@ -111,6 +116,23 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             await _seedPerawatanV4();
             debugPrint('migrasi v4 selesai (tabel pilar kehidupan dibuat)');
           }
+          if (dari < 5) {
+            // v5 (FR-82): dua tabel BARU (visi, area hidup) + satu kolom BARU
+            // pada `tujuan` (area_id). Kolom nullable, jadi tujuan lama tetap
+            // utuh tanpa diisi apa pun.
+            await m.createTable(visi);
+            await m.createTable(areaHidup);
+            // Kolom area_id hanya ditambahkan bila tabel `tujuan` SUDAH ada
+            // (perangkat yang datang dari v4). Bila perangkat datang dari v2/v3,
+            // tabel tujuan baru saja dibuat oleh blok v4 di atas dan sudah
+            // memuat kolom ini — menambahkannya lagi = galat "duplicate column".
+            if (dari >= 4) {
+              await m.addColumn(tujuan, tujuan.areaId);
+            }
+            await _pasangIndeksUnikV5();
+            debugPrint('migrasi v5 selesai (visi & area hidup dibuat, '
+                'kolom tujuan.area_id ditambahkan)');
+          }
         },
       );
 
@@ -124,6 +146,14 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
         'ON riwayat_pembayaran(tagihan_id, periode_jatuh_tempo)');
     await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_pemasukan_bulan '
         'ON pemasukan_bulanan(bulan)');
+  }
+
+  /// Skema v5 (FR-82): keunikan pengenal stabil visi & area hidup.
+  Future<void> _pasangIndeksUnikV5() async {
+    await customStatement(
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_visi_id ON visi(id_visi)');
+    await customStatement('CREATE UNIQUE INDEX IF NOT EXISTS idx_area_id '
+        'ON area_hidup(id_area)');
   }
 
   /// Skema v3: tabel baru dibuat di sini (urutan tidak penting, tidak ada FK

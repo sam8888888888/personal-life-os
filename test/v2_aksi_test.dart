@@ -766,7 +766,7 @@ void main() {
   // Bahasa aman pasal III-11
   // =========================================================================
 
-  test('bahasa aman III-11 pada 12 berkas modul aksi', () {
+  test('bahasa aman III-11 pada seluruh berkas modul aksi', () {
     final berkas = <String>[
       for (final f in Directory('lib/features/aksi').listSync())
         if (f is File && f.path.endsWith('.dart')) f.path,

@@ -32,6 +32,7 @@ import 'features/aksi/kebiasaan_screen.dart';
 import 'features/aksi/perawatan_screen.dart';
 import 'features/aksi/tugas_screen.dart';
 import 'features/aksi/tujuan_screen.dart';
+import 'features/aksi/visi_screen.dart';
 import 'features/cari/pencarian_screen.dart';
 import 'features/dokumen/dokumen_form_screen.dart';
 import 'features/dokumen/dokumen_screen.dart';
@@ -246,6 +247,8 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
             path: 'kebiasaan', builder: (c, s) => const KebiasaanScreen()),
         GoRoute(
             path: 'perawatan', builder: (c, s) => const PerawatanScreen()),
+        // FR-82 — puncak rantai rencana.
+        GoRoute(path: 'visi', builder: (c, s) => const VisiScreen()),
       ],
     ),
     // FR-139 — pencarian satu pintu lintas modul.

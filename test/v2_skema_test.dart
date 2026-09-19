@@ -81,14 +81,15 @@ void main() {
       await db.close();
     });
 
-    test('versi skema = 4 dan seluruh tabel pilar dibuat', () async {
-      expect(db.schemaVersion, 4);
+    test('versi skema terkini & seluruh tabel pilar dibuat', () async {
+      // Skema naik ke 5 saat rantai rencana (FR-82) ditambahkan.
+      expect(db.schemaVersion, 5);
       final tabel = await _namaTabel(db);
       for (final nama in _tabelV2) {
         expect(tabel.contains(nama), isTrue, reason: 'tabel $nama belum dibuat');
       }
-      // 13 tabel lama + 23 tabel V2 + sqlite_sequence.
-      expect(tabel.length, greaterThanOrEqualTo(36));
+      // 13 tabel lama + 23 tabel V2 + 2 tabel v5 + sqlite_sequence.
+      expect(tabel.length, greaterThanOrEqualTo(38));
     });
 
     test('seluruh tabel V2 bisa dibaca & masih kosong', () async {

@@ -274,7 +274,9 @@ void main() {
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 36, reason: '13 tabel v3 + 23 tabel v4 = 36');
+      expect(tabel.length, 38,
+          reason: '13 tabel v3 + 23 tabel v4 + 2 tabel v5 (visi, area_hidup) '
+              '= 38');
       expect(tabel.keys, contains('tagihan'));
       expect(tabel.keys, contains('pengaturan'));
       for (final t in tabelV3) {

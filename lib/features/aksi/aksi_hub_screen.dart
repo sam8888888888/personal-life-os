@@ -21,6 +21,7 @@ import 'aksi_providers.dart';
 import 'kebiasaan_screen.dart';
 import 'navigasi_aksi.dart';
 import 'perawatan_screen.dart';
+import 'visi_screen.dart';
 import 'tugas_cepat_sheet.dart';
 import 'tugas_screen.dart';
 import 'tujuan_screen.dart';
@@ -220,6 +221,20 @@ class _StateAksiHub extends ConsumerState<AksiHubScreen> {
                           context,
                           const KebiasaanScreen(),
                           rute: '/aksi/kebiasaan',
+                        ),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        key: const Key('buka_visi'),
+                        leading: const Icon(Icons.flag_outlined),
+                        title: const Text('Visi & Area hidup'),
+                        subtitle: const Text(
+                            'Rantai: Visi → Area → Tujuan → Proyek → Tugas'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => bukaLayarAksi(
+                          context,
+                          const VisiScreen(),
+                          rute: '/aksi/visi',
                         ),
                       ),
                       const Divider(height: 1),

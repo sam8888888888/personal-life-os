@@ -8847,6 +8847,1056 @@ class NilaiKewajibanBulananCompanion
   }
 }
 
+class $VisiTable extends Visi with TableInfo<$VisiTable, VisiData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VisiTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _idVisiMeta = const VerificationMeta('idVisi');
+  @override
+  late final GeneratedColumn<String> idVisi = GeneratedColumn<String>(
+    'id_visi',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _namaMeta = const VerificationMeta('nama');
+  @override
+  late final GeneratedColumn<String> nama = GeneratedColumn<String>(
+    'nama',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 160,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _keteranganMeta = const VerificationMeta(
+    'keterangan',
+  );
+  @override
+  late final GeneratedColumn<String> keterangan = GeneratedColumn<String>(
+    'keterangan',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('aktif'),
+  );
+  static const VerificationMeta _urutanMeta = const VerificationMeta('urutan');
+  @override
+  late final GeneratedColumn<int> urutan = GeneratedColumn<int>(
+    'urutan',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _dibuatPadaMeta = const VerificationMeta(
+    'dibuatPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dibuatPada = GeneratedColumn<DateTime>(
+    'dibuat_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _diubahPadaMeta = const VerificationMeta(
+    'diubahPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> diubahPada = GeneratedColumn<DateTime>(
+    'diubah_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    idVisi,
+    nama,
+    keterangan,
+    status,
+    urutan,
+    dibuatPada,
+    diubahPada,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'visi';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<VisiData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('id_visi')) {
+      context.handle(
+        _idVisiMeta,
+        idVisi.isAcceptableOrUnknown(data['id_visi']!, _idVisiMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_idVisiMeta);
+    }
+    if (data.containsKey('nama')) {
+      context.handle(
+        _namaMeta,
+        nama.isAcceptableOrUnknown(data['nama']!, _namaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_namaMeta);
+    }
+    if (data.containsKey('keterangan')) {
+      context.handle(
+        _keteranganMeta,
+        keterangan.isAcceptableOrUnknown(data['keterangan']!, _keteranganMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('urutan')) {
+      context.handle(
+        _urutanMeta,
+        urutan.isAcceptableOrUnknown(data['urutan']!, _urutanMeta),
+      );
+    }
+    if (data.containsKey('dibuat_pada')) {
+      context.handle(
+        _dibuatPadaMeta,
+        dibuatPada.isAcceptableOrUnknown(data['dibuat_pada']!, _dibuatPadaMeta),
+      );
+    }
+    if (data.containsKey('diubah_pada')) {
+      context.handle(
+        _diubahPadaMeta,
+        diubahPada.isAcceptableOrUnknown(data['diubah_pada']!, _diubahPadaMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  VisiData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return VisiData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      idVisi: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id_visi'],
+      )!,
+      nama: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nama'],
+      )!,
+      keterangan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}keterangan'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      urutan: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}urutan'],
+      )!,
+      dibuatPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}dibuat_pada'],
+      )!,
+      diubahPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}diubah_pada'],
+      )!,
+    );
+  }
+
+  @override
+  $VisiTable createAlias(String alias) {
+    return $VisiTable(attachedDatabase, alias);
+  }
+}
+
+class VisiData extends DataClass implements Insertable<VisiData> {
+  final int id;
+
+  /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
+  final String idVisi;
+  final String nama;
+  final String? keterangan;
+
+  /// aktif / tercapai / arsip.
+  final String status;
+  final int urutan;
+  final DateTime dibuatPada;
+  final DateTime diubahPada;
+  const VisiData({
+    required this.id,
+    required this.idVisi,
+    required this.nama,
+    this.keterangan,
+    required this.status,
+    required this.urutan,
+    required this.dibuatPada,
+    required this.diubahPada,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['id_visi'] = Variable<String>(idVisi);
+    map['nama'] = Variable<String>(nama);
+    if (!nullToAbsent || keterangan != null) {
+      map['keterangan'] = Variable<String>(keterangan);
+    }
+    map['status'] = Variable<String>(status);
+    map['urutan'] = Variable<int>(urutan);
+    map['dibuat_pada'] = Variable<DateTime>(dibuatPada);
+    map['diubah_pada'] = Variable<DateTime>(diubahPada);
+    return map;
+  }
+
+  VisiCompanion toCompanion(bool nullToAbsent) {
+    return VisiCompanion(
+      id: Value(id),
+      idVisi: Value(idVisi),
+      nama: Value(nama),
+      keterangan: keterangan == null && nullToAbsent
+          ? const Value.absent()
+          : Value(keterangan),
+      status: Value(status),
+      urutan: Value(urutan),
+      dibuatPada: Value(dibuatPada),
+      diubahPada: Value(diubahPada),
+    );
+  }
+
+  factory VisiData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return VisiData(
+      id: serializer.fromJson<int>(json['id']),
+      idVisi: serializer.fromJson<String>(json['idVisi']),
+      nama: serializer.fromJson<String>(json['nama']),
+      keterangan: serializer.fromJson<String?>(json['keterangan']),
+      status: serializer.fromJson<String>(json['status']),
+      urutan: serializer.fromJson<int>(json['urutan']),
+      dibuatPada: serializer.fromJson<DateTime>(json['dibuatPada']),
+      diubahPada: serializer.fromJson<DateTime>(json['diubahPada']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'idVisi': serializer.toJson<String>(idVisi),
+      'nama': serializer.toJson<String>(nama),
+      'keterangan': serializer.toJson<String?>(keterangan),
+      'status': serializer.toJson<String>(status),
+      'urutan': serializer.toJson<int>(urutan),
+      'dibuatPada': serializer.toJson<DateTime>(dibuatPada),
+      'diubahPada': serializer.toJson<DateTime>(diubahPada),
+    };
+  }
+
+  VisiData copyWith({
+    int? id,
+    String? idVisi,
+    String? nama,
+    Value<String?> keterangan = const Value.absent(),
+    String? status,
+    int? urutan,
+    DateTime? dibuatPada,
+    DateTime? diubahPada,
+  }) => VisiData(
+    id: id ?? this.id,
+    idVisi: idVisi ?? this.idVisi,
+    nama: nama ?? this.nama,
+    keterangan: keterangan.present ? keterangan.value : this.keterangan,
+    status: status ?? this.status,
+    urutan: urutan ?? this.urutan,
+    dibuatPada: dibuatPada ?? this.dibuatPada,
+    diubahPada: diubahPada ?? this.diubahPada,
+  );
+  VisiData copyWithCompanion(VisiCompanion data) {
+    return VisiData(
+      id: data.id.present ? data.id.value : this.id,
+      idVisi: data.idVisi.present ? data.idVisi.value : this.idVisi,
+      nama: data.nama.present ? data.nama.value : this.nama,
+      keterangan: data.keterangan.present
+          ? data.keterangan.value
+          : this.keterangan,
+      status: data.status.present ? data.status.value : this.status,
+      urutan: data.urutan.present ? data.urutan.value : this.urutan,
+      dibuatPada: data.dibuatPada.present
+          ? data.dibuatPada.value
+          : this.dibuatPada,
+      diubahPada: data.diubahPada.present
+          ? data.diubahPada.value
+          : this.diubahPada,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisiData(')
+          ..write('id: $id, ')
+          ..write('idVisi: $idVisi, ')
+          ..write('nama: $nama, ')
+          ..write('keterangan: $keterangan, ')
+          ..write('status: $status, ')
+          ..write('urutan: $urutan, ')
+          ..write('dibuatPada: $dibuatPada, ')
+          ..write('diubahPada: $diubahPada')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    idVisi,
+    nama,
+    keterangan,
+    status,
+    urutan,
+    dibuatPada,
+    diubahPada,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is VisiData &&
+          other.id == this.id &&
+          other.idVisi == this.idVisi &&
+          other.nama == this.nama &&
+          other.keterangan == this.keterangan &&
+          other.status == this.status &&
+          other.urutan == this.urutan &&
+          other.dibuatPada == this.dibuatPada &&
+          other.diubahPada == this.diubahPada);
+}
+
+class VisiCompanion extends UpdateCompanion<VisiData> {
+  final Value<int> id;
+  final Value<String> idVisi;
+  final Value<String> nama;
+  final Value<String?> keterangan;
+  final Value<String> status;
+  final Value<int> urutan;
+  final Value<DateTime> dibuatPada;
+  final Value<DateTime> diubahPada;
+  const VisiCompanion({
+    this.id = const Value.absent(),
+    this.idVisi = const Value.absent(),
+    this.nama = const Value.absent(),
+    this.keterangan = const Value.absent(),
+    this.status = const Value.absent(),
+    this.urutan = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+    this.diubahPada = const Value.absent(),
+  });
+  VisiCompanion.insert({
+    this.id = const Value.absent(),
+    required String idVisi,
+    required String nama,
+    this.keterangan = const Value.absent(),
+    this.status = const Value.absent(),
+    this.urutan = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+    this.diubahPada = const Value.absent(),
+  }) : idVisi = Value(idVisi),
+       nama = Value(nama);
+  static Insertable<VisiData> custom({
+    Expression<int>? id,
+    Expression<String>? idVisi,
+    Expression<String>? nama,
+    Expression<String>? keterangan,
+    Expression<String>? status,
+    Expression<int>? urutan,
+    Expression<DateTime>? dibuatPada,
+    Expression<DateTime>? diubahPada,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (idVisi != null) 'id_visi': idVisi,
+      if (nama != null) 'nama': nama,
+      if (keterangan != null) 'keterangan': keterangan,
+      if (status != null) 'status': status,
+      if (urutan != null) 'urutan': urutan,
+      if (dibuatPada != null) 'dibuat_pada': dibuatPada,
+      if (diubahPada != null) 'diubah_pada': diubahPada,
+    });
+  }
+
+  VisiCompanion copyWith({
+    Value<int>? id,
+    Value<String>? idVisi,
+    Value<String>? nama,
+    Value<String?>? keterangan,
+    Value<String>? status,
+    Value<int>? urutan,
+    Value<DateTime>? dibuatPada,
+    Value<DateTime>? diubahPada,
+  }) {
+    return VisiCompanion(
+      id: id ?? this.id,
+      idVisi: idVisi ?? this.idVisi,
+      nama: nama ?? this.nama,
+      keterangan: keterangan ?? this.keterangan,
+      status: status ?? this.status,
+      urutan: urutan ?? this.urutan,
+      dibuatPada: dibuatPada ?? this.dibuatPada,
+      diubahPada: diubahPada ?? this.diubahPada,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (idVisi.present) {
+      map['id_visi'] = Variable<String>(idVisi.value);
+    }
+    if (nama.present) {
+      map['nama'] = Variable<String>(nama.value);
+    }
+    if (keterangan.present) {
+      map['keterangan'] = Variable<String>(keterangan.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (urutan.present) {
+      map['urutan'] = Variable<int>(urutan.value);
+    }
+    if (dibuatPada.present) {
+      map['dibuat_pada'] = Variable<DateTime>(dibuatPada.value);
+    }
+    if (diubahPada.present) {
+      map['diubah_pada'] = Variable<DateTime>(diubahPada.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisiCompanion(')
+          ..write('id: $id, ')
+          ..write('idVisi: $idVisi, ')
+          ..write('nama: $nama, ')
+          ..write('keterangan: $keterangan, ')
+          ..write('status: $status, ')
+          ..write('urutan: $urutan, ')
+          ..write('dibuatPada: $dibuatPada, ')
+          ..write('diubahPada: $diubahPada')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AreaHidupTable extends AreaHidup
+    with TableInfo<$AreaHidupTable, AreaHidupData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AreaHidupTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _idAreaMeta = const VerificationMeta('idArea');
+  @override
+  late final GeneratedColumn<String> idArea = GeneratedColumn<String>(
+    'id_area',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visiIdMeta = const VerificationMeta('visiId');
+  @override
+  late final GeneratedColumn<int> visiId = GeneratedColumn<int>(
+    'visi_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES visi (id)',
+    ),
+  );
+  static const VerificationMeta _namaMeta = const VerificationMeta('nama');
+  @override
+  late final GeneratedColumn<String> nama = GeneratedColumn<String>(
+    'nama',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 120,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _keteranganMeta = const VerificationMeta(
+    'keterangan',
+  );
+  @override
+  late final GeneratedColumn<String> keterangan = GeneratedColumn<String>(
+    'keterangan',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _aktifMeta = const VerificationMeta('aktif');
+  @override
+  late final GeneratedColumn<bool> aktif = GeneratedColumn<bool>(
+    'aktif',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("aktif" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _urutanMeta = const VerificationMeta('urutan');
+  @override
+  late final GeneratedColumn<int> urutan = GeneratedColumn<int>(
+    'urutan',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _dibuatPadaMeta = const VerificationMeta(
+    'dibuatPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dibuatPada = GeneratedColumn<DateTime>(
+    'dibuat_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _diubahPadaMeta = const VerificationMeta(
+    'diubahPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> diubahPada = GeneratedColumn<DateTime>(
+    'diubah_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    idArea,
+    visiId,
+    nama,
+    keterangan,
+    aktif,
+    urutan,
+    dibuatPada,
+    diubahPada,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'area_hidup';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AreaHidupData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('id_area')) {
+      context.handle(
+        _idAreaMeta,
+        idArea.isAcceptableOrUnknown(data['id_area']!, _idAreaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_idAreaMeta);
+    }
+    if (data.containsKey('visi_id')) {
+      context.handle(
+        _visiIdMeta,
+        visiId.isAcceptableOrUnknown(data['visi_id']!, _visiIdMeta),
+      );
+    }
+    if (data.containsKey('nama')) {
+      context.handle(
+        _namaMeta,
+        nama.isAcceptableOrUnknown(data['nama']!, _namaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_namaMeta);
+    }
+    if (data.containsKey('keterangan')) {
+      context.handle(
+        _keteranganMeta,
+        keterangan.isAcceptableOrUnknown(data['keterangan']!, _keteranganMeta),
+      );
+    }
+    if (data.containsKey('aktif')) {
+      context.handle(
+        _aktifMeta,
+        aktif.isAcceptableOrUnknown(data['aktif']!, _aktifMeta),
+      );
+    }
+    if (data.containsKey('urutan')) {
+      context.handle(
+        _urutanMeta,
+        urutan.isAcceptableOrUnknown(data['urutan']!, _urutanMeta),
+      );
+    }
+    if (data.containsKey('dibuat_pada')) {
+      context.handle(
+        _dibuatPadaMeta,
+        dibuatPada.isAcceptableOrUnknown(data['dibuat_pada']!, _dibuatPadaMeta),
+      );
+    }
+    if (data.containsKey('diubah_pada')) {
+      context.handle(
+        _diubahPadaMeta,
+        diubahPada.isAcceptableOrUnknown(data['diubah_pada']!, _diubahPadaMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AreaHidupData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AreaHidupData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      idArea: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id_area'],
+      )!,
+      visiId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visi_id'],
+      ),
+      nama: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nama'],
+      )!,
+      keterangan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}keterangan'],
+      ),
+      aktif: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}aktif'],
+      )!,
+      urutan: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}urutan'],
+      )!,
+      dibuatPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}dibuat_pada'],
+      )!,
+      diubahPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}diubah_pada'],
+      )!,
+    );
+  }
+
+  @override
+  $AreaHidupTable createAlias(String alias) {
+    return $AreaHidupTable(attachedDatabase, alias);
+  }
+}
+
+class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
+  final int id;
+  final String idArea;
+  final int? visiId;
+  final String nama;
+  final String? keterangan;
+  final bool aktif;
+  final int urutan;
+  final DateTime dibuatPada;
+  final DateTime diubahPada;
+  const AreaHidupData({
+    required this.id,
+    required this.idArea,
+    this.visiId,
+    required this.nama,
+    this.keterangan,
+    required this.aktif,
+    required this.urutan,
+    required this.dibuatPada,
+    required this.diubahPada,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['id_area'] = Variable<String>(idArea);
+    if (!nullToAbsent || visiId != null) {
+      map['visi_id'] = Variable<int>(visiId);
+    }
+    map['nama'] = Variable<String>(nama);
+    if (!nullToAbsent || keterangan != null) {
+      map['keterangan'] = Variable<String>(keterangan);
+    }
+    map['aktif'] = Variable<bool>(aktif);
+    map['urutan'] = Variable<int>(urutan);
+    map['dibuat_pada'] = Variable<DateTime>(dibuatPada);
+    map['diubah_pada'] = Variable<DateTime>(diubahPada);
+    return map;
+  }
+
+  AreaHidupCompanion toCompanion(bool nullToAbsent) {
+    return AreaHidupCompanion(
+      id: Value(id),
+      idArea: Value(idArea),
+      visiId: visiId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(visiId),
+      nama: Value(nama),
+      keterangan: keterangan == null && nullToAbsent
+          ? const Value.absent()
+          : Value(keterangan),
+      aktif: Value(aktif),
+      urutan: Value(urutan),
+      dibuatPada: Value(dibuatPada),
+      diubahPada: Value(diubahPada),
+    );
+  }
+
+  factory AreaHidupData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AreaHidupData(
+      id: serializer.fromJson<int>(json['id']),
+      idArea: serializer.fromJson<String>(json['idArea']),
+      visiId: serializer.fromJson<int?>(json['visiId']),
+      nama: serializer.fromJson<String>(json['nama']),
+      keterangan: serializer.fromJson<String?>(json['keterangan']),
+      aktif: serializer.fromJson<bool>(json['aktif']),
+      urutan: serializer.fromJson<int>(json['urutan']),
+      dibuatPada: serializer.fromJson<DateTime>(json['dibuatPada']),
+      diubahPada: serializer.fromJson<DateTime>(json['diubahPada']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'idArea': serializer.toJson<String>(idArea),
+      'visiId': serializer.toJson<int?>(visiId),
+      'nama': serializer.toJson<String>(nama),
+      'keterangan': serializer.toJson<String?>(keterangan),
+      'aktif': serializer.toJson<bool>(aktif),
+      'urutan': serializer.toJson<int>(urutan),
+      'dibuatPada': serializer.toJson<DateTime>(dibuatPada),
+      'diubahPada': serializer.toJson<DateTime>(diubahPada),
+    };
+  }
+
+  AreaHidupData copyWith({
+    int? id,
+    String? idArea,
+    Value<int?> visiId = const Value.absent(),
+    String? nama,
+    Value<String?> keterangan = const Value.absent(),
+    bool? aktif,
+    int? urutan,
+    DateTime? dibuatPada,
+    DateTime? diubahPada,
+  }) => AreaHidupData(
+    id: id ?? this.id,
+    idArea: idArea ?? this.idArea,
+    visiId: visiId.present ? visiId.value : this.visiId,
+    nama: nama ?? this.nama,
+    keterangan: keterangan.present ? keterangan.value : this.keterangan,
+    aktif: aktif ?? this.aktif,
+    urutan: urutan ?? this.urutan,
+    dibuatPada: dibuatPada ?? this.dibuatPada,
+    diubahPada: diubahPada ?? this.diubahPada,
+  );
+  AreaHidupData copyWithCompanion(AreaHidupCompanion data) {
+    return AreaHidupData(
+      id: data.id.present ? data.id.value : this.id,
+      idArea: data.idArea.present ? data.idArea.value : this.idArea,
+      visiId: data.visiId.present ? data.visiId.value : this.visiId,
+      nama: data.nama.present ? data.nama.value : this.nama,
+      keterangan: data.keterangan.present
+          ? data.keterangan.value
+          : this.keterangan,
+      aktif: data.aktif.present ? data.aktif.value : this.aktif,
+      urutan: data.urutan.present ? data.urutan.value : this.urutan,
+      dibuatPada: data.dibuatPada.present
+          ? data.dibuatPada.value
+          : this.dibuatPada,
+      diubahPada: data.diubahPada.present
+          ? data.diubahPada.value
+          : this.diubahPada,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AreaHidupData(')
+          ..write('id: $id, ')
+          ..write('idArea: $idArea, ')
+          ..write('visiId: $visiId, ')
+          ..write('nama: $nama, ')
+          ..write('keterangan: $keterangan, ')
+          ..write('aktif: $aktif, ')
+          ..write('urutan: $urutan, ')
+          ..write('dibuatPada: $dibuatPada, ')
+          ..write('diubahPada: $diubahPada')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    idArea,
+    visiId,
+    nama,
+    keterangan,
+    aktif,
+    urutan,
+    dibuatPada,
+    diubahPada,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AreaHidupData &&
+          other.id == this.id &&
+          other.idArea == this.idArea &&
+          other.visiId == this.visiId &&
+          other.nama == this.nama &&
+          other.keterangan == this.keterangan &&
+          other.aktif == this.aktif &&
+          other.urutan == this.urutan &&
+          other.dibuatPada == this.dibuatPada &&
+          other.diubahPada == this.diubahPada);
+}
+
+class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
+  final Value<int> id;
+  final Value<String> idArea;
+  final Value<int?> visiId;
+  final Value<String> nama;
+  final Value<String?> keterangan;
+  final Value<bool> aktif;
+  final Value<int> urutan;
+  final Value<DateTime> dibuatPada;
+  final Value<DateTime> diubahPada;
+  const AreaHidupCompanion({
+    this.id = const Value.absent(),
+    this.idArea = const Value.absent(),
+    this.visiId = const Value.absent(),
+    this.nama = const Value.absent(),
+    this.keterangan = const Value.absent(),
+    this.aktif = const Value.absent(),
+    this.urutan = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+    this.diubahPada = const Value.absent(),
+  });
+  AreaHidupCompanion.insert({
+    this.id = const Value.absent(),
+    required String idArea,
+    this.visiId = const Value.absent(),
+    required String nama,
+    this.keterangan = const Value.absent(),
+    this.aktif = const Value.absent(),
+    this.urutan = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+    this.diubahPada = const Value.absent(),
+  }) : idArea = Value(idArea),
+       nama = Value(nama);
+  static Insertable<AreaHidupData> custom({
+    Expression<int>? id,
+    Expression<String>? idArea,
+    Expression<int>? visiId,
+    Expression<String>? nama,
+    Expression<String>? keterangan,
+    Expression<bool>? aktif,
+    Expression<int>? urutan,
+    Expression<DateTime>? dibuatPada,
+    Expression<DateTime>? diubahPada,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (idArea != null) 'id_area': idArea,
+      if (visiId != null) 'visi_id': visiId,
+      if (nama != null) 'nama': nama,
+      if (keterangan != null) 'keterangan': keterangan,
+      if (aktif != null) 'aktif': aktif,
+      if (urutan != null) 'urutan': urutan,
+      if (dibuatPada != null) 'dibuat_pada': dibuatPada,
+      if (diubahPada != null) 'diubah_pada': diubahPada,
+    });
+  }
+
+  AreaHidupCompanion copyWith({
+    Value<int>? id,
+    Value<String>? idArea,
+    Value<int?>? visiId,
+    Value<String>? nama,
+    Value<String?>? keterangan,
+    Value<bool>? aktif,
+    Value<int>? urutan,
+    Value<DateTime>? dibuatPada,
+    Value<DateTime>? diubahPada,
+  }) {
+    return AreaHidupCompanion(
+      id: id ?? this.id,
+      idArea: idArea ?? this.idArea,
+      visiId: visiId ?? this.visiId,
+      nama: nama ?? this.nama,
+      keterangan: keterangan ?? this.keterangan,
+      aktif: aktif ?? this.aktif,
+      urutan: urutan ?? this.urutan,
+      dibuatPada: dibuatPada ?? this.dibuatPada,
+      diubahPada: diubahPada ?? this.diubahPada,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (idArea.present) {
+      map['id_area'] = Variable<String>(idArea.value);
+    }
+    if (visiId.present) {
+      map['visi_id'] = Variable<int>(visiId.value);
+    }
+    if (nama.present) {
+      map['nama'] = Variable<String>(nama.value);
+    }
+    if (keterangan.present) {
+      map['keterangan'] = Variable<String>(keterangan.value);
+    }
+    if (aktif.present) {
+      map['aktif'] = Variable<bool>(aktif.value);
+    }
+    if (urutan.present) {
+      map['urutan'] = Variable<int>(urutan.value);
+    }
+    if (dibuatPada.present) {
+      map['dibuat_pada'] = Variable<DateTime>(dibuatPada.value);
+    }
+    if (diubahPada.present) {
+      map['diubah_pada'] = Variable<DateTime>(diubahPada.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AreaHidupCompanion(')
+          ..write('id: $id, ')
+          ..write('idArea: $idArea, ')
+          ..write('visiId: $visiId, ')
+          ..write('nama: $nama, ')
+          ..write('keterangan: $keterangan, ')
+          ..write('aktif: $aktif, ')
+          ..write('urutan: $urutan, ')
+          ..write('dibuatPada: $dibuatPada, ')
+          ..write('diubahPada: $diubahPada')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -8898,6 +9948,18 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
     defaultValue: const Constant('pribadi'),
+  );
+  static const VerificationMeta _areaIdMeta = const VerificationMeta('areaId');
+  @override
+  late final GeneratedColumn<int> areaId = GeneratedColumn<int>(
+    'area_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES area_hidup (id)',
+    ),
   );
   static const VerificationMeta _targetTeksMeta = const VerificationMeta(
     'targetTeks',
@@ -9014,6 +10076,7 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
     idTujuan,
     nama,
     area,
+    areaId,
     targetTeks,
     targetAngka,
     satuan,
@@ -9060,6 +10123,12 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
       context.handle(
         _areaMeta,
         area.isAcceptableOrUnknown(data['area']!, _areaMeta),
+      );
+    }
+    if (data.containsKey('area_id')) {
+      context.handle(
+        _areaIdMeta,
+        areaId.isAcceptableOrUnknown(data['area_id']!, _areaIdMeta),
       );
     }
     if (data.containsKey('target_teks')) {
@@ -9156,6 +10225,10 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
         DriftSqlType.string,
         data['${effectivePrefix}area'],
       )!,
+      areaId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}area_id'],
+      ),
       targetTeks: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}target_teks'],
@@ -9214,6 +10287,10 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
 
   /// Area hidup: pribadi / keluarga / kerja / keuangan / ibadah / kesehatan.
   final String area;
+
+  /// Penyambung ke tabel `area_hidup` (FR-82). null = belum disambungkan;
+  /// tujuan lama tidak kehilangan apa pun saat kolom ini ditambahkan.
+  final int? areaId;
   final String? targetTeks;
   final int? targetAngka;
   final String? satuan;
@@ -9231,6 +10308,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     required this.idTujuan,
     required this.nama,
     required this.area,
+    this.areaId,
     this.targetTeks,
     this.targetAngka,
     this.satuan,
@@ -9249,6 +10327,9 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     map['id_tujuan'] = Variable<String>(idTujuan);
     map['nama'] = Variable<String>(nama);
     map['area'] = Variable<String>(area);
+    if (!nullToAbsent || areaId != null) {
+      map['area_id'] = Variable<int>(areaId);
+    }
     if (!nullToAbsent || targetTeks != null) {
       map['target_teks'] = Variable<String>(targetTeks);
     }
@@ -9280,6 +10361,9 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
       idTujuan: Value(idTujuan),
       nama: Value(nama),
       area: Value(area),
+      areaId: areaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(areaId),
       targetTeks: targetTeks == null && nullToAbsent
           ? const Value.absent()
           : Value(targetTeks),
@@ -9315,6 +10399,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
       idTujuan: serializer.fromJson<String>(json['idTujuan']),
       nama: serializer.fromJson<String>(json['nama']),
       area: serializer.fromJson<String>(json['area']),
+      areaId: serializer.fromJson<int?>(json['areaId']),
       targetTeks: serializer.fromJson<String?>(json['targetTeks']),
       targetAngka: serializer.fromJson<int?>(json['targetAngka']),
       satuan: serializer.fromJson<String?>(json['satuan']),
@@ -9335,6 +10420,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
       'idTujuan': serializer.toJson<String>(idTujuan),
       'nama': serializer.toJson<String>(nama),
       'area': serializer.toJson<String>(area),
+      'areaId': serializer.toJson<int?>(areaId),
       'targetTeks': serializer.toJson<String?>(targetTeks),
       'targetAngka': serializer.toJson<int?>(targetAngka),
       'satuan': serializer.toJson<String?>(satuan),
@@ -9353,6 +10439,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     String? idTujuan,
     String? nama,
     String? area,
+    Value<int?> areaId = const Value.absent(),
     Value<String?> targetTeks = const Value.absent(),
     Value<int?> targetAngka = const Value.absent(),
     Value<String?> satuan = const Value.absent(),
@@ -9368,6 +10455,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     idTujuan: idTujuan ?? this.idTujuan,
     nama: nama ?? this.nama,
     area: area ?? this.area,
+    areaId: areaId.present ? areaId.value : this.areaId,
     targetTeks: targetTeks.present ? targetTeks.value : this.targetTeks,
     targetAngka: targetAngka.present ? targetAngka.value : this.targetAngka,
     satuan: satuan.present ? satuan.value : this.satuan,
@@ -9387,6 +10475,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
       idTujuan: data.idTujuan.present ? data.idTujuan.value : this.idTujuan,
       nama: data.nama.present ? data.nama.value : this.nama,
       area: data.area.present ? data.area.value : this.area,
+      areaId: data.areaId.present ? data.areaId.value : this.areaId,
       targetTeks: data.targetTeks.present
           ? data.targetTeks.value
           : this.targetTeks,
@@ -9419,6 +10508,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
           ..write('idTujuan: $idTujuan, ')
           ..write('nama: $nama, ')
           ..write('area: $area, ')
+          ..write('areaId: $areaId, ')
           ..write('targetTeks: $targetTeks, ')
           ..write('targetAngka: $targetAngka, ')
           ..write('satuan: $satuan, ')
@@ -9439,6 +10529,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     idTujuan,
     nama,
     area,
+    areaId,
     targetTeks,
     targetAngka,
     satuan,
@@ -9458,6 +10549,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
           other.idTujuan == this.idTujuan &&
           other.nama == this.nama &&
           other.area == this.area &&
+          other.areaId == this.areaId &&
           other.targetTeks == this.targetTeks &&
           other.targetAngka == this.targetAngka &&
           other.satuan == this.satuan &&
@@ -9475,6 +10567,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
   final Value<String> idTujuan;
   final Value<String> nama;
   final Value<String> area;
+  final Value<int?> areaId;
   final Value<String?> targetTeks;
   final Value<int?> targetAngka;
   final Value<String?> satuan;
@@ -9490,6 +10583,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
     this.idTujuan = const Value.absent(),
     this.nama = const Value.absent(),
     this.area = const Value.absent(),
+    this.areaId = const Value.absent(),
     this.targetTeks = const Value.absent(),
     this.targetAngka = const Value.absent(),
     this.satuan = const Value.absent(),
@@ -9506,6 +10600,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
     required String idTujuan,
     required String nama,
     this.area = const Value.absent(),
+    this.areaId = const Value.absent(),
     this.targetTeks = const Value.absent(),
     this.targetAngka = const Value.absent(),
     this.satuan = const Value.absent(),
@@ -9523,6 +10618,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
     Expression<String>? idTujuan,
     Expression<String>? nama,
     Expression<String>? area,
+    Expression<int>? areaId,
     Expression<String>? targetTeks,
     Expression<int>? targetAngka,
     Expression<String>? satuan,
@@ -9539,6 +10635,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
       if (idTujuan != null) 'id_tujuan': idTujuan,
       if (nama != null) 'nama': nama,
       if (area != null) 'area': area,
+      if (areaId != null) 'area_id': areaId,
       if (targetTeks != null) 'target_teks': targetTeks,
       if (targetAngka != null) 'target_angka': targetAngka,
       if (satuan != null) 'satuan': satuan,
@@ -9557,6 +10654,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
     Value<String>? idTujuan,
     Value<String>? nama,
     Value<String>? area,
+    Value<int?>? areaId,
     Value<String?>? targetTeks,
     Value<int?>? targetAngka,
     Value<String?>? satuan,
@@ -9573,6 +10671,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
       idTujuan: idTujuan ?? this.idTujuan,
       nama: nama ?? this.nama,
       area: area ?? this.area,
+      areaId: areaId ?? this.areaId,
       targetTeks: targetTeks ?? this.targetTeks,
       targetAngka: targetAngka ?? this.targetAngka,
       satuan: satuan ?? this.satuan,
@@ -9600,6 +10699,9 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
     }
     if (area.present) {
       map['area'] = Variable<String>(area.value);
+    }
+    if (areaId.present) {
+      map['area_id'] = Variable<int>(areaId.value);
     }
     if (targetTeks.present) {
       map['target_teks'] = Variable<String>(targetTeks.value);
@@ -9641,6 +10743,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
           ..write('idTujuan: $idTujuan, ')
           ..write('nama: $nama, ')
           ..write('area: $area, ')
+          ..write('areaId: $areaId, ')
           ..write('targetTeks: $targetTeks, ')
           ..write('targetAngka: $targetAngka, ')
           ..write('satuan: $satuan, ')
@@ -22296,6 +23399,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $NilaiKewajibanBulananTable nilaiKewajibanBulanan =
       $NilaiKewajibanBulananTable(this);
+  late final $VisiTable visi = $VisiTable(this);
+  late final $AreaHidupTable areaHidup = $AreaHidupTable(this);
   late final $TujuanTable tujuan = $TujuanTable(this);
   late final $ProyekTable proyek = $ProyekTable(this);
   late final $TugasTable tugas = $TugasTable(this);
@@ -22341,6 +23446,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     kewajiban,
     nilaiAsetBulanan,
     nilaiKewajibanBulanan,
+    visi,
+    areaHidup,
     tujuan,
     proyek,
     tugas,
@@ -28433,11 +29540,836 @@ typedef $$NilaiKewajibanBulananTableProcessedTableManager =
       NilaiKewajibanBulananData,
       PrefetchHooks Function({bool kewajibanId})
     >;
+typedef $$VisiTableCreateCompanionBuilder = VisiCompanion Function({
+  Value<int> id,
+  required String idVisi,
+  required String nama,
+  Value<String?> keterangan,
+  Value<String> status,
+  Value<int> urutan,
+  Value<DateTime> dibuatPada,
+  Value<DateTime> diubahPada,
+});
+typedef $$VisiTableUpdateCompanionBuilder = VisiCompanion Function({
+  Value<int> id,
+  Value<String> idVisi,
+  Value<String> nama,
+  Value<String?> keterangan,
+  Value<String> status,
+  Value<int> urutan,
+  Value<DateTime> dibuatPada,
+  Value<DateTime> diubahPada,
+});
+
+final class $$VisiTableReferences
+    extends BaseReferences<_$AppDatabase, $VisiTable, VisiData> {
+  $$VisiTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$AreaHidupTable, List<AreaHidupData>>
+  _areaHidupRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.areaHidup,
+    aliasName: 'visi__id__area_hidup__visi_id',
+  );
+
+  $$AreaHidupTableProcessedTableManager get areaHidupRefs {
+    final manager = $$AreaHidupTableTableManager(
+      $_db,
+      $_db.areaHidup,
+    ).filter((f) => f.visiId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_areaHidupRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$VisiTableFilterComposer extends Composer<_$AppDatabase, $VisiTable> {
+  $$VisiTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idVisi => $composableBuilder(
+    column: $table.idVisi,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nama => $composableBuilder(
+    column: $table.nama,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get urutan => $composableBuilder(
+    column: $table.urutan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> areaHidupRefs(
+    Expression<bool> Function($$AreaHidupTableFilterComposer f) f,
+  ) {
+    final $$AreaHidupTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.areaHidup,
+      getReferencedColumn: (t) => t.visiId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AreaHidupTableFilterComposer(
+            $db: $db,
+            $table: $db.areaHidup,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VisiTableOrderingComposer extends Composer<_$AppDatabase, $VisiTable> {
+  $$VisiTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idVisi => $composableBuilder(
+    column: $table.idVisi,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nama => $composableBuilder(
+    column: $table.nama,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get urutan => $composableBuilder(
+    column: $table.urutan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$VisiTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VisiTable> {
+  $$VisiTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get idVisi =>
+      $composableBuilder(column: $table.idVisi, builder: (column) => column);
+
+  GeneratedColumn<String> get nama =>
+      $composableBuilder(column: $table.nama, builder: (column) => column);
+
+  GeneratedColumn<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get urutan =>
+      $composableBuilder(column: $table.urutan, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => column,
+  );
+
+  Expression<T> areaHidupRefs<T extends Object>(
+    Expression<T> Function($$AreaHidupTableAnnotationComposer a) f,
+  ) {
+    final $$AreaHidupTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.areaHidup,
+      getReferencedColumn: (t) => t.visiId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AreaHidupTableAnnotationComposer(
+            $db: $db,
+            $table: $db.areaHidup,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$VisiTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VisiTable,
+          VisiData,
+          $$VisiTableFilterComposer,
+          $$VisiTableOrderingComposer,
+          $$VisiTableAnnotationComposer,
+          $$VisiTableCreateCompanionBuilder,
+          $$VisiTableUpdateCompanionBuilder,
+          (VisiData, $$VisiTableReferences),
+          VisiData,
+          PrefetchHooks Function({bool areaHidupRefs})
+        > {
+  $$VisiTableTableManager(_$AppDatabase db, $VisiTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VisiTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VisiTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VisiTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> idVisi = const Value.absent(),
+                Value<String> nama = const Value.absent(),
+                Value<String?> keterangan = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> urutan = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+                Value<DateTime> diubahPada = const Value.absent(),
+              }) => VisiCompanion(
+                id: id,
+                idVisi: idVisi,
+                nama: nama,
+                keterangan: keterangan,
+                status: status,
+                urutan: urutan,
+                dibuatPada: dibuatPada,
+                diubahPada: diubahPada,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String idVisi,
+                required String nama,
+                Value<String?> keterangan = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> urutan = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+                Value<DateTime> diubahPada = const Value.absent(),
+              }) => VisiCompanion.insert(
+                id: id,
+                idVisi: idVisi,
+                nama: nama,
+                keterangan: keterangan,
+                status: status,
+                urutan: urutan,
+                dibuatPada: dibuatPada,
+                diubahPada: diubahPada,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$VisiTable, VisiData>(table),
+                  $$VisiTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({areaHidupRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (areaHidupRefs) db.areaHidup],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (areaHidupRefs)
+                    await $_getPrefetchedData<
+                      VisiData,
+                      $VisiTable,
+                      AreaHidupData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$VisiTableReferences
+                          ._areaHidupRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$VisiTableReferences(db, table, p0).areaHidupRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.visiId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$VisiTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VisiTable,
+      VisiData,
+      $$VisiTableFilterComposer,
+      $$VisiTableOrderingComposer,
+      $$VisiTableAnnotationComposer,
+      $$VisiTableCreateCompanionBuilder,
+      $$VisiTableUpdateCompanionBuilder,
+      (VisiData, $$VisiTableReferences),
+      VisiData,
+      PrefetchHooks Function({bool areaHidupRefs})
+    >;
+typedef $$AreaHidupTableCreateCompanionBuilder = AreaHidupCompanion Function({
+  Value<int> id,
+  required String idArea,
+  Value<int?> visiId,
+  required String nama,
+  Value<String?> keterangan,
+  Value<bool> aktif,
+  Value<int> urutan,
+  Value<DateTime> dibuatPada,
+  Value<DateTime> diubahPada,
+});
+typedef $$AreaHidupTableUpdateCompanionBuilder = AreaHidupCompanion Function({
+  Value<int> id,
+  Value<String> idArea,
+  Value<int?> visiId,
+  Value<String> nama,
+  Value<String?> keterangan,
+  Value<bool> aktif,
+  Value<int> urutan,
+  Value<DateTime> dibuatPada,
+  Value<DateTime> diubahPada,
+});
+
+final class $$AreaHidupTableReferences
+    extends BaseReferences<_$AppDatabase, $AreaHidupTable, AreaHidupData> {
+  $$AreaHidupTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $VisiTable _visiIdTable(_$AppDatabase db) =>
+      db.visi.createAlias('area_hidup__visi_id__visi__id');
+
+  $$VisiTableProcessedTableManager? get visiId {
+    final $_column = $_itemColumn<int>('visi_id');
+    if ($_column == null) return null;
+    final manager = $$VisiTableTableManager(
+      $_db,
+      $_db.visi,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_visiIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$TujuanTable, List<TujuanData>> _tujuanRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.tujuan,
+    aliasName: 'area_hidup__id__tujuan__area_id',
+  );
+
+  $$TujuanTableProcessedTableManager get tujuanRefs {
+    final manager = $$TujuanTableTableManager(
+      $_db,
+      $_db.tujuan,
+    ).filter((f) => f.areaId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_tujuanRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$AreaHidupTableFilterComposer
+    extends Composer<_$AppDatabase, $AreaHidupTable> {
+  $$AreaHidupTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get idArea => $composableBuilder(
+    column: $table.idArea,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nama => $composableBuilder(
+    column: $table.nama,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get aktif => $composableBuilder(
+    column: $table.aktif,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get urutan => $composableBuilder(
+    column: $table.urutan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$VisiTableFilterComposer get visiId {
+    final $$VisiTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.visiId,
+      referencedTable: $db.visi,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisiTableFilterComposer(
+            $db: $db,
+            $table: $db.visi,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<bool> tujuanRefs(
+    Expression<bool> Function($$TujuanTableFilterComposer f) f,
+  ) {
+    final $$TujuanTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.tujuan,
+      getReferencedColumn: (t) => t.areaId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TujuanTableFilterComposer(
+            $db: $db,
+            $table: $db.tujuan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AreaHidupTableOrderingComposer
+    extends Composer<_$AppDatabase, $AreaHidupTable> {
+  $$AreaHidupTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get idArea => $composableBuilder(
+    column: $table.idArea,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nama => $composableBuilder(
+    column: $table.nama,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get aktif => $composableBuilder(
+    column: $table.aktif,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get urutan => $composableBuilder(
+    column: $table.urutan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$VisiTableOrderingComposer get visiId {
+    final $$VisiTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.visiId,
+      referencedTable: $db.visi,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisiTableOrderingComposer(
+            $db: $db,
+            $table: $db.visi,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AreaHidupTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AreaHidupTable> {
+  $$AreaHidupTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get idArea =>
+      $composableBuilder(column: $table.idArea, builder: (column) => column);
+
+  GeneratedColumn<String> get nama =>
+      $composableBuilder(column: $table.nama, builder: (column) => column);
+
+  GeneratedColumn<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get aktif =>
+      $composableBuilder(column: $table.aktif, builder: (column) => column);
+
+  GeneratedColumn<int> get urutan =>
+      $composableBuilder(column: $table.urutan, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => column,
+  );
+
+  $$VisiTableAnnotationComposer get visiId {
+    final $$VisiTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.visiId,
+      referencedTable: $db.visi,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$VisiTableAnnotationComposer(
+            $db: $db,
+            $table: $db.visi,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  Expression<T> tujuanRefs<T extends Object>(
+    Expression<T> Function($$TujuanTableAnnotationComposer a) f,
+  ) {
+    final $$TujuanTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.tujuan,
+      getReferencedColumn: (t) => t.areaId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TujuanTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tujuan,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$AreaHidupTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AreaHidupTable,
+          AreaHidupData,
+          $$AreaHidupTableFilterComposer,
+          $$AreaHidupTableOrderingComposer,
+          $$AreaHidupTableAnnotationComposer,
+          $$AreaHidupTableCreateCompanionBuilder,
+          $$AreaHidupTableUpdateCompanionBuilder,
+          (AreaHidupData, $$AreaHidupTableReferences),
+          AreaHidupData,
+          PrefetchHooks Function({bool visiId, bool tujuanRefs})
+        > {
+  $$AreaHidupTableTableManager(_$AppDatabase db, $AreaHidupTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AreaHidupTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AreaHidupTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AreaHidupTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> idArea = const Value.absent(),
+                Value<int?> visiId = const Value.absent(),
+                Value<String> nama = const Value.absent(),
+                Value<String?> keterangan = const Value.absent(),
+                Value<bool> aktif = const Value.absent(),
+                Value<int> urutan = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+                Value<DateTime> diubahPada = const Value.absent(),
+              }) => AreaHidupCompanion(
+                id: id,
+                idArea: idArea,
+                visiId: visiId,
+                nama: nama,
+                keterangan: keterangan,
+                aktif: aktif,
+                urutan: urutan,
+                dibuatPada: dibuatPada,
+                diubahPada: diubahPada,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String idArea,
+                Value<int?> visiId = const Value.absent(),
+                required String nama,
+                Value<String?> keterangan = const Value.absent(),
+                Value<bool> aktif = const Value.absent(),
+                Value<int> urutan = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+                Value<DateTime> diubahPada = const Value.absent(),
+              }) => AreaHidupCompanion.insert(
+                id: id,
+                idArea: idArea,
+                visiId: visiId,
+                nama: nama,
+                keterangan: keterangan,
+                aktif: aktif,
+                urutan: urutan,
+                dibuatPada: dibuatPada,
+                diubahPada: diubahPada,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AreaHidupTable, AreaHidupData>(table),
+                  $$AreaHidupTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({visiId = false, tujuanRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (tujuanRefs) db.tujuan],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (visiId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.visiId,
+                        referencedTable: $$AreaHidupTableReferences
+                            ._visiIdTable(db),
+                        referencedColumn: $$AreaHidupTableReferences
+                            ._visiIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (tujuanRefs)
+                    await $_getPrefetchedData<
+                      AreaHidupData,
+                      $AreaHidupTable,
+                      TujuanData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$AreaHidupTableReferences
+                          ._tujuanRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$AreaHidupTableReferences(db, table, p0).tujuanRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.areaId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AreaHidupTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AreaHidupTable,
+      AreaHidupData,
+      $$AreaHidupTableFilterComposer,
+      $$AreaHidupTableOrderingComposer,
+      $$AreaHidupTableAnnotationComposer,
+      $$AreaHidupTableCreateCompanionBuilder,
+      $$AreaHidupTableUpdateCompanionBuilder,
+      (AreaHidupData, $$AreaHidupTableReferences),
+      AreaHidupData,
+      PrefetchHooks Function({bool visiId, bool tujuanRefs})
+    >;
 typedef $$TujuanTableCreateCompanionBuilder = TujuanCompanion Function({
   Value<int> id,
   required String idTujuan,
   required String nama,
   Value<String> area,
+  Value<int?> areaId,
   Value<String?> targetTeks,
   Value<int?> targetAngka,
   Value<String?> satuan,
@@ -28454,6 +30386,7 @@ typedef $$TujuanTableUpdateCompanionBuilder = TujuanCompanion Function({
   Value<String> idTujuan,
   Value<String> nama,
   Value<String> area,
+  Value<int?> areaId,
   Value<String?> targetTeks,
   Value<int?> targetAngka,
   Value<String?> satuan,
@@ -28469,6 +30402,23 @@ typedef $$TujuanTableUpdateCompanionBuilder = TujuanCompanion Function({
 final class $$TujuanTableReferences
     extends BaseReferences<_$AppDatabase, $TujuanTable, TujuanData> {
   $$TujuanTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $AreaHidupTable _areaIdTable(_$AppDatabase db) =>
+      db.areaHidup.createAlias('tujuan__area_id__area_hidup__id');
+
+  $$AreaHidupTableProcessedTableManager? get areaId {
+    final $_column = $_itemColumn<int>('area_id');
+    if ($_column == null) return null;
+    final manager = $$AreaHidupTableTableManager(
+      $_db,
+      $_db.areaHidup,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_areaIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 
   static MultiTypedResultKey<$ProyekTable, List<ProyekData>> _proyekRefsTable(
     _$AppDatabase db,
@@ -28587,6 +30537,29 @@ class $$TujuanTableFilterComposer
     column: $table.diubahPada,
     builder: (column) => ColumnFilters(column),
   );
+
+  $$AreaHidupTableFilterComposer get areaId {
+    final $$AreaHidupTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.areaId,
+      referencedTable: $db.areaHidup,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AreaHidupTableFilterComposer(
+            $db: $db,
+            $table: $db.areaHidup,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 
   Expression<bool> proyekRefs(
     Expression<bool> Function($$ProyekTableFilterComposer f) f,
@@ -28717,6 +30690,29 @@ class $$TujuanTableOrderingComposer
     column: $table.diubahPada,
     builder: (column) => ColumnOrderings(column),
   );
+
+  $$AreaHidupTableOrderingComposer get areaId {
+    final $$AreaHidupTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.areaId,
+      referencedTable: $db.areaHidup,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AreaHidupTableOrderingComposer(
+            $db: $db,
+            $table: $db.areaHidup,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TujuanTableAnnotationComposer
@@ -28782,6 +30778,29 @@ class $$TujuanTableAnnotationComposer
     builder: (column) => column,
   );
 
+  $$AreaHidupTableAnnotationComposer get areaId {
+    final $$AreaHidupTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.areaId,
+      referencedTable: $db.areaHidup,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AreaHidupTableAnnotationComposer(
+            $db: $db,
+            $table: $db.areaHidup,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   Expression<T> proyekRefs<T extends Object>(
     Expression<T> Function($$ProyekTableAnnotationComposer a) f,
   ) {
@@ -28846,7 +30865,7 @@ class $$TujuanTableTableManager
           $$TujuanTableUpdateCompanionBuilder,
           (TujuanData, $$TujuanTableReferences),
           TujuanData,
-          PrefetchHooks Function({bool proyekRefs, bool tugasRefs})
+          PrefetchHooks Function({bool areaId, bool proyekRefs, bool tugasRefs})
         > {
   $$TujuanTableTableManager(_$AppDatabase db, $TujuanTable table)
     : super(
@@ -28865,6 +30884,7 @@ class $$TujuanTableTableManager
                 Value<String> idTujuan = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> area = const Value.absent(),
+                Value<int?> areaId = const Value.absent(),
                 Value<String?> targetTeks = const Value.absent(),
                 Value<int?> targetAngka = const Value.absent(),
                 Value<String?> satuan = const Value.absent(),
@@ -28880,6 +30900,7 @@ class $$TujuanTableTableManager
                 idTujuan: idTujuan,
                 nama: nama,
                 area: area,
+                areaId: areaId,
                 targetTeks: targetTeks,
                 targetAngka: targetAngka,
                 satuan: satuan,
@@ -28897,6 +30918,7 @@ class $$TujuanTableTableManager
                 required String idTujuan,
                 required String nama,
                 Value<String> area = const Value.absent(),
+                Value<int?> areaId = const Value.absent(),
                 Value<String?> targetTeks = const Value.absent(),
                 Value<int?> targetAngka = const Value.absent(),
                 Value<String?> satuan = const Value.absent(),
@@ -28912,6 +30934,7 @@ class $$TujuanTableTableManager
                 idTujuan: idTujuan,
                 nama: nama,
                 area: area,
+                areaId: areaId,
                 targetTeks: targetTeks,
                 targetAngka: targetAngka,
                 satuan: satuan,
@@ -28931,48 +30954,84 @@ class $$TujuanTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({proyekRefs = false, tugasRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (proyekRefs) db.proyek,
-                if (tugasRefs) db.tugas,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (proyekRefs)
-                    await $_getPrefetchedData<
-                      TujuanData,
-                      $TujuanTable,
-                      ProyekData
-                    >(
-                      currentTable: table,
-                      referencedTable: $$TujuanTableReferences._proyekRefsTable(
-                        db,
-                      ),
-                      managerFromTypedResult: (p0) =>
-                          $$TujuanTableReferences(db, table, p0).proyekRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.tujuanId == item.id),
-                      typedResults: items,
-                    ),
-                  if (tugasRefs)
-                    await $_getPrefetchedData<TujuanData, $TujuanTable, Tuga>(
-                      currentTable: table,
-                      referencedTable: $$TujuanTableReferences._tugasRefsTable(
-                        db,
-                      ),
-                      managerFromTypedResult: (p0) =>
-                          $$TujuanTableReferences(db, table, p0).tugasRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.tujuanId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({areaId = false, proyekRefs = false, tugasRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (proyekRefs) db.proyek,
+                    if (tugasRefs) db.tugas,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (areaId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.areaId,
+                            referencedTable: $$TujuanTableReferences
+                                ._areaIdTable(db),
+                            referencedColumn: $$TujuanTableReferences
+                                ._areaIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (proyekRefs)
+                        await $_getPrefetchedData<
+                          TujuanData,
+                          $TujuanTable,
+                          ProyekData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TujuanTableReferences
+                              ._proyekRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TujuanTableReferences(db, table, p0).proyekRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.tujuanId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (tugasRefs)
+                        await $_getPrefetchedData<
+                          TujuanData,
+                          $TujuanTable,
+                          Tuga
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TujuanTableReferences
+                              ._tugasRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TujuanTableReferences(db, table, p0).tugasRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.tujuanId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -28989,7 +31048,7 @@ typedef $$TujuanTableProcessedTableManager =
       $$TujuanTableUpdateCompanionBuilder,
       (TujuanData, $$TujuanTableReferences),
       TujuanData,
-      PrefetchHooks Function({bool proyekRefs, bool tugasRefs})
+      PrefetchHooks Function({bool areaId, bool proyekRefs, bool tugasRefs})
     >;
 typedef $$ProyekTableCreateCompanionBuilder = ProyekCompanion Function({
   Value<int> id,
@@ -36677,6 +38736,9 @@ class $AppDatabaseManager {
       $$NilaiAsetBulananTableTableManager(_db, _db.nilaiAsetBulanan);
   $$NilaiKewajibanBulananTableTableManager get nilaiKewajibanBulanan =>
       $$NilaiKewajibanBulananTableTableManager(_db, _db.nilaiKewajibanBulanan);
+  $$VisiTableTableManager get visi => $$VisiTableTableManager(_db, _db.visi);
+  $$AreaHidupTableTableManager get areaHidup =>
+      $$AreaHidupTableTableManager(_db, _db.areaHidup);
   $$TujuanTableTableManager get tujuan =>
       $$TujuanTableTableManager(_db, _db.tujuan);
   $$ProyekTableTableManager get proyek =>
