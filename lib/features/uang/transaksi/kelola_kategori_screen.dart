@@ -11,6 +11,7 @@ import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audit/audit_log.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../data/database/database.dart';
 import '../../../data/model/enums.dart';
@@ -49,6 +50,20 @@ class _KelolaKategoriScreenState extends ConsumerState<KelolaKategoriScreen> {
   /// Tampilkan juga kategori yang disembunyikan (dengan tanda jelas)?
   bool _tampilkanArsip = true;
 
+  /// FR-138 — catatan aktivitas untuk kategori.
+  ///
+  /// Satu helper supaya empat aksi (tambah/ubah/arsip/hapus) menulis catatan
+  /// dengan bentuk yang sama, dan penulisan tidak pernah menggagalkan aksi.
+  Future<void> _audit(String aksi, {String? id, required String ringkas}) =>
+      catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kategori,
+        aksi: aksi,
+        entitas: 'kategori',
+        entitasId: id,
+        ringkas: ringkas,
+      );
+
   Future<void> _tambah() async {
     final hasil = await showDialog<HasilKategori>(
       context: context,
@@ -62,6 +77,8 @@ class _KelolaKategoriScreenState extends ConsumerState<KelolaKategoriScreen> {
             ikon: hasil.ikon,
             warna: hasil.warna,
           );
+      await _audit(AksiAudit.buat,
+          ringkas: 'Kategori "${hasil.nama}" ditambahkan.');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Kategori "${hasil.nama}" ditambahkan.')));
@@ -85,6 +102,9 @@ class _KelolaKategoriScreenState extends ConsumerState<KelolaKategoriScreen> {
             ikon: hasil.ikon,
             warna: hasil.warna,
           );
+      await _audit(AksiAudit.ubah,
+          id: '${k.id}',
+          ringkas: 'Kategori "${hasil.nama}" diubah.');
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Kategori diperbarui.')));
@@ -103,6 +123,11 @@ class _KelolaKategoriScreenState extends ConsumerState<KelolaKategoriScreen> {
       } else {
         await ref.read(repoKategoriProvider).sembunyikan(k.id);
       }
+      await _audit(AksiAudit.ubah,
+          id: '${k.id}',
+          ringkas: k.arsip
+              ? 'Kategori "${k.nama}" ditampilkan kembali.'
+              : 'Kategori "${k.nama}" disembunyikan (riwayat tetap utuh).');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(k.arsip
@@ -135,6 +160,8 @@ class _KelolaKategoriScreenState extends ConsumerState<KelolaKategoriScreen> {
     if (yakin != true || !mounted) return;
     try {
       await ref.read(repoKategoriProvider).hapus(k.id);
+      await _audit(AksiAudit.hapus,
+          id: '${k.id}', ringkas: 'Kategori "${k.nama}" dihapus.');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Kategori "${k.nama}" dihapus.')));

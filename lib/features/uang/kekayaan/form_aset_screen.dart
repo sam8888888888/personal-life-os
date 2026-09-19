@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audit/audit_log.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/uang_utils.dart';
 import '../../../data/database/database.dart';
@@ -192,6 +193,16 @@ class _FormAsetScreenState extends ConsumerState<FormAsetScreen> {
           catatan: _catatan.text.trim(),
         );
       }
+      // FR-138 — catatan aktivitas modul aset.
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.aset,
+        aksi: _baru ? AksiAudit.buat : AksiAudit.ubah,
+        entitas: 'aset',
+        entitasId: _baru ? null : '${widget.aset!.id}',
+        ringkas: 'Aset "${_nama.text.trim()}" '
+            '${_baru ? 'dibuat' : 'diubah'} (${fmtRpDariSen(sen)}).',
+      );
     } catch (e) {
       _pesan('Aset tidak bisa disimpan: $e');
       return;
@@ -224,6 +235,14 @@ class _FormAsetScreenState extends ConsumerState<FormAsetScreen> {
     if (yakin != true) return;
     try {
       await _repo.hapusAset(widget.aset!.id);
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.aset,
+        aksi: AksiAudit.hapus,
+        entitas: 'aset',
+        entitasId: '${widget.aset!.id}',
+        ringkas: 'Aset "${widget.aset!.nama}" dihapus.',
+      );
     } catch (e) {
       _pesan('Aset tidak bisa dihapus: $e');
       return;

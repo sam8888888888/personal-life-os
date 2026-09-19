@@ -14,6 +14,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audit/audit_log.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/tanggal_utils.dart';
 import '../../../core/utils/uang_utils.dart';
@@ -141,6 +142,18 @@ class _FormTransaksiScreenState extends ConsumerState<FormTransaksiScreen> {
                 _catatan.text.trim().isEmpty ? null : _catatan.text.trim()),
             sumber: const Value('manual'),
           ));
+      // FR-138 — catatan aktivitas modul uang.
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.transaksi,
+        aksi: widget.id == null ? AksiAudit.buat : AksiAudit.ubah,
+        entitas: 'transaksi',
+        entitasId: _idTransaksi,
+        ringkas: 'Transaksi ${_jenis.nilaiDb} '
+            '${fmtRpDariSen(rupiahKeSen(nominal))} '
+            '${widget.id == null ? 'dicatat' : 'diubah'} '
+            '(${fmtTanggalId(_tanggal)}).',
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(widget.id == null

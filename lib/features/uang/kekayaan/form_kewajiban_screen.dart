@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audit/audit_log.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/uang_utils.dart';
 import '../../../data/database/database.dart';
@@ -240,6 +241,17 @@ class _FormKewajibanScreenState extends ConsumerState<FormKewajibanScreen> {
           catatan: _catatan.text.trim(),
         );
       }
+      // FR-138 — catatan aktivitas modul kewajiban.
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kewajiban,
+        aksi: _baru ? AksiAudit.buat : AksiAudit.ubah,
+        entitas: 'kewajiban',
+        entitasId: _baru ? null : '${widget.kewajiban!.id}',
+        ringkas: 'Kewajiban "${_nama.text.trim()}" '
+            '${_baru ? 'dibuat' : 'diubah'} '
+            '(sisa ${fmtRpDariSen(sisaSen)}).',
+      );
     } catch (e) {
       _pesan('Kewajiban tidak bisa disimpan: $e');
       return;
@@ -272,6 +284,14 @@ class _FormKewajibanScreenState extends ConsumerState<FormKewajibanScreen> {
     if (yakin != true) return;
     try {
       await _repo.hapusKewajiban(widget.kewajiban!.id);
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kewajiban,
+        aksi: AksiAudit.hapus,
+        entitas: 'kewajiban',
+        entitasId: '${widget.kewajiban!.id}',
+        ringkas: 'Kewajiban "${widget.kewajiban!.nama}" dihapus.',
+      );
     } catch (e) {
       _pesan('Kewajiban tidak bisa dihapus: $e');
       return;

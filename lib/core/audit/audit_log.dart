@@ -28,6 +28,7 @@ abstract final class ModulAudit {
   static const String aset = 'aset';
   static const String kewajiban = 'kewajiban';
   static const String anggaran = 'anggaran';
+  static const String kategori = 'kategori';
   static const String tugas = 'tugas';
   static const String kebiasaan = 'kebiasaan';
   static const String kesehatan = 'kesehatan';
@@ -45,6 +46,7 @@ abstract final class ModulAudit {
     aset,
     kewajiban,
     anggaran,
+    kategori,
     tugas,
     kebiasaan,
     kesehatan,

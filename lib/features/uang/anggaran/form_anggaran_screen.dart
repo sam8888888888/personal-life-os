@@ -12,6 +12,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audit/audit_log.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/uang_utils.dart';
 import '../../../data/database/database.dart';
@@ -105,6 +106,17 @@ class _FormAnggaranScreenState extends ConsumerState<FormAnggaranScreen> {
         kategoriId: _kategoriId!,
         batasSen: rupiahKeSen(nominal),
       );
+      // FR-138 — catatan aktivitas modul anggaran.
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.anggaran,
+        aksi: _baris == null ? AksiAudit.buat : AksiAudit.ubah,
+        entitas: 'anggaran',
+        entitasId: '${widget.periode}-$_kategoriId',
+        ringkas: 'Anggaran ${_namaKategori(_kategoriId!)} '
+            '${widget.periode} ${_baris == null ? 'diisi' : 'diubah'} '
+            '${fmtRpDariSen(rupiahKeSen(nominal))}.',
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Anggaran tersimpan.')));
@@ -140,6 +152,15 @@ class _FormAnggaranScreenState extends ConsumerState<FormAnggaranScreen> {
     );
     if (yakin != true) return;
     await AnggaranRepository(ref.read(databaseProvider)).hapus(id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.anggaran,
+      aksi: AksiAudit.hapus,
+      entitas: 'anggaran',
+      entitasId: '${widget.periode}-$_kategoriId',
+      ringkas: 'Anggaran ${_namaKategori(_kategoriId ?? 0)} '
+          '${widget.periode} dihapus.',
+    );
     if (!mounted) return;
     Navigator.of(context).pop(true);
   }
