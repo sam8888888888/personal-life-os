@@ -245,6 +245,35 @@ class LanggananRepository {
     }
   }
 
+  /// FR-70 — tandai langganan masih dipakai (memperbarui `terakhirDipakaiPada`).
+  Future<void> tandaiDipakai(int id, {DateTime? kapan}) async {
+    final waktu = kapan ?? DateTime.now();
+    await (db.update(db.langganan)..where((l) => l.id.equals(id)))
+        .write(LanggananCompanion(
+      terakhirDipakaiPada: Value(waktu),
+      diubahPada: Value(waktu),
+    ));
+  }
+
+  /// FR-70 — nominal pembayaran terakhir per tagihan (sen) dari riwayat.
+  ///
+  /// Bukti "tarif mungkin naik": kalau pembayaran terakhir lebih besar daripada
+  /// nominal langganan, angka langganan sudah tertinggal. Baris diurutkan waktu
+  /// (lalu id) supaya pembayaran paling baru selalu menang.
+  Future<Map<int, int>> pembayaranTerakhirPerTagihan() async {
+    final rows = await (db.select(db.riwayatPembayaran)
+          ..orderBy([
+            (r) => OrderingTerm.asc(r.tanggalBayar),
+            (r) => OrderingTerm.asc(r.id),
+          ]))
+        .get();
+    final hasil = <int, int>{};
+    for (final r in rows) {
+      hasil[r.tagihanId] = r.jumlahSen;
+    }
+    return hasil;
+  }
+
   Future<void> _ubahStatus(
     int id,
     StatusLangganan status, {

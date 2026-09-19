@@ -23,6 +23,8 @@ import '../../../core/utils/waktu.dart';
 import '../../../data/database/database.dart';
 import '../../../data/model/enums.dart';
 import '../../../data/repository/langganan_repository.dart';
+import 'analitik_langganan.dart';
+import 'deteksi_langganan.dart';
 import 'form_langganan_screen.dart';
 
 /// Repositori langganan untuk layar ini.
@@ -36,6 +38,11 @@ final repoLanggananProvider = Provider<LanggananRepository>(
 final daftarLanggananProvider =
     StreamProvider.autoDispose<List<LanggananData>>(
         (ref) => ref.watch(repoLanggananProvider).watchSemua());
+
+/// Nominal pembayaran terakhir per tagihan (sen) — bukti deteksi tarif naik
+/// (FR-70). Dibaca sekali, bukan per baris.
+final pembayaranTerakhirProvider = FutureProvider.autoDispose<Map<int, int>>(
+    (ref) => ref.watch(repoLanggananProvider).pembayaranTerakhirPerTagihan());
 
 /// Saringan status pada daftar langganan.
 enum FilterLangganan { semua, aktif, pause, berhenti }
@@ -122,11 +129,17 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
   @override
   Widget build(BuildContext context) {
     final async = ref.watch(daftarLanggananProvider);
+    final daftarTagihan =
+        ref.watch(semuaTagihanProvider).value ?? const <TagihanData>[];
     final namaTagihan = <int, String>{
-      for (final t in ref.watch(semuaTagihanProvider).value ??
-          const <TagihanData>[])
-        t.id: t.nama,
+      for (final t in daftarTagihan) t.id: t.nama,
     };
+    final nominalTagihan = <int, int>{
+      for (final t in daftarTagihan)
+        if (t.jumlahSen != null) t.id: t.jumlahSen!,
+    };
+    final pembayaranTerakhir =
+        ref.watch(pembayaranTerakhirProvider).value ?? const <int, int>{};
     return Scaffold(
       appBar: AppBar(title: const Text('Langganan')),
       floatingActionButton: FloatingActionButton.extended(
@@ -139,12 +152,18 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const Center(
             child: Text('Tidak bisa memuat daftar langganan saat ini.')),
-        data: (semua) => _isi(semua, namaTagihan),
+        data: (semua) =>
+            _isi(semua, namaTagihan, nominalTagihan, pembayaranTerakhir),
       ),
     );
   }
 
-  Widget _isi(List<LanggananData> semua, Map<int, String> namaTagihan) {
+  Widget _isi(
+    List<LanggananData> semua,
+    Map<int, String> namaTagihan,
+    Map<int, int> nominalTagihan,
+    Map<int, int> pembayaranTerakhir,
+  ) {
     final terfilter = semua.where((l) => cocokFilter(l, _filter)).toList();
     final totalSen = totalBulananAktifSen(semua);
     final jmlAktif = semua
@@ -154,11 +173,23 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
         .where((l) => StatusLangganan.dariDb(l.status) == StatusLangganan.pause)
         .length;
 
+    // FR-69 & FR-70 — dihitung dari daftar yang sama, tanpa query baru.
+    final ringkasan = hitungRingkasanLangganan(semua, _sekarang);
+    final temuan = deteksiLangganan(
+      daftar: semua,
+      sekarang: _sekarang,
+      pembayaranTerakhirSen: pembayaranTerakhir,
+      nominalTagihanSen: nominalTagihan,
+    );
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
       children: [
         _kartuTotal(totalSen, jmlAktif, jmlPause, semua.length),
-        const SizedBox(height: 12),
+        const SizedBox(height: 2),
+        Text('Setara ${fmtRpDariSen(totalSen * 12)} per tahun',
+            key: const Key('total_tahunan')),
+        const SizedBox(height: 8),
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
@@ -203,6 +234,18 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _kartuBaris(l, namaTagihan, semua),
               )),
+        // FR-69/FR-70 — wawasan diletakkan di bawah daftar supaya saringan
+        // status dan baris langganan tetap dekat dengan bagian atas layar.
+        const SizedBox(height: 12),
+        KartuAnalitikLangganan(ringkasan: ringkasan),
+        if (temuan.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          PanelPerhatianLangganan(
+            temuan: temuan,
+            onTandaiDipakai: _tandaiDipakai,
+            onSesuaikanNominal: _sesuaikanNominal,
+          ),
+        ],
       ],
     );
   }
@@ -348,6 +391,43 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     // pekerja lain, jadi modul ini tidak menambah rute di sana.
     Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => FormLanggananScreen(id: id)));
+  }
+
+  /// FR-70 — tandai langganan masih dipakai hari ini.
+  Future<void> _tandaiDipakai(LanggananData l) async {
+    await ref.read(repoLanggananProvider).tandaiDipakai(l.id);
+    if (!mounted) return;
+    _pesan('"${l.nama}" ditandai masih dipakai hari ini.');
+  }
+
+  /// FR-70 — samakan nominal dengan bukti terbaru, setelah dikonfirmasi.
+  Future<void> _sesuaikanNominal(LanggananData l, int acuanSen) async {
+    final setuju = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Sesuaikan nominal langganan?'),
+        content: Text('"${l.nama}" diubah dari ${fmtRpDariSen(l.nominalSen)} '
+            'menjadi ${fmtRpDariSen(acuanSen)} (angka bukti terakhir). '
+            'Riwayat pembayaran tidak diubah.'),
+        actions: [
+          TextButton(
+            key: const Key('sesuaikan_batal'),
+            onPressed: () => Navigator.of(c).pop(false),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            key: const Key('sesuaikan_simpan'),
+            onPressed: () => Navigator.of(c).pop(true),
+            child: const Text('Sesuaikan'),
+          ),
+        ],
+      ),
+    );
+    if (setuju != true) return;
+    await ref.read(repoLanggananProvider).ubah(l.id, nominalSen: acuanSen);
+    if (!mounted) return;
+    _pesan('Nominal "${l.nama}" disesuaikan menjadi '
+        '${fmtRpDariSen(acuanSen)}.');
   }
 
   Future<void> _pause(LanggananData l) async {

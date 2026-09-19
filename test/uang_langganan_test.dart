@@ -294,11 +294,15 @@ void main() {
   }
 
   /// ListView itu malas: gulir sampai target terlihat.
-  Future<void> gulirKe(WidgetTester t, Finder target, {int maks = 8}) async {
+  ///
+  /// Memakai titik tetap di badan daftar (210, 500) — bukan pusat `Scrollable` —
+  /// supaya gulir tetap bekerja walau layar bertambah tinggi oleh kartu baru
+  /// (FR-69/FR-70) dan sebagian isi menutupi pusat viewport.
+  Future<void> gulirKe(WidgetTester t, Finder target, {int maks = 10}) async {
     for (var i = 0; i < maks; i++) {
       if (target.evaluate().isNotEmpty) return;
-      await t.drag(find.byType(Scrollable).first, const Offset(0, -220));
-      await t.pump(const Duration(milliseconds: 120));
+      await t.dragFrom(const Offset(210, 500), const Offset(0, -220));
+      await t.pump(const Duration(milliseconds: 150));
     }
   }
 
@@ -336,6 +340,8 @@ void main() {
       expect(find.textContaining('2 aktif · 1 pause (tidak dihitung)'),
           findsOneWidget);
 
+      // Kartu FR-69/FR-70 menambah tinggi layar: gulir dulu ke saringan.
+      await gulirKe(t, find.byKey(const Key('filter_semua')));
       // Semua tombol saringan tersedia.
       for (final k in ['filter_semua', 'filter_aktif', 'filter_pause', 'filter_berhenti']) {
         expect(find.byKey(Key(k)), findsOneWidget, reason: k);
@@ -347,27 +353,36 @@ void main() {
       await isiEmpat();
       await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
 
+      await gulirKe(t, find.byKey(const Key('filter_pause')));
       await t.tap(find.byKey(const Key('filter_pause')));
       await t.pump(const Duration(milliseconds: 200));
+      await gulirKe(t, find.text('Spotify'));
       expect(find.text('Spotify'), findsOneWidget);
       expect(find.text('Netflix'), findsNothing);
       expect(find.text('Gym Lama'), findsNothing);
       expect(find.textContaining('riwayat tetap ada'), findsOneWidget);
 
+      await gulirKe(t, find.byKey(const Key('filter_aktif')));
       await t.tap(find.byKey(const Key('filter_aktif')));
       await t.pump(const Duration(milliseconds: 200));
+      await gulirKe(t, find.text('Netflix'));
       expect(find.text('Spotify'), findsNothing);
       expect(find.text('Netflix'), findsOneWidget);
       expect(find.text('Gym Lama'), findsNothing);
 
+      await gulirKe(t, find.byKey(const Key('filter_berhenti')));
       await t.tap(find.byKey(const Key('filter_berhenti')));
       await t.pump(const Duration(milliseconds: 200));
+      await gulirKe(t, find.text('Gym Lama'));
       expect(find.text('Gym Lama'), findsOneWidget);
       expect(find.text('Netflix'), findsNothing);
 
+      await gulirKe(t, find.byKey(const Key('filter_semua')));
       await t.tap(find.byKey(const Key('filter_semua')));
       await t.pump(const Duration(milliseconds: 200));
+      await gulirKe(t, find.text('4 dari 4 langganan tampil'));
       expect(find.text('4 dari 4 langganan tampil'), findsOneWidget);
+      await gulirKe(t, find.text('Netflix'));
       expect(find.text('Netflix'), findsOneWidget);
       // Baris ke-4 hanya dibangun setelah digulir (ListView malas).
       await gulirKe(t, find.text('Gym Lama'));
@@ -380,6 +395,7 @@ void main() {
       final baris = await isiEmpat();
       await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
 
+      await gulirKe(t, find.text('Rp 186.000 · Bulanan'));
       expect(find.text('Rp 186.000 · Bulanan'), findsOneWidget);
       expect(find.text('Mulai 1 Januari 2026'), findsWidgets);
       expect(find.text('Berikutnya 1 Oktober 2026'), findsWidgets);
@@ -412,7 +428,11 @@ void main() {
           nama: 'Netflix', nominalSen: 18600000, tagihanId: tid);
       await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
 
-      await t.tap(find.byKey(Key('aksi_pause_${l.id}')));
+      final tombolPause = find.byKey(Key('aksi_pause_${l.id}'));
+      await gulirKe(t, tombolPause);
+      await t.ensureVisible(tombolPause);
+      await t.pump(const Duration(milliseconds: 150));
+      await t.tap(tombolPause);
       await t.pump();
       await t.pump(const Duration(milliseconds: 300));
       expect(find.text('Pause "Netflix" sampai kapan?'), findsOneWidget);
@@ -447,7 +467,11 @@ void main() {
       await repo.pause(l.id, sampai: DateTime(2026, 10, 31));
       await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
 
-      await t.tap(find.byKey(Key('aksi_aktifkan_${l.id}')));
+      final tombolAktifkan = find.byKey(Key('aksi_aktifkan_${l.id}'));
+      await gulirKe(t, tombolAktifkan);
+      await t.ensureVisible(tombolAktifkan);
+      await t.pump(const Duration(milliseconds: 150));
+      await t.tap(tombolAktifkan);
       await t.pump();
       await t.pump(const Duration(milliseconds: 400));
 
@@ -471,8 +495,11 @@ void main() {
       expect(t.widget<Text>(find.byKey(const Key('total_bulanan'))).data,
           'Rp 50.000');
 
-      await gulirKe(t, find.byKey(Key('aksi_berhenti_${l.id}')));
-      await t.tap(find.byKey(Key('aksi_berhenti_${l.id}')));
+      final tombolBerhenti = find.byKey(Key('aksi_berhenti_${l.id}'));
+      await gulirKe(t, tombolBerhenti);
+      await t.ensureVisible(tombolBerhenti);
+      await t.pump(const Duration(milliseconds: 150));
+      await t.tap(tombolBerhenti);
       await t.pump();
       await t.pump(const Duration(milliseconds: 300));
       expect(find.text('Tandai berhenti?'), findsOneWidget);
@@ -496,8 +523,11 @@ void main() {
       await repo.pause(l.id);
       await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
 
-      await gulirKe(t, find.byKey(Key('aksi_hapus_${l.id}')));
-      await t.tap(find.byKey(Key('aksi_hapus_${l.id}')));
+      final tombolHapus = find.byKey(Key('aksi_hapus_${l.id}'));
+      await gulirKe(t, tombolHapus);
+      await t.ensureVisible(tombolHapus);
+      await t.pump(const Duration(milliseconds: 150));
+      await t.tap(tombolHapus);
       await t.pump();
       await t.pump(const Duration(milliseconds: 300));
       expect(find.text('Hapus baris langganan?'), findsOneWidget);
@@ -533,6 +563,7 @@ void main() {
       expect(semua.first.nama, 'iCloud');
       expect(semua.first.nominalSen, 15000000);
       expect(find.text('iCloud'), findsOneWidget);
+      await gulirKe(t, find.text('Rp 150.000 · Bulanan'));
       expect(find.text('Rp 150.000 · Bulanan'), findsOneWidget);
       expect(find.byKey(const Key('total_bulanan')), findsOneWidget);
       await tutup(t);
@@ -543,8 +574,11 @@ void main() {
       final l = await tambahL(nama: 'Netflix', nominalSen: 5000000);
       await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
 
-      await gulirKe(t, find.byKey(Key('aksi_ubah_${l.id}')));
-      await t.tap(find.byKey(Key('aksi_ubah_${l.id}')));
+      final tombolUbah = find.byKey(Key('aksi_ubah_${l.id}'));
+      await gulirKe(t, tombolUbah);
+      await t.ensureVisible(tombolUbah);
+      await t.pump(const Duration(milliseconds: 150));
+      await t.tap(tombolUbah);
       await t.pump();
       await t.pump(const Duration(milliseconds: 600));
       expect(find.text('Ubah langganan'), findsOneWidget);
@@ -557,6 +591,7 @@ void main() {
       await t.pump(const Duration(milliseconds: 600));
 
       expect((await repo.ambilSatu(l.id))!.nominalSen, 20000000);
+      await gulirKe(t, find.text('Rp 200.000 · Bulanan'));
       expect(find.text('Rp 200.000 · Bulanan'), findsOneWidget);
       await tutup(t);
     });
