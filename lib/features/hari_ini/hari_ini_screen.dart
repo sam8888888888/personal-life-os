@@ -9,14 +9,21 @@ import 'package:personal_life_os/core/utils/waktu.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/audit/audit_log.dart';
+import '../../core/hari_ini/hari_berat.dart';
 import '../../core/hari_ini/model_hari_ini.dart';
 import '../../core/hari_ini/penyusun_hari_ini.dart';
 import '../../core/ibadah/kalender_hijriah.dart';
+import '../../core/notifikasi/perencana_pengingat.dart';
+import '../../core/notifikasi/tunda_pengingat.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../data/database/database.dart';
+import '../../data/repository/notifikasi_riwayat_repository.dart';
+import 'kartu_hari_berat.dart';
 import 'kartu_pilar.dart';
 import 'pemetaan_tagihan.dart';
+import 'tinjauan_malam_screen.dart';
 import 'warna_tingkat.dart';
 
 class HariIniScreen extends ConsumerStatefulWidget {
@@ -69,12 +76,78 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
     }
   }
 
+  /// FR-66 — tunda pengingat butir yang tidak mendesak.
+  ///
+  /// Yang bergeser hanya waktu pengingat; tanggal jatuh tempo tidak disentuh
+  /// (aturan `tunda_pengingat.dart`, FR-148).
+  Future<void> _tundaButir(ButirHariBerat b) async {
+    if (b.jenis != 'tagihan') {
+      // ponytail: tugas belum punya lembar ubah tanggal, jadi tombolnya tidak
+      // pernah ditampilkan untuk tugas.
+      return;
+    }
+    final pengingatId = idNotifikasi(b.id, slotTunda);
+    try {
+      final hasil = await TundaPengingatRepository(
+        ref.read(databaseProvider),
+        jam: () => _sekarang,
+      ).terapkan(
+            pengingatId: pengingatId,
+            jatuhTempoAsli: b.jatuhTempo,
+            pilihan: PilihanTunda.besokSembilan,
+            alasan: 'ditunda dari mode hari berat',
+          );
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.notifikasi,
+        aksi: AksiAudit.tunda,
+        entitas: 'pengingat',
+        entitasId: '$pengingatId',
+        ringkas: 'Pengingat "${b.nama}" ditunda sampai '
+            '${fmtTanggalAman(hasil.waktuPengingatBaru)}. '
+            'Jatuh tempo tetap ${fmtTanggalAman(b.jatuhTempo)}.',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Pengingat "${b.nama}" ditunda sampai '
+              '${fmtTanggalAman(hasil.waktuPengingatBaru)}. '
+              'Tanggal jatuh temponya tidak berubah.')));
+    } on BatasTundaTerlampaui catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.pesan)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Penundaan belum bisa disimpan sekarang.')));
+    }
+  }
+
+  /// Buka modul asal butir (tagihan atau kerja).
+  void _bukaButir(ButirHariBerat b) {
+    context.push(b.jenis == 'tugas' ? '/kerja' : '/tagihan');
+  }
+
+  void _bukaTinjauanMalam() {
+    Navigator.of(context).push(MaterialPageRoute<void>(
+        builder: (_) => TinjauanMalamScreen(hari: _sekarang)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final tagihanAsync = ref.watch(semuaTagihanProvider);
     final izinAsync = ref.watch(statusIzinPengingatProvider);
     final izin = izinAsync.value;
     final tagihan = petaDaftarTagihan(tagihanAsync.value ?? const <TagihanData>[]);
+    // FR-66 — beban hari ini (tagihan + tugas). FR-64 — saklar tinjauan malam.
+    final tugasRingkas =
+        ref.watch(tugasRingkasProvider).value ?? const <TugasRingkas>[];
+    final hariBerat = susunHariBerat(
+      tagihan: tagihan,
+      tugas: tugasRingkas,
+      hari: _sekarang,
+    );
+    final tinjauanAktif = ref.watch(tinjauanMalamAktifProvider).value ?? true;
 
     final data = DataHariIni(
       sekarang: _sekarang,
@@ -108,6 +181,29 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
           const SizedBox(height: 12),
           if (_sekarang.hour < 12) ...[
             _KartuRingkasanPagi(onTap: () => context.push('/briefing')),
+            const SizedBox(height: 12),
+          ],
+          if (hariBerat.berat) ...[
+            KartuHariBerat(
+              hasil: hariBerat,
+              onTunda: _tundaButir,
+              onBuka: _bukaButir,
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (_sekarang.hour >= 17 && tinjauanAktif) ...[
+            Card(
+              margin: EdgeInsets.zero,
+              child: ListTile(
+                key: const Key('kartu_tinjauan_malam'),
+                leading: const Icon(Icons.nightlight_outlined),
+                title: const Text('Tinjauan malam'),
+                subtitle: const Text(
+                    'Apa yang selesai, apa yang belum, dan satu pertanyaan'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _bukaTinjauanMalam,
+              ),
+            ),
             const SizedBox(height: 12),
           ],
           const _JudulBlok('Pilar hari ini'),
