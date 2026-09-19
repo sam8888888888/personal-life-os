@@ -11,6 +11,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audit/audit_log.dart';
+import '../../core/providers/app_providers.dart';
 import '../../core/utils/waktu.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/kesehatan_repository.dart';
@@ -89,6 +91,13 @@ class _AirScreenState extends ConsumerState<AirScreen> {
   Future<void> _tambah(int ml) async {
     try {
       await ref.read(kesehatanRepoProvider).catatAir(jumlahMl: ml);
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kesehatan,
+        aksi: AksiAudit.buat,
+        entitas: 'air',
+        ringkas: 'Air ${formatMl(ml)} dicatat.',
+      );
     } on ArgumentError catch (e) {
       _pesan('Catatan belum bisa disimpan: ${e.message}');
       return;
@@ -117,6 +126,14 @@ class _AirScreenState extends ConsumerState<AirScreen> {
       return;
     }
     await ref.read(kesehatanRepoProvider).hapusAir(terakhir.first.id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.kesehatan,
+      aksi: AksiAudit.hapus,
+      entitas: 'air',
+      entitasId: '${terakhir.first.id}',
+      ringkas: 'Catatan air terakhir dibatalkan.',
+    );
     await _muat();
     _pesan('Catatan terakhir dibatalkan.');
   }
@@ -131,6 +148,13 @@ class _AirScreenState extends ConsumerState<AirScreen> {
     try {
       await ref.read(kesehatanRepoProvider).simpanTargetAirMl(target);
       await ref.read(kesehatanRepoProvider).simpanUkuranGelasMl(gelas);
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kesehatan,
+        aksi: AksiAudit.ubah,
+        entitas: 'air_pengaturan',
+        ringkas: 'Target air $target ml & ukuran gelas $gelas ml diperbarui.',
+      );
     } on ArgumentError catch (e) {
       _pesan('Pengaturan belum bisa disimpan: ${e.message}');
       return;

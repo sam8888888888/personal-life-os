@@ -11,6 +11,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audit/audit_log.dart';
+import '../../core/providers/app_providers.dart';
 import '../../core/utils/waktu.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/kesehatan_repository.dart';
@@ -122,6 +124,13 @@ class _AktivitasScreenState extends ConsumerState<AktivitasScreen> {
             tanggal: _tanggal,
             catatan: _catatan.text,
           );
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kesehatan,
+        aksi: AksiAudit.buat,
+        entitas: 'aktivitas',
+        ringkas: 'Aktivitas "$jenis" $durasi menit dicatat.',
+      );
     } on ArgumentError catch (e) {
       _pesan('Catatan belum bisa disimpan: ${e.message}');
       return;
@@ -135,6 +144,14 @@ class _AktivitasScreenState extends ConsumerState<AktivitasScreen> {
 
   Future<void> _hapus(Aktivita a) async {
     await ref.read(kesehatanRepoProvider).hapusAktivitas(a.id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.kesehatan,
+      aksi: AksiAudit.hapus,
+      entitas: 'aktivitas',
+      entitasId: '${a.id}',
+      ringkas: 'Aktivitas "${a.jenis}" dihapus.',
+    );
     await _muat();
     _pesan('Catatan dihapus.');
   }

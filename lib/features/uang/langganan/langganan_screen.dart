@@ -19,6 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/tanggal_utils.dart';
 import '../../../core/utils/uang_utils.dart';
+import '../../../core/audit/audit_log.dart';
 import '../../../core/utils/waktu.dart';
 import '../../../data/database/database.dart';
 import '../../../data/model/enums.dart';
@@ -394,8 +395,24 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
   }
 
   /// FR-70 — tandai langganan masih dipakai hari ini.
+  /// FR-138 — catatan aktivitas modul langganan.
+  ///
+  /// Satu helper supaya semua aksi langganan meninggalkan catatan dengan bentuk
+  /// sama, dan penulisan catatan tidak pernah menggagalkan aksinya.
+  Future<void> _audit(String aksi, LanggananData l, String ringkas) =>
+      catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.langganan,
+        aksi: aksi,
+        entitas: 'langganan',
+        entitasId: '${l.id}',
+        ringkas: ringkas,
+      );
+
   Future<void> _tandaiDipakai(LanggananData l) async {
     await ref.read(repoLanggananProvider).tandaiDipakai(l.id);
+    await _audit(AksiAudit.tandai, l,
+        'Langganan "${l.nama}" ditandai masih dipakai.');
     if (!mounted) return;
     _pesan('"${l.nama}" ditandai masih dipakai hari ini.');
   }
@@ -425,6 +442,11 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     );
     if (setuju != true) return;
     await ref.read(repoLanggananProvider).ubah(l.id, nominalSen: acuanSen);
+    await _audit(
+        AksiAudit.ubah,
+        l,
+        'Nominal langganan "${l.nama}" disesuaikan dari '
+        '${fmtRpDariSen(l.nominalSen)} menjadi ${fmtRpDariSen(acuanSen)}.');
     if (!mounted) return;
     _pesan('Nominal "${l.nama}" disesuaikan menjadi '
         '${fmtRpDariSen(acuanSen)}.');
@@ -449,6 +471,8 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     );
     if (pilihan == null) return;
     await ref.read(repoLanggananProvider).pause(l.id, sampai: pilihan.sampai);
+    await _audit(AksiAudit.ubah, l,
+        'Langganan "${l.nama}" dipause (pengingat berhenti, riwayat tetap).');
     if (!mounted) return;
     final sampai = pilihan.sampai;
     _pesan(sampai == null
@@ -492,6 +516,8 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
 
   Future<void> _aktifkan(LanggananData l) async {
     await ref.read(repoLanggananProvider).aktifkan(l.id);
+    await _audit(AksiAudit.ubah, l,
+        'Langganan "${l.nama}" diaktifkan kembali (pengingat hidup).');
     if (!mounted) return;
     _pesan('Langganan "${l.nama}" aktif lagi. Pengingatnya hidup kembali.');
   }
@@ -505,12 +531,15 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     );
     if (yakin != true) return;
     await ref.read(repoLanggananProvider).hentikan(l.id);
+    await _audit(AksiAudit.ubah, l,
+        'Langganan "${l.nama}" ditandai berhenti (riwayat tetap tersimpan).');
     if (!mounted) return;
     _pesan('Langganan "${l.nama}" ditandai berhenti. Riwayat tetap tersimpan.');
   }
 
   Future<void> _lepasTautan(LanggananData l) async {
     await ref.read(repoLanggananProvider).lepasTautan(l.id);
+    await _audit(AksiAudit.ubah, l, 'Tautan langganan "${l.nama}" dilepas.');
     if (!mounted) return;
     _pesan('Tautan "${l.nama}" dilepas. Tagihan itu kembali mengingatkan '
         'sampai dimatikan sendiri.');
@@ -558,6 +587,8 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     if (idDipilih == null) return;
     try {
       await ref.read(repoLanggananProvider).tautkanKeTagihan(l.id, idDipilih);
+      await _audit(AksiAudit.ubah, l,
+          'Langganan "${l.nama}" ditautkan ke tagihan.');
       if (!mounted) return;
       _pesan('Langganan "${l.nama}" kini tertaut ke tagihan itu.');
     } catch (e) {
@@ -578,6 +609,7 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     // Aturan hapus (hidupkan tagihan tertaut, riwayat tetap) ada di repository,
     // bukan di layar — satu tempat untuk semua pemanggil.
     await ref.read(repoLanggananProvider).hapus(l.id);
+    await _audit(AksiAudit.hapus, l, 'Baris langganan "${l.nama}" dihapus.');
     if (!mounted) return;
     _pesan('Baris langganan "${l.nama}" dihapus.');
   }

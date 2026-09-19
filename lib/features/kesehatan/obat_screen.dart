@@ -12,6 +12,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audit/audit_log.dart';
+import '../../core/providers/app_providers.dart';
 import '../../core/utils/waktu.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/kesehatan_repository.dart'
@@ -129,6 +131,14 @@ class _ObatScreenState extends ConsumerState<ObatScreen> {
             catatan: _catatan.text,
             jamMinum: _daftarJam,
           );
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kesehatan,
+        aksi: AksiAudit.buat,
+        entitas: 'obat',
+        ringkas: 'Obat "$nama" disimpan '
+            '(${_daftarJam.isEmpty ? 'tanpa jam minum' : '${_daftarJam.length} jam minum'}).',
+      );
     } on ArgumentError catch (e) {
       _pesan('Catatan belum bisa disimpan: ${e.message}');
       return;
@@ -149,18 +159,43 @@ class _ObatScreenState extends ConsumerState<ObatScreen> {
           waktuRencana: j.waktuRencana,
           status: status,
         );
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.kesehatan,
+      aksi: AksiAudit.tandai,
+      entitas: 'minum_obat',
+      entitasId: '${j.obatId}',
+      ringkas: '${j.obat.nama} ${j.jam}: '
+          '${status.label.toLowerCase()} dicatat.',
+    );
     await _muat();
     _pesan('${j.obat.nama} ${j.jam}: tercatat ${status.label.toLowerCase()}.');
   }
 
   Future<void> _hapusObat(ObatData o) async {
     await ref.read(obatRepoProvider).hapusObat(o.id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.kesehatan,
+      aksi: AksiAudit.hapus,
+      entitas: 'obat',
+      entitasId: '${o.id}',
+      ringkas: 'Obat "${o.nama}" dihapus.',
+    );
     await _muat();
     _pesan('Catatan obat dihapus.');
   }
 
   Future<void> _gantiAktif(ObatData o, bool aktif) async {
     await ref.read(obatRepoProvider).ubahObat(o.id, aktif: aktif);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.kesehatan,
+      aksi: AksiAudit.ubah,
+      entitas: 'obat',
+      entitasId: '${o.id}',
+      ringkas: 'Obat "${o.nama}" ${aktif ? 'diaktifkan' : 'dinonaktifkan'}.',
+    );
     await _muat();
   }
 

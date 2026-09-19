@@ -17,6 +17,12 @@ import 'package:personal_life_os/core/audit/audit_log.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
 import 'package:personal_life_os/core/theme/app_tema.dart';
 import 'package:personal_life_os/data/database/database.dart';
+import 'package:personal_life_os/data/model/enums.dart';
+import 'package:personal_life_os/data/repository/langganan_repository.dart';
+import 'package:personal_life_os/features/kesehatan/aktivitas_screen.dart';
+import 'package:personal_life_os/features/kesehatan/air_screen.dart';
+import 'package:personal_life_os/features/kesehatan/obat_screen.dart';
+import 'package:personal_life_os/features/uang/langganan/langganan_screen.dart';
 import 'package:personal_life_os/features/uang/anggaran/form_anggaran_screen.dart';
 import 'package:personal_life_os/features/uang/kekayaan/form_aset_screen.dart';
 import 'package:personal_life_os/features/uang/kekayaan/form_kewajiban_screen.dart';
@@ -195,6 +201,77 @@ void main() {
     expect(baris, hasLength(1));
     expect(baris.first.aksi, AksiAudit.hapus);
     expect(baris.first.ringkas, contains('Hapus Uji'));
+    await tutup(t);
+  });
+  // ------------------------------------------------------------------
+  // Modul kesehatan & langganan (FR-138 bagian 3)
+  // ------------------------------------------------------------------
+
+  testWidgets('aktivitas: mencatat aktivitas meninggalkan satu catatan',
+      (t) async {
+    await tampilkan(t, AktivitasScreen(jamSekarang: () => jamUji));
+
+    await t.enterText(
+        find.byKey(const Key('input_jenis_aktivitas')), 'Jalan Kaki');
+    await t.enterText(find.byKey(const Key('input_durasi_menit')), '30');
+    await ketuk(t, find.byKey(const Key('simpan_aktivitas')));
+
+    final baris = await catatan(ModulAudit.kesehatan);
+    expect(baris, hasLength(1));
+    expect(baris.first.aksi, AksiAudit.buat);
+    expect(baris.first.ringkas, contains('Jalan Kaki'));
+    expect(baris.first.ringkas, contains('30 menit'));
+    expect((await db.select(db.aktivitas).get()), hasLength(1));
+    await tutup(t);
+  });
+
+  testWidgets('air: mencatat segelas air meninggalkan satu catatan',
+      (t) async {
+    await tampilkan(t, AirScreen(jamSekarang: () => jamUji));
+
+    await ketuk(t, find.byKey(const Key('tambah_gelas')));
+
+    final baris = await catatan(ModulAudit.kesehatan);
+    expect(baris, hasLength(1));
+    expect(baris.first.entitas, 'air');
+    expect(baris.first.aksi, AksiAudit.buat);
+    expect((await db.select(db.catatanAir).get()), hasLength(1));
+    await tutup(t);
+  });
+
+  testWidgets('obat: menyimpan obat meninggalkan satu catatan', (t) async {
+    await tampilkan(t, ObatScreen(jamSekarang: () => jamUji));
+
+    await t.enterText(find.byKey(const Key('input_nama_obat')), 'Vitamin Uji');
+    await t.enterText(find.byKey(const Key('input_jumlah_per_minum')), '1');
+    await ketuk(t, find.byKey(const Key('simpan_obat')));
+
+    final baris = await catatan(ModulAudit.kesehatan);
+    expect(baris, hasLength(1));
+    expect(baris.first.entitas, 'obat');
+    expect(baris.first.ringkas, contains('Vitamin Uji'));
+    expect((await db.select(db.obat).get()), hasLength(1));
+    await tutup(t);
+  });
+
+  testWidgets('langganan: pause meninggalkan satu catatan', (t) async {
+    final l = await LanggananRepository(db).tambah(
+      nama: 'Langganan Uji',
+      nominalSen: 5000000,
+      tanggalMulai: DateTime(2026, 1, 20),
+      siklus: Frekuensi.bulanan,
+    );
+
+    await tampilkan(t, LanggananScreen(jamSekarang: () => jamUji));
+    await ketuk(t, find.byKey(Key('aksi_pause_${l.id}')));
+    await t.pump(const Duration(milliseconds: 300));
+    await ketuk(t, find.byKey(const Key('pause_1_bulan')));
+
+    final baris = await catatan(ModulAudit.langganan);
+    expect(baris, hasLength(1));
+    expect(baris.first.aksi, AksiAudit.ubah);
+    expect(baris.first.ringkas, contains('dipause'));
+    expect(baris.first.entitasId, '${l.id}');
     await tutup(t);
   });
 }

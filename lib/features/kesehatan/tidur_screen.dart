@@ -11,6 +11,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/audit/audit_log.dart';
+import '../../core/providers/app_providers.dart';
 import '../../core/utils/waktu.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/kesehatan_repository.dart';
@@ -157,6 +159,13 @@ class _TidurScreenState extends ConsumerState<TidurScreen> {
             tidurSiangMenit: siang,
             catatan: _catatan.text,
           );
+      await catatAuditAman(
+        ref.read(databaseProvider),
+        modul: ModulAudit.kesehatan,
+        aksi: AksiAudit.buat,
+        entitas: 'tidur',
+        ringkas: 'Catatan tidur disimpan.',
+      );
     } on ArgumentError catch (e) {
       _pesan('Catatan belum bisa disimpan: ${e.message}');
       return;
@@ -168,6 +177,14 @@ class _TidurScreenState extends ConsumerState<TidurScreen> {
 
   Future<void> _hapus(TidurData t) async {
     await ref.read(kesehatanRepoProvider).hapusTidur(t.id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.kesehatan,
+      aksi: AksiAudit.hapus,
+      entitas: 'tidur',
+      entitasId: '${t.id}',
+      ringkas: 'Catatan tidur dihapus.',
+    );
     await _mulai();
     _pesan('Catatan dihapus.');
   }
