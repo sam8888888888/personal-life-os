@@ -53,8 +53,12 @@ Setiap batch ditulis di berkas ini: perintah uji yang dijalankan, hasil nyata, b
 | Batch | Keadaan | Commit | Bukti |
 |---|---|---|---|
 | **A1 — FR-69, FR-70** | SELESAI | `c1694d2` | analyze bersih; 786 uji hijau (8 uji baru) |
-| **A2 — FR-138** | SELESAI | `6188bab`, `064a9d5` | audit modul uang, kategori, langganan, kesehatan; 11 uji baru; total **797 uji hijau** |
-| B — FR-64, FR-66, FR-81, FR-82, FR-85 | belum mulai | — | — |
+| **A2 — FR-138** | SELESAI | `6188bab`, `064a9d5` | audit modul uang, kategori, langganan, kesehatan; 11 uji baru |
+| **B — FR-64, FR-66** | SELESAI | `0da9dbf` | kartu hari berat + tinjauan malam; 9 uji baru |
+| **B — FR-81, FR-85** | SELESAI | `dcd3a38` | metrik pemulihan & konsistensi mingguan; 5 uji baru |
+| **B — FR-82** | SELESAI | `7677cc3` | skema v5 (visi, area_hidup, tujuan.area_id) + rantai rencana; 6 uji baru; **total 817 uji hijau** |
+| C — FR-65, FR-67, FR-89 | belum mulai | — | — |
+
 
 Catatan teknis A2:
 * penulisan catatan audit diletakkan di **lapisan layar** (bukan repository) — pola yang
