@@ -295,6 +295,46 @@ class KebiasaanRepository {
     return hasil;
   }
 
+  /// Deret nilai harian per kebiasaan (lama → terbaru), panjang [hari].
+  ///
+  /// Hari tanpa catatan bernilai 0, jadi metrik pemulihan (FR-81) dan grafik
+  /// konsistensi (FR-85) menghitung apa adanya tanpa menebak.
+  Future<Map<int, List<double>>> nilaiHarianSemua({
+    int hari = 7,
+    DateTime? sampai,
+  }) async {
+    final panjang = _panjangRentang(hari);
+    final akhir = hariSaja(sampai ?? waktuSekarang());
+    final awal = akhir.subtract(Duration(days: panjang - 1));
+    final q = db.selectOnly(db.logKebiasaan)
+      ..addColumns([
+        db.logKebiasaan.kebiasaanId,
+        db.logKebiasaan.tanggal,
+        db.logKebiasaan.nilai.sum(),
+      ])
+      ..where(db.logKebiasaan.tanggal.isBetweenValues(awal, akhir))
+      ..groupBy([db.logKebiasaan.kebiasaanId, db.logKebiasaan.tanggal]);
+    final baris = await q.get();
+
+    final perHari = <int, Map<DateTime, double>>{};
+    for (final b in baris) {
+      final id = b.read(db.logKebiasaan.kebiasaanId)!;
+      final tanggal = hariSaja(b.read(db.logKebiasaan.tanggal)!);
+      final nilai = b.read(db.logKebiasaan.nilai.sum()) ?? 0;
+      (perHari[id] ??= <DateTime, double>{})[tanggal] = nilai;
+    }
+
+    final hasil = <int, List<double>>{};
+    for (final k in await ambilSemua()) {
+      final peta = perHari[k.id] ?? const <DateTime, double>{};
+      hasil[k.id] = [
+        for (var i = 0; i < panjang; i++)
+          peta[awal.add(Duration(days: i))] ?? 0.0,
+      ];
+    }
+    return hasil;
+  }
+
   /// Hapus satu kebiasaan beserta catatannya.
   ///
   /// Urutannya jelas: baris log dibuang lebih dulu supaya tidak ada catatan

@@ -15,10 +15,14 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/aksi/pemulihan_kebiasaan.dart';
 import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/waktu.dart';
 import '../../../data/database/database.dart';
 import '../../../data/repository/kebiasaan_repository.dart';
+import '../../../data/repository/kesehatan_repository.dart'
+    show BatangHarian;
+import '../../../features/kesehatan/grafik_batang_harian.dart';
 
 /// Repositori kebiasaan untuk layar ini.
 ///
@@ -56,12 +60,16 @@ class _DataLayar {
     required this.ringkas7,
     required this.ringkas30,
     required this.hariIni,
+    required this.deret7,
   });
 
   final List<KebiasaanData> daftar;
   final Map<int, RingkasanKebiasaan> ringkas7;
   final Map<int, RingkasanKebiasaan> ringkas30;
   final Map<int, double> hariIni;
+
+  /// Deret nilai harian 7 hari terakhir per kebiasaan (FR-81/FR-85).
+  final Map<int, List<double>> deret7;
 }
 
 class KebiasaanScreen extends ConsumerStatefulWidget {
@@ -108,9 +116,13 @@ class _KebiasaanScreenState extends ConsumerState<KebiasaanScreen> {
       final hariIni = await repo
           .nilaiHari(waktuSekarang())
           .timeout(batasPenyimpananKebiasaan);
+      final deret7 = await repo
+          .nilaiHarianSemua(hari: 7)
+          .timeout(batasPenyimpananKebiasaan);
       if (!mounted) return;
       setState(() {
         _data = _DataLayar(
+          deret7: deret7,
           daftar: daftar,
           ringkas7: ringkas7,
           ringkas30: ringkas30,
@@ -195,8 +207,56 @@ class _KebiasaanScreenState extends ConsumerState<KebiasaanScreen> {
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
+        _kartuKonsistensi(data),
+        const SizedBox(height: 8),
         ...data.daftar.map(_kartuKebiasaan),
       ],
+    );
+  }
+
+  /// FR-85 — konsistensi mingguan: "tercatat / belum tercatat" + grafik.
+  ///
+  /// Tidak ada angka tunggal yang menggambarkan kualitas; yang ditampilkan
+  /// hanya jumlah hari tercatat dan berapa kebiasaan yang tercatat per hari.
+  Widget _kartuKonsistensi(_DataLayar data) {
+    final tema = Theme.of(context);
+    final perHari = jumlahTercatatPerHari(data.deret7.values, rentangHari: 7);
+    final totalTercatat = perHari.fold<int>(0, (a, b) => a + b);
+    final jumlahKebiasaan = data.daftar.length;
+    final kini = waktuSekarang();
+    final hariAkhir = DateTime(kini.year, kini.month, kini.day);
+    final batang = <BatangHarian>[
+      for (var i = 0; i < 7; i++)
+        BatangHarian(
+          tanggal: hariAkhir.subtract(Duration(days: 6 - i)),
+          nilai: perHari[i],
+        ),
+    ];
+
+    return Card(
+      key: const Key('kartu_konsistensi'),
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Konsistensi 7 hari', style: tema.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(kalimatKonsistensi(
+                data.deret7.values.where((d) => d.any((v) => v > 0)).length, 7)),
+            Text('$totalTercatat penanda dari '
+                '${jumlahKebiasaan * 7} kemungkinan · '
+                'tidak ada penilaian, hanya catatan.'),
+            const SizedBox(height: 8),
+            GrafikBatangHarian(
+              batang: batang,
+              satuan: 'kebiasaan tercatat',
+              tinggi: 90,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -233,6 +293,14 @@ class _KebiasaanScreenState extends ConsumerState<KebiasaanScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: Text(teksHariIni(nilaiHariIni)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              hitungPemulihan(data.deret7[k.id] ?? const <double>[]).kalimat,
+              key: Key('pemulihan_${k.id}'),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
