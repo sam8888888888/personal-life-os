@@ -2,19 +2,41 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class LainnyaScreen extends StatelessWidget {
+import '../../core/providers/akun_providers.dart';
+
+class LainnyaScreen extends ConsumerWidget {
   const LainnyaScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final tema = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Lainnya')),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
         children: [
+          Card(
+            margin: EdgeInsets.zero,
+            child: Consumer(
+              builder: (context, ref, _) {
+                final sesi = ref.watch(sesiAkunProvider).value;
+                return ListTile(
+                  key: const Key('buka_akun'),
+                  leading: const Icon(Icons.cloud_sync_outlined),
+                  title: const Text('Akun & Sinkron'),
+                  subtitle: Text(sesi == null
+                      ? 'Belum masuk — masuk supaya semua HP isinya sama'
+                      : 'Masuk sebagai ${sesi.nama}'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/akun'),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
           Card(
             margin: EdgeInsets.zero,
             child: Column(
