@@ -1,6 +1,7 @@
 /// Pengaturan: pemasukan bulanan (bahan hitung "uang tersisa"), data & info.
 library;
 
+import '../../core/versi.dart';
 import '../../core/utils/waktu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -190,7 +191,7 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
         const Text('Tentang',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),
-        const Text('Personal Life OS · versi 0.4.0 (fase V1.5 — ibadah)'),
+        const Text('Personal Life OS · versi $versiAplikasi (build $nomorBuild) · $jalurPengembangan'),
         const Text('Zona waktu & format: Indonesia (id-ID), Rupiah'),
         const SizedBox(height: 6),
         const Text('Pengingat berjalan di perangkat (tanpa internet).',
