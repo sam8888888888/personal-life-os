@@ -34,6 +34,7 @@ import 'features/aksi/tugas_screen.dart';
 import 'features/aksi/tujuan_screen.dart';
 import 'features/aksi/visi_screen.dart';
 import 'features/akun/akun_screen.dart';
+import 'features/peta_fitur/peta_fitur_screen.dart';
 import 'features/akun/masuk_screen.dart';
 import 'features/cari/pencarian_screen.dart';
 import 'features/dokumen/dokumen_form_screen.dart';
@@ -252,6 +253,7 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
         // FR-82 — puncak rantai rencana.
         GoRoute(path: 'visi', builder: (c, s) => const VisiScreen()),
       GoRoute(path: '/akun', builder: (c, s) => const AkunScreen()),
+      GoRoute(path: '/peta-fitur', builder: (c, s) => const PetaFiturScreen()),
       GoRoute(
         path: '/akun/masuk',
         builder: (c, s) =>

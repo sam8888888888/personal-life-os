@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/peta_fitur/data_peta_fitur.dart';
 import '../../core/providers/akun_providers.dart';
 
 class LainnyaScreen extends ConsumerWidget {
@@ -18,6 +19,20 @@ class LainnyaScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
         children: [
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              key: const Key('buka_peta_fitur'),
+              leading: const Icon(Icons.map_outlined),
+              title: const Text('Semua Fitur (PRD v3.1)'),
+              subtitle: Text(
+                  '${ringkasanPetaFitur()[StatusFitur.selesai]} dari '
+                  '${petaFitur.length} butir sudah selesai — lihat tandanya'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/peta-fitur'),
+            ),
+          ),
+          const SizedBox(height: 16),
           Card(
             margin: EdgeInsets.zero,
             child: Consumer(
