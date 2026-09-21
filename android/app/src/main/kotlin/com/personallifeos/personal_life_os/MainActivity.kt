@@ -12,6 +12,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val kanal = "lifeos/rute"
     private val kanalBagikan = "lifeos/bagikan"
+    private val kanalBuka = "lifeos/buka"
     private var saluranRute: MethodChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -26,6 +27,33 @@ class MainActivity : FlutterActivity() {
         }
         saluranRute = saluran
         pasangKanalBagikan(flutterEngine)
+        pasangKanalBuka(flutterEngine)
+    }
+
+    /// FR-49: buka tautan ke aplikasi lain (WhatsApp / SMS / Telegram).
+    /// Bila tidak ada aplikasi penerima, dijawab `false` — bukan galat,
+    /// supaya Dart bisa memberi tahu pengguna apa adanya.
+    private fun pasangKanalBuka(flutterEngine: FlutterEngine) {
+        val saluran = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, kanalBuka)
+        saluran.setMethodCallHandler { panggilan, hasil ->
+            if (panggilan.method != "bukaTautan") {
+                hasil.notImplemented()
+                return@setMethodCallHandler
+            }
+            val tautan = panggilan.argument<String>("tautan")
+            if (tautan.isNullOrBlank()) {
+                hasil.error("tautan_kosong", "Tautan kosong", null)
+                return@setMethodCallHandler
+            }
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(tautan)))
+                hasil.success(true)
+            } catch (e: android.content.ActivityNotFoundException) {
+                hasil.success(false)
+            } catch (e: Exception) {
+                hasil.error("gagal", e.message, null)
+            }
+        }
     }
 
     /// FR-45: bagikan berkas laporan (PDF/CSV) lewat lembar berbagi Android.

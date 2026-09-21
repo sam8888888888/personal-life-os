@@ -64,6 +64,7 @@ import 'features/tagihan/kelola_kategori_tagihan_screen.dart';
 import 'features/tagihan/form_tagihan_screen.dart';
 import 'features/tagihan/ekspor_csv_screen.dart';
 import 'features/tagihan/ekspor_kalender_screen.dart';
+import 'features/tagihan/pengingat_kanal_screen.dart';
 import 'features/tagihan/pola_bayar_screen.dart';
 import 'features/tagihan/pusat_bayar_screen.dart';
 import 'features/uang/anggaran/anggaran_screen.dart';
@@ -76,6 +77,7 @@ import 'features/uang/strategi_pelunasan/strategi_pelunasan_screen.dart';
 import 'features/uang/transaksi/daftar_transaksi_screen.dart';
 import 'features/uang/uang_hub_screen.dart';
 import 'features/uang/aman_sampai_gajian_screen.dart';
+import 'features/uang/mata_uang_screen.dart';
 
 /// Membuat router baru (dipakai aplikasi & uji UI).
 GoRouter buatRouter({String awal = '/'}) => GoRouter(
@@ -106,6 +108,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/tagihan/ekspor-csv',
       builder: (c, s) => const EksporCsvScreen(),
+    ),
+    GoRoute(
+      path: '/tagihan/pengingat-multi-kanal',
+      builder: (c, s) => const PengingatKanalScreen(),
+    ),
+    GoRoute(
+      path: '/uang/mata-uang',
+      builder: (c, s) => const MataUangScreen(),
     ),
     GoRoute(
       path: '/tagihan/pusat-bayar',

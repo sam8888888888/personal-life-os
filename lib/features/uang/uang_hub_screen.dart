@@ -183,6 +183,26 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_pengingat_multi_kanal'),
+                  leading: const Icon(Icons.forum_outlined),
+                  title: const Text('Pengingat multi-kanal'),
+                  subtitle: const Text(
+                      'Teruskan pengingat ke WhatsApp / SMS / Telegram (FR-49)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tagihan/pengingat-multi-kanal'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_mata_uang'),
+                  leading: const Icon(Icons.currency_exchange_outlined),
+                  title: const Text('Multi-mata uang & kurs'),
+                  subtitle: const Text(
+                      'Mata uang per tagihan + konversi ke Rupiah (FR-52)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/mata-uang'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_pusat_bayar'),
                   leading: const Icon(Icons.account_balance_outlined),
                   title: const Text('Pusat Bayar'),

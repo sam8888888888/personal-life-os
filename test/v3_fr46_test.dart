@@ -137,6 +137,7 @@ void main() {
         sekarang: sekarang,
       );
       expect(temuan, hasLength(1));
+      expect(temuan.first.tagihanId, t.id);
       expect(temuan.first.sebab, SebabBerhenti.belumPernahDibayar);
       expect(temuan.first.jumlahPembayaran, 0);
       expect(temuan.first.ringkas, contains('Belum pernah ada catatan'));
