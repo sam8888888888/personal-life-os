@@ -82,15 +82,16 @@ void main() {
     });
 
     test('versi skema terkini & seluruh tabel pilar dibuat', () async {
-      // Skema 5 = rantai rencana (FR-82); skema 6 = sinkron antar HP
-      // (kolom tagihan.uid + tabel sinkron_kotor).
-      expect(db.schemaVersion, 6);
+      // Skema 5 = rantai rencana (FR-82); 6 = sinkron antar HP (kolom
+      // tagihan.uid + sinkron_kotor); 7 = lima tabel kesehatan/ibadah/kas;
+      // 8 = kolom sisa obat (FR-107).
+      expect(db.schemaVersion, 8);
       final tabel = await _namaTabel(db);
       for (final nama in _tabelV2) {
         expect(tabel.contains(nama), isTrue, reason: 'tabel $nama belum dibuat');
       }
       // 13 tabel lama + 23 tabel V2 + 2 tabel v5 + sqlite_sequence.
-      expect(tabel.length, greaterThanOrEqualTo(38));
+      expect(tabel.length, greaterThanOrEqualTo(43));
     });
 
     test('seluruh tabel V2 bisa dibaca & masih kosong', () async {

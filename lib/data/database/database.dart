@@ -313,18 +313,41 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   /// Skema v4: 23 tabel baru pilar kehidupan (V2).
   /// Skema v8 (FR-107): kolom sisa obat pada tabel obat yang sudah ada.
   Future<void> _tambahKolomV8(Migrator m) async {
-    await m.addColumn(obat, obat.sisa);
-    await m.addColumn(obat, obat.sisaDiperbaruiPada);
+    // Sebagian basis data lama dibuat dari definisi tabel terbaru, jadi
+    // kolomnya bisa sudah ada walau versinya masih di bawah 8 — diperiksa
+    // dulu supaya migrasi tidak pernah gagal karena kolom kembar.
+    if (!await _tabelAda('obat')) return;
+    final kolom = await customSelect("PRAGMA table_info(obat)").get();
+    final nama = kolom.map((r) => (r.data['name'] as String?) ?? '').toSet();
+    if (!nama.contains('sisa')) await m.addColumn(obat, obat.sisa);
+    if (!nama.contains('sisa_diperbarui_pada')) {
+      await m.addColumn(obat, obat.sisaDiperbaruiPada);
+    }
+  }
+
+  /// Cek keberadaan tabel (dipakai migrasi agar aman dijalankan ulang).
+  Future<bool> _tabelAda(String nama) async {
+    final baris = await customSelect(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+      variables: [Variable<String>(nama)],
+    ).get();
+    return baris.isNotEmpty;
   }
 
   /// Skema v7 (FR-51/94/96/105/109): lima tabel baru — tanpa menyentuh tabel
   /// lama, jadi pemutakhiran aplikasi tidak mengubah data pengguna.
   Future<void> _buatTabelV7(Migrator m) async {
-    await m.createTable(catatanKesehatan);
-    await m.createTable(janjiKesehatan);
-    await m.createTable(kasInformal);
-    await m.createTable(hafalan);
-    await m.createTable(zakatSedekah);
+    final Map<String, TableInfo<Table, dynamic>> tabel = {
+      'catatan_kesehatan': catatanKesehatan,
+      'janji_kesehatan': janjiKesehatan,
+      'kas_informal': kasInformal,
+      'hafalan': hafalan,
+      'zakat_sedekah': zakatSedekah,
+    };
+    for (final masuk in tabel.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
   }
 
   Future<void> _buatTabelV4(Migrator m) async {

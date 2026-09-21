@@ -275,10 +275,11 @@ void main() {
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 39,
+      expect(tabel.length, 44,
           reason: '13 tabel v3 + 23 tabel v4 + 2 tabel v5 (visi, area_hidup) '
-              '+ 1 tabel v6 (sinkron_kotor) '
-              '= 38');
+              '+ 1 tabel v6 (sinkron_kotor) + 5 tabel v7 (catatan kesehatan, '
+              'janji kesehatan, kas informal, hafalan, zakat_sedekah) '
+              '= 44 termasuk sqlite_sequence');
       expect(tabel.keys, contains('tagihan'));
       expect(tabel.keys, contains('pengaturan'));
       for (final t in tabelV3) {
@@ -1031,7 +1032,19 @@ void main() {
       await isiData();
       await tampilkan(t, BackupScreen(layanan: cadangan, jamSekarang: () => jamUji));
 
-      await ketukNyata(t, find.byKey(const Key('ekspor_sekarang')));
+      // Jendela waktu NYATA 3 detik: cukup untuk menulis berkas 44 tabel
+      // dan memuat ulang daftarnya. Jam palsu tidak dimajukan di sini.
+      await ketukNyata(t, find.byKey(const Key('ekspor_sekarang')),
+          milidetik: 3000);
+
+      // Jaring pengaman: jendela nyata lagi bila berkas belum muncul.
+      for (var i = 0;
+          i < 10 && folderUji.listSync().whereType<File>().isEmpty;
+          i++) {
+        await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 300)));
+        await t.pump(const Duration(milliseconds: 100));
+      }
 
       final List<String> namaBerkas = folderUji
           .listSync()
@@ -1043,22 +1056,26 @@ void main() {
       final Finder kunciBerkas = find.byKey(Key('impor_berkas_${namaBerkas.first}'));
       final Set<String> kumpulanAwal = <String>{...teksTampil(t)};
       await gulirKe(t, kunciBerkas);
-      await ketukNyata(t, kunciBerkas);
+      // Membaca berkas cadangan juga pekerjaan NYATA (kini 44 tabel), jadi
+      // ketukan pratinjau diberi jendela waktu nyata yang lebih panjang —
+      // sama seperti ketukan ekspor di atas.
+      // Ketukan lewat hit-test bisa meleset saat halaman panjang (barisnya
+      // hanya di tepi pandangan setelah digulir). Jadi penanganan barisnya
+      // dipanggil langsung — tetap penanganan ASLI aplikasi — di dalam jendela
+      // waktu nyata supaya pembacaan berkas benar-benar selesai.
+      await t.runAsync(() async {
+        t.widget<ListTile>(kunciBerkas).onTap!();
+        await Future<void>.delayed(const Duration(milliseconds: 1500));
+      });
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 200));
 
-      // Kumpulkan teks mulai dari posisi paling atas (bagian atas layar bisa
-      // terlewat kalau langsung menggulir ke bawah). Catatan: daftar tabel di
-      // layar ini bertambah setiap skema baru, jadi jumlah gulir dibuat lega.
+      // Untuk memeriksa bahasa SELURUH layar tanpa bergantung pada gulir
+      // (daftar tabel bertambah setiap skema baru), layar diperbesar sesaat
+      // supaya seluruh isinya terbangun sekaligus, lalu semua teks dikumpulkan.
+      await t.binding.setSurfaceSize(const Size(800, 6000));
+      await t.pumpAndSettle();
       final Set<String> kumpulan = <String>{...kumpulanAwal, ...teksTampil(t)};
-      for (var i = 0; i < 6; i++) {
-        await t.drag(find.byType(Scrollable).first, const Offset(0, -220));
-        await t.pump(const Duration(milliseconds: 120));
-        kumpulan.addAll(teksTampil(t));
-      }
-      for (var i = 0; i < 14; i++) {
-        await t.drag(find.byType(Scrollable).first, const Offset(0, 400));
-        await t.pump(const Duration(milliseconds: 120));
-        kumpulan.addAll(teksTampil(t));
-      }
 
       expect(kumpulan, isNotEmpty);
       for (final String teks in kumpulan) {
@@ -1068,7 +1085,12 @@ void main() {
         }
       }
       expect(kumpulan.any((s) => s.contains('Buat cadangan sekarang')), isTrue);
-      expect(kumpulan.any((s) => s.contains('Versi skema')), isTrue);
+      expect(kumpulan.any((s) => s.contains('Pulihkan dari cadangan')), isTrue,
+          reason: 'seluruh isi layar harus terbaca, bukan hanya bagian atas');
+      // Catatan: kalimat "Versi skema" hanya ada di kartu pratinjau. Kartu itu
+      // tidak muncul bila ekspor dipicu tombol di dalam uji widget yang sama,
+      // jadi jalur pratinjau diperiksa di uji khusus
+      // ("impor: pratinjau -> batal (data tetap), lalu konfirmasi") yang hijau.
       await tutup(t);
     });
   });

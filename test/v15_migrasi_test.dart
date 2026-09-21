@@ -129,7 +129,7 @@ void main() {
     //    v2 -> v3 -> v4 -> v5 (v4 menambah 23 tabel pilar kehidupan, v5
     //    menambah visi & area hidup + kolom tujuan.area_id).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 6);
+    expect(versi.data.values.first, 8);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();

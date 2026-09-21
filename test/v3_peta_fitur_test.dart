@@ -51,7 +51,7 @@ void main() {
     });
 
     test('yang belum dikerjakan TIDAK diberi tanda Selesai', () {
-      expect(cari('FR-09').status, StatusFitur.belum);   // duplikasi cepat tagihan
+      expect(cari('FR-38').status, StatusFitur.belum);   // impor tagihan dari foto (OCR)
       expect(cari('FR-26').status, StatusFitur.belum);   // kunci aplikasi
       expect(cari('FR-149').status, StatusFitur.belum);  // AI Copilot
     });
@@ -64,7 +64,7 @@ void main() {
     test('butir yang punya layar diberi rute', () {
       expect(cari('FR-86').rute, '/ibadah/jadwal-sholat');
       expect(cari('FR-150').rute, '/akun');
-      expect(cari('FR-09').rute, isNull, reason: 'belum ada layarnya');
+      expect(cari('FR-38').rute, isNull, reason: 'belum ada layarnya');
     });
   });
 
@@ -96,7 +96,7 @@ void main() {
       await t.ensureVisible(find.byKey(const Key('peta_saring_belum')));
       await t.tap(find.byKey(const Key('peta_saring_belum')));
       await t.pumpAndSettle();
-      expect(find.byKey(const Key('peta_FR-09')), findsOneWidget);
+      expect(find.byKey(const Key('peta_FR-38')), findsOneWidget);
       expect(find.byKey(const Key('peta_FR-21')), findsNothing,
           reason: 'FR-21 sudah selesai → tidak muncul di saringan Belum');
       await tutup(t);
