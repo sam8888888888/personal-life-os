@@ -17,12 +17,14 @@ import 'features/hari_ini/ibadah_hub_screen.dart';
 import 'features/hari_ini/kerja_screen.dart';
 import 'features/hari_ini/lainnya_screen.dart';
 import 'features/ibadah/jadwal_sholat_screen.dart';
+import 'features/ibadah/hifz_screen.dart';
 import 'features/ibadah/kalender_hijriah_screen.dart';
 import 'features/ibadah/dzikir_screen.dart';
 import 'features/ibadah/muhasabah_screen.dart';
 import 'features/ibadah/pelacakan_sholat_screen.dart';
 import 'features/ibadah/puasa_screen.dart';
 import 'features/ibadah/quran_screen.dart';
+import 'features/ibadah/zakat_screen.dart';
 import 'features/ibadah/ramadan_screen.dart';
 import 'features/ibadah/pengingat_ibadah_screen.dart';
 import 'features/ibadah/pengaturan_ibadah.dart';
@@ -229,6 +231,15 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/ibadah/quran',
       builder: (c, s) => const QuranScreen(),
+    ),
+    // FR-94 & FR-96: pelacakan hafalan & zakat/sedekah.
+    GoRoute(
+      path: '/ibadah/hifz',
+      builder: (c, s) => const HifzScreen(),
+    ),
+    GoRoute(
+      path: '/ibadah/zakat',
+      builder: (c, s) => const ZakatScreen(),
     ),
     GoRoute(
       path: '/ibadah/dzikir',

@@ -103,6 +103,26 @@ class IbadahHubScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_hifz'),
+                  leading: const Icon(Icons.menu_book_outlined),
+                  title: const Text('Hafalan (hifz)'),
+                  subtitle: const Text(
+                      'Per juz/surah · baru, murajaah, perlu diulang (FR-94)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ibadah/hifz'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_zakat'),
+                  leading: const Icon(Icons.volunteer_activism_outlined),
+                  title: const Text('Zakat & sedekah'),
+                  subtitle: const Text(
+                      'Catatan infaq + asisten hitung zakat (FR-96)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ibadah/zakat'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_dzikir'),
                   leading: const Icon(Icons.radio_button_checked),
                   title: const Text('Dzikir & doa'),
