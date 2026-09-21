@@ -202,6 +202,7 @@ class PerencanaPengingat {
     bool sertakanBriefingPagi = false,
     String jamBriefingPagi = jamBriefingBawaan,
     List<JadwalPengingatSholat> jadwalSholat = const [],
+    Map<int, int> leadPintar = const {},
   }) {
     final batasAwal = sekarang.add(const Duration(minutes: 1));
     final batasAkhir = sekarang.add(horizon);
@@ -210,7 +211,8 @@ class PerencanaPengingat {
     for (final t in tagihan) {
       if (!t.statusAktif || t.lunas) continue;
       final jam = jamDariTeks(t.pengingatJam);
-      hasil.addAll(_pengingatLead(t, jam, batasAwal, batasAkhir));
+      hasil.addAll(_pengingatLead(t, jam, batasAwal, batasAkhir,
+          leadTambahan: leadPintar[t.id]));
       hasil.addAll(_pengingatTerlambat(t, jam, sekarang, batasAwal, batasAkhir));
     }
 
@@ -329,14 +331,14 @@ class PerencanaPengingat {
           ? 'Tidak ada tagihan hari ini atau besok.'
           : 'Hari ini & besok tidak ada tagihan. '
               '$jumlahTujuhHari tagihan dalam 7 hari ke depan '
-              '(\${fmtRpDariSen(totalTujuhHari)}).';
+              '(${fmtRpDariSen(totalTujuhHari)}).';
     }
     final hariIni = jumlahHariIni == 0
         ? 'Hari ini tidak ada tagihan'
         : 'Hari ini $jumlahHariIni tagihan (${fmtRpDariSen(totalHariIni)})';
     final besokTeks = jumlahBesok == 0
-        ? 'besok tidak ada'
-        : 'besok $jumlahBesok (${fmtRpDariSen(totalBesok)})';
+        ? 'besok tidak ada tagihan'
+        : 'besok $jumlahBesok tagihan (${fmtRpDariSen(totalBesok)})';
     return '$hariIni, $besokTeks. '
         'Total 7 hari: ${fmtRpDariSen(totalTujuhHari)}.';
   }
@@ -355,13 +357,22 @@ class PerencanaPengingat {
     return (jumlah, total);
   }
 
+  /// [leadTambahan] (FR-17) = hari yang biasanya dipakai pengguna membayar,
+  /// hasil pembelajaran pola. Bila ada dan belum termasuk, satu pengingat
+  /// ditambahkan pada hari itu.
   List<Pengingat> _pengingatLead(
     TagihanData t,
     (int, int) jam,
     DateTime batasAwal,
-    DateTime batasAkhir,
-  ) {
+    DateTime batasAkhir, {
+    int? leadTambahan,
+  }) {
     var lead = teksKeLead(t.pengingatLeadHari); // urut menurun: H-60 … H-0
+    if (leadTambahan != null &&
+        leadTambahan >= 0 &&
+        !lead.contains(leadTambahan)) {
+      lead = [...lead, leadTambahan]..sort((a, b) => b.compareTo(a));
+    }
     if (lead.length > maksPengingatPerSiklus) {
       // FR-12: bila lead melebihi batas, buang yang TERJAUH (H-60, H-30, …).
       // Pengingat terdekat (H-1, hari-H) justru yang paling penting.

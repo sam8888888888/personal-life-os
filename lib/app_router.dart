@@ -63,6 +63,7 @@ import 'features/tagihan/daftar_tagihan_screen.dart';
 import 'features/tagihan/kelola_kategori_tagihan_screen.dart';
 import 'features/tagihan/form_tagihan_screen.dart';
 import 'features/tagihan/ekspor_csv_screen.dart';
+import 'features/tagihan/pola_bayar_screen.dart';
 import 'features/uang/anggaran/anggaran_screen.dart';
 import 'features/uang/kekayaan/kekayaan_screen.dart';
 import 'features/uang/langganan/langganan_screen.dart';
@@ -103,6 +104,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/tagihan/ekspor-csv',
       builder: (c, s) => const EksporCsvScreen(),
+    ),
+    GoRoute(
+      path: '/tagihan/pola-bayar',
+      builder: (c, s) => const PolaBayarScreen(),
     ),
     GoRoute(
       path: '/tagihan/kategori',

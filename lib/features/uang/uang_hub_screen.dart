@@ -173,6 +173,16 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_pola_bayar'),
+                  leading: const Icon(Icons.insights_outlined),
+                  title: const Text('Pola bayar & pengingat pintar'),
+                  subtitle: const Text(
+                      'Kebiasaan membayar yang terbaca + usul pengingat (FR-40/17)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tagihan/pola-bayar'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_ekspor_csv'),
                   leading: const Icon(Icons.table_view_outlined),
                   title: const Text('Ekspor CSV'),

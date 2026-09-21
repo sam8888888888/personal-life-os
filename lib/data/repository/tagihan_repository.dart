@@ -321,6 +321,27 @@ class TagihanRepository {
         await tandaiUidDari(id);
       });
 
+  /// Riwayat pembayaran + id tagihannya (dipakai pembelajaran pola, FR-17/FR-40).
+  Future<List<({int tagihanId, String nama, DateTime tanggalBayar, DateTime periode, int telatHari})>>
+      riwayatDenganId() async {
+    final kueri = db.select(db.riwayatPembayaran).join([
+      leftOuterJoin(db.tagihan, db.tagihan.id.equalsExp(db.riwayatPembayaran.tagihanId)),
+    ])
+      ..orderBy([OrderingTerm.asc(db.riwayatPembayaran.tanggalBayar)]);
+    final baris = await kueri.get();
+    return baris.map((b) {
+      final rp = b.readTable(db.riwayatPembayaran);
+      final tg = b.readTableOrNull(db.tagihan);
+      return (
+        tagihanId: rp.tagihanId,
+        nama: tg?.nama ?? '(tagihan dihapus)',
+        tanggalBayar: rp.tanggalBayar,
+        periode: rp.periodeJatuhTempo,
+        telatHari: rp.telatHari ?? 0,
+      );
+    }).toList();
+  }
+
   /// FR-09: salin satu tagihan sebagai tagihan baru (siap disunting).
   ///
   /// Yang disalin: jenis, nominal, mata uang, kategori, frekuensi, jadwal

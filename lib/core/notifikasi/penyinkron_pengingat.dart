@@ -2,11 +2,14 @@
 /// Dipanggil saat aplikasi dibuka, setelah data berubah, dan dari pekerja latar.
 library;
 
+import '../../data/database/database.dart';
 import '../../data/repository/tagihan_repository.dart';
 import 'jejak.dart';
 import 'layanan_notifikasi.dart';
 import 'model_pengingat.dart';
+import '../../data/repository/pengaturan_repository.dart';
 import 'perencana_pengingat.dart';
+import '../laporan/pola_bayar.dart';
 import 'sumber_pengingat_tambahan.dart';
 
 class HasilSinkron {
@@ -44,6 +47,9 @@ class HasilSinkron {
       '${galatSumberTambahan.isEmpty ? '' : ', galat tambahan=$galatSumberTambahan'}, '
       'galat=$galat)';
 }
+
+/// FR-17: saklar "pengingat menyesuaikan pola" (disimpan apa adanya 'true').
+const String kunciPengingatPintar = 'pengingat_pintar';
 
 class PenyinkronPengingat {
   const PenyinkronPengingat({
@@ -84,8 +90,10 @@ class PenyinkronPengingat {
     try {
       final semua = await repo.ambilSemua();
       final tambahan = await _pengingatTambahan(kini, galatTambahan);
+      final petaPintar = await _leadPintar(semua);
       final daftar = <Pengingat>[
-        ...perencana.rencanakan(tagihan: semua, sekarang: kini),
+        ...perencana.rencanakan(tagihan: semua, sekarang: kini,
+            leadPintar: petaPintar),
         ...tambahan,
       ]..sort((a, b) => a.waktu.compareTo(b.waktu));
       await layanan.pasangJadwal(daftar);
@@ -128,10 +136,42 @@ class PenyinkronPengingat {
     final semua = await repo.ambilSemua();
     final galat = <String>[];
     final tambahan = await _pengingatTambahan(kini, galat);
+    final petaPintar = await _leadPintar(semua);
     final daftar = <Pengingat>[
-      ...perencana.rencanakan(tagihan: semua, sekarang: kini),
+      ...perencana.rencanakan(tagihan: semua, sekarang: kini,
+          leadPintar: petaPintar),
       ...tambahan,
     ]..sort((a, b) => a.waktu.compareTo(b.waktu));
     return daftar.take(maks).toList(growable: false);
+  }
+
+  /// FR-17: peta tagihanId → lead hari kebiasaan membayar.
+  ///
+  /// Kosong bila saklar "pengingat menyesuaikan pola" belum dinyalakan, atau
+  /// bila pola pembayarannya belum cukup kuat (lihat PolaBayar.cukupBukti).
+  Future<Map<int, int>> _leadPintar(List<TagihanData> tagihan) async {
+    try {
+      final menyala = await PengaturanRepository(repo.db)
+          .bacaSaklar(kunciPengingatPintar);
+      if (!menyala) return const {};
+      final riwayat = await repo.riwayatDenganId();
+      final pola = hitungPolaBayar([
+        for (final r in riwayat)
+          CatatanBayar(
+            tagihanId: r.tagihanId,
+            namaTagihan: r.nama,
+            tanggalBayar: r.tanggalBayar,
+            jatuhTempoPeriode: r.periode,
+          ),
+      ]);
+      return leadPintarDariPola(pola,
+          tagihanAktif: {
+            for (final t in tagihan)
+              if (t.statusAktif && !t.lunas) t.id,
+          });
+    } catch (_) {
+      // Pembelajaran pola tidak boleh menggagalkan penjadwalan pengingat.
+      return const {};
+    }
   }
 }
