@@ -1054,8 +1054,26 @@ void main() {
       expect(namaBerkas, hasLength(1));
 
       final Finder kunciBerkas = find.byKey(Key('impor_berkas_${namaBerkas.first}'));
+      // Berkas di disk bisa muncul LEBIH DULU daripada daftar di layar, karena
+      // memuat daftar juga pekerjaan berkas NYATA. Tunggu barisnya benar-benar
+      // terbangun: tiap putaran memakai jendela waktu nyata (jam palsu hanya
+      // dimajukan 100 ms per putaran, tetap jauh di bawah batas 5 detik layar).
+      for (var i = 0; i < 15 && kunciBerkas.evaluate().isEmpty; i++) {
+        await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 250)));
+        await t.pump(const Duration(milliseconds: 100));
+      }
       final Set<String> kumpulanAwal = <String>{...teksTampil(t)};
-      await gulirKe(t, kunciBerkas);
+      // Panel hasil ekspor bisa panjang (satu baris per tabel), jadi baris
+      // impor dicari dengan menggulir TURUN sampai ketemu.
+      for (var i = 0; i < 40 && kunciBerkas.evaluate().isEmpty; i++) {
+        await t.drag(find.byType(Scrollable).first, const Offset(0, -260));
+        await t.pump(const Duration(milliseconds: 80));
+      }
+      if (kunciBerkas.evaluate().isNotEmpty) {
+        await t.ensureVisible(kunciBerkas);
+        await t.pump(const Duration(milliseconds: 80));
+      }
       // Membaca berkas cadangan juga pekerjaan NYATA (kini 44 tabel), jadi
       // ketukan pratinjau diberi jendela waktu nyata yang lebih panjang —
       // sama seperti ketukan ekspor di atas.
@@ -1087,10 +1105,8 @@ void main() {
       expect(kumpulan.any((s) => s.contains('Buat cadangan sekarang')), isTrue);
       expect(kumpulan.any((s) => s.contains('Pulihkan dari cadangan')), isTrue,
           reason: 'seluruh isi layar harus terbaca, bukan hanya bagian atas');
-      // Catatan: kalimat "Versi skema" hanya ada di kartu pratinjau. Kartu itu
-      // tidak muncul bila ekspor dipicu tombol di dalam uji widget yang sama,
-      // jadi jalur pratinjau diperiksa di uji khusus
-      // ("impor: pratinjau -> batal (data tetap), lalu konfirmasi") yang hijau.
+      expect(kumpulan.any((s) => s.contains('Versi skema')), isTrue,
+          reason: 'kartu pratinjau harus terbaca setelah berkas dipilih');
       await tutup(t);
     });
   });
