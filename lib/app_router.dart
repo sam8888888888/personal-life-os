@@ -69,6 +69,7 @@ import 'features/uang/pengeluaran_terencana/pengeluaran_terencana_screen.dart';
 import 'features/uang/strategi_pelunasan/strategi_pelunasan_screen.dart';
 import 'features/uang/transaksi/daftar_transaksi_screen.dart';
 import 'features/uang/uang_hub_screen.dart';
+import 'features/uang/aman_sampai_gajian_screen.dart';
 
 /// Membuat router baru (dipakai aplikasi & uji UI).
 GoRouter buatRouter({String awal = '/'}) => GoRouter(
@@ -226,6 +227,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/uang/langganan',
       builder: (c, s) => const LanggananScreen(),
+    ),
+    GoRoute(
+      path: '/uang/aman-sampai-gajian',
+      builder: (c, s) => const AmanSampaiGajianScreen(),
     ),
     GoRoute(
       path: '/uang/kekayaan',

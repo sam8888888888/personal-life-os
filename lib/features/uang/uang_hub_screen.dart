@@ -113,6 +113,16 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_aman_sampai_gajian'),
+                  leading: const Icon(Icons.event_available_outlined),
+                  title: const Text('Uang aman sampai gajian'),
+                  subtitle: const Text(
+                      'Tagihan sampai tanggal gajian + sisa saldo (FR-33)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/aman-sampai-gajian'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_statistik_pembayaran'),
                   leading: const Icon(Icons.insights_outlined),
                   title: const Text('Statistik pembayaran'),
