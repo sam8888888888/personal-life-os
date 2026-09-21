@@ -28,6 +28,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../core/audit/audit_log.dart';
 import '../../core/laporan/pdf_laporan_bulanan.dart';
+import '../../core/platform/bagikan.dart';
 import '../../core/laporan/ringkasan_bulanan.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
@@ -134,6 +135,59 @@ class LaporanBulananScreenState extends ConsumerState<LaporanBulananScreen> {
 
   /// Simpan laporan bulan yang sedang tampil sebagai CSV.
   Future<void> unduhCsv() => _simpanBerkas(pdf: false);
+
+  /// FR-45: bagikan laporan bulan ini sebagai PDF.
+  Future<void> bagikanPdf() => _bagikan(pdf: true);
+
+  /// FR-45: bagikan laporan bulan ini sebagai CSV (bisa dibuka Excel).
+  Future<void> bagikanCsv() => _bagikan(pdf: false);
+
+  /// Berkas dibuat dulu (memakai jalur simpan yang sama), baru dibagikan.
+  /// Bila HP tidak punya aplikasi penerima, pesannya menyebut lokasi berkas —
+  /// tidak ada keberhasilan yang dipalsukan.
+  Future<void> _bagikan({required bool pdf}) async {
+    final r = ringkasan;
+    if (r == null) {
+      pesan('Laporan bulan ini belum siap dibaca, jadi belum ada yang bisa '
+          'dibagikan.');
+      return;
+    }
+    try {
+      await _simpanBerkas(pdf: pdf);
+      final folder = await (widget.folderLaporan?.call() ??
+              getApplicationDocumentsDirectory())
+          .timeout(batasTunggu);
+      final namaBerkas =
+          'plo_laporan_${kodeBerkasBulan(r.bulan)}.${pdf ? 'pdf' : 'csv'}';
+      final berkas = File(p.join(folder.path, namaBerkas));
+      if (!berkas.existsSync()) {
+        if (!mounted) return;
+        pesan('Berkas laporan belum terbentuk, jadi belum bisa dibagikan.');
+        return;
+      }
+      final judul = 'Laporan bulanan ${namaBulanTahunId(r.bulan)}';
+      final terkirim = await bagikanBerkas(
+        jalur: berkas.path,
+        judul: judul,
+        jenis: pdf ? 'application/pdf' : 'text/csv',
+      );
+      if (!mounted) return;
+      // Pesan "Tersimpan: …" tidak perlu mengantre di depan pesan ini.
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        key: const Key('hasil_bagikan'),
+        duration: const Duration(seconds: 8),
+        content: Text(terkirim
+            ? '$judul dikirim ke aplikasi lain.'
+            : 'Belum bisa dibagikan otomatis di perangkat ini. Berkasnya ada di '
+                '${berkas.path}'),
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      pesan('Laporan belum bisa dibagikan. Coba lagi setelah folder dokumen '
+          'aplikasi bisa dibuka.');
+    }
+  }
 
   Future<void> _simpanBerkas({required bool pdf}) async {
     final r = ringkasan;
@@ -245,6 +299,8 @@ class LaporanBulananScreenState extends ConsumerState<LaporanBulananScreen> {
           ],
           const SizedBox(height: 12),
           _tombolUnduh(),
+          const SizedBox(height: 8),
+          _tombolBagikan(),
         ],
       ),
     );
@@ -495,6 +551,29 @@ class LaporanBulananScreenState extends ConsumerState<LaporanBulananScreen> {
               onPressed: () => unduhCsv(),
               icon: const Icon(Icons.table_chart_outlined),
               label: const Text('Unduh CSV'),
+            ),
+          ),
+        ],
+      );
+
+  /// FR-45: bagikan berkas laporan ke aplikasi lain (WhatsApp, email, dsb).
+  Widget _tombolBagikan() => Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key('bagikan_pdf'),
+              onPressed: () => bagikanPdf(),
+              icon: const Icon(Icons.share_outlined),
+              label: const Text('Bagikan PDF'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: OutlinedButton.icon(
+              key: const Key('bagikan_csv'),
+              onPressed: () => bagikanCsv(),
+              icon: const Icon(Icons.ios_share_outlined),
+              label: const Text('Bagikan CSV'),
             ),
           ),
         ],

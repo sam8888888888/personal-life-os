@@ -183,6 +183,26 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_pusat_bayar'),
+                  leading: const Icon(Icons.account_balance_outlined),
+                  title: const Text('Pusat Bayar'),
+                  subtitle: const Text(
+                      'Aplikasi bayar, nomor VA/QRIS & catatan konfirmasi (FR-42)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tagihan/pusat-bayar'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_ekspor_kalender'),
+                  leading: const Icon(Icons.calendar_month_outlined),
+                  title: const Text('Ekspor kalender (.ics)'),
+                  subtitle: const Text(
+                      'Tagihan mendatang ke Google Kalender (FR-41)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tagihan/ekspor-kalender'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_ekspor_csv'),
                   leading: const Icon(Icons.table_view_outlined),
                   title: const Text('Ekspor CSV'),

@@ -20,6 +20,7 @@ import '../../../core/providers/app_providers.dart';
 import '../../../core/utils/tanggal_utils.dart';
 import '../../../core/utils/uang_utils.dart';
 import '../../../core/audit/audit_log.dart';
+import '../../../core/laporan/tagihan_berhenti.dart';
 import '../../../core/utils/waktu.dart';
 import '../../../data/database/database.dart';
 import '../../../data/model/enums.dart';
@@ -105,6 +106,18 @@ String kalimatPause(LanggananData l) {
 }
 
 /// Hasil dialog pause; null berarti pengguna menutup dialog (batal).
+/// FR-46: catatan pembayaran (id tagihan + tanggal) untuk mendeteksi tagihan
+/// yang berhenti muncul. Dibuat lokal di modul ini, seperti provider lain di
+/// berkas ini.
+final riwayatBayarProvider = FutureProvider.autoDispose<
+    List<({int tagihanId, DateTime tanggalBayar})>>((ref) async {
+  final baris = await ref.watch(tagihanRepoProvider).riwayatDenganId();
+  return [
+    for (final b in baris)
+      (tagihanId: b.tagihanId, tanggalBayar: b.tanggalBayar),
+  ];
+});
+
 class PilihanPause {
   const PilihanPause(this.sampai);
 
@@ -141,6 +154,15 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     };
     final pembayaranTerakhir =
         ref.watch(pembayaranTerakhirProvider).value ?? const <int, int>{};
+
+    // FR-46: tagihan berulang yang catatan pembayarannya sudah berhenti.
+    final riwayatBayar = ref.watch(riwayatBayarProvider).value ??
+        const <({int tagihanId, DateTime tanggalBayar})>[];
+    final berhenti = deteksiTagihanBerhenti(
+      tagihan: daftarTagihan,
+      riwayat: riwayatBayar,
+      sekarang: _sekarang,
+    );
     return Scaffold(
       appBar: AppBar(title: const Text('Langganan')),
       floatingActionButton: FloatingActionButton.extended(
@@ -153,8 +175,8 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const Center(
             child: Text('Tidak bisa memuat daftar langganan saat ini.')),
-        data: (semua) =>
-            _isi(semua, namaTagihan, nominalTagihan, pembayaranTerakhir),
+        data: (semua) => _isi(
+            semua, namaTagihan, nominalTagihan, pembayaranTerakhir, berhenti),
       ),
     );
   }
@@ -164,6 +186,7 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
     Map<int, String> namaTagihan,
     Map<int, int> nominalTagihan,
     Map<int, int> pembayaranTerakhir,
+    List<TagihanBerhenti> berhenti,
   ) {
     final terfilter = semua.where((l) => cocokFilter(l, _filter)).toList();
     final totalSen = totalBulananAktifSen(semua);
@@ -245,6 +268,13 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
             temuan: temuan,
             onTandaiDipakai: _tandaiDipakai,
             onSesuaikanNominal: _sesuaikanNominal,
+          ),
+        ],
+        if (berhenti.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          PanelTagihanBerhenti(
+            daftar: berhenti,
+            onMatikanPengingat: _matikanPengingat,
           ),
         ],
       ],
@@ -408,6 +438,20 @@ class _LanggananScreenState extends ConsumerState<LanggananScreen> {
         entitasId: '${l.id}',
         ringkas: ringkas,
       );
+
+  /// FR-46: matikan pengingat tagihan yang langganannya sudah berhenti.
+  /// Tagihannya TIDAK dihapus — hanya tidak lagi diingatkan.
+  Future<void> _matikanPengingat(int tagihanId) async {
+    final jumlah = await ref.read(tagihanRepoProvider).nonaktifkan(tagihanId);
+    if (!mounted) return;
+    // Hitungan ulang setelah data berubah.
+    ref.invalidate(riwayatBayarProvider);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(jumlah > 0
+          ? 'Pengingat dimatikan — datanya tetap tersimpan.'
+          : 'Tagihan ini sudah tidak aktif.'),
+    ));
+  }
 
   Future<void> _tandaiDipakai(LanggananData l) async {
     await ref.read(repoLanggananProvider).tandaiDipakai(l.id);

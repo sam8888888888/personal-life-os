@@ -59,6 +59,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- FR-45: bagikan berkas laporan lewat lembar berbagi Android. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.berkas"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/berkas_paths" />
+        </provider>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
