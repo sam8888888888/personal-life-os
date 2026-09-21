@@ -824,3 +824,110 @@ class SinkronKotor extends Table {
   @override
   Set<Column> get primaryKey => {tabel, uid};
 }
+
+/// FR-105 — Jurnal kesehatan berbentuk angka (tekanan darah, gula darah, dst).
+///
+/// Menyimpan ANGKA apa adanya + satuan yang dipakai pengguna. Aplikasi hanya
+/// menampilkan tren, tidak menafsirkan sebagai diagnosis.
+class CatatanKesehatan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// tekanan_darah · detak_jantung · gula_darah · suhu · saturasi · kolesterol · lab
+  TextColumn get jenis => text()();
+  DateTimeColumn get waktu => dateTime()();
+
+  /// Nilai utama (mis. sistolik, atau angka tunggal).
+  RealColumn get nilai => real()();
+
+  /// Nilai kedua bila jenisnya berpasangan (mis. diastolik).
+  RealColumn get nilaiKedua => real().nullable()();
+
+  /// Satuan yang dipakai pengguna (mis. mmHg, mg/dL) — disimpan apa adanya.
+  TextColumn get satuan => text().withDefault(const Constant(''))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-109 — Janji dokter / tes lab / kontrol, dengan pengingat 7 hari, 1 hari,
+/// dan 2 jam sebelum jadwal.
+class JanjiKesehatan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get judul => text()();
+
+  /// kontrol · lab · vaksin · gigi · lain
+  TextColumn get jenis => text().withDefault(const Constant('kontrol'))();
+  DateTimeColumn get waktu => dateTime()();
+  TextColumn get tempat => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get selesai => boolean().withDefault(const Constant(false))();
+
+  /// Lead hari yang dipakai (mis. "7,1"); 2 jam sebelum diatur lewat saklar.
+  TextColumn get pengingatHari => text().withDefault(const Constant('7,1'))();
+  BoolColumn get ingatkanDuaJam =>
+      boolean().withDefault(const Constant(true))();
+  TextColumn get jamPengingat => text().withDefault(const Constant('08:00'))();
+
+  /// Pengenal stabil untuk sinkron antar perangkat.
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-51 — Catatan kas & utang informal (warung, kontrakan, utang-piutang, COD).
+class KasInformal extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// utang (kita berutang) · piutang (orang berutang) · tunai (catatan kas)
+  TextColumn get jenis => text()();
+
+  /// Nama warung/orang tempat berutang.
+  TextColumn get pihak => text()();
+  DateTimeColumn get tanggal => dateTime()();
+  IntColumn get jumlahSen => integer()();
+  TextColumn get kodeMataUang => text().withDefault(const Constant('IDR'))();
+  BoolColumn get lunas => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get tanggalLunas => dateTime().nullable()();
+  DateTimeColumn get jatuhTempo => dateTime().nullable()();
+  TextColumn get catatan => text().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-94 — Pelacakan hafalan (hifz): baru, murajaah, perlu diulang.
+class Hafalan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// juz · surah
+  TextColumn get jenis => text().withDefault(const Constant('surah'))();
+  TextColumn get nama => text()();
+  IntColumn get nomor => integer().nullable()();
+
+  /// baru · murajaah · perlu_diulang · kuat
+  TextColumn get status => text().withDefault(const Constant('baru'))();
+  DateTimeColumn get terakhir => dateTime()();
+
+  /// Aturan ulangan pilihan pengguna (hari). 0 = tidak dijadwalkan ulang.
+  IntColumn get ulangSetiapHari => integer().withDefault(const Constant(7))();
+  TextColumn get catatan => text().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-96 — Zakat & sedekah: catatan infaq/sedekah (perhitungan zakat memakai
+/// aset yang sudah ada + acuan nisab yang diisi pengguna).
+class ZakatSedekah extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// zakat_maal · zakat_fitrah · infaq · sedekah · wakaf
+  TextColumn get jenis => text()();
+  DateTimeColumn get tanggal => dateTime()();
+  IntColumn get jumlahSen => integer()();
+  TextColumn get kodeMataUang => text().withDefault(const Constant('IDR'))();
+  TextColumn get penerima => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}

@@ -44,7 +44,9 @@ import 'features/kalender/kalender_screen.dart';
 import 'features/kesehatan/aktivitas_screen.dart';
 import 'features/kesehatan/air_screen.dart';
 import 'features/kesehatan/kesehatan_hub_screen.dart';
+import 'features/kesehatan/jurnal_angka_screen.dart';
 import 'features/kesehatan/obat_screen.dart';
+import 'features/kesehatan/ukuran_tubuh_screen.dart';
 import 'features/kesehatan/tidur_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
 import 'features/laporan/denda_terhindarkan_screen.dart';
@@ -338,6 +340,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
         GoRoute(
           path: 'tidur',
           builder: (c, s) => const TidurScreen(),
+        ),
+        GoRoute(
+          path: 'ukuran-tubuh',
+          builder: (c, s) => const UkuranTubuhScreen(),
+        ),
+        GoRoute(
+          path: 'jurnal-angka',
+          builder: (c, s) => const JurnalAngkaScreen(),
         ),
         GoRoute(
           path: 'obat',

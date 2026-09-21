@@ -199,6 +199,23 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
                       ),
                       const Divider(height: 1),
                       _pintu(
+                        kunci: 'buka_ukuran_tubuh',
+                        ikon: Icons.monitor_weight_outlined,
+                        judul: 'Berat & ukuran tubuh',
+                        keterangan: 'IMT, lingkar perut, lemak & target (FR-104)',
+                        tujuan: '/kesehatan/ukuran-tubuh',
+                      ),
+                      const Divider(height: 1),
+                      _pintu(
+                        kunci: 'buka_jurnal_angka',
+                        ikon: Icons.monitor_heart_outlined,
+                        judul: 'Jurnal kesehatan (angka)',
+                        keterangan:
+                            'Tekanan darah, gula darah, suhu & tren 30 hari (FR-105)',
+                        tujuan: '/kesehatan/jurnal-angka',
+                      ),
+                      const Divider(height: 1),
+                      _pintu(
                         kunci: 'buka_obat',
                         ikon: Icons.medication_outlined,
                         judul: 'Obat & vitamin',

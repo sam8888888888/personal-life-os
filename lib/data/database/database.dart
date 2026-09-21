@@ -61,13 +61,20 @@ part 'database.g.dart';
   LogQuran,
   LogDzikir,
   RefleksiMuhasabah,
+  // Kesehatan lanjutan (FR-105/FR-109) & kas informal (FR-51),
+  // hafalan (FR-94), zakat & sedekah (FR-96)
+  CatatanKesehatan,
+  JanjiKesehatan,
+  KasInformal,
+  Hafalan,
+  ZakatSedekah,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -139,6 +146,14 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
                 'CREATE UNIQUE INDEX IF NOT EXISTS idx_tagihan_uid '
                 'ON tagihan(uid)');
             debugPrint('migrasi v6 selesai (uid tagihan terisi, catatan perubahan siap)');
+          }
+          if (dari < 7) {
+            // v7: lima tabel BARU (kesehatan lanjutan, janji dokter, kas
+            // informal, hafalan, zakat & sedekah). Tidak ada kolom tabel lama
+            // yang diubah, jadi data pengguna tidak tersentuh.
+            await _buatTabelV7(m);
+            debugPrint('migrasi v7 selesai (catatan kesehatan, janji dokter, '
+                'kas informal, hafalan, zakat & sedekah dibuat)');
           }
           if (dari < 5) {
             // v5 (FR-82): dua tabel BARU (visi, area hidup) + satu kolom BARU
@@ -290,6 +305,16 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   }
 
   /// Skema v4: 23 tabel baru pilar kehidupan (V2).
+  /// Skema v7 (FR-51/94/96/105/109): lima tabel baru — tanpa menyentuh tabel
+  /// lama, jadi pemutakhiran aplikasi tidak mengubah data pengguna.
+  Future<void> _buatTabelV7(Migrator m) async {
+    await m.createTable(catatanKesehatan);
+    await m.createTable(janjiKesehatan);
+    await m.createTable(kasInformal);
+    await m.createTable(hafalan);
+    await m.createTable(zakatSedekah);
+  }
+
   Future<void> _buatTabelV4(Migrator m) async {
     await m.createTable(tujuan);
     await m.createTable(proyek);
