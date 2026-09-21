@@ -261,8 +261,9 @@ void main() {
       expect(hasil.namaBerkas, 'plo_backup_20260915_0800.json');
       expect(File(hasil.path).existsSync(), isTrue);
       expect(File(hasil.path).lengthSync(), greaterThan(0));
-      expect(hasil.totalBaris, 51,
-          reason: '45 baris (13 tabel inti) + 6 template perawatan (skema v4)');
+      expect(hasil.totalBaris, 52,
+          reason: '45 baris (13 tabel inti) + 6 template perawatan (v4) '
+              '+ 1 catatan perubahan sinkron (v6)');
 
       final Map<String, dynamic> isi =
           jsonDecode(File(hasil.path).readAsStringSync()) as Map<String, dynamic>;
@@ -274,8 +275,9 @@ void main() {
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 38,
+      expect(tabel.length, 39,
           reason: '13 tabel v3 + 23 tabel v4 + 2 tabel v5 (visi, area_hidup) '
+              '+ 1 tabel v6 (sinkron_kotor) '
               '= 38');
       expect(tabel.keys, contains('tagihan'));
       expect(tabel.keys, contains('pengaturan'));

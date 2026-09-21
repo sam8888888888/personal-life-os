@@ -82,8 +82,9 @@ void main() {
     });
 
     test('versi skema terkini & seluruh tabel pilar dibuat', () async {
-      // Skema naik ke 5 saat rantai rencana (FR-82) ditambahkan.
-      expect(db.schemaVersion, 5);
+      // Skema 5 = rantai rencana (FR-82); skema 6 = sinkron antar HP
+      // (kolom tagihan.uid + tabel sinkron_kotor).
+      expect(db.schemaVersion, 6);
       final tabel = await _namaTabel(db);
       for (final nama in _tabelV2) {
         expect(tabel.contains(nama), isTrue, reason: 'tabel $nama belum dibuat');

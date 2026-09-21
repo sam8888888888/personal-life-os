@@ -1,6 +1,8 @@
 /// Repositori tagihan — CRUD + aturan pelunasan/rollover (PRD §10.3).
 library;
 
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 
 import '../../core/utils/tanggal_utils.dart';
@@ -29,14 +31,151 @@ class TagihanRepository {
   Future<List<TagihanData>> ambilSemua() =>
       (db.select(db.tagihan)..orderBy([(t) => OrderingTerm.asc(t.jatuhTempo)])).get();
 
-  Future<TagihanData> tambah(TagihanCompanion c) =>
-      db.into(db.tagihan).insertReturning(c);
+  /// Uid baru untuk sinkron antar HP (FR-150).
+  ///
+  /// Sengaja tidak memakai paket uuid: cukup unik dan tidak bergantung waktu
+  /// perangkat yang bisa berbeda antar HP.
+  static String uidBaru([Random? acak]) {
+    final r = acak ?? Random();
+    final bagian = List.generate(4, (_) => r.nextInt(1 << 32).toRadixString(16).padLeft(8, '0'));
+    return bagian.join();
+  }
+
+  Future<TagihanData> tambah(TagihanCompanion c) {
+    // uid diisi di sini supaya semua jalur (form, contoh data, impor) ikut aman.
+    final denganUid = (c.uid.present && (c.uid.value ?? '').isNotEmpty)
+        ? c
+        : c.copyWith(uid: Value(uidBaru()));
+    return db.transaction(() async {
+      final hasil = await db.into(db.tagihan).insertReturning(denganUid);
+      await tandaiKotor(hasil.uid!);
+      return hasil;
+    });
+  }
+
+  /// Tandai satu baris (lewat id angka) sebagai perlu dikirim.
+  ///
+  /// Dipakai jalur ubah yang tidak lewat [ubah]: nonaktifkan, tandai lunas,
+  /// undo lunas. tanpa ini, perubahan itu tidak akan pernah sampai ke HP lain.
+  Future<void> tandaiUidDari(int id) async {
+    final baris =
+        await (db.select(db.tagihan)..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (baris?.uid != null) await tandaiKotor(baris!.uid!);
+  }
+
+  /// Catat bahwa satu baris (uid) perlu dikirim ke server.
+  ///
+  /// Aman dipanggil berkali-kali: penanda digabung (upsert) per uid, dan kalau
+  /// baris ini pernah ditandai hapus, tanda hapus yang menang.
+  Future<void> tandaiKotor(String uid, {bool hapus = false}) async {
+    final lama = await (db.select(db.sinkronKotor)
+          ..where((k) => k.tabel.equals('tagihan') & k.uid.equals(uid)))
+        .getSingleOrNull();
+    await db.into(db.sinkronKotor).insertOnConflictUpdate(
+          SinkronKotorCompanion.insert(
+            tabel: 'tagihan',
+            uid: uid,
+            hapus: Value(hapus || (lama?.hapus ?? false)),
+            waktu: DateTime.now(),
+          ),
+        );
+  }
+
+  /// Semua baris ber-uid (untuk sinkron); baris tanpa uid (belum tersentuh
+  /// sejak v6) tetap tidak ikut supaya tidak ada data separuh jadi.
+  Future<List<TagihanData>> semuaUntukSinkron() =>
+      (db.select(db.tagihan)..where((t) => t.uid.isNotNull())).get();
+
+  /// Terapkan satu baris kiriman server, dicocokkan lewat uid (bukan id angka).
+  Future<void> terapDariServer({
+    required String uid,
+    required Map<String, dynamic> isi,
+    required DateTime waktu,
+    required bool dihapus,
+  }) async {
+    await db.transaction(() async {
+      final lama = await (db.select(db.tagihan)..where((t) => t.uid.equals(uid)))
+          .getSingleOrNull();
+      if (dihapus) {
+        if (lama != null) {
+          await (db.delete(db.tagihan)..where((t) => t.id.equals(lama.id))).go();
+        }
+        return;
+      }
+      final nilai = TagihanCompanion(
+        uid: Value(uid),
+        jenis: Value(isi['jenis'] as String? ?? 'tagihan'),
+        nama: Value(isi['nama'] as String? ?? '(tanpa nama)'),
+        jumlahSen: Value(isi['jumlah_sen'] as int?),
+        kodeMataUang: Value(isi['kode_mata_uang'] as String? ?? 'IDR'),
+        kategoriId: Value(isi['kategori_id'] as int?),
+        jatuhTempo: Value(DateTime.fromMillisecondsSinceEpoch(
+            isi['jatuh_tempo_ms'] as int? ?? 0)),
+        frekuensi: Value(isi['frekuensi'] as String? ?? 'bulanan'),
+        kustomHariN: Value(isi['kustom_hari_n'] as int?),
+        pengingatLeadHari: Value(isi['pengingat_lead_hari'] as String? ?? '7,3,1'),
+        pengingatJam: Value(isi['pengingat_jam'] as String? ?? '09:00'),
+        kanalPengingat: Value(isi['kanal_pengingat'] as String? ?? 'push'),
+        prioritas: Value(isi['prioritas'] as String? ?? 'biasa'),
+        catatan: Value(isi['catatan'] as String?),
+        tautanBayar: Value(isi['tautan_bayar'] as String?),
+        statusAktif: Value(isi['status_aktif'] as bool? ?? true),
+        lunas: Value(isi['lunas'] as bool? ?? false),
+        tanggalLunas: Value(isi['tanggal_lunas_ms'] == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(isi['tanggal_lunas_ms'] as int)),
+        diubahPada: Value(waktu),
+      );
+      if (lama == null) {
+        await db.into(db.tagihan).insert(nilai);
+      } else if (!waktu.isBefore(lama.diubahPada)) {
+        await (db.update(db.tagihan)..where((t) => t.id.equals(lama.id)))
+            .write(denganUid(nilai, lama.uid));
+      }
+      // Baris ini datang dari server: jangan pernah dikirim balik (kalau tidak,
+      // penghapusan di HP lain bisa hidup lagi di sini).
+      await (db.delete(db.sinkronKotor)
+            ..where((k) => k.tabel.equals('tagihan') & k.uid.equals(uid)))
+          .go();
+    });
+  }
+
+  static TagihanCompanion denganUid(TagihanCompanion c, String? uid) =>
+      uid == null ? c : c.copyWith(uid: Value(uid));
+
+  /// Data satu baris untuk dikirim ke server.
+  static Map<String, dynamic> kePeta(TagihanData t) => {
+        'uid': t.uid,
+        'jenis': t.jenis,
+        'nama': t.nama,
+        'jumlah_sen': t.jumlahSen,
+        'kode_mata_uang': t.kodeMataUang,
+        'kategori_id': t.kategoriId,
+        'jatuh_tempo_ms': t.jatuhTempo.millisecondsSinceEpoch,
+        'frekuensi': t.frekuensi,
+        'kustom_hari_n': t.kustomHariN,
+        'pengingat_lead_hari': t.pengingatLeadHari,
+        'pengingat_jam': t.pengingatJam,
+        'kanal_pengingat': t.kanalPengingat,
+        'prioritas': t.prioritas,
+        'catatan': t.catatan,
+        'tautan_bayar': t.tautanBayar,
+        'status_aktif': t.statusAktif,
+        'lunas': t.lunas,
+        'tanggal_lunas_ms': t.tanggalLunas?.millisecondsSinceEpoch,
+      };
+
 
   /// Update sebagian; mengembalikan jumlah baris berubah.
   Future<int> ubah(TagihanCompanion c, {required int id}) async {
-    return (db.update(db.tagihan)..where((t) => t.id.equals(id))).write(
-      c.copyWith(id: Value(id), diubahPada: Value(DateTime.now())),
-    );
+    return db.transaction(() async {
+      final baris = (await (db.update(db.tagihan)..where((t) => t.id.equals(id)))
+              .write(c.copyWith(id: Value(id), diubahPada: Value(DateTime.now()))));
+      final sesudah =
+          await (db.select(db.tagihan)..where((t) => t.id.equals(id))).getSingleOrNull();
+      if (sesudah?.uid != null) await tandaiKotor(sesudah!.uid!);
+      return baris;
+    });
   }
 
   /// Hapus permanen beserta riwayatnya.
@@ -48,6 +187,13 @@ class TagihanRepository {
   ///   uangnya benar-benar keluar, jadi riwayat kas tidak boleh hilang diam
   ///   diam (aturan MASTER: baris jangan hilang, nilai dikosongkan + catatan).
   Future<void> hapus(int id) => db.transaction(() async {
+        // FR-150: catat penanda hapus supaya HP lain ikut menghapus.
+        final hendakDihapus = await (db.select(db.tagihan)
+              ..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+        if (hendakDihapus?.uid != null) {
+          await tandaiKotor(hendakDihapus!.uid!, hapus: true);
+        }
         await (db.update(db.langganan)..where((l) => l.tagihanId.equals(id)))
             .write(LanggananCompanion(
           tagihanId: const Value(null),
@@ -66,10 +212,14 @@ class TagihanRepository {
       });
 
   /// Nonaktifkan tagihan berulang tanpa menghapus riwayat.
-  Future<int> nonaktifkan(int id) => (db.update(db.tagihan)
-        ..where((t) => t.id.equals(id)))
-      .write(TagihanCompanion(
-          statusAktif: const Value(false), diubahPada: Value(DateTime.now())));
+  Future<int> nonaktifkan(int id) => db.transaction(() async {
+        final n = await (db.update(db.tagihan)..where((t) => t.id.equals(id)))
+            .write(TagihanCompanion(
+                statusAktif: const Value(false),
+                diubahPada: Value(DateTime.now())));
+        await tandaiUidDari(id);
+        return n;
+      });
 
   /// Tandai lunas: catat riwayat, geser periode berikutnya
   /// (day-clamping 31 Jan -> 28/29 Feb). Tagihan sekali -> nonaktif.
@@ -140,6 +290,7 @@ class TagihanRepository {
               diubahPada: Value(DateTime.now()),
             );
       await (db.update(db.tagihan)..where((x) => x.id.equals(id))).write(penutup);
+      await tandaiUidDari(id);
 
       return (db.select(db.riwayatPembayaran)..where((r) => r.id.equals(riwayatId)))
           .getSingle();
@@ -166,6 +317,7 @@ class TagihanRepository {
                 diubahPada: Value(DateTime.now()),
               ),
             );
+        await tandaiUidDari(id);
       });
 
   /// Tagihan aktif belum lunas yang jatuh tempo dalam [dalamHari] ke depan.

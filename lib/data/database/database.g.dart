@@ -357,6 +357,15 @@ class $TagihanTable extends Tagihan with TableInfo<$TagihanTable, TagihanData> {
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _jenisMeta = const VerificationMeta('jenis');
   @override
   late final GeneratedColumn<String> jenis = GeneratedColumn<String>(
@@ -588,6 +597,7 @@ class $TagihanTable extends Tagihan with TableInfo<$TagihanTable, TagihanData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     jenis,
     nama,
     jumlahSen,
@@ -622,6 +632,12 @@ class $TagihanTable extends Tagihan with TableInfo<$TagihanTable, TagihanData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('jenis')) {
       context.handle(
@@ -778,6 +794,10 @@ class $TagihanTable extends Tagihan with TableInfo<$TagihanTable, TagihanData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       jenis: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}jenis'],
@@ -865,6 +885,10 @@ class $TagihanTable extends Tagihan with TableInfo<$TagihanTable, TagihanData> {
 
 class TagihanData extends DataClass implements Insertable<TagihanData> {
   final int id;
+
+  /// Kunci tetap antar perangkat (sinkron FR-150). Nullable supaya baris lama
+  /// bisa diisi saat migrasi tanpa mengganggu data pengguna.
+  final String? uid;
   final String jenis;
   final String nama;
 
@@ -902,6 +926,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
   final DateTime diubahPada;
   const TagihanData({
     required this.id,
+    this.uid,
     required this.jenis,
     required this.nama,
     this.jumlahSen,
@@ -926,6 +951,9 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['jenis'] = Variable<String>(jenis);
     map['nama'] = Variable<String>(nama);
     if (!nullToAbsent || jumlahSen != null) {
@@ -963,6 +991,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
   TagihanCompanion toCompanion(bool nullToAbsent) {
     return TagihanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       jenis: Value(jenis),
       nama: Value(nama),
       jumlahSen: jumlahSen == null && nullToAbsent
@@ -1004,6 +1033,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TagihanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       jenis: serializer.fromJson<String>(json['jenis']),
       nama: serializer.fromJson<String>(json['nama']),
       jumlahSen: serializer.fromJson<int?>(json['jumlahSen']),
@@ -1030,6 +1060,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'jenis': serializer.toJson<String>(jenis),
       'nama': serializer.toJson<String>(nama),
       'jumlahSen': serializer.toJson<int?>(jumlahSen),
@@ -1054,6 +1085,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
 
   TagihanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? jenis,
     String? nama,
     Value<int?> jumlahSen = const Value.absent(),
@@ -1075,6 +1107,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
     DateTime? diubahPada,
   }) => TagihanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     jenis: jenis ?? this.jenis,
     nama: nama ?? this.nama,
     jumlahSen: jumlahSen.present ? jumlahSen.value : this.jumlahSen,
@@ -1098,6 +1131,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
   TagihanData copyWithCompanion(TagihanCompanion data) {
     return TagihanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       nama: data.nama.present ? data.nama.value : this.nama,
       jumlahSen: data.jumlahSen.present ? data.jumlahSen.value : this.jumlahSen,
@@ -1148,6 +1182,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
   String toString() {
     return (StringBuffer('TagihanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('nama: $nama, ')
           ..write('jumlahSen: $jumlahSen, ')
@@ -1172,8 +1207,9 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
+    uid,
     jenis,
     nama,
     jumlahSen,
@@ -1193,12 +1229,13 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
     tanggalLunas,
     dibuatPada,
     diubahPada,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TagihanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.jenis == this.jenis &&
           other.nama == this.nama &&
           other.jumlahSen == this.jumlahSen &&
@@ -1222,6 +1259,7 @@ class TagihanData extends DataClass implements Insertable<TagihanData> {
 
 class TagihanCompanion extends UpdateCompanion<TagihanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> jenis;
   final Value<String> nama;
   final Value<int?> jumlahSen;
@@ -1243,6 +1281,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
   final Value<DateTime> diubahPada;
   const TagihanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.jenis = const Value.absent(),
     this.nama = const Value.absent(),
     this.jumlahSen = const Value.absent(),
@@ -1265,6 +1304,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
   });
   TagihanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.jenis = const Value.absent(),
     required String nama,
     this.jumlahSen = const Value.absent(),
@@ -1288,6 +1328,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
        jatuhTempo = Value(jatuhTempo);
   static Insertable<TagihanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? jenis,
     Expression<String>? nama,
     Expression<int>? jumlahSen,
@@ -1310,6 +1351,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (jenis != null) 'jenis': jenis,
       if (nama != null) 'nama': nama,
       if (jumlahSen != null) 'jumlah_sen': jumlahSen,
@@ -1334,6 +1376,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
 
   TagihanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? jenis,
     Value<String>? nama,
     Value<int?>? jumlahSen,
@@ -1356,6 +1399,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
   }) {
     return TagihanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       jenis: jenis ?? this.jenis,
       nama: nama ?? this.nama,
       jumlahSen: jumlahSen ?? this.jumlahSen,
@@ -1383,6 +1427,9 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (jenis.present) {
       map['jenis'] = Variable<String>(jenis.value);
@@ -1448,6 +1495,7 @@ class TagihanCompanion extends UpdateCompanion<TagihanData> {
   String toString() {
     return (StringBuffer('TagihanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('nama: $nama, ')
           ..write('jumlahSen: $jumlahSen, ')
@@ -2491,6 +2539,317 @@ class PengaturanCompanion extends UpdateCompanion<PengaturanData> {
     return (StringBuffer('PengaturanCompanion(')
           ..write('kunci: $kunci, ')
           ..write('nilai: $nilai, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SinkronKotorTable extends SinkronKotor
+    with TableInfo<$SinkronKotorTable, SinkronKotorData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SinkronKotorTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _tabelMeta = const VerificationMeta('tabel');
+  @override
+  late final GeneratedColumn<String> tabel = GeneratedColumn<String>(
+    'tabel',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hapusMeta = const VerificationMeta('hapus');
+  @override
+  late final GeneratedColumn<bool> hapus = GeneratedColumn<bool>(
+    'hapus',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hapus" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _waktuMeta = const VerificationMeta('waktu');
+  @override
+  late final GeneratedColumn<DateTime> waktu = GeneratedColumn<DateTime>(
+    'waktu',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [tabel, uid, hapus, waktu];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sinkron_kotor';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SinkronKotorData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('tabel')) {
+      context.handle(
+        _tabelMeta,
+        tabel.isAcceptableOrUnknown(data['tabel']!, _tabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tabelMeta);
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uidMeta);
+    }
+    if (data.containsKey('hapus')) {
+      context.handle(
+        _hapusMeta,
+        hapus.isAcceptableOrUnknown(data['hapus']!, _hapusMeta),
+      );
+    }
+    if (data.containsKey('waktu')) {
+      context.handle(
+        _waktuMeta,
+        waktu.isAcceptableOrUnknown(data['waktu']!, _waktuMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_waktuMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {tabel, uid};
+  @override
+  SinkronKotorData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SinkronKotorData(
+      tabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tabel'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      )!,
+      hapus: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hapus'],
+      )!,
+      waktu: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}waktu'],
+      )!,
+    );
+  }
+
+  @override
+  $SinkronKotorTable createAlias(String alias) {
+    return $SinkronKotorTable(attachedDatabase, alias);
+  }
+}
+
+class SinkronKotorData extends DataClass
+    implements Insertable<SinkronKotorData> {
+  final String tabel;
+  final String uid;
+
+  /// true = baris ini dihapus di perangkat ini.
+  final bool hapus;
+  final DateTime waktu;
+  const SinkronKotorData({
+    required this.tabel,
+    required this.uid,
+    required this.hapus,
+    required this.waktu,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['tabel'] = Variable<String>(tabel);
+    map['uid'] = Variable<String>(uid);
+    map['hapus'] = Variable<bool>(hapus);
+    map['waktu'] = Variable<DateTime>(waktu);
+    return map;
+  }
+
+  SinkronKotorCompanion toCompanion(bool nullToAbsent) {
+    return SinkronKotorCompanion(
+      tabel: Value(tabel),
+      uid: Value(uid),
+      hapus: Value(hapus),
+      waktu: Value(waktu),
+    );
+  }
+
+  factory SinkronKotorData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SinkronKotorData(
+      tabel: serializer.fromJson<String>(json['tabel']),
+      uid: serializer.fromJson<String>(json['uid']),
+      hapus: serializer.fromJson<bool>(json['hapus']),
+      waktu: serializer.fromJson<DateTime>(json['waktu']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tabel': serializer.toJson<String>(tabel),
+      'uid': serializer.toJson<String>(uid),
+      'hapus': serializer.toJson<bool>(hapus),
+      'waktu': serializer.toJson<DateTime>(waktu),
+    };
+  }
+
+  SinkronKotorData copyWith({
+    String? tabel,
+    String? uid,
+    bool? hapus,
+    DateTime? waktu,
+  }) => SinkronKotorData(
+    tabel: tabel ?? this.tabel,
+    uid: uid ?? this.uid,
+    hapus: hapus ?? this.hapus,
+    waktu: waktu ?? this.waktu,
+  );
+  SinkronKotorData copyWithCompanion(SinkronKotorCompanion data) {
+    return SinkronKotorData(
+      tabel: data.tabel.present ? data.tabel.value : this.tabel,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      hapus: data.hapus.present ? data.hapus.value : this.hapus,
+      waktu: data.waktu.present ? data.waktu.value : this.waktu,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SinkronKotorData(')
+          ..write('tabel: $tabel, ')
+          ..write('uid: $uid, ')
+          ..write('hapus: $hapus, ')
+          ..write('waktu: $waktu')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(tabel, uid, hapus, waktu);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SinkronKotorData &&
+          other.tabel == this.tabel &&
+          other.uid == this.uid &&
+          other.hapus == this.hapus &&
+          other.waktu == this.waktu);
+}
+
+class SinkronKotorCompanion extends UpdateCompanion<SinkronKotorData> {
+  final Value<String> tabel;
+  final Value<String> uid;
+  final Value<bool> hapus;
+  final Value<DateTime> waktu;
+  final Value<int> rowid;
+  const SinkronKotorCompanion({
+    this.tabel = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.hapus = const Value.absent(),
+    this.waktu = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SinkronKotorCompanion.insert({
+    required String tabel,
+    required String uid,
+    this.hapus = const Value.absent(),
+    required DateTime waktu,
+    this.rowid = const Value.absent(),
+  }) : tabel = Value(tabel),
+       uid = Value(uid),
+       waktu = Value(waktu);
+  static Insertable<SinkronKotorData> custom({
+    Expression<String>? tabel,
+    Expression<String>? uid,
+    Expression<bool>? hapus,
+    Expression<DateTime>? waktu,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (tabel != null) 'tabel': tabel,
+      if (uid != null) 'uid': uid,
+      if (hapus != null) 'hapus': hapus,
+      if (waktu != null) 'waktu': waktu,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SinkronKotorCompanion copyWith({
+    Value<String>? tabel,
+    Value<String>? uid,
+    Value<bool>? hapus,
+    Value<DateTime>? waktu,
+    Value<int>? rowid,
+  }) {
+    return SinkronKotorCompanion(
+      tabel: tabel ?? this.tabel,
+      uid: uid ?? this.uid,
+      hapus: hapus ?? this.hapus,
+      waktu: waktu ?? this.waktu,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (tabel.present) {
+      map['tabel'] = Variable<String>(tabel.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (hapus.present) {
+      map['hapus'] = Variable<bool>(hapus.value);
+    }
+    if (waktu.present) {
+      map['waktu'] = Variable<DateTime>(waktu.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SinkronKotorCompanion(')
+          ..write('tabel: $tabel, ')
+          ..write('uid: $uid, ')
+          ..write('hapus: $hapus, ')
+          ..write('waktu: $waktu, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -23385,6 +23744,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $PengaturanTable pengaturan = $PengaturanTable(this);
+  late final $SinkronKotorTable sinkronKotor = $SinkronKotorTable(this);
   late final $KategoriTransaksiTable kategoriTransaksi =
       $KategoriTransaksiTable(this);
   late final $TransaksiTable transaksi = $TransaksiTable(this);
@@ -23438,6 +23798,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     riwayatPembayaran,
     pemasukanBulanan,
     pengaturan,
+    sinkronKotor,
     kategoriTransaksi,
     transaksi,
     anggaranBulanan,
@@ -23765,6 +24126,7 @@ typedef $$KategoriTableProcessedTableManager =
     >;
 typedef $$TagihanTableCreateCompanionBuilder = TagihanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> jenis,
   required String nama,
   Value<int?> jumlahSen,
@@ -23787,6 +24149,7 @@ typedef $$TagihanTableCreateCompanionBuilder = TagihanCompanion Function({
 });
 typedef $$TagihanTableUpdateCompanionBuilder = TagihanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> jenis,
   Value<String> nama,
   Value<int?> jumlahSen,
@@ -23901,6 +24264,11 @@ class $$TagihanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -24107,6 +24475,11 @@ class $$TagihanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get jenis => $composableBuilder(
     column: $table.jenis,
     builder: (column) => ColumnOrderings(column),
@@ -24232,6 +24605,9 @@ class $$TagihanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get jenis =>
       $composableBuilder(column: $table.jenis, builder: (column) => column);
@@ -24443,6 +24819,7 @@ class $$TagihanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<int?> jumlahSen = const Value.absent(),
@@ -24464,6 +24841,7 @@ class $$TagihanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TagihanCompanion(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 nama: nama,
                 jumlahSen: jumlahSen,
@@ -24487,6 +24865,7 @@ class $$TagihanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 required String nama,
                 Value<int?> jumlahSen = const Value.absent(),
@@ -24508,6 +24887,7 @@ class $$TagihanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TagihanCompanion.insert(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 nama: nama,
                 jumlahSen: jumlahSen,
@@ -25399,6 +25779,196 @@ typedef $$PengaturanTableProcessedTableManager =
         BaseReferences<_$AppDatabase, $PengaturanTable, PengaturanData>,
       ),
       PengaturanData,
+      PrefetchHooks Function()
+    >;
+typedef $$SinkronKotorTableCreateCompanionBuilder =
+    SinkronKotorCompanion Function({
+      required String tabel,
+      required String uid,
+      Value<bool> hapus,
+      required DateTime waktu,
+      Value<int> rowid,
+    });
+typedef $$SinkronKotorTableUpdateCompanionBuilder =
+    SinkronKotorCompanion Function({
+      Value<String> tabel,
+      Value<String> uid,
+      Value<bool> hapus,
+      Value<DateTime> waktu,
+      Value<int> rowid,
+    });
+
+class $$SinkronKotorTableFilterComposer
+    extends Composer<_$AppDatabase, $SinkronKotorTable> {
+  $$SinkronKotorTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get tabel => $composableBuilder(
+    column: $table.tabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get hapus => $composableBuilder(
+    column: $table.hapus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get waktu => $composableBuilder(
+    column: $table.waktu,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SinkronKotorTableOrderingComposer
+    extends Composer<_$AppDatabase, $SinkronKotorTable> {
+  $$SinkronKotorTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get tabel => $composableBuilder(
+    column: $table.tabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get hapus => $composableBuilder(
+    column: $table.hapus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get waktu => $composableBuilder(
+    column: $table.waktu,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SinkronKotorTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SinkronKotorTable> {
+  $$SinkronKotorTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get tabel =>
+      $composableBuilder(column: $table.tabel, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<bool> get hapus =>
+      $composableBuilder(column: $table.hapus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get waktu =>
+      $composableBuilder(column: $table.waktu, builder: (column) => column);
+}
+
+class $$SinkronKotorTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SinkronKotorTable,
+          SinkronKotorData,
+          $$SinkronKotorTableFilterComposer,
+          $$SinkronKotorTableOrderingComposer,
+          $$SinkronKotorTableAnnotationComposer,
+          $$SinkronKotorTableCreateCompanionBuilder,
+          $$SinkronKotorTableUpdateCompanionBuilder,
+          (
+            SinkronKotorData,
+            BaseReferences<_$AppDatabase, $SinkronKotorTable, SinkronKotorData>,
+          ),
+          SinkronKotorData,
+          PrefetchHooks Function()
+        > {
+  $$SinkronKotorTableTableManager(_$AppDatabase db, $SinkronKotorTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SinkronKotorTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SinkronKotorTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SinkronKotorTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> tabel = const Value.absent(),
+                Value<String> uid = const Value.absent(),
+                Value<bool> hapus = const Value.absent(),
+                Value<DateTime> waktu = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SinkronKotorCompanion(
+                tabel: tabel,
+                uid: uid,
+                hapus: hapus,
+                waktu: waktu,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String tabel,
+                required String uid,
+                Value<bool> hapus = const Value.absent(),
+                required DateTime waktu,
+                Value<int> rowid = const Value.absent(),
+              }) => SinkronKotorCompanion.insert(
+                tabel: tabel,
+                uid: uid,
+                hapus: hapus,
+                waktu: waktu,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SinkronKotorTable, SinkronKotorData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SinkronKotorTable,
+                    SinkronKotorData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SinkronKotorTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SinkronKotorTable,
+      SinkronKotorData,
+      $$SinkronKotorTableFilterComposer,
+      $$SinkronKotorTableOrderingComposer,
+      $$SinkronKotorTableAnnotationComposer,
+      $$SinkronKotorTableCreateCompanionBuilder,
+      $$SinkronKotorTableUpdateCompanionBuilder,
+      (
+        SinkronKotorData,
+        BaseReferences<_$AppDatabase, $SinkronKotorTable, SinkronKotorData>,
+      ),
+      SinkronKotorData,
       PrefetchHooks Function()
     >;
 typedef $$KategoriTransaksiTableCreateCompanionBuilder =
@@ -38721,6 +39291,8 @@ class $AppDatabaseManager {
       $$PemasukanBulananTableTableManager(_db, _db.pemasukanBulanan);
   $$PengaturanTableTableManager get pengaturan =>
       $$PengaturanTableTableManager(_db, _db.pengaturan);
+  $$SinkronKotorTableTableManager get sinkronKotor =>
+      $$SinkronKotorTableTableManager(_db, _db.sinkronKotor);
   $$KategoriTransaksiTableTableManager get kategoriTransaksi =>
       $$KategoriTransaksiTableTableManager(_db, _db.kategoriTransaksi);
   $$TransaksiTableTableManager get transaksi =>

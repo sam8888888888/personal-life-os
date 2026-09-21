@@ -17,6 +17,7 @@ part 'database.g.dart';
   RiwayatPembayaran,
   PemasukanBulanan,
   Pengaturan,
+  SinkronKotor,
   // Skema v3 — fondasi V1.5 (FR-68/71/72/76), ditambahkan Aaron 15 Sep 2026.
   KategoriTransaksi,
   Transaksi,
@@ -66,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,6 +116,29 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             await _pasangIndeksUnikV4();
             await _seedPerawatanV4();
             debugPrint('migrasi v4 selesai (tabel pilar kehidupan dibuat)');
+          }
+          if (dari < 6) {
+            // v6 (sinkron antar HP): kolom uid di tagihan + tabel jejak hapus.
+            // Baris lama diberi uid unik per baris, jadi tidak ada yang bentrok
+            // dan data pengguna tidak berubah isinya.
+            await m.createTable(sinkronKotor);
+            // Sebagian basis data lama (dibuat dari definisi tabel terbaru)
+            // sudah punya kolom uid walau versinya masih di bawah 6 — jadi
+            // kolomnya diperiksa dulu supaya migrasi tidak gagal di HP mana pun.
+            final kolomTagihan =
+                await customSelect("PRAGMA table_info(tagihan)").get();
+            final sudahAdaUid = kolomTagihan
+                .any((r) => (r.data['name'] as String?) == 'uid');
+            if (!sudahAdaUid) {
+              await m.addColumn(tagihan, tagihan.uid);
+            }
+            await customStatement(
+                "UPDATE tagihan SET uid = lower(hex(randomblob(8))) "
+                "WHERE uid IS NULL OR uid = ''");
+            await customStatement(
+                'CREATE UNIQUE INDEX IF NOT EXISTS idx_tagihan_uid '
+                'ON tagihan(uid)');
+            debugPrint('migrasi v6 selesai (uid tagihan terisi, catatan perubahan siap)');
           }
           if (dari < 5) {
             // v5 (FR-82): dua tabel BARU (visi, area hidup) + satu kolom BARU

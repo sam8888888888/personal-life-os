@@ -25,6 +25,10 @@ class Kategori extends Table {
 /// dengan jenis='tagihan'|'dokumen' (FR-53 memakai engine yang sama).
 class Tagihan extends Table {
   IntColumn get id => integer().autoIncrement()();
+
+  /// Kunci tetap antar perangkat (sinkron FR-150). Nullable supaya baris lama
+  /// bisa diisi saat migrasi tanpa mengganggu data pengguna.
+  TextColumn get uid => text().nullable()();
   TextColumn get jenis => text().withDefault(const Constant('tagihan'))();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   /// Jumlah dalam satuan terkecil mata uang; null untuk dokumen/non-moneter.
@@ -801,4 +805,22 @@ class RefleksiMuhasabah extends Table {
   DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
 
   // Unik (tanggal) lewat indeks SQL di `database.dart`.
+}
+
+
+/// Catatan perubahan lokal yang belum terkirim (pola "outbox", FR-150).
+///
+/// Setiap tambah/ubah/hapus mencatatkan satu penanda. Penanda dibersihkan
+/// HANYA setelah server menerima, jadi tidak ada perubahan yang bisa terlewat
+/// — dan baris yang sudah dihapus tidak mungkin "hidup lagi" di HP lain.
+class SinkronKotor extends Table {
+  TextColumn get tabel => text()();
+  TextColumn get uid => text()();
+
+  /// true = baris ini dihapus di perangkat ini.
+  BoolColumn get hapus => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get waktu => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {tabel, uid};
 }

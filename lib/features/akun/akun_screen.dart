@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/akun/klien_akun.dart';
 import '../../core/providers/akun_providers.dart';
+import '../../core/sinkron/sinkron_tagihan.dart';
 
 class AkunScreen extends ConsumerStatefulWidget {
   const AkunScreen({super.key});
@@ -21,6 +22,30 @@ class AkunScreen extends ConsumerStatefulWidget {
 class _AkunScreenState extends ConsumerState<AkunScreen> {
   String? _catatanServer;
   bool _memeriksa = false;
+  String? _hasilSinkron;
+  bool _menyinkron = false;
+
+  /// Sinkron tagihan antar HP (tahap 2). Hasilnya ditulis apa adanya —
+  /// termasuk kalau gagal.
+  Future<void> _sinkronSekarang() async {
+    final repo = ref.read(akunRepoProvider);
+    final token = await repo.token();
+    if (token == null) return;
+    setState(() {
+      _menyinkron = true;
+      _hasilSinkron = null;
+    });
+    try {
+      final hasil = await ref.read(sinkronTagihanProvider).jalan(token: token);
+      setState(() => _hasilSinkron = hasil.pesan);
+    } on AkunGagal catch (e) {
+      setState(() => _hasilSinkron = 'Gagal: ${e.pesan}');
+    } catch (e) {
+      setState(() => _hasilSinkron = 'Gagal: $e');
+    } finally {
+      if (mounted) setState(() => _menyinkron = false);
+    }
+  }
 
   Future<void> _periksaServer() async {
     final repo = ref.read(akunRepoProvider);
@@ -142,6 +167,21 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
                     ),
                     const Divider(height: 1),
                     ListTile(
+                      key: const Key('sinkron_sekarang'),
+                      leading: const Icon(Icons.sync),
+                      title: const Text('Sinkron sekarang'),
+                      subtitle: Text(_hasilSinkron ??
+                          'Samakan tagihan di semua HP yang memakai akun ini.'),
+                      trailing: _menyinkron
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.play_arrow),
+                      onTap: _menyinkron ? null : _sinkronSekarang,
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
                       key: const Key('keluar_akun'),
                       leading: const Icon(Icons.logout),
                       title: const Text('Keluar dari akun'),
@@ -169,10 +209,10 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
                     ),
                     const SizedBox(height: 6),
                     const Text(
-                      'Belum aktif. Akun dan servernya sudah jalan, tetapi '
-                      'pemindahan isi data (tagihan, uang, kebiasaan, dokumen) '
-                      'sedang dikerjakan pada tahap berikutnya. Ron tidak akan '
-                      'bilang "sudah sinkron" sebelum benar-benar diuji di dua HP.',
+                      'Sinkron TAGIHAN sudah aktif (uji dua HP: lulus). '
+                      'Modul lain — uang/transaksi, kebiasaan, agenda, dokumen — '
+                      'belum; Ron kerjakan satu per satu dan tidak akan bilang '
+                      '"sudah sinkron" sebelum diuji dua HP.',
                     ),
                   ],
                 ),
