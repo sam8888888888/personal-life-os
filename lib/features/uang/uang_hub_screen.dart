@@ -203,6 +203,26 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_rekap_tahunan'),
+                  leading: const Icon(Icons.auto_awesome_outlined),
+                  title: const Text('Rekap tahunan'),
+                  subtitle: const Text(
+                      'Statistik setahun + kartu berbagi gambar (FR-37)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/rekap-tahunan'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_kas_informal'),
+                  leading: const Icon(Icons.storefront_outlined),
+                  title: const Text('Kas & utang informal'),
+                  subtitle: const Text(
+                      'Utang warung/kontrakan & piutang, saldo per pihak (FR-51)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/uang/kas-informal'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_pusat_bayar'),
                   leading: const Icon(Icons.account_balance_outlined),
                   title: const Text('Pusat Bayar'),

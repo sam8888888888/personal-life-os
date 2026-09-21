@@ -18,7 +18,10 @@
 /// dan tidak menampilkan angka karangan.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/utils/tanggal_utils.dart';
@@ -176,6 +179,31 @@ class _DokumenScreenState extends ConsumerState<DokumenScreen> {
     );
   }
 
+  /// FR-53 — salin nomor dokumen langsung dari daftar (tanpa membuka berkas).
+  ///
+  /// Nomornya TIDAK ditampilkan di pesan supaya tidak terbaca orang di sebelah;
+  /// pesan hanya menyebut dokumen apa yang nomornya sudah masuk papan klip.
+  Future<void> salinNomor(DokumenData d) async {
+    final nomor = d.nomor?.trim() ?? '';
+    if (nomor.isEmpty) return;
+    var berhasil = true;
+    try {
+      // Batas waktu: bila kanal papan klip tidak menjawab, pengguna diberi tahu
+      // apa adanya daripada pesan "berhasil" yang belum tentu benar.
+      await Clipboard.setData(ClipboardData(text: nomor))
+          .timeout(const Duration(milliseconds: 1200));
+    } catch (_) {
+      berhasil = false;
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      key: const Key('pesan_salin_nomor'),
+      content: Text(berhasil
+          ? 'Nomor ${d.nama} disalin ke papan klip.'
+          : 'Nomor ${d.nama} belum bisa disalin di perangkat ini.'),
+    ));
+  }
+
   Widget kartuBaris(DokumenData d) {
     final tema = Theme.of(context);
     final jenis = labelJenisDokumen[d.jenis] ?? d.jenis;
@@ -226,6 +254,13 @@ class _DokumenScreenState extends ConsumerState<DokumenScreen> {
             Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                if (d.nomor != null && d.nomor!.isNotEmpty)
+                  TextButton.icon(
+                    key: Key('salin_nomor_${d.id}'),
+                    onPressed: () => salinNomor(d),
+                    icon: const Icon(Icons.copy_all_outlined, size: 18),
+                    label: const Text('Salin nomor'),
+                  ),
                 TextButton.icon(
                   key: Key('diperpanjang_${d.id}'),
                   onPressed: () => tandaiDiperpanjang(d),

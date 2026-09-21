@@ -58,6 +58,7 @@ import 'features/laporan/skor_disiplin_screen.dart';
 import 'features/laporan/statistik_pembayaran_screen.dart';
 import 'features/laporan/proyeksi_arus_kas_screen.dart';
 import 'features/laporan/laporan_bulanan_screen.dart';
+import 'features/laporan/rekap_tahunan_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
 import 'features/platform/audit_log_screen.dart';
 import 'features/platform/pusat_notifikasi_screen.dart';
@@ -82,6 +83,7 @@ import 'features/uang/strategi_pelunasan/strategi_pelunasan_screen.dart';
 import 'features/uang/transaksi/daftar_transaksi_screen.dart';
 import 'features/uang/uang_hub_screen.dart';
 import 'features/uang/aman_sampai_gajian_screen.dart';
+import 'features/uang/kas_informal_screen.dart';
 import 'features/uang/mata_uang_screen.dart';
 
 /// Membuat router baru (dipakai aplikasi & uji UI).
@@ -303,6 +305,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/laporan/skor-disiplin',
       builder: (c, s) => const SkorDisiplinScreen(),
+    ),
+    GoRoute(
+      path: '/uang/rekap-tahunan',
+      builder: (c, s) => const RekapTahunanScreen(),
+    ),
+    GoRoute(
+      path: '/uang/kas-informal',
+      builder: (c, s) => const KasInformalScreen(),
     ),
     GoRoute(
       path: '/laporan/bulanan',
