@@ -47,6 +47,9 @@ import 'features/kesehatan/kesehatan_hub_screen.dart';
 import 'features/kesehatan/obat_screen.dart';
 import 'features/kesehatan/tidur_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
+import 'features/laporan/denda_terhindarkan_screen.dart';
+import 'features/laporan/kenaikan_tagihan_screen.dart';
+import 'features/laporan/skor_disiplin_screen.dart';
 import 'features/laporan/statistik_pembayaran_screen.dart';
 import 'features/laporan/proyeksi_arus_kas_screen.dart';
 import 'features/laporan/laporan_bulanan_screen.dart';
@@ -249,6 +252,18 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/laporan/proyeksi-arus-kas',
       builder: (c, s) => const ProyeksiArusKasScreen(),
+    ),
+    GoRoute(
+      path: '/laporan/denda-terhindarkan',
+      builder: (c, s) => const DendaTerhindarkanScreen(),
+    ),
+    GoRoute(
+      path: '/laporan/kenaikan-tagihan',
+      builder: (c, s) => const KenaikanTagihanScreen(),
+    ),
+    GoRoute(
+      path: '/laporan/skor-disiplin',
+      builder: (c, s) => const SkorDisiplinScreen(),
     ),
     GoRoute(
       path: '/laporan/bulanan',

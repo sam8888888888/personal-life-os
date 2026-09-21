@@ -123,6 +123,36 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_denda_terhindarkan'),
+                  leading: const Icon(Icons.savings_outlined),
+                  title: const Text('Denda terhindarkan'),
+                  subtitle: const Text(
+                      'Perkiraan denda yang tidak jadi keluar (FR-34)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/laporan/denda-terhindarkan'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_kenaikan_tagihan'),
+                  leading: const Icon(Icons.trending_up_outlined),
+                  title: const Text('Kenaikan tagihan'),
+                  subtitle: const Text(
+                      'Bandingkan nominal dengan 3 pembayaran sebelumnya (FR-35)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/laporan/kenaikan-tagihan'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_skor_disiplin'),
+                  leading: const Icon(Icons.emoji_events_outlined),
+                  title: const Text('Skor disiplin tagihan'),
+                  subtitle: const Text(
+                      'Skor lokal 0–100 & capaian (FR-36)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/laporan/skor-disiplin'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_statistik_pembayaran'),
                   leading: const Icon(Icons.insights_outlined),
                   title: const Text('Statistik pembayaran'),
