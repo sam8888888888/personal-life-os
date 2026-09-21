@@ -4,7 +4,6 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repository/akun_repository.dart';
-import '../../data/repository/tagihan_repository.dart';
 import '../sinkron/sinkron_tagihan.dart';
 import '../akun/klien_akun.dart';
 import 'app_providers.dart';

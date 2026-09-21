@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/akun/klien_akun.dart';
 import '../../core/providers/akun_providers.dart';
-import '../../core/sinkron/sinkron_tagihan.dart';
 
 class AkunScreen extends ConsumerStatefulWidget {
   const AkunScreen({super.key});

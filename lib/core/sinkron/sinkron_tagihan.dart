@@ -76,14 +76,17 @@ class SinkronTagihan {
 
     for (final k in penanda) {
       final barisnya = perUid[k.uid];
-      final hapus = k.hapus || barisnya == null;
-      final waktu = hapus ? k.waktu : barisnya!.diubahPada;
+      final hidup = k.hapus ? null : barisnya;
+      final hapus = hidup == null;
+      final waktu = hidup?.diubahPada ?? k.waktu;
       perubahan.add({
         'tabel': namaTabel,
         'id_lokal': k.uid,
         'waktu_klien': waktu.toUtc().toIso8601String(),
         'dihapus': hapus,
-        'isi': hapus ? const <String, dynamic>{} : TagihanRepository.kePeta(barisnya),
+        'isi': hidup == null
+            ? const <String, dynamic>{}
+            : TagihanRepository.kePeta(hidup),
       });
       terkirim.add(k.uid);
     }
