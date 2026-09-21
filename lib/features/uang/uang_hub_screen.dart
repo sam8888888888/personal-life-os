@@ -113,6 +113,16 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_ekspor_csv'),
+                  leading: const Icon(Icons.table_view_outlined),
+                  title: const Text('Ekspor CSV'),
+                  subtitle: const Text(
+                      'Tagihan & riwayat pembayaran untuk spreadsheet (FR-25)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tagihan/ekspor-csv'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_kewajiban'),
                   leading: const Icon(Icons.account_balance_outlined),
                   title: const Text('Kewajiban & cicilan'),

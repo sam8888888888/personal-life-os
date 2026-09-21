@@ -57,6 +57,7 @@ import 'features/ringkasan/ringkasan_screen.dart';
 import 'features/tagihan/daftar_tagihan_screen.dart';
 import 'features/tagihan/kelola_kategori_tagihan_screen.dart';
 import 'features/tagihan/form_tagihan_screen.dart';
+import 'features/tagihan/ekspor_csv_screen.dart';
 import 'features/uang/anggaran/anggaran_screen.dart';
 import 'features/uang/kekayaan/kekayaan_screen.dart';
 import 'features/uang/langganan/langganan_screen.dart';
@@ -92,6 +93,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
         GoRoute(path: '/kalender', builder: (c, s) => const KalenderScreen()),
         GoRoute(path: '/pengaturan', builder: (c, s) => const PengaturanScreen()),
       ],
+    ),
+    GoRoute(
+      path: '/tagihan/ekspor-csv',
+      builder: (c, s) => const EksporCsvScreen(),
     ),
     GoRoute(
       path: '/tagihan/kategori',

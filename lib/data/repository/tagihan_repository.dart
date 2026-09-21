@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:drift/drift.dart';
 
+import '../../core/laporan/ekspor_csv.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../database/database.dart';
 import '../model/enums.dart';
@@ -319,6 +320,30 @@ class TagihanRepository {
             );
         await tandaiUidDari(id);
       });
+
+  /// Semua riwayat pembayaran + nama tagihannya (FR-25 ekspor CSV).
+  ///
+  /// Nama diambil dari tagihan; kalau tagihannya sudah dihapus, ditulis
+  /// "(tagihan dihapus)" — riwayat uangnya TIDAK dihilangkan.
+  Future<List<BarisRiwayatCsv>> riwayatUntukEkspor() async {
+    final kueri = db.select(db.riwayatPembayaran).join([
+      leftOuterJoin(db.tagihan, db.tagihan.id.equalsExp(db.riwayatPembayaran.tagihanId)),
+    ])
+      ..orderBy([OrderingTerm.desc(db.riwayatPembayaran.tanggalBayar)]);
+    final baris = await kueri.get();
+    return baris.map((b) {
+      final rp = b.readTable(db.riwayatPembayaran);
+      final tg = b.readTableOrNull(db.tagihan);
+      return BarisRiwayatCsv(
+        namaTagihan: tg?.nama ?? '(tagihan dihapus)',
+        periode: rp.periodeJatuhTempo,
+        tanggalBayar: rp.tanggalBayar,
+        jumlahSen: rp.jumlahSen,
+        kodeMataUang: rp.kodeMataUang,
+        telatHari: rp.telatHari,
+      );
+    }).toList();
+  }
 
   /// Tagihan aktif belum lunas yang jatuh tempo dalam [dalamHari] ke depan.
   Stream<List<TagihanData>> watchJatuhTempoDalam(int dalamHari,
