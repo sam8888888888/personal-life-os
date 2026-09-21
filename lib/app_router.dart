@@ -47,6 +47,8 @@ import 'features/kesehatan/kesehatan_hub_screen.dart';
 import 'features/kesehatan/obat_screen.dart';
 import 'features/kesehatan/tidur_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
+import 'features/laporan/statistik_pembayaran_screen.dart';
+import 'features/laporan/proyeksi_arus_kas_screen.dart';
 import 'features/laporan/laporan_bulanan_screen.dart';
 import 'features/pengingat/pengingat_screen.dart';
 import 'features/platform/audit_log_screen.dart';
@@ -235,6 +237,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       builder: (c, s) => const BebanTagihanScreen(),
     ),
     // Laporan bulanan + unduhan PDF/CSV (FR-77).
+    GoRoute(
+      path: '/laporan/statistik-pembayaran',
+      builder: (c, s) => const StatistikPembayaranScreen(),
+    ),
+    GoRoute(
+      path: '/laporan/proyeksi-arus-kas',
+      builder: (c, s) => const ProyeksiArusKasScreen(),
+    ),
     GoRoute(
       path: '/laporan/bulanan',
       builder: (c, s) => const LaporanBulananScreen(),

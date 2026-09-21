@@ -113,6 +113,26 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_statistik_pembayaran'),
+                  leading: const Icon(Icons.insights_outlined),
+                  title: const Text('Statistik pembayaran'),
+                  subtitle: const Text(
+                      'Total, rata-rata & tren 12 bulan (FR-29)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/laporan/statistik-pembayaran'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_proyeksi_arus_kas'),
+                  leading: const Icon(Icons.stacked_line_chart_outlined),
+                  title: const Text('Proyeksi 3 bulan'),
+                  subtitle: const Text(
+                      'Perkiraan tagihan & langganan 3 bulan ke depan (FR-30)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/laporan/proyeksi-arus-kas'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_ekspor_csv'),
                   leading: const Icon(Icons.table_view_outlined),
                   title: const Text('Ekspor CSV'),

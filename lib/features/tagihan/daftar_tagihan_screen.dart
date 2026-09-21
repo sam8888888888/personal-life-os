@@ -374,10 +374,5 @@ List<DateTime> pilihanBulan({DateTime? acuan, int mundur = 12, int maju = 6}) {
   return bulan;
 }
 
-const List<String> namaBulanSingkat = [
-  '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
-];
-
 /// Label bulan dalam bahasa Indonesia (mis. "Sep 2026").
 String fmtBulanTahun(DateTime b) => '${namaBulanSingkat[b.month]} ${b.year}';

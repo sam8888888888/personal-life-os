@@ -175,3 +175,15 @@ String fmtTanggalPendekAman(DateTime t) =>
 /// "09:00"
 String fmtJam(DateTime t) =>
     '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+/// "September 2026" (atau "Oktober 2026" dst) tanpa data locale intl —
+/// aman dipakai di layar, notifikasi, maupun pekerja latar.
+String fmtBulanAman(DateTime t) =>
+    '${_pilihLokal(_bulanPanjangLokal)[t.month - 1]} ${t.year}';
+
+/// Nama bulan singkat bahasa Indonesia (dipakai grafik & pemilih bulan).
+/// Indeks mengikuti nomor bulan: namaBulanSingkat[9] == 'Sep'.
+const List<String> namaBulanSingkat = [
+  '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+];
