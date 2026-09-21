@@ -29,7 +29,13 @@ void main() {
   final klien = KlienAkun(namaPerangkat: 'uji-otomatis');
   late String token;
 
+  // Uji ini MENEMBAK server sungguhan dan membuat akun uji. Supaya tidak
+  // menumpuk akun setiap kali seluruh suite dijalankan, ia hanya berjalan
+  // saat diminta:  flutter test --dart-define=LIFEOS_UJI_LIVE=1 ...
+  const jalankanLive = bool.fromEnvironment('LIFEOS_UJI_LIVE');
+
   setUpAll(() async {
+    if (!jalankanLive) return;
     // Akun khusus uji, alamat unik supaya bisa dijalankan berkali-kali.
     final cap = DateTime.now().millisecondsSinceEpoch;
     try {
@@ -50,6 +56,10 @@ void main() {
   });
 
   test('dua HP sungguhan: tagihan, ubahan, dan hapus berpindah lewat server', () async {
+    if (!jalankanLive) {
+      markTestSkipped('uji sambung server hanya saat LIFEOS_UJI_LIVE=1');
+      return;
+    }
     if (token.isEmpty) {
       markTestSkipped('tanpa token (server tidak terjangkau)');
       return;
