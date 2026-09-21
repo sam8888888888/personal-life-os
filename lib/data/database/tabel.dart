@@ -61,6 +61,9 @@ class Tagihan extends Table {
 /// Riwayat pembayaran — bukti audit & statistik (FR-08 rekap tahunan).
 class RiwayatPembayaran extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   IntColumn get tagihanId => integer().references(Tagihan, #id)();
   /// Periode jatuh tempo yang dibayar.
   DateTimeColumn get periodeJatuhTempo => dateTime()();
@@ -78,6 +81,9 @@ class RiwayatPembayaran extends Table {
 /// Pemasukan bulanan (untuk "uang tersisa" / dasbor — FR-33).
 class PemasukanBulanan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Bulan "YYYY-MM" (satu baris per bulan, mudah di-query).
   TextColumn get bulan => text()();
   IntColumn get jumlahSen => integer().withDefault(const Constant(0))();
@@ -107,6 +113,9 @@ class Pengaturan extends Table {
 /// jadi tidak digabung. Tidak ada tabel lama yang diubah.
 class KategoriTransaksi extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Kunci stabil (mis. `kel_makan`) — dipakai seed ulang & impor/ekspor.
   /// Tanpa kolom ini, kategori berganda setiap kali nama diubah pengguna.
   TextColumn get kode => text().withLength(min: 1, max: 60)();
@@ -138,6 +147,9 @@ class KategoriTransaksi extends Table {
 /// Satu baris arus kas (FR-71; dipakai FR-72 realisasi & FR-73 kalender).
 class Transaksi extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Pengenal stabil (`trx_<uuid>` / `tagihan:<id>:<YYYY-MM>`) — kunci
   /// idempotensi impor & sinkron (pola PB-05/06/07).
   TextColumn get idTransaksi => text()();
@@ -167,6 +179,9 @@ class Transaksi extends Table {
 /// Batas anggaran per kategori per bulan (FR-72).
 class AnggaranBulanan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// 'YYYY-MM'.
   TextColumn get periode => text()();
   /// KEPUTUSAN (rancangan §4.3): 0 = anggaran TOTAL bulan itu, selain 0 = id
@@ -194,6 +209,9 @@ class AnggaranBulanan extends Table {
 /// tanpa menghapus riwayat.
 class Langganan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Unik. Pengenal stabil (`lgn_<microseconds>`), dipakai sebagai bagian
   /// payload notifikasi + kunci impor/ekspor.
   TextColumn get idLangganan => text()();
@@ -227,6 +245,9 @@ class Langganan extends Table {
 /// saran/produk keuangan di lapisan data (PRD §III-11).
 class Aset extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Unik. Pengenal stabil untuk impor/ekspor & sinkron.
   TextColumn get idAset => text()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
@@ -252,6 +273,9 @@ class Aset extends Table {
 /// Kewajiban/utang milik pengguna (FR-76; kolom bunga disiapkan untuk FR-74).
 class Kewajiban extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get idKewajiban => text()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   /// JenisKewajiban: kartu_kredit / kpr / pinjaman / cicilan / lain.
@@ -276,6 +300,9 @@ class Kewajiban extends Table {
 /// Riwayat nilai aset per bulan (FR-76: grafik tren tidak berubah retroaktif).
 class NilaiAsetBulanan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   IntColumn get asetId => integer().references(Aset, #id)();
   /// 'YYYY-MM'.
   TextColumn get bulan => text()();
@@ -304,6 +331,9 @@ class NilaiAsetBulanan extends Table {
 /// pada bulan yang sama, supaya tidak ada dua angka yang bisa tidak sinkron.
 class NilaiKewajibanBulanan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   IntColumn get kewajibanId => integer().references(Kewajiban, #id)();
   TextColumn get bulan => text()();
   IntColumn get nilaiSen => integer()();
@@ -350,6 +380,9 @@ class NilaiKewajibanBulanan extends Table {
 /// bawahnya (area hanya dilepas) — itu yang dijaga repository.
 class Visi extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
   TextColumn get idVisi => text()();
   TextColumn get nama => text().withLength(min: 1, max: 160)();
@@ -369,6 +402,9 @@ class Visi extends Table {
 /// menghapus area.
 class AreaHidup extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get idArea => text()();
   IntColumn get visiId => integer().nullable().references(Visi, #id)();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
@@ -388,6 +424,9 @@ class AreaHidup extends Table {
 /// aplikasi tidak memaksa pengguna mengukur hidupnya dengan angka.
 class Tujuan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
   TextColumn get idTujuan => text()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
@@ -418,6 +457,9 @@ class Tujuan extends Table {
 /// pengguna tidak hilang karena satu salah ketuk.
 class Proyek extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get idProyek => text()();
   IntColumn get tujuanId => integer().nullable().references(Tujuan, #id)();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
@@ -437,6 +479,9 @@ class Proyek extends Table {
 /// langsung ke tujuan, atau berdiri sendiri (tugas cepat FR-79).
 class Tugas extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get idTugas => text()();
   IntColumn get tujuanId => integer().nullable().references(Tujuan, #id)();
   IntColumn get proyekId => integer().nullable().references(Proyek, #id)();
@@ -466,6 +511,9 @@ class Tugas extends Table {
 /// lapisan fitur, bukan di basis data, supaya pengguna tidak terkunci).
 class Kebiasaan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get idKebiasaan => text()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   TextColumn get ikon => text().withDefault(const Constant('repeat'))();
@@ -488,6 +536,9 @@ class Kebiasaan extends Table {
 /// dicatat setengah jalan tanpa memaksa selesai/belum.
 class LogKebiasaan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   IntColumn get kebiasaanId => integer().references(Kebiasaan, #id)();
   DateTimeColumn get tanggal => dateTime()();
   RealColumn get nilai => real().withDefault(const Constant(1))();
@@ -503,6 +554,9 @@ class LogKebiasaan extends Table {
 /// menetapkan tanggal yang berbeda dari hasil hitungan interval.
 class Perawatan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   /// kendaraan / rumah / dokumen / keluarga / perangkat / lain.
   TextColumn get kategori => text().withDefault(const Constant('lain'))();
@@ -530,6 +584,9 @@ class Perawatan extends Table {
 /// lingkar perut, gula darah, dst. Satuan disimpan apa adanya.
 class UkuranTubuh extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// berat / sistolik / diastolik / lingkar_perut / gula_darah / suhu / lain.
   TextColumn get jenis => text()();
   RealColumn get nilai => real()();
@@ -542,6 +599,9 @@ class UkuranTubuh extends Table {
 /// Aktivitas fisik (FR-102).
 class Aktivitas extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// jalan / lari / sepeda / renang / gym / peregangan / olahraga / rumah.
   TextColumn get jenis => text()();
   IntColumn get durasiMenit => integer()();
@@ -560,6 +620,9 @@ class Aktivitas extends Table {
 /// (termasuk lintas tengah malam) lalu boleh dikoreksi pengguna.
 class Tidur extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   /// Tanggal (hari bangun) — kunci "satu catatan per malam".
   DateTimeColumn get tanggal => dateTime()();
   DateTimeColumn get jamTidur => dateTime()();
@@ -621,6 +684,9 @@ class MinumObat extends Table {
 /// Pencatat air (FR-111) — satu baris per gelas/botol; total harian dihitung.
 class CatatanAir extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   DateTimeColumn get waktu => dateTime()();
   IntColumn get jumlahMl => integer().withDefault(const Constant(250))();
   TextColumn get catatan => text().nullable()();
@@ -634,6 +700,9 @@ class CatatanAir extends Table {
 /// supaya cadangan/pemulihan di perangkat lain tetap bisa menemukannya.
 class Dokumen extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get idDokumen => text()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   /// ktp / kk / paspor / sim / stnk / sertifikat / ijazah / kontrak / polis /
@@ -721,6 +790,9 @@ class TundaPengingat extends Table {
 /// Pembayaran kewajiban/utang (FR-74) — memisahkan pokok & bunga.
 class PembayaranKewajiban extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   IntColumn get kewajibanId => integer().references(Kewajiban, #id)();
   DateTimeColumn get tanggal => dateTime()();
   IntColumn get jumlahSen => integer()();
@@ -735,6 +807,9 @@ class PembayaranKewajiban extends Table {
 /// tertentu, tetapi belum menjadi transaksi.
 class PengeluaranTerencana extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   TextColumn get nama => text().withLength(min: 1, max: 120)();
   IntColumn get jumlahSen => integer()();
   DateTimeColumn get tanggal => dateTime()();
@@ -750,6 +825,9 @@ class PengeluaranTerencana extends Table {
 /// Pelacakan puasa (FR-92) — satu baris per tanggal per jenis puasa.
 class LogPuasa extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   DateTimeColumn get tanggal => dateTime()();
   /// ramadan / senin_kamis / ayyamul_bidh / sunnah / qadha / custom.
   TextColumn get jenis => text()();
@@ -764,6 +842,9 @@ class LogPuasa extends Table {
 /// Pelacakan Quran (FR-93) — baca, dengar, hafal baru, murajaah.
 class LogQuran extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   DateTimeColumn get tanggal => dateTime()();
   /// baca / dengar / hafal / murajaah.
   TextColumn get jenis => text()();
@@ -779,6 +860,9 @@ class LogQuran extends Table {
 /// Dzikir & doa (FR-95) — penghitung per sesi.
 class LogDzikir extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   DateTimeColumn get tanggal => dateTime()();
   /// pagi / petang / sebelum_tidur / custom.
   TextColumn get jenis => text()();
@@ -796,6 +880,9 @@ class LogDzikir extends Table {
 /// pengguna, BUKAN penilaian aplikasi. Tidak ada kolom skor.
 class RefleksiMuhasabah extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
   DateTimeColumn get tanggal => dateTime()();
   /// Lima daftar refleksi bawaan PRD; null = tidak diisi (bukan berarti tidak).
   BoolColumn get sholatTerjaga => boolean().nullable()();
@@ -834,6 +921,9 @@ class SinkronKotor extends Table {
 /// menampilkan tren, tidak menafsirkan sebagai diagnosis.
 class CatatanKesehatan extends Table {
   IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  TextColumn get uid => text().nullable()();
 
   /// tekanan_darah · detak_jantung · gula_darah · suhu · saturasi · kolesterol · lab
   TextColumn get jenis => text()();
@@ -1088,4 +1178,59 @@ class SuasanaHati extends Table {
   TextColumn get uid => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+// ======================= PENDUKUNG SINKRON SEMUA MODUL (FR-150) ============
+
+/// Sidik baris yang terakhir sudah tersinkron.
+///
+/// Dipakai mesin sinkron untuk mengetahui baris mana yang berubah/terhapus
+/// TANPA mengubah satu pun berkas repositori lama (tidak ada jalur tulis baru
+/// yang harus diingat): cukup bandingkan sidik isi baris.
+class SinkronSidik extends Table {
+  TextColumn get tabel => text()();
+  TextColumn get uid => text()();
+  /// Sidik isi baris (64 bit, heksadesimal) saat terakhir tersinkron.
+  TextColumn get sidik => text()();
+  DateTimeColumn get waktu => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {tabel, uid};
+}
+
+/// Kaitan antar-tabel yang belum bisa dipasang (baris induk belum turun dari
+/// server). Disimpan apa adanya, dicoba ulang pada sinkron berikutnya — supaya
+/// baris tidak pernah dipasang ke induk yang salah.
+class SinkronTautanBelum extends Table {
+  TextColumn get tabel => text()();
+  TextColumn get uid => text()();
+  /// Nama kolom foreign key di tabel anak, mis. `tagihan_id`.
+  TextColumn get kolom => text()();
+  /// uid baris induk yang ditunggu.
+  TextColumn get uidInduk => text()();
+
+  @override
+  Set<Column> get primaryKey => {tabel, uid, kolom};
+}
+
+/// Lampiran (foto & rekaman suara) untuk catatan — FR-118.
+///
+/// SENGAJA TIDAK ikut sinkron antar HP: berkasnya binari dan cukup besar, jadi
+/// memindahkannya butuh penyimpanan objek di server (tahap berikutnya). Yang
+/// tersimpan di basis data hanya jalur berkas di HP ini — jadi keterangan itu
+/// ditulis apa adanya di layar supaya tidak ada klaim "sudah tersinkron".
+class Lampiran extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  /// Tabel pemilik lampiran, mis. `catatan_pengetahuan`.
+  TextColumn get indukTabel => text()();
+  /// uid baris pemilik (bukan id angka, supaya tetap cocok antar HP).
+  TextColumn get indukUid => text()();
+  /// foto · suara
+  TextColumn get jenis => text()();
+  /// Jalur berkas di HP ini (folder dokumen aplikasi, bukan cache).
+  TextColumn get berkas => text()();
+  TextColumn get keterangan => text().withDefault(const Constant(''))();
+  IntColumn get ukuranByte => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
 }

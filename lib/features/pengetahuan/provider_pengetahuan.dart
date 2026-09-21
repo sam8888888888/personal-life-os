@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers/app_providers.dart';
 import '../../data/repository/kesehatan_ringkas_repository.dart';
+import '../../data/repository/lampiran_repository.dart';
 import '../../data/repository/pengetahuan_repository.dart';
 
 /// Penyimpanan modul pengetahuan (catatan, keputusan, pembelajaran, kartu
@@ -20,4 +21,9 @@ final pengetahuanRepoProvider = Provider<PengetahuanRepository>(
 /// Penyimpanan catatan makan & suasana hati.
 final kesehatanRingkasRepoProvider = Provider<KesehatanRingkasRepository>(
   (ref) => KesehatanRingkasRepository(ref.watch(databaseProvider)),
+);
+
+/// Penyimpanan lampiran catatan (FR-118: foto & rekaman suara).
+final lampiranRepoProvider = Provider<LampiranRepository>(
+  (ref) => LampiranRepository(ref.watch(databaseProvider)),
 );

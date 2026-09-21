@@ -1,13 +1,18 @@
 /// Layar Akun & Sinkron — menu utama: status masuk, periksa server, keluar.
 ///
-/// JUJUR soal keadaan: sinkron isi data (tagihan/uang/kebiasaan) belum aktif.
+/// JUJUR soal keadaan: apa yang ikut sinkron dan apa yang tidak.
 /// Layar ini tidak berpura-pura sudah menyinkronkan apa pun.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/platform/kanal_media.dart';
 import '../../core/akun/klien_akun.dart';
 import '../../core/providers/akun_providers.dart';
 
@@ -26,6 +31,68 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
 
   /// Sinkron tagihan antar HP (tahap 2). Hasilnya ditulis apa adanya —
   /// termasuk kalau gagal.
+  /// FR-27 — ekspor seluruh data ke satu berkas, lalu tawarkan dibagikan
+  /// (WhatsApp/Drive/USB pilihan Papi). Tidak butuh server.
+  Future<void> _eksporBerkas() async {
+    if (!mounted) return;
+    setState(() {
+      _menyinkron = true;
+      _hasilSinkron = null;
+    });
+    try {
+      final folder = await getApplicationDocumentsDirectory();
+      final stempel = DateTime.now()
+          .toIso8601String()
+          .replaceAll(':', '-')
+          .split('.')
+          .first;
+      final berkas = File('${folder.path}/sinkron-lifeos-$stempel.json');
+      final jumlah = await ref.read(sinkronSemuaProvider).eksporBerkas(berkas);
+      try {
+        await const MethodChannel('lifeos/bagikan').invokeMethod<bool>('bagikan', {
+          'jalur': berkas.path,
+          'judul': 'Berkas sinkron Personal Life OS',
+          'jenis': 'application/json',
+        });
+      } catch (_) {
+        // Tanpa aplikasi berbagi (atau bukan Android): berkasnya tetap ada.
+      }
+      if (mounted) {
+        setState(() => _hasilSinkron =
+            'Berkas sinkron dibuat ($jumlah baris):\n${berkas.path}');
+      }
+    } catch (e) {
+      if (mounted) setState(() => _hasilSinkron = 'Gagal mengekspor: $e');
+    } finally {
+      if (mounted) setState(() => _menyinkron = false);
+    }
+  }
+
+  /// FR-27 — masukkan berkas sinkron (dari HP lain) ke HP ini.
+  Future<void> _imporBerkas() async {
+    if (!mounted) return;
+    setState(() {
+      _menyinkron = true;
+      _hasilSinkron = null;
+    });
+    try {
+      final jalur = await KanalMedia().pilihBerkas(mime: 'application/json');
+      if (jalur == null || jalur.isEmpty) {
+        if (mounted) setState(() => _hasilSinkron = 'Batal memilih berkas.');
+        return;
+      }
+      final jumlah =
+          await ref.read(sinkronSemuaProvider).imporBerkas(File(jalur));
+      if (mounted) {
+        setState(() => _hasilSinkron = 'Berkas dimasukkan: $jumlah baris.');
+      }
+    } catch (e) {
+      if (mounted) setState(() => _hasilSinkron = 'Gagal memasukkan berkas: $e');
+    } finally {
+      if (mounted) setState(() => _menyinkron = false);
+    }
+  }
+
   Future<void> _sinkronSekarang() async {
     final repo = ref.read(akunRepoProvider);
     final token = await repo.token();
@@ -35,7 +102,7 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
       _hasilSinkron = null;
     });
     try {
-      final hasil = await ref.read(sinkronTagihanProvider).jalan(token: token);
+      final hasil = await ref.read(sinkronSemuaProvider).jalan(token: token);
       setState(() => _hasilSinkron = hasil.pesan);
     } on AkunGagal catch (e) {
       setState(() => _hasilSinkron = 'Gagal: ${e.pesan}');
@@ -207,11 +274,52 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
                       ],
                     ),
                     const SizedBox(height: 6),
+                    Text('Sinkron lewat berkas (tanpa server)',
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
                     const Text(
-                      'Sinkron TAGIHAN sudah aktif (uji dua HP: lulus). '
-                      'Modul lain — uang/transaksi, kebiasaan, agenda, dokumen — '
-                      'belum; Ron kerjakan satu per satu dan tidak akan bilang '
-                      '"sudah sinkron" sebelum diuji dua HP.',
+                      'Tanpa server: seluruh data ditulis ke satu berkas, lalu '
+                      'bisa Papi kirim sendiri (WhatsApp/Drive/USB) ke HP lain '
+                      'dan dimasukkan lewat tombol Impor.',
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.icon(
+                          key: const Key('ekspor_berkas_sinkron'),
+                          onPressed: _menyinkron ? null : _eksporBerkas,
+                          icon: const Icon(Icons.ios_share),
+                          label: const Text('Ekspor berkas'),
+                        ),
+                        OutlinedButton.icon(
+                          key: const Key('impor_berkas_sinkron'),
+                          onPressed: _menyinkron ? null : _imporBerkas,
+                          icon: const Icon(Icons.file_open_outlined),
+                          label: const Text('Impor berkas'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Sinkron SELURUH MODUL sudah aktif dan diuji dua basis '
+                      'data (HP A & HP B): tagihan, riwayat pembayaran, kas & '
+                      'transaksi, aset & kewajiban, tujuan/tugas, kebiasaan, '
+                      'kesehatan (berat, air, tidur, makan, suasana hati), '
+                      'dokumen, pengetahuan, dan ibadah.',
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Yang SENGAJA tidak ikut: kategori kas bawaan dan jadwal '
+                      'perawatan bawaan (sudah ada di tiap HP, kalau ikut akan '
+                      'berlipat ganda), serta catatan obat & minum obat.',
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Bentrok antar HP: versi terbaru menang, versi yang kalah '
+                      'TETAP DISIMPAN di server (tidak ada data yang hilang).',
                     ),
                   ],
                 ),

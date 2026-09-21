@@ -1539,6 +1539,15 @@ class $RiwayatPembayaranTable extends RiwayatPembayaran
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _tagihanIdMeta = const VerificationMeta(
     'tagihanId',
   );
@@ -1623,6 +1632,7 @@ class $RiwayatPembayaranTable extends RiwayatPembayaran
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     tagihanId,
     periodeJatuhTempo,
     jumlahSen,
@@ -1645,6 +1655,12 @@ class $RiwayatPembayaranTable extends RiwayatPembayaran
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('tagihan_id')) {
       context.handle(
@@ -1718,6 +1734,10 @@ class $RiwayatPembayaranTable extends RiwayatPembayaran
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       tagihanId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}tagihan_id'],
@@ -1758,6 +1778,10 @@ class $RiwayatPembayaranTable extends RiwayatPembayaran
 class RiwayatPembayaranData extends DataClass
     implements Insertable<RiwayatPembayaranData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final int tagihanId;
 
   /// Periode jatuh tempo yang dibayar.
@@ -1769,6 +1793,7 @@ class RiwayatPembayaranData extends DataClass
   final String via;
   const RiwayatPembayaranData({
     required this.id,
+    this.uid,
     required this.tagihanId,
     required this.periodeJatuhTempo,
     required this.jumlahSen,
@@ -1781,6 +1806,9 @@ class RiwayatPembayaranData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['tagihan_id'] = Variable<int>(tagihanId);
     map['periode_jatuh_tempo'] = Variable<DateTime>(periodeJatuhTempo);
     map['jumlah_sen'] = Variable<int>(jumlahSen);
@@ -1796,6 +1824,7 @@ class RiwayatPembayaranData extends DataClass
   RiwayatPembayaranCompanion toCompanion(bool nullToAbsent) {
     return RiwayatPembayaranCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       tagihanId: Value(tagihanId),
       periodeJatuhTempo: Value(periodeJatuhTempo),
       jumlahSen: Value(jumlahSen),
@@ -1815,6 +1844,7 @@ class RiwayatPembayaranData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RiwayatPembayaranData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       tagihanId: serializer.fromJson<int>(json['tagihanId']),
       periodeJatuhTempo: serializer.fromJson<DateTime>(
         json['periodeJatuhTempo'],
@@ -1831,6 +1861,7 @@ class RiwayatPembayaranData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'tagihanId': serializer.toJson<int>(tagihanId),
       'periodeJatuhTempo': serializer.toJson<DateTime>(periodeJatuhTempo),
       'jumlahSen': serializer.toJson<int>(jumlahSen),
@@ -1843,6 +1874,7 @@ class RiwayatPembayaranData extends DataClass
 
   RiwayatPembayaranData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     int? tagihanId,
     DateTime? periodeJatuhTempo,
     int? jumlahSen,
@@ -1852,6 +1884,7 @@ class RiwayatPembayaranData extends DataClass
     String? via,
   }) => RiwayatPembayaranData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     tagihanId: tagihanId ?? this.tagihanId,
     periodeJatuhTempo: periodeJatuhTempo ?? this.periodeJatuhTempo,
     jumlahSen: jumlahSen ?? this.jumlahSen,
@@ -1863,6 +1896,7 @@ class RiwayatPembayaranData extends DataClass
   RiwayatPembayaranData copyWithCompanion(RiwayatPembayaranCompanion data) {
     return RiwayatPembayaranData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       tagihanId: data.tagihanId.present ? data.tagihanId.value : this.tagihanId,
       periodeJatuhTempo: data.periodeJatuhTempo.present
           ? data.periodeJatuhTempo.value
@@ -1883,6 +1917,7 @@ class RiwayatPembayaranData extends DataClass
   String toString() {
     return (StringBuffer('RiwayatPembayaranData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tagihanId: $tagihanId, ')
           ..write('periodeJatuhTempo: $periodeJatuhTempo, ')
           ..write('jumlahSen: $jumlahSen, ')
@@ -1897,6 +1932,7 @@ class RiwayatPembayaranData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     tagihanId,
     periodeJatuhTempo,
     jumlahSen,
@@ -1910,6 +1946,7 @@ class RiwayatPembayaranData extends DataClass
       identical(this, other) ||
       (other is RiwayatPembayaranData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.tagihanId == this.tagihanId &&
           other.periodeJatuhTempo == this.periodeJatuhTempo &&
           other.jumlahSen == this.jumlahSen &&
@@ -1922,6 +1959,7 @@ class RiwayatPembayaranData extends DataClass
 class RiwayatPembayaranCompanion
     extends UpdateCompanion<RiwayatPembayaranData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<int> tagihanId;
   final Value<DateTime> periodeJatuhTempo;
   final Value<int> jumlahSen;
@@ -1931,6 +1969,7 @@ class RiwayatPembayaranCompanion
   final Value<String> via;
   const RiwayatPembayaranCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.tagihanId = const Value.absent(),
     this.periodeJatuhTempo = const Value.absent(),
     this.jumlahSen = const Value.absent(),
@@ -1941,6 +1980,7 @@ class RiwayatPembayaranCompanion
   });
   RiwayatPembayaranCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required int tagihanId,
     required DateTime periodeJatuhTempo,
     required int jumlahSen,
@@ -1954,6 +1994,7 @@ class RiwayatPembayaranCompanion
        tanggalBayar = Value(tanggalBayar);
   static Insertable<RiwayatPembayaranData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<int>? tagihanId,
     Expression<DateTime>? periodeJatuhTempo,
     Expression<int>? jumlahSen,
@@ -1964,6 +2005,7 @@ class RiwayatPembayaranCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (tagihanId != null) 'tagihan_id': tagihanId,
       if (periodeJatuhTempo != null) 'periode_jatuh_tempo': periodeJatuhTempo,
       if (jumlahSen != null) 'jumlah_sen': jumlahSen,
@@ -1976,6 +2018,7 @@ class RiwayatPembayaranCompanion
 
   RiwayatPembayaranCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<int>? tagihanId,
     Value<DateTime>? periodeJatuhTempo,
     Value<int>? jumlahSen,
@@ -1986,6 +2029,7 @@ class RiwayatPembayaranCompanion
   }) {
     return RiwayatPembayaranCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       tagihanId: tagihanId ?? this.tagihanId,
       periodeJatuhTempo: periodeJatuhTempo ?? this.periodeJatuhTempo,
       jumlahSen: jumlahSen ?? this.jumlahSen,
@@ -2001,6 +2045,9 @@ class RiwayatPembayaranCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (tagihanId.present) {
       map['tagihan_id'] = Variable<int>(tagihanId.value);
@@ -2030,6 +2077,7 @@ class RiwayatPembayaranCompanion
   String toString() {
     return (StringBuffer('RiwayatPembayaranCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tagihanId: $tagihanId, ')
           ..write('periodeJatuhTempo: $periodeJatuhTempo, ')
           ..write('jumlahSen: $jumlahSen, ')
@@ -2060,6 +2108,15 @@ class $PemasukanBulananTable extends PemasukanBulanan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _bulanMeta = const VerificationMeta('bulan');
   @override
@@ -2093,7 +2150,7 @@ class $PemasukanBulananTable extends PemasukanBulanan
     defaultValue: const Constant('Gaji'),
   );
   @override
-  List<GeneratedColumn> get $columns => [id, bulan, jumlahSen, sumber];
+  List<GeneratedColumn> get $columns => [id, uid, bulan, jumlahSen, sumber];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2108,6 +2165,12 @@ class $PemasukanBulananTable extends PemasukanBulanan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('bulan')) {
       context.handle(
@@ -2142,6 +2205,10 @@ class $PemasukanBulananTable extends PemasukanBulanan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       bulan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}bulan'],
@@ -2167,12 +2234,17 @@ class PemasukanBulananData extends DataClass
     implements Insertable<PemasukanBulananData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Bulan "YYYY-MM" (satu baris per bulan, mudah di-query).
   final String bulan;
   final int jumlahSen;
   final String sumber;
   const PemasukanBulananData({
     required this.id,
+    this.uid,
     required this.bulan,
     required this.jumlahSen,
     required this.sumber,
@@ -2181,6 +2253,9 @@ class PemasukanBulananData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['bulan'] = Variable<String>(bulan);
     map['jumlah_sen'] = Variable<int>(jumlahSen);
     map['sumber'] = Variable<String>(sumber);
@@ -2190,6 +2265,7 @@ class PemasukanBulananData extends DataClass
   PemasukanBulananCompanion toCompanion(bool nullToAbsent) {
     return PemasukanBulananCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       bulan: Value(bulan),
       jumlahSen: Value(jumlahSen),
       sumber: Value(sumber),
@@ -2203,6 +2279,7 @@ class PemasukanBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PemasukanBulananData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       bulan: serializer.fromJson<String>(json['bulan']),
       jumlahSen: serializer.fromJson<int>(json['jumlahSen']),
       sumber: serializer.fromJson<String>(json['sumber']),
@@ -2213,6 +2290,7 @@ class PemasukanBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'bulan': serializer.toJson<String>(bulan),
       'jumlahSen': serializer.toJson<int>(jumlahSen),
       'sumber': serializer.toJson<String>(sumber),
@@ -2221,11 +2299,13 @@ class PemasukanBulananData extends DataClass
 
   PemasukanBulananData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? bulan,
     int? jumlahSen,
     String? sumber,
   }) => PemasukanBulananData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     bulan: bulan ?? this.bulan,
     jumlahSen: jumlahSen ?? this.jumlahSen,
     sumber: sumber ?? this.sumber,
@@ -2233,6 +2313,7 @@ class PemasukanBulananData extends DataClass
   PemasukanBulananData copyWithCompanion(PemasukanBulananCompanion data) {
     return PemasukanBulananData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       bulan: data.bulan.present ? data.bulan.value : this.bulan,
       jumlahSen: data.jumlahSen.present ? data.jumlahSen.value : this.jumlahSen,
       sumber: data.sumber.present ? data.sumber.value : this.sumber,
@@ -2243,6 +2324,7 @@ class PemasukanBulananData extends DataClass
   String toString() {
     return (StringBuffer('PemasukanBulananData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('bulan: $bulan, ')
           ..write('jumlahSen: $jumlahSen, ')
           ..write('sumber: $sumber')
@@ -2251,12 +2333,13 @@ class PemasukanBulananData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, bulan, jumlahSen, sumber);
+  int get hashCode => Object.hash(id, uid, bulan, jumlahSen, sumber);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is PemasukanBulananData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.bulan == this.bulan &&
           other.jumlahSen == this.jumlahSen &&
           other.sumber == this.sumber);
@@ -2264,29 +2347,34 @@ class PemasukanBulananData extends DataClass
 
 class PemasukanBulananCompanion extends UpdateCompanion<PemasukanBulananData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> bulan;
   final Value<int> jumlahSen;
   final Value<String> sumber;
   const PemasukanBulananCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.bulan = const Value.absent(),
     this.jumlahSen = const Value.absent(),
     this.sumber = const Value.absent(),
   });
   PemasukanBulananCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String bulan,
     this.jumlahSen = const Value.absent(),
     this.sumber = const Value.absent(),
   }) : bulan = Value(bulan);
   static Insertable<PemasukanBulananData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? bulan,
     Expression<int>? jumlahSen,
     Expression<String>? sumber,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (bulan != null) 'bulan': bulan,
       if (jumlahSen != null) 'jumlah_sen': jumlahSen,
       if (sumber != null) 'sumber': sumber,
@@ -2295,12 +2383,14 @@ class PemasukanBulananCompanion extends UpdateCompanion<PemasukanBulananData> {
 
   PemasukanBulananCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? bulan,
     Value<int>? jumlahSen,
     Value<String>? sumber,
   }) {
     return PemasukanBulananCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       bulan: bulan ?? this.bulan,
       jumlahSen: jumlahSen ?? this.jumlahSen,
       sumber: sumber ?? this.sumber,
@@ -2312,6 +2402,9 @@ class PemasukanBulananCompanion extends UpdateCompanion<PemasukanBulananData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (bulan.present) {
       map['bulan'] = Variable<String>(bulan.value);
@@ -2329,6 +2422,7 @@ class PemasukanBulananCompanion extends UpdateCompanion<PemasukanBulananData> {
   String toString() {
     return (StringBuffer('PemasukanBulananCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('bulan: $bulan, ')
           ..write('jumlahSen: $jumlahSen, ')
           ..write('sumber: $sumber')
@@ -2875,6 +2969,15 @@ class $KategoriTransaksiTable extends KategoriTransaksi
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _kodeMeta = const VerificationMeta('kode');
   @override
   late final GeneratedColumn<String> kode = GeneratedColumn<String>(
@@ -3019,6 +3122,7 @@ class $KategoriTransaksiTable extends KategoriTransaksi
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     kode,
     indukKode,
     nama,
@@ -3046,6 +3150,12 @@ class $KategoriTransaksiTable extends KategoriTransaksi
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('kode')) {
       context.handle(
@@ -3139,6 +3249,10 @@ class $KategoriTransaksiTable extends KategoriTransaksi
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       kode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}kode'],
@@ -3200,6 +3314,10 @@ class KategoriTransaksiData extends DataClass
     implements Insertable<KategoriTransaksiData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Kunci stabil (mis. `kel_makan`) — dipakai seed ulang & impor/ekspor.
   /// Tanpa kolom ini, kategori berganda setiap kali nama diubah pengguna.
   final String kode;
@@ -3228,6 +3346,7 @@ class KategoriTransaksiData extends DataClass
   final DateTime diubahPada;
   const KategoriTransaksiData({
     required this.id,
+    this.uid,
     required this.kode,
     this.indukKode,
     required this.nama,
@@ -3245,6 +3364,9 @@ class KategoriTransaksiData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['kode'] = Variable<String>(kode);
     if (!nullToAbsent || indukKode != null) {
       map['induk_kode'] = Variable<String>(indukKode);
@@ -3265,6 +3387,7 @@ class KategoriTransaksiData extends DataClass
   KategoriTransaksiCompanion toCompanion(bool nullToAbsent) {
     return KategoriTransaksiCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       kode: Value(kode),
       indukKode: indukKode == null && nullToAbsent
           ? const Value.absent()
@@ -3289,6 +3412,7 @@ class KategoriTransaksiData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return KategoriTransaksiData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       kode: serializer.fromJson<String>(json['kode']),
       indukKode: serializer.fromJson<String?>(json['indukKode']),
       nama: serializer.fromJson<String>(json['nama']),
@@ -3308,6 +3432,7 @@ class KategoriTransaksiData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'kode': serializer.toJson<String>(kode),
       'indukKode': serializer.toJson<String?>(indukKode),
       'nama': serializer.toJson<String>(nama),
@@ -3325,6 +3450,7 @@ class KategoriTransaksiData extends DataClass
 
   KategoriTransaksiData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? kode,
     Value<String?> indukKode = const Value.absent(),
     String? nama,
@@ -3339,6 +3465,7 @@ class KategoriTransaksiData extends DataClass
     DateTime? diubahPada,
   }) => KategoriTransaksiData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     kode: kode ?? this.kode,
     indukKode: indukKode.present ? indukKode.value : this.indukKode,
     nama: nama ?? this.nama,
@@ -3355,6 +3482,7 @@ class KategoriTransaksiData extends DataClass
   KategoriTransaksiData copyWithCompanion(KategoriTransaksiCompanion data) {
     return KategoriTransaksiData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       kode: data.kode.present ? data.kode.value : this.kode,
       indukKode: data.indukKode.present ? data.indukKode.value : this.indukKode,
       nama: data.nama.present ? data.nama.value : this.nama,
@@ -3380,6 +3508,7 @@ class KategoriTransaksiData extends DataClass
   String toString() {
     return (StringBuffer('KategoriTransaksiData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kode: $kode, ')
           ..write('indukKode: $indukKode, ')
           ..write('nama: $nama, ')
@@ -3399,6 +3528,7 @@ class KategoriTransaksiData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     kode,
     indukKode,
     nama,
@@ -3417,6 +3547,7 @@ class KategoriTransaksiData extends DataClass
       identical(this, other) ||
       (other is KategoriTransaksiData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.kode == this.kode &&
           other.indukKode == this.indukKode &&
           other.nama == this.nama &&
@@ -3434,6 +3565,7 @@ class KategoriTransaksiData extends DataClass
 class KategoriTransaksiCompanion
     extends UpdateCompanion<KategoriTransaksiData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> kode;
   final Value<String?> indukKode;
   final Value<String> nama;
@@ -3448,6 +3580,7 @@ class KategoriTransaksiCompanion
   final Value<DateTime> diubahPada;
   const KategoriTransaksiCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.kode = const Value.absent(),
     this.indukKode = const Value.absent(),
     this.nama = const Value.absent(),
@@ -3463,6 +3596,7 @@ class KategoriTransaksiCompanion
   });
   KategoriTransaksiCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String kode,
     this.indukKode = const Value.absent(),
     required String nama,
@@ -3479,6 +3613,7 @@ class KategoriTransaksiCompanion
        nama = Value(nama);
   static Insertable<KategoriTransaksiData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? kode,
     Expression<String>? indukKode,
     Expression<String>? nama,
@@ -3494,6 +3629,7 @@ class KategoriTransaksiCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (kode != null) 'kode': kode,
       if (indukKode != null) 'induk_kode': indukKode,
       if (nama != null) 'nama': nama,
@@ -3511,6 +3647,7 @@ class KategoriTransaksiCompanion
 
   KategoriTransaksiCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? kode,
     Value<String?>? indukKode,
     Value<String>? nama,
@@ -3526,6 +3663,7 @@ class KategoriTransaksiCompanion
   }) {
     return KategoriTransaksiCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       kode: kode ?? this.kode,
       indukKode: indukKode ?? this.indukKode,
       nama: nama ?? this.nama,
@@ -3546,6 +3684,9 @@ class KategoriTransaksiCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (kode.present) {
       map['kode'] = Variable<String>(kode.value);
@@ -3590,6 +3731,7 @@ class KategoriTransaksiCompanion
   String toString() {
     return (StringBuffer('KategoriTransaksiCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kode: $kode, ')
           ..write('indukKode: $indukKode, ')
           ..write('nama: $nama, ')
@@ -3625,6 +3767,15 @@ class $TransaksiTable extends Transaksi
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idTransaksiMeta = const VerificationMeta(
     'idTransaksi',
@@ -3768,6 +3919,7 @@ class $TransaksiTable extends Transaksi
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idTransaksi,
     jenis,
     tanggal,
@@ -3795,6 +3947,12 @@ class $TransaksiTable extends Transaksi
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_transaksi')) {
       context.handle(
@@ -3896,6 +4054,10 @@ class $TransaksiTable extends Transaksi
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idTransaksi: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_transaksi'],
@@ -3956,6 +4118,10 @@ class $TransaksiTable extends Transaksi
 class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Pengenal stabil (`trx_<uuid>` / `tagihan:<id>:<YYYY-MM>`) — kunci
   /// idempotensi impor & sinkron (pola PB-05/06/07).
   final String idTransaksi;
@@ -3985,6 +4151,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   final DateTime diubahPada;
   const TransaksiData({
     required this.id,
+    this.uid,
     required this.idTransaksi,
     required this.jenis,
     required this.tanggal,
@@ -4002,6 +4169,9 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_transaksi'] = Variable<String>(idTransaksi);
     map['jenis'] = Variable<String>(jenis);
     map['tanggal'] = Variable<DateTime>(tanggal);
@@ -4028,6 +4198,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   TransaksiCompanion toCompanion(bool nullToAbsent) {
     return TransaksiCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idTransaksi: Value(idTransaksi),
       jenis: Value(jenis),
       tanggal: Value(tanggal),
@@ -4058,6 +4229,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TransaksiData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idTransaksi: serializer.fromJson<String>(json['idTransaksi']),
       jenis: serializer.fromJson<String>(json['jenis']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
@@ -4077,6 +4249,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idTransaksi': serializer.toJson<String>(idTransaksi),
       'jenis': serializer.toJson<String>(jenis),
       'tanggal': serializer.toJson<DateTime>(tanggal),
@@ -4094,6 +4267,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
 
   TransaksiData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idTransaksi,
     String? jenis,
     DateTime? tanggal,
@@ -4108,6 +4282,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
     DateTime? diubahPada,
   }) => TransaksiData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idTransaksi: idTransaksi ?? this.idTransaksi,
     jenis: jenis ?? this.jenis,
     tanggal: tanggal ?? this.tanggal,
@@ -4126,6 +4301,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   TransaksiData copyWithCompanion(TransaksiCompanion data) {
     return TransaksiData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idTransaksi: data.idTransaksi.present
           ? data.idTransaksi.value
           : this.idTransaksi,
@@ -4157,6 +4333,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   String toString() {
     return (StringBuffer('TransaksiData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idTransaksi: $idTransaksi, ')
           ..write('jenis: $jenis, ')
           ..write('tanggal: $tanggal, ')
@@ -4176,6 +4353,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idTransaksi,
     jenis,
     tanggal,
@@ -4194,6 +4372,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
       identical(this, other) ||
       (other is TransaksiData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idTransaksi == this.idTransaksi &&
           other.jenis == this.jenis &&
           other.tanggal == this.tanggal &&
@@ -4210,6 +4389,7 @@ class TransaksiData extends DataClass implements Insertable<TransaksiData> {
 
 class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idTransaksi;
   final Value<String> jenis;
   final Value<DateTime> tanggal;
@@ -4224,6 +4404,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
   final Value<DateTime> diubahPada;
   const TransaksiCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idTransaksi = const Value.absent(),
     this.jenis = const Value.absent(),
     this.tanggal = const Value.absent(),
@@ -4239,6 +4420,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
   });
   TransaksiCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idTransaksi,
     this.jenis = const Value.absent(),
     required DateTime tanggal,
@@ -4256,6 +4438,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
        jumlahSen = Value(jumlahSen);
   static Insertable<TransaksiData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idTransaksi,
     Expression<String>? jenis,
     Expression<DateTime>? tanggal,
@@ -4271,6 +4454,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idTransaksi != null) 'id_transaksi': idTransaksi,
       if (jenis != null) 'jenis': jenis,
       if (tanggal != null) 'tanggal': tanggal,
@@ -4288,6 +4472,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
 
   TransaksiCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idTransaksi,
     Value<String>? jenis,
     Value<DateTime>? tanggal,
@@ -4303,6 +4488,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
   }) {
     return TransaksiCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idTransaksi: idTransaksi ?? this.idTransaksi,
       jenis: jenis ?? this.jenis,
       tanggal: tanggal ?? this.tanggal,
@@ -4323,6 +4509,9 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idTransaksi.present) {
       map['id_transaksi'] = Variable<String>(idTransaksi.value);
@@ -4367,6 +4556,7 @@ class TransaksiCompanion extends UpdateCompanion<TransaksiData> {
   String toString() {
     return (StringBuffer('TransaksiCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idTransaksi: $idTransaksi, ')
           ..write('jenis: $jenis, ')
           ..write('tanggal: $tanggal, ')
@@ -4402,6 +4592,15 @@ class $AnggaranBulananTable extends AnggaranBulanan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _periodeMeta = const VerificationMeta(
     'periode',
@@ -4514,6 +4713,7 @@ class $AnggaranBulananTable extends AnggaranBulanan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     periode,
     kategoriId,
     batasSen,
@@ -4538,6 +4738,12 @@ class $AnggaranBulananTable extends AnggaranBulanan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('periode')) {
       context.handle(
@@ -4614,6 +4820,10 @@ class $AnggaranBulananTable extends AnggaranBulanan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       periode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}periode'],
@@ -4663,6 +4873,10 @@ class AnggaranBulananData extends DataClass
     implements Insertable<AnggaranBulananData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// 'YYYY-MM'.
   final String periode;
 
@@ -4682,6 +4896,7 @@ class AnggaranBulananData extends DataClass
   final DateTime diubahPada;
   const AnggaranBulananData({
     required this.id,
+    this.uid,
     required this.periode,
     required this.kategoriId,
     required this.batasSen,
@@ -4696,6 +4911,9 @@ class AnggaranBulananData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['periode'] = Variable<String>(periode);
     map['kategori_id'] = Variable<int>(kategoriId);
     map['batas_sen'] = Variable<int>(batasSen);
@@ -4715,6 +4933,7 @@ class AnggaranBulananData extends DataClass
   AnggaranBulananCompanion toCompanion(bool nullToAbsent) {
     return AnggaranBulananCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       periode: Value(periode),
       kategoriId: Value(kategoriId),
       batasSen: Value(batasSen),
@@ -4738,6 +4957,7 @@ class AnggaranBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AnggaranBulananData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       periode: serializer.fromJson<String>(json['periode']),
       kategoriId: serializer.fromJson<int>(json['kategoriId']),
       batasSen: serializer.fromJson<int>(json['batasSen']),
@@ -4754,6 +4974,7 @@ class AnggaranBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'periode': serializer.toJson<String>(periode),
       'kategoriId': serializer.toJson<int>(kategoriId),
       'batasSen': serializer.toJson<int>(batasSen),
@@ -4768,6 +4989,7 @@ class AnggaranBulananData extends DataClass
 
   AnggaranBulananData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? periode,
     int? kategoriId,
     int? batasSen,
@@ -4779,6 +5001,7 @@ class AnggaranBulananData extends DataClass
     DateTime? diubahPada,
   }) => AnggaranBulananData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     periode: periode ?? this.periode,
     kategoriId: kategoriId ?? this.kategoriId,
     batasSen: batasSen ?? this.batasSen,
@@ -4792,6 +5015,7 @@ class AnggaranBulananData extends DataClass
   AnggaranBulananData copyWithCompanion(AnggaranBulananCompanion data) {
     return AnggaranBulananData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       periode: data.periode.present ? data.periode.value : this.periode,
       kategoriId: data.kategoriId.present
           ? data.kategoriId.value
@@ -4818,6 +5042,7 @@ class AnggaranBulananData extends DataClass
   String toString() {
     return (StringBuffer('AnggaranBulananData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('periode: $periode, ')
           ..write('kategoriId: $kategoriId, ')
           ..write('batasSen: $batasSen, ')
@@ -4834,6 +5059,7 @@ class AnggaranBulananData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     periode,
     kategoriId,
     batasSen,
@@ -4849,6 +5075,7 @@ class AnggaranBulananData extends DataClass
       identical(this, other) ||
       (other is AnggaranBulananData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.periode == this.periode &&
           other.kategoriId == this.kategoriId &&
           other.batasSen == this.batasSen &&
@@ -4862,6 +5089,7 @@ class AnggaranBulananData extends DataClass
 
 class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> periode;
   final Value<int> kategoriId;
   final Value<int> batasSen;
@@ -4873,6 +5101,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   final Value<DateTime> diubahPada;
   const AnggaranBulananCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.periode = const Value.absent(),
     this.kategoriId = const Value.absent(),
     this.batasSen = const Value.absent(),
@@ -4885,6 +5114,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   });
   AnggaranBulananCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String periode,
     this.kategoriId = const Value.absent(),
     this.batasSen = const Value.absent(),
@@ -4897,6 +5127,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   }) : periode = Value(periode);
   static Insertable<AnggaranBulananData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? periode,
     Expression<int>? kategoriId,
     Expression<int>? batasSen,
@@ -4909,6 +5140,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (periode != null) 'periode': periode,
       if (kategoriId != null) 'kategori_id': kategoriId,
       if (batasSen != null) 'batas_sen': batasSen,
@@ -4923,6 +5155,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
 
   AnggaranBulananCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? periode,
     Value<int>? kategoriId,
     Value<int>? batasSen,
@@ -4935,6 +5168,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   }) {
     return AnggaranBulananCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       periode: periode ?? this.periode,
       kategoriId: kategoriId ?? this.kategoriId,
       batasSen: batasSen ?? this.batasSen,
@@ -4952,6 +5186,9 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (periode.present) {
       map['periode'] = Variable<String>(periode.value);
@@ -4987,6 +5224,7 @@ class AnggaranBulananCompanion extends UpdateCompanion<AnggaranBulananData> {
   String toString() {
     return (StringBuffer('AnggaranBulananCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('periode: $periode, ')
           ..write('kategoriId: $kategoriId, ')
           ..write('batasSen: $batasSen, ')
@@ -5019,6 +5257,15 @@ class $LanggananTable extends Langganan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idLanggananMeta = const VerificationMeta(
     'idLangganan',
@@ -5234,6 +5481,7 @@ class $LanggananTable extends Langganan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idLangganan,
     tagihanId,
     nama,
@@ -5267,6 +5515,12 @@ class $LanggananTable extends Langganan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_langganan')) {
       context.handle(
@@ -5419,6 +5673,10 @@ class $LanggananTable extends Langganan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idLangganan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_langganan'],
@@ -5503,6 +5761,10 @@ class $LanggananTable extends Langganan
 class LanggananData extends DataClass implements Insertable<LanggananData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Unik. Pengenal stabil (`lgn_<microseconds>`), dipakai sebagai bagian
   /// payload notifikasi + kunci impor/ekspor.
   final String idLangganan;
@@ -5532,6 +5794,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
   final DateTime diubahPada;
   const LanggananData({
     required this.id,
+    this.uid,
     required this.idLangganan,
     this.tagihanId,
     required this.nama,
@@ -5555,6 +5818,9 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_langganan'] = Variable<String>(idLangganan);
     if (!nullToAbsent || tagihanId != null) {
       map['tagihan_id'] = Variable<int>(tagihanId);
@@ -5595,6 +5861,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
   LanggananCompanion toCompanion(bool nullToAbsent) {
     return LanggananCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idLangganan: Value(idLangganan),
       tagihanId: tagihanId == null && nullToAbsent
           ? const Value.absent()
@@ -5639,6 +5906,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LanggananData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idLangganan: serializer.fromJson<String>(json['idLangganan']),
       tagihanId: serializer.fromJson<int?>(json['tagihanId']),
       nama: serializer.fromJson<String>(json['nama']),
@@ -5666,6 +5934,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idLangganan': serializer.toJson<String>(idLangganan),
       'tagihanId': serializer.toJson<int?>(tagihanId),
       'nama': serializer.toJson<String>(nama),
@@ -5689,6 +5958,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
 
   LanggananData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idLangganan,
     Value<int?> tagihanId = const Value.absent(),
     String? nama,
@@ -5709,6 +5979,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
     DateTime? diubahPada,
   }) => LanggananData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idLangganan: idLangganan ?? this.idLangganan,
     tagihanId: tagihanId.present ? tagihanId.value : this.tagihanId,
     nama: nama ?? this.nama,
@@ -5733,6 +6004,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
   LanggananData copyWithCompanion(LanggananCompanion data) {
     return LanggananData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idLangganan: data.idLangganan.present
           ? data.idLangganan.value
           : this.idLangganan,
@@ -5784,6 +6056,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
   String toString() {
     return (StringBuffer('LanggananData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idLangganan: $idLangganan, ')
           ..write('tagihanId: $tagihanId, ')
           ..write('nama: $nama, ')
@@ -5809,6 +6082,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idLangganan,
     tagihanId,
     nama,
@@ -5833,6 +6107,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
       identical(this, other) ||
       (other is LanggananData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idLangganan == this.idLangganan &&
           other.tagihanId == this.tagihanId &&
           other.nama == this.nama &&
@@ -5855,6 +6130,7 @@ class LanggananData extends DataClass implements Insertable<LanggananData> {
 
 class LanggananCompanion extends UpdateCompanion<LanggananData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idLangganan;
   final Value<int?> tagihanId;
   final Value<String> nama;
@@ -5875,6 +6151,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
   final Value<DateTime> diubahPada;
   const LanggananCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idLangganan = const Value.absent(),
     this.tagihanId = const Value.absent(),
     this.nama = const Value.absent(),
@@ -5896,6 +6173,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
   });
   LanggananCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idLangganan,
     this.tagihanId = const Value.absent(),
     required String nama,
@@ -5919,6 +6197,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
        tanggalMulai = Value(tanggalMulai);
   static Insertable<LanggananData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idLangganan,
     Expression<int>? tagihanId,
     Expression<String>? nama,
@@ -5940,6 +6219,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idLangganan != null) 'id_langganan': idLangganan,
       if (tagihanId != null) 'tagihan_id': tagihanId,
       if (nama != null) 'nama': nama,
@@ -5964,6 +6244,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
 
   LanggananCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idLangganan,
     Value<int?>? tagihanId,
     Value<String>? nama,
@@ -5985,6 +6266,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
   }) {
     return LanggananCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idLangganan: idLangganan ?? this.idLangganan,
       tagihanId: tagihanId ?? this.tagihanId,
       nama: nama ?? this.nama,
@@ -6011,6 +6293,9 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idLangganan.present) {
       map['id_langganan'] = Variable<String>(idLangganan.value);
@@ -6075,6 +6360,7 @@ class LanggananCompanion extends UpdateCompanion<LanggananData> {
   String toString() {
     return (StringBuffer('LanggananCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idLangganan: $idLangganan, ')
           ..write('tagihanId: $tagihanId, ')
           ..write('nama: $nama, ')
@@ -6115,6 +6401,15 @@ class $AsetTable extends Aset with TableInfo<$AsetTable, AsetData> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idAsetMeta = const VerificationMeta('idAset');
   @override
@@ -6247,6 +6542,7 @@ class $AsetTable extends Aset with TableInfo<$AsetTable, AsetData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idAset,
     nama,
     jenis,
@@ -6273,6 +6569,12 @@ class $AsetTable extends Aset with TableInfo<$AsetTable, AsetData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_aset')) {
       context.handle(
@@ -6363,6 +6665,10 @@ class $AsetTable extends Aset with TableInfo<$AsetTable, AsetData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idAset: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_aset'],
@@ -6419,6 +6725,10 @@ class $AsetTable extends Aset with TableInfo<$AsetTable, AsetData> {
 class AsetData extends DataClass implements Insertable<AsetData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Unik. Pengenal stabil untuk impor/ekspor & sinkron.
   final String idAset;
   final String nama;
@@ -6443,6 +6753,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
   final DateTime diubahPada;
   const AsetData({
     required this.id,
+    this.uid,
     required this.idAset,
     required this.nama,
     required this.jenis,
@@ -6459,6 +6770,9 @@ class AsetData extends DataClass implements Insertable<AsetData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_aset'] = Variable<String>(idAset);
     map['nama'] = Variable<String>(nama);
     map['jenis'] = Variable<String>(jenis);
@@ -6480,6 +6794,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
   AsetCompanion toCompanion(bool nullToAbsent) {
     return AsetCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idAset: Value(idAset),
       nama: Value(nama),
       jenis: Value(jenis),
@@ -6505,6 +6820,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AsetData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idAset: serializer.fromJson<String>(json['idAset']),
       nama: serializer.fromJson<String>(json['nama']),
       jenis: serializer.fromJson<String>(json['jenis']),
@@ -6523,6 +6839,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idAset': serializer.toJson<String>(idAset),
       'nama': serializer.toJson<String>(nama),
       'jenis': serializer.toJson<String>(jenis),
@@ -6539,6 +6856,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
 
   AsetData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idAset,
     String? nama,
     String? jenis,
@@ -6552,6 +6870,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
     DateTime? diubahPada,
   }) => AsetData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idAset: idAset ?? this.idAset,
     nama: nama ?? this.nama,
     jenis: jenis ?? this.jenis,
@@ -6567,6 +6886,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
   AsetData copyWithCompanion(AsetCompanion data) {
     return AsetData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idAset: data.idAset.present ? data.idAset.value : this.idAset,
       nama: data.nama.present ? data.nama.value : this.nama,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
@@ -6593,6 +6913,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
   String toString() {
     return (StringBuffer('AsetData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idAset: $idAset, ')
           ..write('nama: $nama, ')
           ..write('jenis: $jenis, ')
@@ -6611,6 +6932,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idAset,
     nama,
     jenis,
@@ -6628,6 +6950,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
       identical(this, other) ||
       (other is AsetData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idAset == this.idAset &&
           other.nama == this.nama &&
           other.jenis == this.jenis &&
@@ -6643,6 +6966,7 @@ class AsetData extends DataClass implements Insertable<AsetData> {
 
 class AsetCompanion extends UpdateCompanion<AsetData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idAset;
   final Value<String> nama;
   final Value<String> jenis;
@@ -6656,6 +6980,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
   final Value<DateTime> diubahPada;
   const AsetCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idAset = const Value.absent(),
     this.nama = const Value.absent(),
     this.jenis = const Value.absent(),
@@ -6670,6 +6995,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
   });
   AsetCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idAset,
     required String nama,
     this.jenis = const Value.absent(),
@@ -6685,6 +7011,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
        nama = Value(nama);
   static Insertable<AsetData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idAset,
     Expression<String>? nama,
     Expression<String>? jenis,
@@ -6699,6 +7026,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idAset != null) 'id_aset': idAset,
       if (nama != null) 'nama': nama,
       if (jenis != null) 'jenis': jenis,
@@ -6715,6 +7043,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
 
   AsetCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idAset,
     Value<String>? nama,
     Value<String>? jenis,
@@ -6729,6 +7058,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
   }) {
     return AsetCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idAset: idAset ?? this.idAset,
       nama: nama ?? this.nama,
       jenis: jenis ?? this.jenis,
@@ -6748,6 +7078,9 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idAset.present) {
       map['id_aset'] = Variable<String>(idAset.value);
@@ -6789,6 +7122,7 @@ class AsetCompanion extends UpdateCompanion<AsetData> {
   String toString() {
     return (StringBuffer('AsetCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idAset: $idAset, ')
           ..write('nama: $nama, ')
           ..write('jenis: $jenis, ')
@@ -6823,6 +7157,15 @@ class $KewajibanTable extends Kewajiban
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idKewajibanMeta = const VerificationMeta(
     'idKewajiban',
@@ -6977,6 +7320,7 @@ class $KewajibanTable extends Kewajiban
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idKewajiban,
     nama,
     jenis,
@@ -7005,6 +7349,12 @@ class $KewajibanTable extends Kewajiban
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_kewajiban')) {
       context.handle(
@@ -7119,6 +7469,10 @@ class $KewajibanTable extends Kewajiban
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idKewajiban: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_kewajiban'],
@@ -7182,6 +7536,10 @@ class $KewajibanTable extends Kewajiban
 
 class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String idKewajiban;
   final String nama;
 
@@ -7205,6 +7563,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   final DateTime diubahPada;
   const KewajibanData({
     required this.id,
+    this.uid,
     required this.idKewajiban,
     required this.nama,
     required this.jenis,
@@ -7223,6 +7582,9 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_kewajiban'] = Variable<String>(idKewajiban);
     map['nama'] = Variable<String>(nama);
     map['jenis'] = Variable<String>(jenis);
@@ -7250,6 +7612,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   KewajibanCompanion toCompanion(bool nullToAbsent) {
     return KewajibanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idKewajiban: Value(idKewajiban),
       nama: Value(nama),
       jenis: Value(jenis),
@@ -7281,6 +7644,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return KewajibanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idKewajiban: serializer.fromJson<String>(json['idKewajiban']),
       nama: serializer.fromJson<String>(json['nama']),
       jenis: serializer.fromJson<String>(json['jenis']),
@@ -7305,6 +7669,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idKewajiban': serializer.toJson<String>(idKewajiban),
       'nama': serializer.toJson<String>(nama),
       'jenis': serializer.toJson<String>(jenis),
@@ -7323,6 +7688,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
 
   KewajibanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idKewajiban,
     String? nama,
     String? jenis,
@@ -7338,6 +7704,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
     DateTime? diubahPada,
   }) => KewajibanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idKewajiban: idKewajiban ?? this.idKewajiban,
     nama: nama ?? this.nama,
     jenis: jenis ?? this.jenis,
@@ -7361,6 +7728,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   KewajibanData copyWithCompanion(KewajibanCompanion data) {
     return KewajibanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idKewajiban: data.idKewajiban.present
           ? data.idKewajiban.value
           : this.idKewajiban,
@@ -7397,6 +7765,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   String toString() {
     return (StringBuffer('KewajibanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idKewajiban: $idKewajiban, ')
           ..write('nama: $nama, ')
           ..write('jenis: $jenis, ')
@@ -7417,6 +7786,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idKewajiban,
     nama,
     jenis,
@@ -7436,6 +7806,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
       identical(this, other) ||
       (other is KewajibanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idKewajiban == this.idKewajiban &&
           other.nama == this.nama &&
           other.jenis == this.jenis &&
@@ -7453,6 +7824,7 @@ class KewajibanData extends DataClass implements Insertable<KewajibanData> {
 
 class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idKewajiban;
   final Value<String> nama;
   final Value<String> jenis;
@@ -7468,6 +7840,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
   final Value<DateTime> diubahPada;
   const KewajibanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idKewajiban = const Value.absent(),
     this.nama = const Value.absent(),
     this.jenis = const Value.absent(),
@@ -7484,6 +7857,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
   });
   KewajibanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idKewajiban,
     required String nama,
     this.jenis = const Value.absent(),
@@ -7501,6 +7875,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
        nama = Value(nama);
   static Insertable<KewajibanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idKewajiban,
     Expression<String>? nama,
     Expression<String>? jenis,
@@ -7517,6 +7892,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idKewajiban != null) 'id_kewajiban': idKewajiban,
       if (nama != null) 'nama': nama,
       if (jenis != null) 'jenis': jenis,
@@ -7537,6 +7913,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
 
   KewajibanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idKewajiban,
     Value<String>? nama,
     Value<String>? jenis,
@@ -7553,6 +7930,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
   }) {
     return KewajibanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idKewajiban: idKewajiban ?? this.idKewajiban,
       nama: nama ?? this.nama,
       jenis: jenis ?? this.jenis,
@@ -7575,6 +7953,9 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idKewajiban.present) {
       map['id_kewajiban'] = Variable<String>(idKewajiban.value);
@@ -7626,6 +8007,7 @@ class KewajibanCompanion extends UpdateCompanion<KewajibanData> {
   String toString() {
     return (StringBuffer('KewajibanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idKewajiban: $idKewajiban, ')
           ..write('nama: $nama, ')
           ..write('jenis: $jenis, ')
@@ -7662,6 +8044,15 @@ class $NilaiAsetBulananTable extends NilaiAsetBulanan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _asetIdMeta = const VerificationMeta('asetId');
   @override
@@ -7803,6 +8194,7 @@ class $NilaiAsetBulananTable extends NilaiAsetBulanan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     asetId,
     bulan,
     nilaiSen,
@@ -7830,6 +8222,12 @@ class $NilaiAsetBulananTable extends NilaiAsetBulanan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('aset_id')) {
       context.handle(
@@ -7936,6 +8334,10 @@ class $NilaiAsetBulananTable extends NilaiAsetBulanan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       asetId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}aset_id'],
@@ -7996,6 +8398,10 @@ class $NilaiAsetBulananTable extends NilaiAsetBulanan
 class NilaiAsetBulananData extends DataClass
     implements Insertable<NilaiAsetBulananData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final int asetId;
 
   /// 'YYYY-MM'.
@@ -8021,6 +8427,7 @@ class NilaiAsetBulananData extends DataClass
   final DateTime diubahPada;
   const NilaiAsetBulananData({
     required this.id,
+    this.uid,
     required this.asetId,
     required this.bulan,
     required this.nilaiSen,
@@ -8038,6 +8445,9 @@ class NilaiAsetBulananData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['aset_id'] = Variable<int>(asetId);
     map['bulan'] = Variable<String>(bulan);
     map['nilai_sen'] = Variable<int>(nilaiSen);
@@ -8064,6 +8474,7 @@ class NilaiAsetBulananData extends DataClass
   NilaiAsetBulananCompanion toCompanion(bool nullToAbsent) {
     return NilaiAsetBulananCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       asetId: Value(asetId),
       bulan: Value(bulan),
       nilaiSen: Value(nilaiSen),
@@ -8094,6 +8505,7 @@ class NilaiAsetBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return NilaiAsetBulananData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       asetId: serializer.fromJson<int>(json['asetId']),
       bulan: serializer.fromJson<String>(json['bulan']),
       nilaiSen: serializer.fromJson<int>(json['nilaiSen']),
@@ -8113,6 +8525,7 @@ class NilaiAsetBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'asetId': serializer.toJson<int>(asetId),
       'bulan': serializer.toJson<String>(bulan),
       'nilaiSen': serializer.toJson<int>(nilaiSen),
@@ -8130,6 +8543,7 @@ class NilaiAsetBulananData extends DataClass
 
   NilaiAsetBulananData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     int? asetId,
     String? bulan,
     int? nilaiSen,
@@ -8144,6 +8558,7 @@ class NilaiAsetBulananData extends DataClass
     DateTime? diubahPada,
   }) => NilaiAsetBulananData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     asetId: asetId ?? this.asetId,
     bulan: bulan ?? this.bulan,
     nilaiSen: nilaiSen ?? this.nilaiSen,
@@ -8164,6 +8579,7 @@ class NilaiAsetBulananData extends DataClass
   NilaiAsetBulananData copyWithCompanion(NilaiAsetBulananCompanion data) {
     return NilaiAsetBulananData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       asetId: data.asetId.present ? data.asetId.value : this.asetId,
       bulan: data.bulan.present ? data.bulan.value : this.bulan,
       nilaiSen: data.nilaiSen.present ? data.nilaiSen.value : this.nilaiSen,
@@ -8195,6 +8611,7 @@ class NilaiAsetBulananData extends DataClass
   String toString() {
     return (StringBuffer('NilaiAsetBulananData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('asetId: $asetId, ')
           ..write('bulan: $bulan, ')
           ..write('nilaiSen: $nilaiSen, ')
@@ -8214,6 +8631,7 @@ class NilaiAsetBulananData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     asetId,
     bulan,
     nilaiSen,
@@ -8232,6 +8650,7 @@ class NilaiAsetBulananData extends DataClass
       identical(this, other) ||
       (other is NilaiAsetBulananData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.asetId == this.asetId &&
           other.bulan == this.bulan &&
           other.nilaiSen == this.nilaiSen &&
@@ -8248,6 +8667,7 @@ class NilaiAsetBulananData extends DataClass
 
 class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<int> asetId;
   final Value<String> bulan;
   final Value<int> nilaiSen;
@@ -8262,6 +8682,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
   final Value<DateTime> diubahPada;
   const NilaiAsetBulananCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.asetId = const Value.absent(),
     this.bulan = const Value.absent(),
     this.nilaiSen = const Value.absent(),
@@ -8277,6 +8698,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
   });
   NilaiAsetBulananCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required int asetId,
     required String bulan,
     required int nilaiSen,
@@ -8295,6 +8717,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
        idempotensi = Value(idempotensi);
   static Insertable<NilaiAsetBulananData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<int>? asetId,
     Expression<String>? bulan,
     Expression<int>? nilaiSen,
@@ -8310,6 +8733,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (asetId != null) 'aset_id': asetId,
       if (bulan != null) 'bulan': bulan,
       if (nilaiSen != null) 'nilai_sen': nilaiSen,
@@ -8327,6 +8751,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
 
   NilaiAsetBulananCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<int>? asetId,
     Value<String>? bulan,
     Value<int>? nilaiSen,
@@ -8342,6 +8767,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
   }) {
     return NilaiAsetBulananCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       asetId: asetId ?? this.asetId,
       bulan: bulan ?? this.bulan,
       nilaiSen: nilaiSen ?? this.nilaiSen,
@@ -8362,6 +8788,9 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (asetId.present) {
       map['aset_id'] = Variable<int>(asetId.value);
@@ -8406,6 +8835,7 @@ class NilaiAsetBulananCompanion extends UpdateCompanion<NilaiAsetBulananData> {
   String toString() {
     return (StringBuffer('NilaiAsetBulananCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('asetId: $asetId, ')
           ..write('bulan: $bulan, ')
           ..write('nilaiSen: $nilaiSen, ')
@@ -8441,6 +8871,15 @@ class $NilaiKewajibanBulananTable extends NilaiKewajibanBulanan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _kewajibanIdMeta = const VerificationMeta(
     'kewajibanId',
@@ -8584,6 +9023,7 @@ class $NilaiKewajibanBulananTable extends NilaiKewajibanBulanan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     kewajibanId,
     bulan,
     nilaiSen,
@@ -8611,6 +9051,12 @@ class $NilaiKewajibanBulananTable extends NilaiKewajibanBulanan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('kewajiban_id')) {
       context.handle(
@@ -8723,6 +9169,10 @@ class $NilaiKewajibanBulananTable extends NilaiKewajibanBulanan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       kewajibanId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}kewajiban_id'],
@@ -8783,6 +9233,10 @@ class $NilaiKewajibanBulananTable extends NilaiKewajibanBulanan
 class NilaiKewajibanBulananData extends DataClass
     implements Insertable<NilaiKewajibanBulananData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final int kewajibanId;
   final String bulan;
   final int nilaiSen;
@@ -8799,6 +9253,7 @@ class NilaiKewajibanBulananData extends DataClass
   final DateTime diubahPada;
   const NilaiKewajibanBulananData({
     required this.id,
+    this.uid,
     required this.kewajibanId,
     required this.bulan,
     required this.nilaiSen,
@@ -8816,6 +9271,9 @@ class NilaiKewajibanBulananData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['kewajiban_id'] = Variable<int>(kewajibanId);
     map['bulan'] = Variable<String>(bulan);
     map['nilai_sen'] = Variable<int>(nilaiSen);
@@ -8842,6 +9300,7 @@ class NilaiKewajibanBulananData extends DataClass
   NilaiKewajibanBulananCompanion toCompanion(bool nullToAbsent) {
     return NilaiKewajibanBulananCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       kewajibanId: Value(kewajibanId),
       bulan: Value(bulan),
       nilaiSen: Value(nilaiSen),
@@ -8872,6 +9331,7 @@ class NilaiKewajibanBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return NilaiKewajibanBulananData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       kewajibanId: serializer.fromJson<int>(json['kewajibanId']),
       bulan: serializer.fromJson<String>(json['bulan']),
       nilaiSen: serializer.fromJson<int>(json['nilaiSen']),
@@ -8891,6 +9351,7 @@ class NilaiKewajibanBulananData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'kewajibanId': serializer.toJson<int>(kewajibanId),
       'bulan': serializer.toJson<String>(bulan),
       'nilaiSen': serializer.toJson<int>(nilaiSen),
@@ -8908,6 +9369,7 @@ class NilaiKewajibanBulananData extends DataClass
 
   NilaiKewajibanBulananData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     int? kewajibanId,
     String? bulan,
     int? nilaiSen,
@@ -8922,6 +9384,7 @@ class NilaiKewajibanBulananData extends DataClass
     DateTime? diubahPada,
   }) => NilaiKewajibanBulananData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     kewajibanId: kewajibanId ?? this.kewajibanId,
     bulan: bulan ?? this.bulan,
     nilaiSen: nilaiSen ?? this.nilaiSen,
@@ -8944,6 +9407,7 @@ class NilaiKewajibanBulananData extends DataClass
   ) {
     return NilaiKewajibanBulananData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       kewajibanId: data.kewajibanId.present
           ? data.kewajibanId.value
           : this.kewajibanId,
@@ -8977,6 +9441,7 @@ class NilaiKewajibanBulananData extends DataClass
   String toString() {
     return (StringBuffer('NilaiKewajibanBulananData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kewajibanId: $kewajibanId, ')
           ..write('bulan: $bulan, ')
           ..write('nilaiSen: $nilaiSen, ')
@@ -8996,6 +9461,7 @@ class NilaiKewajibanBulananData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     kewajibanId,
     bulan,
     nilaiSen,
@@ -9014,6 +9480,7 @@ class NilaiKewajibanBulananData extends DataClass
       identical(this, other) ||
       (other is NilaiKewajibanBulananData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.kewajibanId == this.kewajibanId &&
           other.bulan == this.bulan &&
           other.nilaiSen == this.nilaiSen &&
@@ -9031,6 +9498,7 @@ class NilaiKewajibanBulananData extends DataClass
 class NilaiKewajibanBulananCompanion
     extends UpdateCompanion<NilaiKewajibanBulananData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<int> kewajibanId;
   final Value<String> bulan;
   final Value<int> nilaiSen;
@@ -9045,6 +9513,7 @@ class NilaiKewajibanBulananCompanion
   final Value<DateTime> diubahPada;
   const NilaiKewajibanBulananCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.kewajibanId = const Value.absent(),
     this.bulan = const Value.absent(),
     this.nilaiSen = const Value.absent(),
@@ -9060,6 +9529,7 @@ class NilaiKewajibanBulananCompanion
   });
   NilaiKewajibanBulananCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required int kewajibanId,
     required String bulan,
     required int nilaiSen,
@@ -9078,6 +9548,7 @@ class NilaiKewajibanBulananCompanion
        idempotensi = Value(idempotensi);
   static Insertable<NilaiKewajibanBulananData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<int>? kewajibanId,
     Expression<String>? bulan,
     Expression<int>? nilaiSen,
@@ -9093,6 +9564,7 @@ class NilaiKewajibanBulananCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (kewajibanId != null) 'kewajiban_id': kewajibanId,
       if (bulan != null) 'bulan': bulan,
       if (nilaiSen != null) 'nilai_sen': nilaiSen,
@@ -9110,6 +9582,7 @@ class NilaiKewajibanBulananCompanion
 
   NilaiKewajibanBulananCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<int>? kewajibanId,
     Value<String>? bulan,
     Value<int>? nilaiSen,
@@ -9125,6 +9598,7 @@ class NilaiKewajibanBulananCompanion
   }) {
     return NilaiKewajibanBulananCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       kewajibanId: kewajibanId ?? this.kewajibanId,
       bulan: bulan ?? this.bulan,
       nilaiSen: nilaiSen ?? this.nilaiSen,
@@ -9145,6 +9619,9 @@ class NilaiKewajibanBulananCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (kewajibanId.present) {
       map['kewajiban_id'] = Variable<int>(kewajibanId.value);
@@ -9189,6 +9666,7 @@ class NilaiKewajibanBulananCompanion
   String toString() {
     return (StringBuffer('NilaiKewajibanBulananCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kewajibanId: $kewajibanId, ')
           ..write('bulan: $bulan, ')
           ..write('nilaiSen: $nilaiSen, ')
@@ -9223,6 +9701,15 @@ class $VisiTable extends Visi with TableInfo<$VisiTable, VisiData> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idVisiMeta = const VerificationMeta('idVisi');
   @override
@@ -9304,6 +9791,7 @@ class $VisiTable extends Visi with TableInfo<$VisiTable, VisiData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idVisi,
     nama,
     keterangan,
@@ -9326,6 +9814,12 @@ class $VisiTable extends Visi with TableInfo<$VisiTable, VisiData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_visi')) {
       context.handle(
@@ -9386,6 +9880,10 @@ class $VisiTable extends Visi with TableInfo<$VisiTable, VisiData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idVisi: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_visi'],
@@ -9426,6 +9924,10 @@ class $VisiTable extends Visi with TableInfo<$VisiTable, VisiData> {
 class VisiData extends DataClass implements Insertable<VisiData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
   final String idVisi;
   final String nama;
@@ -9438,6 +9940,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
   final DateTime diubahPada;
   const VisiData({
     required this.id,
+    this.uid,
     required this.idVisi,
     required this.nama,
     this.keterangan,
@@ -9450,6 +9953,9 @@ class VisiData extends DataClass implements Insertable<VisiData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_visi'] = Variable<String>(idVisi);
     map['nama'] = Variable<String>(nama);
     if (!nullToAbsent || keterangan != null) {
@@ -9465,6 +9971,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
   VisiCompanion toCompanion(bool nullToAbsent) {
     return VisiCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idVisi: Value(idVisi),
       nama: Value(nama),
       keterangan: keterangan == null && nullToAbsent
@@ -9484,6 +9991,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return VisiData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idVisi: serializer.fromJson<String>(json['idVisi']),
       nama: serializer.fromJson<String>(json['nama']),
       keterangan: serializer.fromJson<String?>(json['keterangan']),
@@ -9498,6 +10006,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idVisi': serializer.toJson<String>(idVisi),
       'nama': serializer.toJson<String>(nama),
       'keterangan': serializer.toJson<String?>(keterangan),
@@ -9510,6 +10019,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
 
   VisiData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idVisi,
     String? nama,
     Value<String?> keterangan = const Value.absent(),
@@ -9519,6 +10029,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
     DateTime? diubahPada,
   }) => VisiData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idVisi: idVisi ?? this.idVisi,
     nama: nama ?? this.nama,
     keterangan: keterangan.present ? keterangan.value : this.keterangan,
@@ -9530,6 +10041,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
   VisiData copyWithCompanion(VisiCompanion data) {
     return VisiData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idVisi: data.idVisi.present ? data.idVisi.value : this.idVisi,
       nama: data.nama.present ? data.nama.value : this.nama,
       keterangan: data.keterangan.present
@@ -9550,6 +10062,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
   String toString() {
     return (StringBuffer('VisiData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idVisi: $idVisi, ')
           ..write('nama: $nama, ')
           ..write('keterangan: $keterangan, ')
@@ -9564,6 +10077,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idVisi,
     nama,
     keterangan,
@@ -9577,6 +10091,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
       identical(this, other) ||
       (other is VisiData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idVisi == this.idVisi &&
           other.nama == this.nama &&
           other.keterangan == this.keterangan &&
@@ -9588,6 +10103,7 @@ class VisiData extends DataClass implements Insertable<VisiData> {
 
 class VisiCompanion extends UpdateCompanion<VisiData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idVisi;
   final Value<String> nama;
   final Value<String?> keterangan;
@@ -9597,6 +10113,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
   final Value<DateTime> diubahPada;
   const VisiCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idVisi = const Value.absent(),
     this.nama = const Value.absent(),
     this.keterangan = const Value.absent(),
@@ -9607,6 +10124,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
   });
   VisiCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idVisi,
     required String nama,
     this.keterangan = const Value.absent(),
@@ -9618,6 +10136,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
        nama = Value(nama);
   static Insertable<VisiData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idVisi,
     Expression<String>? nama,
     Expression<String>? keterangan,
@@ -9628,6 +10147,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idVisi != null) 'id_visi': idVisi,
       if (nama != null) 'nama': nama,
       if (keterangan != null) 'keterangan': keterangan,
@@ -9640,6 +10160,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
 
   VisiCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idVisi,
     Value<String>? nama,
     Value<String?>? keterangan,
@@ -9650,6 +10171,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
   }) {
     return VisiCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idVisi: idVisi ?? this.idVisi,
       nama: nama ?? this.nama,
       keterangan: keterangan ?? this.keterangan,
@@ -9665,6 +10187,9 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idVisi.present) {
       map['id_visi'] = Variable<String>(idVisi.value);
@@ -9694,6 +10219,7 @@ class VisiCompanion extends UpdateCompanion<VisiData> {
   String toString() {
     return (StringBuffer('VisiCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idVisi: $idVisi, ')
           ..write('nama: $nama, ')
           ..write('keterangan: $keterangan, ')
@@ -9724,6 +10250,15 @@ class $AreaHidupTable extends AreaHidup
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idAreaMeta = const VerificationMeta('idArea');
   @override
@@ -9820,6 +10355,7 @@ class $AreaHidupTable extends AreaHidup
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idArea,
     visiId,
     nama,
@@ -9843,6 +10379,12 @@ class $AreaHidupTable extends AreaHidup
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_area')) {
       context.handle(
@@ -9909,6 +10451,10 @@ class $AreaHidupTable extends AreaHidup
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idArea: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_area'],
@@ -9952,6 +10498,10 @@ class $AreaHidupTable extends AreaHidup
 
 class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String idArea;
   final int? visiId;
   final String nama;
@@ -9962,6 +10512,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   final DateTime diubahPada;
   const AreaHidupData({
     required this.id,
+    this.uid,
     required this.idArea,
     this.visiId,
     required this.nama,
@@ -9975,6 +10526,9 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_area'] = Variable<String>(idArea);
     if (!nullToAbsent || visiId != null) {
       map['visi_id'] = Variable<int>(visiId);
@@ -9993,6 +10547,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   AreaHidupCompanion toCompanion(bool nullToAbsent) {
     return AreaHidupCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idArea: Value(idArea),
       visiId: visiId == null && nullToAbsent
           ? const Value.absent()
@@ -10015,6 +10570,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return AreaHidupData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idArea: serializer.fromJson<String>(json['idArea']),
       visiId: serializer.fromJson<int?>(json['visiId']),
       nama: serializer.fromJson<String>(json['nama']),
@@ -10030,6 +10586,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idArea': serializer.toJson<String>(idArea),
       'visiId': serializer.toJson<int?>(visiId),
       'nama': serializer.toJson<String>(nama),
@@ -10043,6 +10600,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
 
   AreaHidupData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idArea,
     Value<int?> visiId = const Value.absent(),
     String? nama,
@@ -10053,6 +10611,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
     DateTime? diubahPada,
   }) => AreaHidupData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idArea: idArea ?? this.idArea,
     visiId: visiId.present ? visiId.value : this.visiId,
     nama: nama ?? this.nama,
@@ -10065,6 +10624,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   AreaHidupData copyWithCompanion(AreaHidupCompanion data) {
     return AreaHidupData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idArea: data.idArea.present ? data.idArea.value : this.idArea,
       visiId: data.visiId.present ? data.visiId.value : this.visiId,
       nama: data.nama.present ? data.nama.value : this.nama,
@@ -10086,6 +10646,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   String toString() {
     return (StringBuffer('AreaHidupData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idArea: $idArea, ')
           ..write('visiId: $visiId, ')
           ..write('nama: $nama, ')
@@ -10101,6 +10662,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idArea,
     visiId,
     nama,
@@ -10115,6 +10677,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
       identical(this, other) ||
       (other is AreaHidupData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idArea == this.idArea &&
           other.visiId == this.visiId &&
           other.nama == this.nama &&
@@ -10127,6 +10690,7 @@ class AreaHidupData extends DataClass implements Insertable<AreaHidupData> {
 
 class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idArea;
   final Value<int?> visiId;
   final Value<String> nama;
@@ -10137,6 +10701,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
   final Value<DateTime> diubahPada;
   const AreaHidupCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idArea = const Value.absent(),
     this.visiId = const Value.absent(),
     this.nama = const Value.absent(),
@@ -10148,6 +10713,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
   });
   AreaHidupCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idArea,
     this.visiId = const Value.absent(),
     required String nama,
@@ -10160,6 +10726,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
        nama = Value(nama);
   static Insertable<AreaHidupData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idArea,
     Expression<int>? visiId,
     Expression<String>? nama,
@@ -10171,6 +10738,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idArea != null) 'id_area': idArea,
       if (visiId != null) 'visi_id': visiId,
       if (nama != null) 'nama': nama,
@@ -10184,6 +10752,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
 
   AreaHidupCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idArea,
     Value<int?>? visiId,
     Value<String>? nama,
@@ -10195,6 +10764,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
   }) {
     return AreaHidupCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idArea: idArea ?? this.idArea,
       visiId: visiId ?? this.visiId,
       nama: nama ?? this.nama,
@@ -10211,6 +10781,9 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idArea.present) {
       map['id_area'] = Variable<String>(idArea.value);
@@ -10243,6 +10816,7 @@ class AreaHidupCompanion extends UpdateCompanion<AreaHidupData> {
   String toString() {
     return (StringBuffer('AreaHidupCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idArea: $idArea, ')
           ..write('visiId: $visiId, ')
           ..write('nama: $nama, ')
@@ -10273,6 +10847,15 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idTujuanMeta = const VerificationMeta(
     'idTujuan',
@@ -10432,6 +11015,7 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idTujuan,
     nama,
     area,
@@ -10461,6 +11045,12 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_tujuan')) {
       context.handle(
@@ -10572,6 +11162,10 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idTujuan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_tujuan'],
@@ -10640,6 +11234,10 @@ class $TujuanTable extends Tujuan with TableInfo<$TujuanTable, TujuanData> {
 class TujuanData extends DataClass implements Insertable<TujuanData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Pengenal stabil untuk impor/ekspor & sinkron. Unik.
   final String idTujuan;
   final String nama;
@@ -10664,6 +11262,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
   final DateTime diubahPada;
   const TujuanData({
     required this.id,
+    this.uid,
     required this.idTujuan,
     required this.nama,
     required this.area,
@@ -10683,6 +11282,9 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_tujuan'] = Variable<String>(idTujuan);
     map['nama'] = Variable<String>(nama);
     map['area'] = Variable<String>(area);
@@ -10717,6 +11319,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
   TujuanCompanion toCompanion(bool nullToAbsent) {
     return TujuanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idTujuan: Value(idTujuan),
       nama: Value(nama),
       area: Value(area),
@@ -10755,6 +11358,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TujuanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idTujuan: serializer.fromJson<String>(json['idTujuan']),
       nama: serializer.fromJson<String>(json['nama']),
       area: serializer.fromJson<String>(json['area']),
@@ -10776,6 +11380,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idTujuan': serializer.toJson<String>(idTujuan),
       'nama': serializer.toJson<String>(nama),
       'area': serializer.toJson<String>(area),
@@ -10795,6 +11400,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
 
   TujuanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idTujuan,
     String? nama,
     String? area,
@@ -10811,6 +11417,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
     DateTime? diubahPada,
   }) => TujuanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idTujuan: idTujuan ?? this.idTujuan,
     nama: nama ?? this.nama,
     area: area ?? this.area,
@@ -10831,6 +11438,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
   TujuanData copyWithCompanion(TujuanCompanion data) {
     return TujuanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idTujuan: data.idTujuan.present ? data.idTujuan.value : this.idTujuan,
       nama: data.nama.present ? data.nama.value : this.nama,
       area: data.area.present ? data.area.value : this.area,
@@ -10864,6 +11472,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
   String toString() {
     return (StringBuffer('TujuanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idTujuan: $idTujuan, ')
           ..write('nama: $nama, ')
           ..write('area: $area, ')
@@ -10885,6 +11494,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idTujuan,
     nama,
     area,
@@ -10905,6 +11515,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
       identical(this, other) ||
       (other is TujuanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idTujuan == this.idTujuan &&
           other.nama == this.nama &&
           other.area == this.area &&
@@ -10923,6 +11534,7 @@ class TujuanData extends DataClass implements Insertable<TujuanData> {
 
 class TujuanCompanion extends UpdateCompanion<TujuanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idTujuan;
   final Value<String> nama;
   final Value<String> area;
@@ -10939,6 +11551,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
   final Value<DateTime> diubahPada;
   const TujuanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idTujuan = const Value.absent(),
     this.nama = const Value.absent(),
     this.area = const Value.absent(),
@@ -10956,6 +11569,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
   });
   TujuanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idTujuan,
     required String nama,
     this.area = const Value.absent(),
@@ -10974,6 +11588,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
        nama = Value(nama);
   static Insertable<TujuanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idTujuan,
     Expression<String>? nama,
     Expression<String>? area,
@@ -10991,6 +11606,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idTujuan != null) 'id_tujuan': idTujuan,
       if (nama != null) 'nama': nama,
       if (area != null) 'area': area,
@@ -11010,6 +11626,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
 
   TujuanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idTujuan,
     Value<String>? nama,
     Value<String>? area,
@@ -11027,6 +11644,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
   }) {
     return TujuanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idTujuan: idTujuan ?? this.idTujuan,
       nama: nama ?? this.nama,
       area: area ?? this.area,
@@ -11049,6 +11667,9 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idTujuan.present) {
       map['id_tujuan'] = Variable<String>(idTujuan.value);
@@ -11099,6 +11720,7 @@ class TujuanCompanion extends UpdateCompanion<TujuanData> {
   String toString() {
     return (StringBuffer('TujuanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idTujuan: $idTujuan, ')
           ..write('nama: $nama, ')
           ..write('area: $area, ')
@@ -11135,6 +11757,15 @@ class $ProyekTable extends Proyek with TableInfo<$ProyekTable, ProyekData> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idProyekMeta = const VerificationMeta(
     'idProyek',
@@ -11254,6 +11885,7 @@ class $ProyekTable extends Proyek with TableInfo<$ProyekTable, ProyekData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idProyek,
     tujuanId,
     nama,
@@ -11279,6 +11911,12 @@ class $ProyekTable extends Proyek with TableInfo<$ProyekTable, ProyekData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_proyek')) {
       context.handle(
@@ -11360,6 +11998,10 @@ class $ProyekTable extends Proyek with TableInfo<$ProyekTable, ProyekData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idProyek: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_proyek'],
@@ -11411,6 +12053,10 @@ class $ProyekTable extends Proyek with TableInfo<$ProyekTable, ProyekData> {
 
 class ProyekData extends DataClass implements Insertable<ProyekData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String idProyek;
   final int? tujuanId;
   final String nama;
@@ -11425,6 +12071,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
   final DateTime diubahPada;
   const ProyekData({
     required this.id,
+    this.uid,
     required this.idProyek,
     this.tujuanId,
     required this.nama,
@@ -11440,6 +12087,9 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_proyek'] = Variable<String>(idProyek);
     if (!nullToAbsent || tujuanId != null) {
       map['tujuan_id'] = Variable<int>(tujuanId);
@@ -11464,6 +12114,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
   ProyekCompanion toCompanion(bool nullToAbsent) {
     return ProyekCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idProyek: Value(idProyek),
       tujuanId: tujuanId == null && nullToAbsent
           ? const Value.absent()
@@ -11492,6 +12143,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ProyekData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idProyek: serializer.fromJson<String>(json['idProyek']),
       tujuanId: serializer.fromJson<int?>(json['tujuanId']),
       nama: serializer.fromJson<String>(json['nama']),
@@ -11509,6 +12161,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idProyek': serializer.toJson<String>(idProyek),
       'tujuanId': serializer.toJson<int?>(tujuanId),
       'nama': serializer.toJson<String>(nama),
@@ -11524,6 +12177,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
 
   ProyekData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idProyek,
     Value<int?> tujuanId = const Value.absent(),
     String? nama,
@@ -11536,6 +12190,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
     DateTime? diubahPada,
   }) => ProyekData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idProyek: idProyek ?? this.idProyek,
     tujuanId: tujuanId.present ? tujuanId.value : this.tujuanId,
     nama: nama ?? this.nama,
@@ -11550,6 +12205,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
   ProyekData copyWithCompanion(ProyekCompanion data) {
     return ProyekData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idProyek: data.idProyek.present ? data.idProyek.value : this.idProyek,
       tujuanId: data.tujuanId.present ? data.tujuanId.value : this.tujuanId,
       nama: data.nama.present ? data.nama.value : this.nama,
@@ -11573,6 +12229,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
   String toString() {
     return (StringBuffer('ProyekData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idProyek: $idProyek, ')
           ..write('tujuanId: $tujuanId, ')
           ..write('nama: $nama, ')
@@ -11590,6 +12247,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idProyek,
     tujuanId,
     nama,
@@ -11606,6 +12264,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
       identical(this, other) ||
       (other is ProyekData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idProyek == this.idProyek &&
           other.tujuanId == this.tujuanId &&
           other.nama == this.nama &&
@@ -11620,6 +12279,7 @@ class ProyekData extends DataClass implements Insertable<ProyekData> {
 
 class ProyekCompanion extends UpdateCompanion<ProyekData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idProyek;
   final Value<int?> tujuanId;
   final Value<String> nama;
@@ -11632,6 +12292,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
   final Value<DateTime> diubahPada;
   const ProyekCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idProyek = const Value.absent(),
     this.tujuanId = const Value.absent(),
     this.nama = const Value.absent(),
@@ -11645,6 +12306,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
   });
   ProyekCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idProyek,
     this.tujuanId = const Value.absent(),
     required String nama,
@@ -11659,6 +12321,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
        nama = Value(nama);
   static Insertable<ProyekData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idProyek,
     Expression<int>? tujuanId,
     Expression<String>? nama,
@@ -11672,6 +12335,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idProyek != null) 'id_proyek': idProyek,
       if (tujuanId != null) 'tujuan_id': tujuanId,
       if (nama != null) 'nama': nama,
@@ -11687,6 +12351,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
 
   ProyekCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idProyek,
     Value<int?>? tujuanId,
     Value<String>? nama,
@@ -11700,6 +12365,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
   }) {
     return ProyekCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idProyek: idProyek ?? this.idProyek,
       tujuanId: tujuanId ?? this.tujuanId,
       nama: nama ?? this.nama,
@@ -11718,6 +12384,9 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idProyek.present) {
       map['id_proyek'] = Variable<String>(idProyek.value);
@@ -11756,6 +12425,7 @@ class ProyekCompanion extends UpdateCompanion<ProyekData> {
   String toString() {
     return (StringBuffer('ProyekCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idProyek: $idProyek, ')
           ..write('tujuanId: $tujuanId, ')
           ..write('nama: $nama, ')
@@ -11788,6 +12458,15 @@ class $TugasTable extends Tugas with TableInfo<$TugasTable, Tuga> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idTugasMeta = const VerificationMeta(
     'idTugas',
@@ -11997,6 +12676,7 @@ class $TugasTable extends Tugas with TableInfo<$TugasTable, Tuga> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idTugas,
     tujuanId,
     proyekId,
@@ -12029,6 +12709,12 @@ class $TugasTable extends Tugas with TableInfo<$TugasTable, Tuga> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_tugas')) {
       context.handle(
@@ -12164,6 +12850,10 @@ class $TugasTable extends Tugas with TableInfo<$TugasTable, Tuga> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idTugas: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_tugas'],
@@ -12243,6 +12933,10 @@ class $TugasTable extends Tugas with TableInfo<$TugasTable, Tuga> {
 
 class Tuga extends DataClass implements Insertable<Tuga> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String idTugas;
   final int? tujuanId;
   final int? proyekId;
@@ -12269,6 +12963,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
   final DateTime diubahPada;
   const Tuga({
     required this.id,
+    this.uid,
     required this.idTugas,
     this.tujuanId,
     this.proyekId,
@@ -12291,6 +12986,9 @@ class Tuga extends DataClass implements Insertable<Tuga> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_tugas'] = Variable<String>(idTugas);
     if (!nullToAbsent || tujuanId != null) {
       map['tujuan_id'] = Variable<int>(tujuanId);
@@ -12328,6 +13026,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
   TugasCompanion toCompanion(bool nullToAbsent) {
     return TugasCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idTugas: Value(idTugas),
       tujuanId: tujuanId == null && nullToAbsent
           ? const Value.absent()
@@ -12369,6 +13068,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Tuga(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idTugas: serializer.fromJson<String>(json['idTugas']),
       tujuanId: serializer.fromJson<int?>(json['tujuanId']),
       proyekId: serializer.fromJson<int?>(json['proyekId']),
@@ -12393,6 +13093,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idTugas': serializer.toJson<String>(idTugas),
       'tujuanId': serializer.toJson<int?>(tujuanId),
       'proyekId': serializer.toJson<int?>(proyekId),
@@ -12415,6 +13116,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
 
   Tuga copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idTugas,
     Value<int?> tujuanId = const Value.absent(),
     Value<int?> proyekId = const Value.absent(),
@@ -12434,6 +13136,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
     DateTime? diubahPada,
   }) => Tuga(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idTugas: idTugas ?? this.idTugas,
     tujuanId: tujuanId.present ? tujuanId.value : this.tujuanId,
     proyekId: proyekId.present ? proyekId.value : this.proyekId,
@@ -12455,6 +13158,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
   Tuga copyWithCompanion(TugasCompanion data) {
     return Tuga(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idTugas: data.idTugas.present ? data.idTugas.value : this.idTugas,
       tujuanId: data.tujuanId.present ? data.tujuanId.value : this.tujuanId,
       proyekId: data.proyekId.present ? data.proyekId.value : this.proyekId,
@@ -12495,6 +13199,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
   String toString() {
     return (StringBuffer('Tuga(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idTugas: $idTugas, ')
           ..write('tujuanId: $tujuanId, ')
           ..write('proyekId: $proyekId, ')
@@ -12519,6 +13224,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idTugas,
     tujuanId,
     proyekId,
@@ -12542,6 +13248,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
       identical(this, other) ||
       (other is Tuga &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idTugas == this.idTugas &&
           other.tujuanId == this.tujuanId &&
           other.proyekId == this.proyekId &&
@@ -12563,6 +13270,7 @@ class Tuga extends DataClass implements Insertable<Tuga> {
 
 class TugasCompanion extends UpdateCompanion<Tuga> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idTugas;
   final Value<int?> tujuanId;
   final Value<int?> proyekId;
@@ -12582,6 +13290,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
   final Value<DateTime> diubahPada;
   const TugasCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idTugas = const Value.absent(),
     this.tujuanId = const Value.absent(),
     this.proyekId = const Value.absent(),
@@ -12602,6 +13311,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
   });
   TugasCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idTugas,
     this.tujuanId = const Value.absent(),
     this.proyekId = const Value.absent(),
@@ -12623,6 +13333,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
        nama = Value(nama);
   static Insertable<Tuga> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idTugas,
     Expression<int>? tujuanId,
     Expression<int>? proyekId,
@@ -12643,6 +13354,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idTugas != null) 'id_tugas': idTugas,
       if (tujuanId != null) 'tujuan_id': tujuanId,
       if (proyekId != null) 'proyek_id': proyekId,
@@ -12665,6 +13377,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
 
   TugasCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idTugas,
     Value<int?>? tujuanId,
     Value<int?>? proyekId,
@@ -12685,6 +13398,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
   }) {
     return TugasCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idTugas: idTugas ?? this.idTugas,
       tujuanId: tujuanId ?? this.tujuanId,
       proyekId: proyekId ?? this.proyekId,
@@ -12710,6 +13424,9 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idTugas.present) {
       map['id_tugas'] = Variable<String>(idTugas.value);
@@ -12769,6 +13486,7 @@ class TugasCompanion extends UpdateCompanion<Tuga> {
   String toString() {
     return (StringBuffer('TugasCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idTugas: $idTugas, ')
           ..write('tujuanId: $tujuanId, ')
           ..write('proyekId: $proyekId, ')
@@ -12809,6 +13527,15 @@ class $KebiasaanTable extends Kebiasaan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idKebiasaanMeta = const VerificationMeta(
     'idKebiasaan',
@@ -12930,6 +13657,7 @@ class $KebiasaanTable extends Kebiasaan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idKebiasaan,
     nama,
     ikon,
@@ -12955,6 +13683,12 @@ class $KebiasaanTable extends Kebiasaan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_kebiasaan')) {
       context.handle(
@@ -13042,6 +13776,10 @@ class $KebiasaanTable extends Kebiasaan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idKebiasaan: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_kebiasaan'],
@@ -13093,6 +13831,10 @@ class $KebiasaanTable extends Kebiasaan
 
 class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String idKebiasaan;
   final String nama;
   final String ikon;
@@ -13109,6 +13851,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   final DateTime dibuatPada;
   const KebiasaanData({
     required this.id,
+    this.uid,
     required this.idKebiasaan,
     required this.nama,
     required this.ikon,
@@ -13124,6 +13867,9 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_kebiasaan'] = Variable<String>(idKebiasaan);
     map['nama'] = Variable<String>(nama);
     map['ikon'] = Variable<String>(ikon);
@@ -13142,6 +13888,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   KebiasaanCompanion toCompanion(bool nullToAbsent) {
     return KebiasaanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idKebiasaan: Value(idKebiasaan),
       nama: Value(nama),
       ikon: Value(ikon),
@@ -13164,6 +13911,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return KebiasaanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idKebiasaan: serializer.fromJson<String>(json['idKebiasaan']),
       nama: serializer.fromJson<String>(json['nama']),
       ikon: serializer.fromJson<String>(json['ikon']),
@@ -13181,6 +13929,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idKebiasaan': serializer.toJson<String>(idKebiasaan),
       'nama': serializer.toJson<String>(nama),
       'ikon': serializer.toJson<String>(ikon),
@@ -13196,6 +13945,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
 
   KebiasaanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idKebiasaan,
     String? nama,
     String? ikon,
@@ -13208,6 +13958,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
     DateTime? dibuatPada,
   }) => KebiasaanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idKebiasaan: idKebiasaan ?? this.idKebiasaan,
     nama: nama ?? this.nama,
     ikon: ikon ?? this.ikon,
@@ -13222,6 +13973,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   KebiasaanData copyWithCompanion(KebiasaanCompanion data) {
     return KebiasaanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idKebiasaan: data.idKebiasaan.present
           ? data.idKebiasaan.value
           : this.idKebiasaan,
@@ -13247,6 +13999,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   String toString() {
     return (StringBuffer('KebiasaanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idKebiasaan: $idKebiasaan, ')
           ..write('nama: $nama, ')
           ..write('ikon: $ikon, ')
@@ -13264,6 +14017,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idKebiasaan,
     nama,
     ikon,
@@ -13280,6 +14034,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
       identical(this, other) ||
       (other is KebiasaanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idKebiasaan == this.idKebiasaan &&
           other.nama == this.nama &&
           other.ikon == this.ikon &&
@@ -13294,6 +14049,7 @@ class KebiasaanData extends DataClass implements Insertable<KebiasaanData> {
 
 class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idKebiasaan;
   final Value<String> nama;
   final Value<String> ikon;
@@ -13306,6 +14062,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
   final Value<DateTime> dibuatPada;
   const KebiasaanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idKebiasaan = const Value.absent(),
     this.nama = const Value.absent(),
     this.ikon = const Value.absent(),
@@ -13319,6 +14076,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
   });
   KebiasaanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idKebiasaan,
     required String nama,
     this.ikon = const Value.absent(),
@@ -13333,6 +14091,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
        nama = Value(nama);
   static Insertable<KebiasaanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idKebiasaan,
     Expression<String>? nama,
     Expression<String>? ikon,
@@ -13346,6 +14105,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idKebiasaan != null) 'id_kebiasaan': idKebiasaan,
       if (nama != null) 'nama': nama,
       if (ikon != null) 'ikon': ikon,
@@ -13361,6 +14121,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
 
   KebiasaanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idKebiasaan,
     Value<String>? nama,
     Value<String>? ikon,
@@ -13374,6 +14135,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
   }) {
     return KebiasaanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idKebiasaan: idKebiasaan ?? this.idKebiasaan,
       nama: nama ?? this.nama,
       ikon: ikon ?? this.ikon,
@@ -13392,6 +14154,9 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idKebiasaan.present) {
       map['id_kebiasaan'] = Variable<String>(idKebiasaan.value);
@@ -13430,6 +14195,7 @@ class KebiasaanCompanion extends UpdateCompanion<KebiasaanData> {
   String toString() {
     return (StringBuffer('KebiasaanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idKebiasaan: $idKebiasaan, ')
           ..write('nama: $nama, ')
           ..write('ikon: $ikon, ')
@@ -13463,6 +14229,15 @@ class $LogKebiasaanTable extends LogKebiasaan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _kebiasaanIdMeta = const VerificationMeta(
     'kebiasaanId',
@@ -13525,6 +14300,7 @@ class $LogKebiasaanTable extends LogKebiasaan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     kebiasaanId,
     tanggal,
     nilai,
@@ -13545,6 +14321,12 @@ class $LogKebiasaanTable extends LogKebiasaan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('kebiasaan_id')) {
       context.handle(
@@ -13599,6 +14381,10 @@ class $LogKebiasaanTable extends LogKebiasaan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       kebiasaanId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}kebiasaan_id'],
@@ -13631,6 +14417,10 @@ class $LogKebiasaanTable extends LogKebiasaan
 class LogKebiasaanData extends DataClass
     implements Insertable<LogKebiasaanData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final int kebiasaanId;
   final DateTime tanggal;
   final double nilai;
@@ -13638,6 +14428,7 @@ class LogKebiasaanData extends DataClass
   final DateTime dicatatPada;
   const LogKebiasaanData({
     required this.id,
+    this.uid,
     required this.kebiasaanId,
     required this.tanggal,
     required this.nilai,
@@ -13648,6 +14439,9 @@ class LogKebiasaanData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['kebiasaan_id'] = Variable<int>(kebiasaanId);
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['nilai'] = Variable<double>(nilai);
@@ -13661,6 +14455,7 @@ class LogKebiasaanData extends DataClass
   LogKebiasaanCompanion toCompanion(bool nullToAbsent) {
     return LogKebiasaanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       kebiasaanId: Value(kebiasaanId),
       tanggal: Value(tanggal),
       nilai: Value(nilai),
@@ -13678,6 +14473,7 @@ class LogKebiasaanData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LogKebiasaanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       kebiasaanId: serializer.fromJson<int>(json['kebiasaanId']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       nilai: serializer.fromJson<double>(json['nilai']),
@@ -13690,6 +14486,7 @@ class LogKebiasaanData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'kebiasaanId': serializer.toJson<int>(kebiasaanId),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'nilai': serializer.toJson<double>(nilai),
@@ -13700,6 +14497,7 @@ class LogKebiasaanData extends DataClass
 
   LogKebiasaanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     int? kebiasaanId,
     DateTime? tanggal,
     double? nilai,
@@ -13707,6 +14505,7 @@ class LogKebiasaanData extends DataClass
     DateTime? dicatatPada,
   }) => LogKebiasaanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     kebiasaanId: kebiasaanId ?? this.kebiasaanId,
     tanggal: tanggal ?? this.tanggal,
     nilai: nilai ?? this.nilai,
@@ -13716,6 +14515,7 @@ class LogKebiasaanData extends DataClass
   LogKebiasaanData copyWithCompanion(LogKebiasaanCompanion data) {
     return LogKebiasaanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       kebiasaanId: data.kebiasaanId.present
           ? data.kebiasaanId.value
           : this.kebiasaanId,
@@ -13732,6 +14532,7 @@ class LogKebiasaanData extends DataClass
   String toString() {
     return (StringBuffer('LogKebiasaanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kebiasaanId: $kebiasaanId, ')
           ..write('tanggal: $tanggal, ')
           ..write('nilai: $nilai, ')
@@ -13743,12 +14544,13 @@ class LogKebiasaanData extends DataClass
 
   @override
   int get hashCode =>
-      Object.hash(id, kebiasaanId, tanggal, nilai, catatan, dicatatPada);
+      Object.hash(id, uid, kebiasaanId, tanggal, nilai, catatan, dicatatPada);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LogKebiasaanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.kebiasaanId == this.kebiasaanId &&
           other.tanggal == this.tanggal &&
           other.nilai == this.nilai &&
@@ -13758,6 +14560,7 @@ class LogKebiasaanData extends DataClass
 
 class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<int> kebiasaanId;
   final Value<DateTime> tanggal;
   final Value<double> nilai;
@@ -13765,6 +14568,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
   final Value<DateTime> dicatatPada;
   const LogKebiasaanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.kebiasaanId = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.nilai = const Value.absent(),
@@ -13773,6 +14577,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
   });
   LogKebiasaanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required int kebiasaanId,
     required DateTime tanggal,
     this.nilai = const Value.absent(),
@@ -13782,6 +14587,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
        tanggal = Value(tanggal);
   static Insertable<LogKebiasaanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<int>? kebiasaanId,
     Expression<DateTime>? tanggal,
     Expression<double>? nilai,
@@ -13790,6 +14596,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (kebiasaanId != null) 'kebiasaan_id': kebiasaanId,
       if (tanggal != null) 'tanggal': tanggal,
       if (nilai != null) 'nilai': nilai,
@@ -13800,6 +14607,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
 
   LogKebiasaanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<int>? kebiasaanId,
     Value<DateTime>? tanggal,
     Value<double>? nilai,
@@ -13808,6 +14616,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
   }) {
     return LogKebiasaanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       kebiasaanId: kebiasaanId ?? this.kebiasaanId,
       tanggal: tanggal ?? this.tanggal,
       nilai: nilai ?? this.nilai,
@@ -13821,6 +14630,9 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (kebiasaanId.present) {
       map['kebiasaan_id'] = Variable<int>(kebiasaanId.value);
@@ -13844,6 +14656,7 @@ class LogKebiasaanCompanion extends UpdateCompanion<LogKebiasaanData> {
   String toString() {
     return (StringBuffer('LogKebiasaanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kebiasaanId: $kebiasaanId, ')
           ..write('tanggal: $tanggal, ')
           ..write('nilai: $nilai, ')
@@ -13872,6 +14685,15 @@ class $PerawatanTable extends Perawatan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _namaMeta = const VerificationMeta('nama');
   @override
@@ -14029,6 +14851,7 @@ class $PerawatanTable extends Perawatan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     nama,
     kategori,
     intervalHari,
@@ -14057,6 +14880,12 @@ class $PerawatanTable extends Perawatan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('nama')) {
       context.handle(
@@ -14165,6 +14994,10 @@ class $PerawatanTable extends Perawatan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       nama: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}nama'],
@@ -14228,6 +15061,10 @@ class $PerawatanTable extends Perawatan
 
 class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String nama;
 
   /// kendaraan / rumah / dokumen / keluarga / perangkat / lain.
@@ -14249,6 +15086,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   final DateTime diubahPada;
   const PerawatanData({
     required this.id,
+    this.uid,
     required this.nama,
     required this.kategori,
     required this.intervalHari,
@@ -14267,6 +15105,9 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['nama'] = Variable<String>(nama);
     map['kategori'] = Variable<String>(kategori);
     map['interval_hari'] = Variable<int>(intervalHari);
@@ -14292,6 +15133,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   PerawatanCompanion toCompanion(bool nullToAbsent) {
     return PerawatanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       nama: Value(nama),
       kategori: Value(kategori),
       intervalHari: Value(intervalHari),
@@ -14321,6 +15163,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PerawatanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       nama: serializer.fromJson<String>(json['nama']),
       kategori: serializer.fromJson<String>(json['kategori']),
       intervalHari: serializer.fromJson<int>(json['intervalHari']),
@@ -14343,6 +15186,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'nama': serializer.toJson<String>(nama),
       'kategori': serializer.toJson<String>(kategori),
       'intervalHari': serializer.toJson<int>(intervalHari),
@@ -14361,6 +15205,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
 
   PerawatanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? nama,
     String? kategori,
     int? intervalHari,
@@ -14376,6 +15221,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
     DateTime? diubahPada,
   }) => PerawatanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     nama: nama ?? this.nama,
     kategori: kategori ?? this.kategori,
     intervalHari: intervalHari ?? this.intervalHari,
@@ -14395,6 +15241,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   PerawatanData copyWithCompanion(PerawatanCompanion data) {
     return PerawatanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       nama: data.nama.present ? data.nama.value : this.nama,
       kategori: data.kategori.present ? data.kategori.value : this.kategori,
       intervalHari: data.intervalHari.present
@@ -14429,6 +15276,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   String toString() {
     return (StringBuffer('PerawatanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('nama: $nama, ')
           ..write('kategori: $kategori, ')
           ..write('intervalHari: $intervalHari, ')
@@ -14449,6 +15297,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     nama,
     kategori,
     intervalHari,
@@ -14468,6 +15317,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
       identical(this, other) ||
       (other is PerawatanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.nama == this.nama &&
           other.kategori == this.kategori &&
           other.intervalHari == this.intervalHari &&
@@ -14485,6 +15335,7 @@ class PerawatanData extends DataClass implements Insertable<PerawatanData> {
 
 class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> nama;
   final Value<String> kategori;
   final Value<int> intervalHari;
@@ -14500,6 +15351,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
   final Value<DateTime> diubahPada;
   const PerawatanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.nama = const Value.absent(),
     this.kategori = const Value.absent(),
     this.intervalHari = const Value.absent(),
@@ -14516,6 +15368,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
   });
   PerawatanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String nama,
     this.kategori = const Value.absent(),
     this.intervalHari = const Value.absent(),
@@ -14533,6 +15386,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
        berikutnya = Value(berikutnya);
   static Insertable<PerawatanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? nama,
     Expression<String>? kategori,
     Expression<int>? intervalHari,
@@ -14549,6 +15403,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (nama != null) 'nama': nama,
       if (kategori != null) 'kategori': kategori,
       if (intervalHari != null) 'interval_hari': intervalHari,
@@ -14567,6 +15422,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
 
   PerawatanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? nama,
     Value<String>? kategori,
     Value<int>? intervalHari,
@@ -14583,6 +15439,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
   }) {
     return PerawatanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       nama: nama ?? this.nama,
       kategori: kategori ?? this.kategori,
       intervalHari: intervalHari ?? this.intervalHari,
@@ -14604,6 +15461,9 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (nama.present) {
       map['nama'] = Variable<String>(nama.value);
@@ -14651,6 +15511,7 @@ class PerawatanCompanion extends UpdateCompanion<PerawatanData> {
   String toString() {
     return (StringBuffer('PerawatanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('nama: $nama, ')
           ..write('kategori: $kategori, ')
           ..write('intervalHari: $intervalHari, ')
@@ -14687,6 +15548,15 @@ class $UkuranTubuhTable extends UkuranTubuh
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _jenisMeta = const VerificationMeta('jenis');
   @override
@@ -14753,6 +15623,7 @@ class $UkuranTubuhTable extends UkuranTubuh
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     jenis,
     nilai,
     satuan,
@@ -14774,6 +15645,12 @@ class $UkuranTubuhTable extends UkuranTubuh
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('jenis')) {
       context.handle(
@@ -14833,6 +15710,10 @@ class $UkuranTubuhTable extends UkuranTubuh
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       jenis: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}jenis'],
@@ -14869,6 +15750,10 @@ class $UkuranTubuhTable extends UkuranTubuh
 class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// berat / sistolik / diastolik / lingkar_perut / gula_darah / suhu / lain.
   final String jenis;
   final double nilai;
@@ -14878,6 +15763,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
   final DateTime dicatatPada;
   const UkuranTubuhData({
     required this.id,
+    this.uid,
     required this.jenis,
     required this.nilai,
     required this.satuan,
@@ -14889,6 +15775,9 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['jenis'] = Variable<String>(jenis);
     map['nilai'] = Variable<double>(nilai);
     map['satuan'] = Variable<String>(satuan);
@@ -14903,6 +15792,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
   UkuranTubuhCompanion toCompanion(bool nullToAbsent) {
     return UkuranTubuhCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       jenis: Value(jenis),
       nilai: Value(nilai),
       satuan: Value(satuan),
@@ -14921,6 +15811,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UkuranTubuhData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       jenis: serializer.fromJson<String>(json['jenis']),
       nilai: serializer.fromJson<double>(json['nilai']),
       satuan: serializer.fromJson<String>(json['satuan']),
@@ -14934,6 +15825,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'jenis': serializer.toJson<String>(jenis),
       'nilai': serializer.toJson<double>(nilai),
       'satuan': serializer.toJson<String>(satuan),
@@ -14945,6 +15837,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
 
   UkuranTubuhData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? jenis,
     double? nilai,
     String? satuan,
@@ -14953,6 +15846,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
     DateTime? dicatatPada,
   }) => UkuranTubuhData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     jenis: jenis ?? this.jenis,
     nilai: nilai ?? this.nilai,
     satuan: satuan ?? this.satuan,
@@ -14963,6 +15857,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
   UkuranTubuhData copyWithCompanion(UkuranTubuhCompanion data) {
     return UkuranTubuhData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       nilai: data.nilai.present ? data.nilai.value : this.nilai,
       satuan: data.satuan.present ? data.satuan.value : this.satuan,
@@ -14978,6 +15873,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
   String toString() {
     return (StringBuffer('UkuranTubuhData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('nilai: $nilai, ')
           ..write('satuan: $satuan, ')
@@ -14990,12 +15886,13 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
 
   @override
   int get hashCode =>
-      Object.hash(id, jenis, nilai, satuan, tanggal, catatan, dicatatPada);
+      Object.hash(id, uid, jenis, nilai, satuan, tanggal, catatan, dicatatPada);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UkuranTubuhData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.jenis == this.jenis &&
           other.nilai == this.nilai &&
           other.satuan == this.satuan &&
@@ -15006,6 +15903,7 @@ class UkuranTubuhData extends DataClass implements Insertable<UkuranTubuhData> {
 
 class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> jenis;
   final Value<double> nilai;
   final Value<String> satuan;
@@ -15014,6 +15912,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
   final Value<DateTime> dicatatPada;
   const UkuranTubuhCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.jenis = const Value.absent(),
     this.nilai = const Value.absent(),
     this.satuan = const Value.absent(),
@@ -15023,6 +15922,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
   });
   UkuranTubuhCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String jenis,
     required double nilai,
     this.satuan = const Value.absent(),
@@ -15034,6 +15934,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
        tanggal = Value(tanggal);
   static Insertable<UkuranTubuhData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? jenis,
     Expression<double>? nilai,
     Expression<String>? satuan,
@@ -15043,6 +15944,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (jenis != null) 'jenis': jenis,
       if (nilai != null) 'nilai': nilai,
       if (satuan != null) 'satuan': satuan,
@@ -15054,6 +15956,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
 
   UkuranTubuhCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? jenis,
     Value<double>? nilai,
     Value<String>? satuan,
@@ -15063,6 +15966,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
   }) {
     return UkuranTubuhCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       jenis: jenis ?? this.jenis,
       nilai: nilai ?? this.nilai,
       satuan: satuan ?? this.satuan,
@@ -15077,6 +15981,9 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (jenis.present) {
       map['jenis'] = Variable<String>(jenis.value);
@@ -15103,6 +16010,7 @@ class UkuranTubuhCompanion extends UpdateCompanion<UkuranTubuhData> {
   String toString() {
     return (StringBuffer('UkuranTubuhCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('nilai: $nilai, ')
           ..write('satuan: $satuan, ')
@@ -15132,6 +16040,15 @@ class $AktivitasTable extends Aktivitas
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _jenisMeta = const VerificationMeta('jenis');
   @override
@@ -15213,6 +16130,7 @@ class $AktivitasTable extends Aktivitas
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     jenis,
     durasiMenit,
     jarakKm,
@@ -15235,6 +16153,12 @@ class $AktivitasTable extends Aktivitas
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('jenis')) {
       context.handle(
@@ -15303,6 +16227,10 @@ class $AktivitasTable extends Aktivitas
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       jenis: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}jenis'],
@@ -15343,6 +16271,10 @@ class $AktivitasTable extends Aktivitas
 class Aktivita extends DataClass implements Insertable<Aktivita> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// jalan / lari / sepeda / renang / gym / peregangan / olahraga / rumah.
   final String jenis;
   final int durasiMenit;
@@ -15357,6 +16289,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
   final DateTime dicatatPada;
   const Aktivita({
     required this.id,
+    this.uid,
     required this.jenis,
     required this.durasiMenit,
     this.jarakKm,
@@ -15369,6 +16302,9 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['jenis'] = Variable<String>(jenis);
     map['durasi_menit'] = Variable<int>(durasiMenit);
     if (!nullToAbsent || jarakKm != null) {
@@ -15386,6 +16322,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
   AktivitasCompanion toCompanion(bool nullToAbsent) {
     return AktivitasCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       jenis: Value(jenis),
       durasiMenit: Value(durasiMenit),
       jarakKm: jarakKm == null && nullToAbsent
@@ -15407,6 +16344,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Aktivita(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       jenis: serializer.fromJson<String>(json['jenis']),
       durasiMenit: serializer.fromJson<int>(json['durasiMenit']),
       jarakKm: serializer.fromJson<double?>(json['jarakKm']),
@@ -15421,6 +16359,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'jenis': serializer.toJson<String>(jenis),
       'durasiMenit': serializer.toJson<int>(durasiMenit),
       'jarakKm': serializer.toJson<double?>(jarakKm),
@@ -15433,6 +16372,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
 
   Aktivita copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? jenis,
     int? durasiMenit,
     Value<double?> jarakKm = const Value.absent(),
@@ -15442,6 +16382,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
     DateTime? dicatatPada,
   }) => Aktivita(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     jenis: jenis ?? this.jenis,
     durasiMenit: durasiMenit ?? this.durasiMenit,
     jarakKm: jarakKm.present ? jarakKm.value : this.jarakKm,
@@ -15453,6 +16394,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
   Aktivita copyWithCompanion(AktivitasCompanion data) {
     return Aktivita(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       durasiMenit: data.durasiMenit.present
           ? data.durasiMenit.value
@@ -15473,6 +16415,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
   String toString() {
     return (StringBuffer('Aktivita(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('durasiMenit: $durasiMenit, ')
           ..write('jarakKm: $jarakKm, ')
@@ -15487,6 +16430,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     jenis,
     durasiMenit,
     jarakKm,
@@ -15500,6 +16444,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
       identical(this, other) ||
       (other is Aktivita &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.jenis == this.jenis &&
           other.durasiMenit == this.durasiMenit &&
           other.jarakKm == this.jarakKm &&
@@ -15511,6 +16456,7 @@ class Aktivita extends DataClass implements Insertable<Aktivita> {
 
 class AktivitasCompanion extends UpdateCompanion<Aktivita> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> jenis;
   final Value<int> durasiMenit;
   final Value<double?> jarakKm;
@@ -15520,6 +16466,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
   final Value<DateTime> dicatatPada;
   const AktivitasCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.jenis = const Value.absent(),
     this.durasiMenit = const Value.absent(),
     this.jarakKm = const Value.absent(),
@@ -15530,6 +16477,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
   });
   AktivitasCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String jenis,
     required int durasiMenit,
     this.jarakKm = const Value.absent(),
@@ -15542,6 +16490,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
        tanggal = Value(tanggal);
   static Insertable<Aktivita> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? jenis,
     Expression<int>? durasiMenit,
     Expression<double>? jarakKm,
@@ -15552,6 +16501,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (jenis != null) 'jenis': jenis,
       if (durasiMenit != null) 'durasi_menit': durasiMenit,
       if (jarakKm != null) 'jarak_km': jarakKm,
@@ -15564,6 +16514,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
 
   AktivitasCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? jenis,
     Value<int>? durasiMenit,
     Value<double?>? jarakKm,
@@ -15574,6 +16525,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
   }) {
     return AktivitasCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       jenis: jenis ?? this.jenis,
       durasiMenit: durasiMenit ?? this.durasiMenit,
       jarakKm: jarakKm ?? this.jarakKm,
@@ -15589,6 +16541,9 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (jenis.present) {
       map['jenis'] = Variable<String>(jenis.value);
@@ -15618,6 +16573,7 @@ class AktivitasCompanion extends UpdateCompanion<Aktivita> {
   String toString() {
     return (StringBuffer('AktivitasCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('durasiMenit: $durasiMenit, ')
           ..write('jarakKm: $jarakKm, ')
@@ -15647,6 +16603,15 @@ class $TidurTable extends Tidur with TableInfo<$TidurTable, TidurData> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _tanggalMeta = const VerificationMeta(
     'tanggal',
@@ -15741,6 +16706,7 @@ class $TidurTable extends Tidur with TableInfo<$TidurTable, TidurData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     tanggal,
     jamTidur,
     jamBangun,
@@ -15764,6 +16730,12 @@ class $TidurTable extends Tidur with TableInfo<$TidurTable, TidurData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('tanggal')) {
       context.handle(
@@ -15843,6 +16815,10 @@ class $TidurTable extends Tidur with TableInfo<$TidurTable, TidurData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       tanggal: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}tanggal'],
@@ -15887,6 +16863,10 @@ class $TidurTable extends Tidur with TableInfo<$TidurTable, TidurData> {
 class TidurData extends DataClass implements Insertable<TidurData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// Tanggal (hari bangun) — kunci "satu catatan per malam".
   final DateTime tanggal;
   final DateTime jamTidur;
@@ -15900,6 +16880,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
   final DateTime dicatatPada;
   const TidurData({
     required this.id,
+    this.uid,
     required this.tanggal,
     required this.jamTidur,
     required this.jamBangun,
@@ -15913,6 +16894,9 @@ class TidurData extends DataClass implements Insertable<TidurData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['jam_tidur'] = Variable<DateTime>(jamTidur);
     map['jam_bangun'] = Variable<DateTime>(jamBangun);
@@ -15931,6 +16915,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
   TidurCompanion toCompanion(bool nullToAbsent) {
     return TidurCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       tanggal: Value(tanggal),
       jamTidur: Value(jamTidur),
       jamBangun: Value(jamBangun),
@@ -15953,6 +16938,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TidurData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       jamTidur: serializer.fromJson<DateTime>(json['jamTidur']),
       jamBangun: serializer.fromJson<DateTime>(json['jamBangun']),
@@ -15968,6 +16954,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'jamTidur': serializer.toJson<DateTime>(jamTidur),
       'jamBangun': serializer.toJson<DateTime>(jamBangun),
@@ -15981,6 +16968,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
 
   TidurData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     DateTime? tanggal,
     DateTime? jamTidur,
     DateTime? jamBangun,
@@ -15991,6 +16979,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
     DateTime? dicatatPada,
   }) => TidurData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     tanggal: tanggal ?? this.tanggal,
     jamTidur: jamTidur ?? this.jamTidur,
     jamBangun: jamBangun ?? this.jamBangun,
@@ -16003,6 +16992,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
   TidurData copyWithCompanion(TidurCompanion data) {
     return TidurData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
       jamTidur: data.jamTidur.present ? data.jamTidur.value : this.jamTidur,
       jamBangun: data.jamBangun.present ? data.jamBangun.value : this.jamBangun,
@@ -16024,6 +17014,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
   String toString() {
     return (StringBuffer('TidurData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jamTidur: $jamTidur, ')
           ..write('jamBangun: $jamBangun, ')
@@ -16039,6 +17030,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     tanggal,
     jamTidur,
     jamBangun,
@@ -16053,6 +17045,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
       identical(this, other) ||
       (other is TidurData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.tanggal == this.tanggal &&
           other.jamTidur == this.jamTidur &&
           other.jamBangun == this.jamBangun &&
@@ -16065,6 +17058,7 @@ class TidurData extends DataClass implements Insertable<TidurData> {
 
 class TidurCompanion extends UpdateCompanion<TidurData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<DateTime> tanggal;
   final Value<DateTime> jamTidur;
   final Value<DateTime> jamBangun;
@@ -16075,6 +17069,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
   final Value<DateTime> dicatatPada;
   const TidurCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.jamTidur = const Value.absent(),
     this.jamBangun = const Value.absent(),
@@ -16086,6 +17081,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
   });
   TidurCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required DateTime tanggal,
     required DateTime jamTidur,
     required DateTime jamBangun,
@@ -16100,6 +17096,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
        durasiMenit = Value(durasiMenit);
   static Insertable<TidurData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<DateTime>? tanggal,
     Expression<DateTime>? jamTidur,
     Expression<DateTime>? jamBangun,
@@ -16111,6 +17108,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (tanggal != null) 'tanggal': tanggal,
       if (jamTidur != null) 'jam_tidur': jamTidur,
       if (jamBangun != null) 'jam_bangun': jamBangun,
@@ -16124,6 +17122,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
 
   TidurCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<DateTime>? tanggal,
     Value<DateTime>? jamTidur,
     Value<DateTime>? jamBangun,
@@ -16135,6 +17134,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
   }) {
     return TidurCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       tanggal: tanggal ?? this.tanggal,
       jamTidur: jamTidur ?? this.jamTidur,
       jamBangun: jamBangun ?? this.jamBangun,
@@ -16151,6 +17151,9 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (tanggal.present) {
       map['tanggal'] = Variable<DateTime>(tanggal.value);
@@ -16183,6 +17186,7 @@ class TidurCompanion extends UpdateCompanion<TidurData> {
   String toString() {
     return (StringBuffer('TidurCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jamTidur: $jamTidur, ')
           ..write('jamBangun: $jamBangun, ')
@@ -17780,6 +18784,15 @@ class $CatatanAirTable extends CatatanAir
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _waktuMeta = const VerificationMeta('waktu');
   @override
   late final GeneratedColumn<DateTime> waktu = GeneratedColumn<DateTime>(
@@ -17813,7 +18826,7 @@ class $CatatanAirTable extends CatatanAir
     requiredDuringInsert: false,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, waktu, jumlahMl, catatan];
+  List<GeneratedColumn> get $columns => [id, uid, waktu, jumlahMl, catatan];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -17828,6 +18841,12 @@ class $CatatanAirTable extends CatatanAir
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('waktu')) {
       context.handle(
@@ -17862,6 +18881,10 @@ class $CatatanAirTable extends CatatanAir
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       waktu: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}waktu'],
@@ -17885,11 +18908,16 @@ class $CatatanAirTable extends CatatanAir
 
 class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final DateTime waktu;
   final int jumlahMl;
   final String? catatan;
   const CatatanAirData({
     required this.id,
+    this.uid,
     required this.waktu,
     required this.jumlahMl,
     this.catatan,
@@ -17898,6 +18926,9 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['waktu'] = Variable<DateTime>(waktu);
     map['jumlah_ml'] = Variable<int>(jumlahMl);
     if (!nullToAbsent || catatan != null) {
@@ -17909,6 +18940,7 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
   CatatanAirCompanion toCompanion(bool nullToAbsent) {
     return CatatanAirCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       waktu: Value(waktu),
       jumlahMl: Value(jumlahMl),
       catatan: catatan == null && nullToAbsent
@@ -17924,6 +18956,7 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CatatanAirData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       waktu: serializer.fromJson<DateTime>(json['waktu']),
       jumlahMl: serializer.fromJson<int>(json['jumlahMl']),
       catatan: serializer.fromJson<String?>(json['catatan']),
@@ -17934,6 +18967,7 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'waktu': serializer.toJson<DateTime>(waktu),
       'jumlahMl': serializer.toJson<int>(jumlahMl),
       'catatan': serializer.toJson<String?>(catatan),
@@ -17942,11 +18976,13 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
 
   CatatanAirData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     DateTime? waktu,
     int? jumlahMl,
     Value<String?> catatan = const Value.absent(),
   }) => CatatanAirData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     waktu: waktu ?? this.waktu,
     jumlahMl: jumlahMl ?? this.jumlahMl,
     catatan: catatan.present ? catatan.value : this.catatan,
@@ -17954,6 +18990,7 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
   CatatanAirData copyWithCompanion(CatatanAirCompanion data) {
     return CatatanAirData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       waktu: data.waktu.present ? data.waktu.value : this.waktu,
       jumlahMl: data.jumlahMl.present ? data.jumlahMl.value : this.jumlahMl,
       catatan: data.catatan.present ? data.catatan.value : this.catatan,
@@ -17964,6 +19001,7 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
   String toString() {
     return (StringBuffer('CatatanAirData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('waktu: $waktu, ')
           ..write('jumlahMl: $jumlahMl, ')
           ..write('catatan: $catatan')
@@ -17972,12 +19010,13 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, waktu, jumlahMl, catatan);
+  int get hashCode => Object.hash(id, uid, waktu, jumlahMl, catatan);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CatatanAirData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.waktu == this.waktu &&
           other.jumlahMl == this.jumlahMl &&
           other.catatan == this.catatan);
@@ -17985,29 +19024,34 @@ class CatatanAirData extends DataClass implements Insertable<CatatanAirData> {
 
 class CatatanAirCompanion extends UpdateCompanion<CatatanAirData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<DateTime> waktu;
   final Value<int> jumlahMl;
   final Value<String?> catatan;
   const CatatanAirCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.waktu = const Value.absent(),
     this.jumlahMl = const Value.absent(),
     this.catatan = const Value.absent(),
   });
   CatatanAirCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required DateTime waktu,
     this.jumlahMl = const Value.absent(),
     this.catatan = const Value.absent(),
   }) : waktu = Value(waktu);
   static Insertable<CatatanAirData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<DateTime>? waktu,
     Expression<int>? jumlahMl,
     Expression<String>? catatan,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (waktu != null) 'waktu': waktu,
       if (jumlahMl != null) 'jumlah_ml': jumlahMl,
       if (catatan != null) 'catatan': catatan,
@@ -18016,12 +19060,14 @@ class CatatanAirCompanion extends UpdateCompanion<CatatanAirData> {
 
   CatatanAirCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<DateTime>? waktu,
     Value<int>? jumlahMl,
     Value<String?>? catatan,
   }) {
     return CatatanAirCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       waktu: waktu ?? this.waktu,
       jumlahMl: jumlahMl ?? this.jumlahMl,
       catatan: catatan ?? this.catatan,
@@ -18033,6 +19079,9 @@ class CatatanAirCompanion extends UpdateCompanion<CatatanAirData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (waktu.present) {
       map['waktu'] = Variable<DateTime>(waktu.value);
@@ -18050,6 +19099,7 @@ class CatatanAirCompanion extends UpdateCompanion<CatatanAirData> {
   String toString() {
     return (StringBuffer('CatatanAirCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('waktu: $waktu, ')
           ..write('jumlahMl: $jumlahMl, ')
           ..write('catatan: $catatan')
@@ -18075,6 +19125,15 @@ class $DokumenTable extends Dokumen with TableInfo<$DokumenTable, DokumenData> {
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _idDokumenMeta = const VerificationMeta(
     'idDokumen',
@@ -18262,6 +19321,7 @@ class $DokumenTable extends Dokumen with TableInfo<$DokumenTable, DokumenData> {
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     idDokumen,
     nama,
     jenis,
@@ -18293,6 +19353,12 @@ class $DokumenTable extends Dokumen with TableInfo<$DokumenTable, DokumenData> {
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('id_dokumen')) {
       context.handle(
@@ -18416,6 +19482,10 @@ class $DokumenTable extends Dokumen with TableInfo<$DokumenTable, DokumenData> {
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       idDokumen: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_dokumen'],
@@ -18491,6 +19561,10 @@ class $DokumenTable extends Dokumen with TableInfo<$DokumenTable, DokumenData> {
 
 class DokumenData extends DataClass implements Insertable<DokumenData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String idDokumen;
   final String nama;
 
@@ -18518,6 +19592,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
   final DateTime diubahPada;
   const DokumenData({
     required this.id,
+    this.uid,
     required this.idDokumen,
     required this.nama,
     required this.jenis,
@@ -18539,6 +19614,9 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['id_dokumen'] = Variable<String>(idDokumen);
     map['nama'] = Variable<String>(nama);
     map['jenis'] = Variable<String>(jenis);
@@ -18575,6 +19653,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
   DokumenCompanion toCompanion(bool nullToAbsent) {
     return DokumenCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       idDokumen: Value(idDokumen),
       nama: Value(nama),
       jenis: Value(jenis),
@@ -18615,6 +19694,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DokumenData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       idDokumen: serializer.fromJson<String>(json['idDokumen']),
       nama: serializer.fromJson<String>(json['nama']),
       jenis: serializer.fromJson<String>(json['jenis']),
@@ -18640,6 +19720,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'idDokumen': serializer.toJson<String>(idDokumen),
       'nama': serializer.toJson<String>(nama),
       'jenis': serializer.toJson<String>(jenis),
@@ -18661,6 +19742,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
 
   DokumenData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? idDokumen,
     String? nama,
     String? jenis,
@@ -18679,6 +19761,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
     DateTime? diubahPada,
   }) => DokumenData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     idDokumen: idDokumen ?? this.idDokumen,
     nama: nama ?? this.nama,
     jenis: jenis ?? this.jenis,
@@ -18703,6 +19786,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
   DokumenData copyWithCompanion(DokumenCompanion data) {
     return DokumenData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       idDokumen: data.idDokumen.present ? data.idDokumen.value : this.idDokumen,
       nama: data.nama.present ? data.nama.value : this.nama,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
@@ -18738,6 +19822,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
   String toString() {
     return (StringBuffer('DokumenData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idDokumen: $idDokumen, ')
           ..write('nama: $nama, ')
           ..write('jenis: $jenis, ')
@@ -18761,6 +19846,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     idDokumen,
     nama,
     jenis,
@@ -18783,6 +19869,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
       identical(this, other) ||
       (other is DokumenData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.idDokumen == this.idDokumen &&
           other.nama == this.nama &&
           other.jenis == this.jenis &&
@@ -18803,6 +19890,7 @@ class DokumenData extends DataClass implements Insertable<DokumenData> {
 
 class DokumenCompanion extends UpdateCompanion<DokumenData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> idDokumen;
   final Value<String> nama;
   final Value<String> jenis;
@@ -18821,6 +19909,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
   final Value<DateTime> diubahPada;
   const DokumenCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.idDokumen = const Value.absent(),
     this.nama = const Value.absent(),
     this.jenis = const Value.absent(),
@@ -18840,6 +19929,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
   });
   DokumenCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String idDokumen,
     required String nama,
     this.jenis = const Value.absent(),
@@ -18860,6 +19950,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
        nama = Value(nama);
   static Insertable<DokumenData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? idDokumen,
     Expression<String>? nama,
     Expression<String>? jenis,
@@ -18879,6 +19970,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (idDokumen != null) 'id_dokumen': idDokumen,
       if (nama != null) 'nama': nama,
       if (jenis != null) 'jenis': jenis,
@@ -18900,6 +19992,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
 
   DokumenCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? idDokumen,
     Value<String>? nama,
     Value<String>? jenis,
@@ -18919,6 +20012,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
   }) {
     return DokumenCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       idDokumen: idDokumen ?? this.idDokumen,
       nama: nama ?? this.nama,
       jenis: jenis ?? this.jenis,
@@ -18943,6 +20037,9 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (idDokumen.present) {
       map['id_dokumen'] = Variable<String>(idDokumen.value);
@@ -18999,6 +20096,7 @@ class DokumenCompanion extends UpdateCompanion<DokumenData> {
   String toString() {
     return (StringBuffer('DokumenCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('idDokumen: $idDokumen, ')
           ..write('nama: $nama, ')
           ..write('jenis: $jenis, ')
@@ -20656,6 +21754,15 @@ class $PembayaranKewajibanTable extends PembayaranKewajiban
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _kewajibanIdMeta = const VerificationMeta(
     'kewajibanId',
   );
@@ -20742,6 +21849,7 @@ class $PembayaranKewajibanTable extends PembayaranKewajiban
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     kewajibanId,
     tanggal,
     jumlahSen,
@@ -20764,6 +21872,12 @@ class $PembayaranKewajibanTable extends PembayaranKewajiban
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('kewajiban_id')) {
       context.handle(
@@ -20835,6 +21949,10 @@ class $PembayaranKewajibanTable extends PembayaranKewajiban
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       kewajibanId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}kewajiban_id'],
@@ -20875,6 +21993,10 @@ class $PembayaranKewajibanTable extends PembayaranKewajiban
 class PembayaranKewajibanData extends DataClass
     implements Insertable<PembayaranKewajibanData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final int kewajibanId;
   final DateTime tanggal;
   final int jumlahSen;
@@ -20886,6 +22008,7 @@ class PembayaranKewajibanData extends DataClass
   final DateTime dicatatPada;
   const PembayaranKewajibanData({
     required this.id,
+    this.uid,
     required this.kewajibanId,
     required this.tanggal,
     required this.jumlahSen,
@@ -20898,6 +22021,9 @@ class PembayaranKewajibanData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['kewajiban_id'] = Variable<int>(kewajibanId);
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['jumlah_sen'] = Variable<int>(jumlahSen);
@@ -20913,6 +22039,7 @@ class PembayaranKewajibanData extends DataClass
   PembayaranKewajibanCompanion toCompanion(bool nullToAbsent) {
     return PembayaranKewajibanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       kewajibanId: Value(kewajibanId),
       tanggal: Value(tanggal),
       jumlahSen: Value(jumlahSen),
@@ -20932,6 +22059,7 @@ class PembayaranKewajibanData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PembayaranKewajibanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       kewajibanId: serializer.fromJson<int>(json['kewajibanId']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       jumlahSen: serializer.fromJson<int>(json['jumlahSen']),
@@ -20946,6 +22074,7 @@ class PembayaranKewajibanData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'kewajibanId': serializer.toJson<int>(kewajibanId),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'jumlahSen': serializer.toJson<int>(jumlahSen),
@@ -20958,6 +22087,7 @@ class PembayaranKewajibanData extends DataClass
 
   PembayaranKewajibanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     int? kewajibanId,
     DateTime? tanggal,
     int? jumlahSen,
@@ -20967,6 +22097,7 @@ class PembayaranKewajibanData extends DataClass
     DateTime? dicatatPada,
   }) => PembayaranKewajibanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     kewajibanId: kewajibanId ?? this.kewajibanId,
     tanggal: tanggal ?? this.tanggal,
     jumlahSen: jumlahSen ?? this.jumlahSen,
@@ -20978,6 +22109,7 @@ class PembayaranKewajibanData extends DataClass
   PembayaranKewajibanData copyWithCompanion(PembayaranKewajibanCompanion data) {
     return PembayaranKewajibanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       kewajibanId: data.kewajibanId.present
           ? data.kewajibanId.value
           : this.kewajibanId,
@@ -20996,6 +22128,7 @@ class PembayaranKewajibanData extends DataClass
   String toString() {
     return (StringBuffer('PembayaranKewajibanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kewajibanId: $kewajibanId, ')
           ..write('tanggal: $tanggal, ')
           ..write('jumlahSen: $jumlahSen, ')
@@ -21010,6 +22143,7 @@ class PembayaranKewajibanData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     kewajibanId,
     tanggal,
     jumlahSen,
@@ -21023,6 +22157,7 @@ class PembayaranKewajibanData extends DataClass
       identical(this, other) ||
       (other is PembayaranKewajibanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.kewajibanId == this.kewajibanId &&
           other.tanggal == this.tanggal &&
           other.jumlahSen == this.jumlahSen &&
@@ -21035,6 +22170,7 @@ class PembayaranKewajibanData extends DataClass
 class PembayaranKewajibanCompanion
     extends UpdateCompanion<PembayaranKewajibanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<int> kewajibanId;
   final Value<DateTime> tanggal;
   final Value<int> jumlahSen;
@@ -21044,6 +22180,7 @@ class PembayaranKewajibanCompanion
   final Value<DateTime> dicatatPada;
   const PembayaranKewajibanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.kewajibanId = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.jumlahSen = const Value.absent(),
@@ -21054,6 +22191,7 @@ class PembayaranKewajibanCompanion
   });
   PembayaranKewajibanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required int kewajibanId,
     required DateTime tanggal,
     required int jumlahSen,
@@ -21066,6 +22204,7 @@ class PembayaranKewajibanCompanion
        jumlahSen = Value(jumlahSen);
   static Insertable<PembayaranKewajibanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<int>? kewajibanId,
     Expression<DateTime>? tanggal,
     Expression<int>? jumlahSen,
@@ -21076,6 +22215,7 @@ class PembayaranKewajibanCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (kewajibanId != null) 'kewajiban_id': kewajibanId,
       if (tanggal != null) 'tanggal': tanggal,
       if (jumlahSen != null) 'jumlah_sen': jumlahSen,
@@ -21088,6 +22228,7 @@ class PembayaranKewajibanCompanion
 
   PembayaranKewajibanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<int>? kewajibanId,
     Value<DateTime>? tanggal,
     Value<int>? jumlahSen,
@@ -21098,6 +22239,7 @@ class PembayaranKewajibanCompanion
   }) {
     return PembayaranKewajibanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       kewajibanId: kewajibanId ?? this.kewajibanId,
       tanggal: tanggal ?? this.tanggal,
       jumlahSen: jumlahSen ?? this.jumlahSen,
@@ -21113,6 +22255,9 @@ class PembayaranKewajibanCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (kewajibanId.present) {
       map['kewajiban_id'] = Variable<int>(kewajibanId.value);
@@ -21142,6 +22287,7 @@ class PembayaranKewajibanCompanion
   String toString() {
     return (StringBuffer('PembayaranKewajibanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('kewajibanId: $kewajibanId, ')
           ..write('tanggal: $tanggal, ')
           ..write('jumlahSen: $jumlahSen, ')
@@ -21172,6 +22318,15 @@ class $PengeluaranTerencanaTable extends PengeluaranTerencana
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _namaMeta = const VerificationMeta('nama');
   @override
@@ -21273,6 +22428,7 @@ class $PengeluaranTerencanaTable extends PengeluaranTerencana
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     nama,
     jumlahSen,
     tanggal,
@@ -21296,6 +22452,12 @@ class $PengeluaranTerencanaTable extends PengeluaranTerencana
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('nama')) {
       context.handle(
@@ -21370,6 +22532,10 @@ class $PengeluaranTerencanaTable extends PengeluaranTerencana
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       nama: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}nama'],
@@ -21414,6 +22580,10 @@ class $PengeluaranTerencanaTable extends PengeluaranTerencana
 class PengeluaranTerencanaData extends DataClass
     implements Insertable<PengeluaranTerencanaData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final String nama;
   final int jumlahSen;
   final DateTime tanggal;
@@ -21424,6 +22594,7 @@ class PengeluaranTerencanaData extends DataClass
   final DateTime dibuatPada;
   const PengeluaranTerencanaData({
     required this.id,
+    this.uid,
     required this.nama,
     required this.jumlahSen,
     required this.tanggal,
@@ -21437,6 +22608,9 @@ class PengeluaranTerencanaData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['nama'] = Variable<String>(nama);
     map['jumlah_sen'] = Variable<int>(jumlahSen);
     map['tanggal'] = Variable<DateTime>(tanggal);
@@ -21455,6 +22629,7 @@ class PengeluaranTerencanaData extends DataClass
   PengeluaranTerencanaCompanion toCompanion(bool nullToAbsent) {
     return PengeluaranTerencanaCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       nama: Value(nama),
       jumlahSen: Value(jumlahSen),
       tanggal: Value(tanggal),
@@ -21477,6 +22652,7 @@ class PengeluaranTerencanaData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PengeluaranTerencanaData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       nama: serializer.fromJson<String>(json['nama']),
       jumlahSen: serializer.fromJson<int>(json['jumlahSen']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
@@ -21492,6 +22668,7 @@ class PengeluaranTerencanaData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'nama': serializer.toJson<String>(nama),
       'jumlahSen': serializer.toJson<int>(jumlahSen),
       'tanggal': serializer.toJson<DateTime>(tanggal),
@@ -21505,6 +22682,7 @@ class PengeluaranTerencanaData extends DataClass
 
   PengeluaranTerencanaData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? nama,
     int? jumlahSen,
     DateTime? tanggal,
@@ -21515,6 +22693,7 @@ class PengeluaranTerencanaData extends DataClass
     DateTime? dibuatPada,
   }) => PengeluaranTerencanaData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     nama: nama ?? this.nama,
     jumlahSen: jumlahSen ?? this.jumlahSen,
     tanggal: tanggal ?? this.tanggal,
@@ -21529,6 +22708,7 @@ class PengeluaranTerencanaData extends DataClass
   ) {
     return PengeluaranTerencanaData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       nama: data.nama.present ? data.nama.value : this.nama,
       jumlahSen: data.jumlahSen.present ? data.jumlahSen.value : this.jumlahSen,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
@@ -21550,6 +22730,7 @@ class PengeluaranTerencanaData extends DataClass
   String toString() {
     return (StringBuffer('PengeluaranTerencanaData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('nama: $nama, ')
           ..write('jumlahSen: $jumlahSen, ')
           ..write('tanggal: $tanggal, ')
@@ -21565,6 +22746,7 @@ class PengeluaranTerencanaData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     nama,
     jumlahSen,
     tanggal,
@@ -21579,6 +22761,7 @@ class PengeluaranTerencanaData extends DataClass
       identical(this, other) ||
       (other is PengeluaranTerencanaData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.nama == this.nama &&
           other.jumlahSen == this.jumlahSen &&
           other.tanggal == this.tanggal &&
@@ -21592,6 +22775,7 @@ class PengeluaranTerencanaData extends DataClass
 class PengeluaranTerencanaCompanion
     extends UpdateCompanion<PengeluaranTerencanaData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> nama;
   final Value<int> jumlahSen;
   final Value<DateTime> tanggal;
@@ -21602,6 +22786,7 @@ class PengeluaranTerencanaCompanion
   final Value<DateTime> dibuatPada;
   const PengeluaranTerencanaCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.nama = const Value.absent(),
     this.jumlahSen = const Value.absent(),
     this.tanggal = const Value.absent(),
@@ -21613,6 +22798,7 @@ class PengeluaranTerencanaCompanion
   });
   PengeluaranTerencanaCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String nama,
     required int jumlahSen,
     required DateTime tanggal,
@@ -21626,6 +22812,7 @@ class PengeluaranTerencanaCompanion
        tanggal = Value(tanggal);
   static Insertable<PengeluaranTerencanaData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? nama,
     Expression<int>? jumlahSen,
     Expression<DateTime>? tanggal,
@@ -21637,6 +22824,7 @@ class PengeluaranTerencanaCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (nama != null) 'nama': nama,
       if (jumlahSen != null) 'jumlah_sen': jumlahSen,
       if (tanggal != null) 'tanggal': tanggal,
@@ -21650,6 +22838,7 @@ class PengeluaranTerencanaCompanion
 
   PengeluaranTerencanaCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? nama,
     Value<int>? jumlahSen,
     Value<DateTime>? tanggal,
@@ -21661,6 +22850,7 @@ class PengeluaranTerencanaCompanion
   }) {
     return PengeluaranTerencanaCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       nama: nama ?? this.nama,
       jumlahSen: jumlahSen ?? this.jumlahSen,
       tanggal: tanggal ?? this.tanggal,
@@ -21677,6 +22867,9 @@ class PengeluaranTerencanaCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (nama.present) {
       map['nama'] = Variable<String>(nama.value);
@@ -21709,6 +22902,7 @@ class PengeluaranTerencanaCompanion
   String toString() {
     return (StringBuffer('PengeluaranTerencanaCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('nama: $nama, ')
           ..write('jumlahSen: $jumlahSen, ')
           ..write('tanggal: $tanggal, ')
@@ -21740,6 +22934,15 @@ class $LogPuasaTable extends LogPuasa
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _tanggalMeta = const VerificationMeta(
     'tanggal',
@@ -21797,6 +23000,7 @@ class $LogPuasaTable extends LogPuasa
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     tanggal,
     jenis,
     status,
@@ -21817,6 +23021,12 @@ class $LogPuasaTable extends LogPuasa
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('tanggal')) {
       context.handle(
@@ -21868,6 +23078,10 @@ class $LogPuasaTable extends LogPuasa
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       tanggal: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}tanggal'],
@@ -21899,6 +23113,10 @@ class $LogPuasaTable extends LogPuasa
 
 class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final DateTime tanggal;
 
   /// ramadan / senin_kamis / ayyamul_bidh / sunnah / qadha / custom.
@@ -21910,6 +23128,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
   final DateTime dicatatPada;
   const LogPuasaData({
     required this.id,
+    this.uid,
     required this.tanggal,
     required this.jenis,
     required this.status,
@@ -21920,6 +23139,9 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['jenis'] = Variable<String>(jenis);
     map['status'] = Variable<String>(status);
@@ -21933,6 +23155,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
   LogPuasaCompanion toCompanion(bool nullToAbsent) {
     return LogPuasaCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       tanggal: Value(tanggal),
       jenis: Value(jenis),
       status: Value(status),
@@ -21950,6 +23173,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LogPuasaData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       jenis: serializer.fromJson<String>(json['jenis']),
       status: serializer.fromJson<String>(json['status']),
@@ -21962,6 +23186,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'jenis': serializer.toJson<String>(jenis),
       'status': serializer.toJson<String>(status),
@@ -21972,6 +23197,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
 
   LogPuasaData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     DateTime? tanggal,
     String? jenis,
     String? status,
@@ -21979,6 +23205,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
     DateTime? dicatatPada,
   }) => LogPuasaData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     tanggal: tanggal ?? this.tanggal,
     jenis: jenis ?? this.jenis,
     status: status ?? this.status,
@@ -21988,6 +23215,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
   LogPuasaData copyWithCompanion(LogPuasaCompanion data) {
     return LogPuasaData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       status: data.status.present ? data.status.value : this.status,
@@ -22002,6 +23230,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
   String toString() {
     return (StringBuffer('LogPuasaData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jenis: $jenis, ')
           ..write('status: $status, ')
@@ -22013,12 +23242,13 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
 
   @override
   int get hashCode =>
-      Object.hash(id, tanggal, jenis, status, catatan, dicatatPada);
+      Object.hash(id, uid, tanggal, jenis, status, catatan, dicatatPada);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is LogPuasaData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.tanggal == this.tanggal &&
           other.jenis == this.jenis &&
           other.status == this.status &&
@@ -22028,6 +23258,7 @@ class LogPuasaData extends DataClass implements Insertable<LogPuasaData> {
 
 class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<DateTime> tanggal;
   final Value<String> jenis;
   final Value<String> status;
@@ -22035,6 +23266,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
   final Value<DateTime> dicatatPada;
   const LogPuasaCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.jenis = const Value.absent(),
     this.status = const Value.absent(),
@@ -22043,6 +23275,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
   });
   LogPuasaCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required DateTime tanggal,
     required String jenis,
     this.status = const Value.absent(),
@@ -22052,6 +23285,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
        jenis = Value(jenis);
   static Insertable<LogPuasaData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<DateTime>? tanggal,
     Expression<String>? jenis,
     Expression<String>? status,
@@ -22060,6 +23294,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (tanggal != null) 'tanggal': tanggal,
       if (jenis != null) 'jenis': jenis,
       if (status != null) 'status': status,
@@ -22070,6 +23305,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
 
   LogPuasaCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<DateTime>? tanggal,
     Value<String>? jenis,
     Value<String>? status,
@@ -22078,6 +23314,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
   }) {
     return LogPuasaCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       tanggal: tanggal ?? this.tanggal,
       jenis: jenis ?? this.jenis,
       status: status ?? this.status,
@@ -22091,6 +23328,9 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (tanggal.present) {
       map['tanggal'] = Variable<DateTime>(tanggal.value);
@@ -22114,6 +23354,7 @@ class LogPuasaCompanion extends UpdateCompanion<LogPuasaData> {
   String toString() {
     return (StringBuffer('LogPuasaCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jenis: $jenis, ')
           ..write('status: $status, ')
@@ -22142,6 +23383,15 @@ class $LogQuranTable extends LogQuran
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _tanggalMeta = const VerificationMeta(
     'tanggal',
@@ -22218,6 +23468,7 @@ class $LogQuranTable extends LogQuran
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     tanggal,
     jenis,
     jumlah,
@@ -22240,6 +23491,12 @@ class $LogQuranTable extends LogQuran
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('tanggal')) {
       context.handle(
@@ -22303,6 +23560,10 @@ class $LogQuranTable extends LogQuran
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       tanggal: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}tanggal'],
@@ -22342,6 +23603,10 @@ class $LogQuranTable extends LogQuran
 
 class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final DateTime tanggal;
 
   /// baca / dengar / hafal / murajaah.
@@ -22357,6 +23622,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   final DateTime dicatatPada;
   const LogQuranData({
     required this.id,
+    this.uid,
     required this.tanggal,
     required this.jenis,
     required this.jumlah,
@@ -22369,6 +23635,9 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['jenis'] = Variable<String>(jenis);
     map['jumlah'] = Variable<double>(jumlah);
@@ -22386,6 +23655,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   LogQuranCompanion toCompanion(bool nullToAbsent) {
     return LogQuranCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       tanggal: Value(tanggal),
       jenis: Value(jenis),
       jumlah: Value(jumlah),
@@ -22407,6 +23677,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LogQuranData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       jenis: serializer.fromJson<String>(json['jenis']),
       jumlah: serializer.fromJson<double>(json['jumlah']),
@@ -22421,6 +23692,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'jenis': serializer.toJson<String>(jenis),
       'jumlah': serializer.toJson<double>(jumlah),
@@ -22433,6 +23705,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
 
   LogQuranData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     DateTime? tanggal,
     String? jenis,
     double? jumlah,
@@ -22442,6 +23715,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
     DateTime? dicatatPada,
   }) => LogQuranData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     tanggal: tanggal ?? this.tanggal,
     jenis: jenis ?? this.jenis,
     jumlah: jumlah ?? this.jumlah,
@@ -22453,6 +23727,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   LogQuranData copyWithCompanion(LogQuranCompanion data) {
     return LogQuranData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       jumlah: data.jumlah.present ? data.jumlah.value : this.jumlah,
@@ -22469,6 +23744,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   String toString() {
     return (StringBuffer('LogQuranData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jenis: $jenis, ')
           ..write('jumlah: $jumlah, ')
@@ -22483,6 +23759,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     tanggal,
     jenis,
     jumlah,
@@ -22496,6 +23773,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
       identical(this, other) ||
       (other is LogQuranData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.tanggal == this.tanggal &&
           other.jenis == this.jenis &&
           other.jumlah == this.jumlah &&
@@ -22507,6 +23785,7 @@ class LogQuranData extends DataClass implements Insertable<LogQuranData> {
 
 class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<DateTime> tanggal;
   final Value<String> jenis;
   final Value<double> jumlah;
@@ -22516,6 +23795,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
   final Value<DateTime> dicatatPada;
   const LogQuranCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.jenis = const Value.absent(),
     this.jumlah = const Value.absent(),
@@ -22526,6 +23806,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
   });
   LogQuranCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required DateTime tanggal,
     required String jenis,
     this.jumlah = const Value.absent(),
@@ -22537,6 +23818,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
        jenis = Value(jenis);
   static Insertable<LogQuranData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<DateTime>? tanggal,
     Expression<String>? jenis,
     Expression<double>? jumlah,
@@ -22547,6 +23829,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (tanggal != null) 'tanggal': tanggal,
       if (jenis != null) 'jenis': jenis,
       if (jumlah != null) 'jumlah': jumlah,
@@ -22559,6 +23842,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
 
   LogQuranCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<DateTime>? tanggal,
     Value<String>? jenis,
     Value<double>? jumlah,
@@ -22569,6 +23853,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
   }) {
     return LogQuranCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       tanggal: tanggal ?? this.tanggal,
       jenis: jenis ?? this.jenis,
       jumlah: jumlah ?? this.jumlah,
@@ -22584,6 +23869,9 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (tanggal.present) {
       map['tanggal'] = Variable<DateTime>(tanggal.value);
@@ -22613,6 +23901,7 @@ class LogQuranCompanion extends UpdateCompanion<LogQuranData> {
   String toString() {
     return (StringBuffer('LogQuranCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jenis: $jenis, ')
           ..write('jumlah: $jumlah, ')
@@ -22643,6 +23932,15 @@ class $LogDzikirTable extends LogDzikir
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _tanggalMeta = const VerificationMeta(
     'tanggal',
@@ -22736,6 +24034,7 @@ class $LogDzikirTable extends LogDzikir
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     tanggal,
     jenis,
     nama,
@@ -22759,6 +24058,12 @@ class $LogDzikirTable extends LogDzikir
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('tanggal')) {
       context.handle(
@@ -22833,6 +24138,10 @@ class $LogDzikirTable extends LogDzikir
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       tanggal: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}tanggal'],
@@ -22876,6 +24185,10 @@ class $LogDzikirTable extends LogDzikir
 
 class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final DateTime tanggal;
 
   /// pagi / petang / sebelum_tidur / custom.
@@ -22888,6 +24201,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   final DateTime dicatatPada;
   const LogDzikirData({
     required this.id,
+    this.uid,
     required this.tanggal,
     required this.jenis,
     required this.nama,
@@ -22901,6 +24215,9 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['tanggal'] = Variable<DateTime>(tanggal);
     map['jenis'] = Variable<String>(jenis);
     map['nama'] = Variable<String>(nama);
@@ -22919,6 +24236,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   LogDzikirCompanion toCompanion(bool nullToAbsent) {
     return LogDzikirCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       tanggal: Value(tanggal),
       jenis: Value(jenis),
       nama: Value(nama),
@@ -22941,6 +24259,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LogDzikirData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       jenis: serializer.fromJson<String>(json['jenis']),
       nama: serializer.fromJson<String>(json['nama']),
@@ -22956,6 +24275,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'jenis': serializer.toJson<String>(jenis),
       'nama': serializer.toJson<String>(nama),
@@ -22969,6 +24289,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
 
   LogDzikirData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     DateTime? tanggal,
     String? jenis,
     String? nama,
@@ -22979,6 +24300,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
     DateTime? dicatatPada,
   }) => LogDzikirData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     tanggal: tanggal ?? this.tanggal,
     jenis: jenis ?? this.jenis,
     nama: nama ?? this.nama,
@@ -22991,6 +24313,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   LogDzikirData copyWithCompanion(LogDzikirCompanion data) {
     return LogDzikirData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       nama: data.nama.present ? data.nama.value : this.nama,
@@ -23010,6 +24333,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   String toString() {
     return (StringBuffer('LogDzikirData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jenis: $jenis, ')
           ..write('nama: $nama, ')
@@ -23025,6 +24349,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     tanggal,
     jenis,
     nama,
@@ -23039,6 +24364,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
       identical(this, other) ||
       (other is LogDzikirData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.tanggal == this.tanggal &&
           other.jenis == this.jenis &&
           other.nama == this.nama &&
@@ -23051,6 +24377,7 @@ class LogDzikirData extends DataClass implements Insertable<LogDzikirData> {
 
 class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<DateTime> tanggal;
   final Value<String> jenis;
   final Value<String> nama;
@@ -23061,6 +24388,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
   final Value<DateTime> dicatatPada;
   const LogDzikirCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.jenis = const Value.absent(),
     this.nama = const Value.absent(),
@@ -23072,6 +24400,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
   });
   LogDzikirCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required DateTime tanggal,
     required String jenis,
     required String nama,
@@ -23085,6 +24414,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
        nama = Value(nama);
   static Insertable<LogDzikirData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<DateTime>? tanggal,
     Expression<String>? jenis,
     Expression<String>? nama,
@@ -23096,6 +24426,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (tanggal != null) 'tanggal': tanggal,
       if (jenis != null) 'jenis': jenis,
       if (nama != null) 'nama': nama,
@@ -23109,6 +24440,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
 
   LogDzikirCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<DateTime>? tanggal,
     Value<String>? jenis,
     Value<String>? nama,
@@ -23120,6 +24452,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
   }) {
     return LogDzikirCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       tanggal: tanggal ?? this.tanggal,
       jenis: jenis ?? this.jenis,
       nama: nama ?? this.nama,
@@ -23136,6 +24469,9 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (tanggal.present) {
       map['tanggal'] = Variable<DateTime>(tanggal.value);
@@ -23168,6 +24504,7 @@ class LogDzikirCompanion extends UpdateCompanion<LogDzikirData> {
   String toString() {
     return (StringBuffer('LogDzikirCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('jenis: $jenis, ')
           ..write('nama: $nama, ')
@@ -23199,6 +24536,15 @@ class $RefleksiMuhasabahTable extends RefleksiMuhasabah
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _tanggalMeta = const VerificationMeta(
     'tanggal',
@@ -23320,6 +24666,7 @@ class $RefleksiMuhasabahTable extends RefleksiMuhasabah
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     tanggal,
     sholatTerjaga,
     mengingatAllah,
@@ -23344,6 +24691,12 @@ class $RefleksiMuhasabahTable extends RefleksiMuhasabah
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('tanggal')) {
       context.handle(
@@ -23429,6 +24782,10 @@ class $RefleksiMuhasabahTable extends RefleksiMuhasabah
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       tanggal: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}tanggal'],
@@ -23477,6 +24834,10 @@ class $RefleksiMuhasabahTable extends RefleksiMuhasabah
 class RefleksiMuhasabahData extends DataClass
     implements Insertable<RefleksiMuhasabahData> {
   final int id;
+
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
   final DateTime tanggal;
 
   /// Lima daftar refleksi bawaan PRD; null = tidak diisi (bukan berarti tidak).
@@ -23490,6 +24851,7 @@ class RefleksiMuhasabahData extends DataClass
   final DateTime dicatatPada;
   const RefleksiMuhasabahData({
     required this.id,
+    this.uid,
     required this.tanggal,
     this.sholatTerjaga,
     this.mengingatAllah,
@@ -23504,6 +24866,9 @@ class RefleksiMuhasabahData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['tanggal'] = Variable<DateTime>(tanggal);
     if (!nullToAbsent || sholatTerjaga != null) {
       map['sholat_terjaga'] = Variable<bool>(sholatTerjaga);
@@ -23533,6 +24898,7 @@ class RefleksiMuhasabahData extends DataClass
   RefleksiMuhasabahCompanion toCompanion(bool nullToAbsent) {
     return RefleksiMuhasabahCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       tanggal: Value(tanggal),
       sholatTerjaga: sholatTerjaga == null && nullToAbsent
           ? const Value.absent()
@@ -23566,6 +24932,7 @@ class RefleksiMuhasabahData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RefleksiMuhasabahData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       tanggal: serializer.fromJson<DateTime>(json['tanggal']),
       sholatTerjaga: serializer.fromJson<bool?>(json['sholatTerjaga']),
       mengingatAllah: serializer.fromJson<bool?>(json['mengingatAllah']),
@@ -23584,6 +24951,7 @@ class RefleksiMuhasabahData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'tanggal': serializer.toJson<DateTime>(tanggal),
       'sholatTerjaga': serializer.toJson<bool?>(sholatTerjaga),
       'mengingatAllah': serializer.toJson<bool?>(mengingatAllah),
@@ -23598,6 +24966,7 @@ class RefleksiMuhasabahData extends DataClass
 
   RefleksiMuhasabahData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     DateTime? tanggal,
     Value<bool?> sholatTerjaga = const Value.absent(),
     Value<bool?> mengingatAllah = const Value.absent(),
@@ -23609,6 +24978,7 @@ class RefleksiMuhasabahData extends DataClass
     DateTime? dicatatPada,
   }) => RefleksiMuhasabahData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     tanggal: tanggal ?? this.tanggal,
     sholatTerjaga: sholatTerjaga.present
         ? sholatTerjaga.value
@@ -23630,6 +25000,7 @@ class RefleksiMuhasabahData extends DataClass
   RefleksiMuhasabahData copyWithCompanion(RefleksiMuhasabahCompanion data) {
     return RefleksiMuhasabahData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       tanggal: data.tanggal.present ? data.tanggal.value : this.tanggal,
       sholatTerjaga: data.sholatTerjaga.present
           ? data.sholatTerjaga.value
@@ -23656,6 +25027,7 @@ class RefleksiMuhasabahData extends DataClass
   String toString() {
     return (StringBuffer('RefleksiMuhasabahData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('sholatTerjaga: $sholatTerjaga, ')
           ..write('mengingatAllah: $mengingatAllah, ')
@@ -23672,6 +25044,7 @@ class RefleksiMuhasabahData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     tanggal,
     sholatTerjaga,
     mengingatAllah,
@@ -23687,6 +25060,7 @@ class RefleksiMuhasabahData extends DataClass
       identical(this, other) ||
       (other is RefleksiMuhasabahData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.tanggal == this.tanggal &&
           other.sholatTerjaga == this.sholatTerjaga &&
           other.mengingatAllah == this.mengingatAllah &&
@@ -23701,6 +25075,7 @@ class RefleksiMuhasabahData extends DataClass
 class RefleksiMuhasabahCompanion
     extends UpdateCompanion<RefleksiMuhasabahData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<DateTime> tanggal;
   final Value<bool?> sholatTerjaga;
   final Value<bool?> mengingatAllah;
@@ -23712,6 +25087,7 @@ class RefleksiMuhasabahCompanion
   final Value<DateTime> dicatatPada;
   const RefleksiMuhasabahCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.tanggal = const Value.absent(),
     this.sholatTerjaga = const Value.absent(),
     this.mengingatAllah = const Value.absent(),
@@ -23724,6 +25100,7 @@ class RefleksiMuhasabahCompanion
   });
   RefleksiMuhasabahCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required DateTime tanggal,
     this.sholatTerjaga = const Value.absent(),
     this.mengingatAllah = const Value.absent(),
@@ -23736,6 +25113,7 @@ class RefleksiMuhasabahCompanion
   }) : tanggal = Value(tanggal);
   static Insertable<RefleksiMuhasabahData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<DateTime>? tanggal,
     Expression<bool>? sholatTerjaga,
     Expression<bool>? mengingatAllah,
@@ -23748,6 +25126,7 @@ class RefleksiMuhasabahCompanion
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (tanggal != null) 'tanggal': tanggal,
       if (sholatTerjaga != null) 'sholat_terjaga': sholatTerjaga,
       if (mengingatAllah != null) 'mengingat_allah': mengingatAllah,
@@ -23763,6 +25142,7 @@ class RefleksiMuhasabahCompanion
 
   RefleksiMuhasabahCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<DateTime>? tanggal,
     Value<bool?>? sholatTerjaga,
     Value<bool?>? mengingatAllah,
@@ -23775,6 +25155,7 @@ class RefleksiMuhasabahCompanion
   }) {
     return RefleksiMuhasabahCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       tanggal: tanggal ?? this.tanggal,
       sholatTerjaga: sholatTerjaga ?? this.sholatTerjaga,
       mengingatAllah: mengingatAllah ?? this.mengingatAllah,
@@ -23792,6 +25173,9 @@ class RefleksiMuhasabahCompanion
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (tanggal.present) {
       map['tanggal'] = Variable<DateTime>(tanggal.value);
@@ -23827,6 +25211,7 @@ class RefleksiMuhasabahCompanion
   String toString() {
     return (StringBuffer('RefleksiMuhasabahCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('tanggal: $tanggal, ')
           ..write('sholatTerjaga: $sholatTerjaga, ')
           ..write('mengingatAllah: $mengingatAllah, ')
@@ -23859,6 +25244,15 @@ class $CatatanKesehatanTable extends CatatanKesehatan
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'PRIMARY KEY AUTOINCREMENT',
     ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _jenisMeta = const VerificationMeta('jenis');
   @override
@@ -23934,6 +25328,7 @@ class $CatatanKesehatanTable extends CatatanKesehatan
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uid,
     jenis,
     waktu,
     nilai,
@@ -23956,6 +25351,12 @@ class $CatatanKesehatanTable extends CatatanKesehatan
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
     }
     if (data.containsKey('jenis')) {
       context.handle(
@@ -24018,6 +25419,10 @@ class $CatatanKesehatanTable extends CatatanKesehatan
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
       jenis: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}jenis'],
@@ -24059,6 +25464,10 @@ class CatatanKesehatanData extends DataClass
     implements Insertable<CatatanKesehatanData> {
   final int id;
 
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah
+  /// disinkronkan; mesin sinkron akan mengisinya sekali lalu tetap.
+  final String? uid;
+
   /// tekanan_darah · detak_jantung · gula_darah · suhu · saturasi · kolesterol · lab
   final String jenis;
   final DateTime waktu;
@@ -24075,6 +25484,7 @@ class CatatanKesehatanData extends DataClass
   final DateTime dibuatPada;
   const CatatanKesehatanData({
     required this.id,
+    this.uid,
     required this.jenis,
     required this.waktu,
     required this.nilai,
@@ -24087,6 +25497,9 @@ class CatatanKesehatanData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
     map['jenis'] = Variable<String>(jenis);
     map['waktu'] = Variable<DateTime>(waktu);
     map['nilai'] = Variable<double>(nilai);
@@ -24104,6 +25517,7 @@ class CatatanKesehatanData extends DataClass
   CatatanKesehatanCompanion toCompanion(bool nullToAbsent) {
     return CatatanKesehatanCompanion(
       id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
       jenis: Value(jenis),
       waktu: Value(waktu),
       nilai: Value(nilai),
@@ -24125,6 +25539,7 @@ class CatatanKesehatanData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return CatatanKesehatanData(
       id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
       jenis: serializer.fromJson<String>(json['jenis']),
       waktu: serializer.fromJson<DateTime>(json['waktu']),
       nilai: serializer.fromJson<double>(json['nilai']),
@@ -24139,6 +25554,7 @@ class CatatanKesehatanData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
       'jenis': serializer.toJson<String>(jenis),
       'waktu': serializer.toJson<DateTime>(waktu),
       'nilai': serializer.toJson<double>(nilai),
@@ -24151,6 +25567,7 @@ class CatatanKesehatanData extends DataClass
 
   CatatanKesehatanData copyWith({
     int? id,
+    Value<String?> uid = const Value.absent(),
     String? jenis,
     DateTime? waktu,
     double? nilai,
@@ -24160,6 +25577,7 @@ class CatatanKesehatanData extends DataClass
     DateTime? dibuatPada,
   }) => CatatanKesehatanData(
     id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
     jenis: jenis ?? this.jenis,
     waktu: waktu ?? this.waktu,
     nilai: nilai ?? this.nilai,
@@ -24171,6 +25589,7 @@ class CatatanKesehatanData extends DataClass
   CatatanKesehatanData copyWithCompanion(CatatanKesehatanCompanion data) {
     return CatatanKesehatanData(
       id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
       jenis: data.jenis.present ? data.jenis.value : this.jenis,
       waktu: data.waktu.present ? data.waktu.value : this.waktu,
       nilai: data.nilai.present ? data.nilai.value : this.nilai,
@@ -24189,6 +25608,7 @@ class CatatanKesehatanData extends DataClass
   String toString() {
     return (StringBuffer('CatatanKesehatanData(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('waktu: $waktu, ')
           ..write('nilai: $nilai, ')
@@ -24203,6 +25623,7 @@ class CatatanKesehatanData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
+    uid,
     jenis,
     waktu,
     nilai,
@@ -24216,6 +25637,7 @@ class CatatanKesehatanData extends DataClass
       identical(this, other) ||
       (other is CatatanKesehatanData &&
           other.id == this.id &&
+          other.uid == this.uid &&
           other.jenis == this.jenis &&
           other.waktu == this.waktu &&
           other.nilai == this.nilai &&
@@ -24227,6 +25649,7 @@ class CatatanKesehatanData extends DataClass
 
 class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
   final Value<int> id;
+  final Value<String?> uid;
   final Value<String> jenis;
   final Value<DateTime> waktu;
   final Value<double> nilai;
@@ -24236,6 +25659,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
   final Value<DateTime> dibuatPada;
   const CatatanKesehatanCompanion({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     this.jenis = const Value.absent(),
     this.waktu = const Value.absent(),
     this.nilai = const Value.absent(),
@@ -24246,6 +25670,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
   });
   CatatanKesehatanCompanion.insert({
     this.id = const Value.absent(),
+    this.uid = const Value.absent(),
     required String jenis,
     required DateTime waktu,
     required double nilai,
@@ -24258,6 +25683,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
        nilai = Value(nilai);
   static Insertable<CatatanKesehatanData> custom({
     Expression<int>? id,
+    Expression<String>? uid,
     Expression<String>? jenis,
     Expression<DateTime>? waktu,
     Expression<double>? nilai,
@@ -24268,6 +25694,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
       if (jenis != null) 'jenis': jenis,
       if (waktu != null) 'waktu': waktu,
       if (nilai != null) 'nilai': nilai,
@@ -24280,6 +25707,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
 
   CatatanKesehatanCompanion copyWith({
     Value<int>? id,
+    Value<String?>? uid,
     Value<String>? jenis,
     Value<DateTime>? waktu,
     Value<double>? nilai,
@@ -24290,6 +25718,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
   }) {
     return CatatanKesehatanCompanion(
       id: id ?? this.id,
+      uid: uid ?? this.uid,
       jenis: jenis ?? this.jenis,
       waktu: waktu ?? this.waktu,
       nilai: nilai ?? this.nilai,
@@ -24305,6 +25734,9 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
     }
     if (jenis.present) {
       map['jenis'] = Variable<String>(jenis.value);
@@ -24334,6 +25766,7 @@ class CatatanKesehatanCompanion extends UpdateCompanion<CatatanKesehatanData> {
   String toString() {
     return (StringBuffer('CatatanKesehatanCompanion(')
           ..write('id: $id, ')
+          ..write('uid: $uid, ')
           ..write('jenis: $jenis, ')
           ..write('waktu: $waktu, ')
           ..write('nilai: $nilai, ')
@@ -32492,6 +33925,1182 @@ class SuasanaHatiCompanion extends UpdateCompanion<SuasanaHatiData> {
   }
 }
 
+class $SinkronSidikTable extends SinkronSidik
+    with TableInfo<$SinkronSidikTable, SinkronSidikData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SinkronSidikTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _tabelMeta = const VerificationMeta('tabel');
+  @override
+  late final GeneratedColumn<String> tabel = GeneratedColumn<String>(
+    'tabel',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sidikMeta = const VerificationMeta('sidik');
+  @override
+  late final GeneratedColumn<String> sidik = GeneratedColumn<String>(
+    'sidik',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _waktuMeta = const VerificationMeta('waktu');
+  @override
+  late final GeneratedColumn<DateTime> waktu = GeneratedColumn<DateTime>(
+    'waktu',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [tabel, uid, sidik, waktu];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sinkron_sidik';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SinkronSidikData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('tabel')) {
+      context.handle(
+        _tabelMeta,
+        tabel.isAcceptableOrUnknown(data['tabel']!, _tabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tabelMeta);
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uidMeta);
+    }
+    if (data.containsKey('sidik')) {
+      context.handle(
+        _sidikMeta,
+        sidik.isAcceptableOrUnknown(data['sidik']!, _sidikMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sidikMeta);
+    }
+    if (data.containsKey('waktu')) {
+      context.handle(
+        _waktuMeta,
+        waktu.isAcceptableOrUnknown(data['waktu']!, _waktuMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {tabel, uid};
+  @override
+  SinkronSidikData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SinkronSidikData(
+      tabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tabel'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      )!,
+      sidik: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sidik'],
+      )!,
+      waktu: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}waktu'],
+      )!,
+    );
+  }
+
+  @override
+  $SinkronSidikTable createAlias(String alias) {
+    return $SinkronSidikTable(attachedDatabase, alias);
+  }
+}
+
+class SinkronSidikData extends DataClass
+    implements Insertable<SinkronSidikData> {
+  final String tabel;
+  final String uid;
+
+  /// Sidik isi baris (64 bit, heksadesimal) saat terakhir tersinkron.
+  final String sidik;
+  final DateTime waktu;
+  const SinkronSidikData({
+    required this.tabel,
+    required this.uid,
+    required this.sidik,
+    required this.waktu,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['tabel'] = Variable<String>(tabel);
+    map['uid'] = Variable<String>(uid);
+    map['sidik'] = Variable<String>(sidik);
+    map['waktu'] = Variable<DateTime>(waktu);
+    return map;
+  }
+
+  SinkronSidikCompanion toCompanion(bool nullToAbsent) {
+    return SinkronSidikCompanion(
+      tabel: Value(tabel),
+      uid: Value(uid),
+      sidik: Value(sidik),
+      waktu: Value(waktu),
+    );
+  }
+
+  factory SinkronSidikData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SinkronSidikData(
+      tabel: serializer.fromJson<String>(json['tabel']),
+      uid: serializer.fromJson<String>(json['uid']),
+      sidik: serializer.fromJson<String>(json['sidik']),
+      waktu: serializer.fromJson<DateTime>(json['waktu']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tabel': serializer.toJson<String>(tabel),
+      'uid': serializer.toJson<String>(uid),
+      'sidik': serializer.toJson<String>(sidik),
+      'waktu': serializer.toJson<DateTime>(waktu),
+    };
+  }
+
+  SinkronSidikData copyWith({
+    String? tabel,
+    String? uid,
+    String? sidik,
+    DateTime? waktu,
+  }) => SinkronSidikData(
+    tabel: tabel ?? this.tabel,
+    uid: uid ?? this.uid,
+    sidik: sidik ?? this.sidik,
+    waktu: waktu ?? this.waktu,
+  );
+  SinkronSidikData copyWithCompanion(SinkronSidikCompanion data) {
+    return SinkronSidikData(
+      tabel: data.tabel.present ? data.tabel.value : this.tabel,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      sidik: data.sidik.present ? data.sidik.value : this.sidik,
+      waktu: data.waktu.present ? data.waktu.value : this.waktu,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SinkronSidikData(')
+          ..write('tabel: $tabel, ')
+          ..write('uid: $uid, ')
+          ..write('sidik: $sidik, ')
+          ..write('waktu: $waktu')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(tabel, uid, sidik, waktu);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SinkronSidikData &&
+          other.tabel == this.tabel &&
+          other.uid == this.uid &&
+          other.sidik == this.sidik &&
+          other.waktu == this.waktu);
+}
+
+class SinkronSidikCompanion extends UpdateCompanion<SinkronSidikData> {
+  final Value<String> tabel;
+  final Value<String> uid;
+  final Value<String> sidik;
+  final Value<DateTime> waktu;
+  final Value<int> rowid;
+  const SinkronSidikCompanion({
+    this.tabel = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.sidik = const Value.absent(),
+    this.waktu = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SinkronSidikCompanion.insert({
+    required String tabel,
+    required String uid,
+    required String sidik,
+    this.waktu = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : tabel = Value(tabel),
+       uid = Value(uid),
+       sidik = Value(sidik);
+  static Insertable<SinkronSidikData> custom({
+    Expression<String>? tabel,
+    Expression<String>? uid,
+    Expression<String>? sidik,
+    Expression<DateTime>? waktu,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (tabel != null) 'tabel': tabel,
+      if (uid != null) 'uid': uid,
+      if (sidik != null) 'sidik': sidik,
+      if (waktu != null) 'waktu': waktu,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SinkronSidikCompanion copyWith({
+    Value<String>? tabel,
+    Value<String>? uid,
+    Value<String>? sidik,
+    Value<DateTime>? waktu,
+    Value<int>? rowid,
+  }) {
+    return SinkronSidikCompanion(
+      tabel: tabel ?? this.tabel,
+      uid: uid ?? this.uid,
+      sidik: sidik ?? this.sidik,
+      waktu: waktu ?? this.waktu,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (tabel.present) {
+      map['tabel'] = Variable<String>(tabel.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (sidik.present) {
+      map['sidik'] = Variable<String>(sidik.value);
+    }
+    if (waktu.present) {
+      map['waktu'] = Variable<DateTime>(waktu.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SinkronSidikCompanion(')
+          ..write('tabel: $tabel, ')
+          ..write('uid: $uid, ')
+          ..write('sidik: $sidik, ')
+          ..write('waktu: $waktu, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SinkronTautanBelumTable extends SinkronTautanBelum
+    with TableInfo<$SinkronTautanBelumTable, SinkronTautanBelumData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SinkronTautanBelumTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _tabelMeta = const VerificationMeta('tabel');
+  @override
+  late final GeneratedColumn<String> tabel = GeneratedColumn<String>(
+    'tabel',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kolomMeta = const VerificationMeta('kolom');
+  @override
+  late final GeneratedColumn<String> kolom = GeneratedColumn<String>(
+    'kolom',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _uidIndukMeta = const VerificationMeta(
+    'uidInduk',
+  );
+  @override
+  late final GeneratedColumn<String> uidInduk = GeneratedColumn<String>(
+    'uid_induk',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [tabel, uid, kolom, uidInduk];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sinkron_tautan_belum';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SinkronTautanBelumData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('tabel')) {
+      context.handle(
+        _tabelMeta,
+        tabel.isAcceptableOrUnknown(data['tabel']!, _tabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tabelMeta);
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uidMeta);
+    }
+    if (data.containsKey('kolom')) {
+      context.handle(
+        _kolomMeta,
+        kolom.isAcceptableOrUnknown(data['kolom']!, _kolomMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kolomMeta);
+    }
+    if (data.containsKey('uid_induk')) {
+      context.handle(
+        _uidIndukMeta,
+        uidInduk.isAcceptableOrUnknown(data['uid_induk']!, _uidIndukMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uidIndukMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {tabel, uid, kolom};
+  @override
+  SinkronTautanBelumData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SinkronTautanBelumData(
+      tabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tabel'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      )!,
+      kolom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kolom'],
+      )!,
+      uidInduk: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid_induk'],
+      )!,
+    );
+  }
+
+  @override
+  $SinkronTautanBelumTable createAlias(String alias) {
+    return $SinkronTautanBelumTable(attachedDatabase, alias);
+  }
+}
+
+class SinkronTautanBelumData extends DataClass
+    implements Insertable<SinkronTautanBelumData> {
+  final String tabel;
+  final String uid;
+
+  /// Nama kolom foreign key di tabel anak, mis. `tagihan_id`.
+  final String kolom;
+
+  /// uid baris induk yang ditunggu.
+  final String uidInduk;
+  const SinkronTautanBelumData({
+    required this.tabel,
+    required this.uid,
+    required this.kolom,
+    required this.uidInduk,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['tabel'] = Variable<String>(tabel);
+    map['uid'] = Variable<String>(uid);
+    map['kolom'] = Variable<String>(kolom);
+    map['uid_induk'] = Variable<String>(uidInduk);
+    return map;
+  }
+
+  SinkronTautanBelumCompanion toCompanion(bool nullToAbsent) {
+    return SinkronTautanBelumCompanion(
+      tabel: Value(tabel),
+      uid: Value(uid),
+      kolom: Value(kolom),
+      uidInduk: Value(uidInduk),
+    );
+  }
+
+  factory SinkronTautanBelumData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SinkronTautanBelumData(
+      tabel: serializer.fromJson<String>(json['tabel']),
+      uid: serializer.fromJson<String>(json['uid']),
+      kolom: serializer.fromJson<String>(json['kolom']),
+      uidInduk: serializer.fromJson<String>(json['uidInduk']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tabel': serializer.toJson<String>(tabel),
+      'uid': serializer.toJson<String>(uid),
+      'kolom': serializer.toJson<String>(kolom),
+      'uidInduk': serializer.toJson<String>(uidInduk),
+    };
+  }
+
+  SinkronTautanBelumData copyWith({
+    String? tabel,
+    String? uid,
+    String? kolom,
+    String? uidInduk,
+  }) => SinkronTautanBelumData(
+    tabel: tabel ?? this.tabel,
+    uid: uid ?? this.uid,
+    kolom: kolom ?? this.kolom,
+    uidInduk: uidInduk ?? this.uidInduk,
+  );
+  SinkronTautanBelumData copyWithCompanion(SinkronTautanBelumCompanion data) {
+    return SinkronTautanBelumData(
+      tabel: data.tabel.present ? data.tabel.value : this.tabel,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      kolom: data.kolom.present ? data.kolom.value : this.kolom,
+      uidInduk: data.uidInduk.present ? data.uidInduk.value : this.uidInduk,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SinkronTautanBelumData(')
+          ..write('tabel: $tabel, ')
+          ..write('uid: $uid, ')
+          ..write('kolom: $kolom, ')
+          ..write('uidInduk: $uidInduk')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(tabel, uid, kolom, uidInduk);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SinkronTautanBelumData &&
+          other.tabel == this.tabel &&
+          other.uid == this.uid &&
+          other.kolom == this.kolom &&
+          other.uidInduk == this.uidInduk);
+}
+
+class SinkronTautanBelumCompanion
+    extends UpdateCompanion<SinkronTautanBelumData> {
+  final Value<String> tabel;
+  final Value<String> uid;
+  final Value<String> kolom;
+  final Value<String> uidInduk;
+  final Value<int> rowid;
+  const SinkronTautanBelumCompanion({
+    this.tabel = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.kolom = const Value.absent(),
+    this.uidInduk = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SinkronTautanBelumCompanion.insert({
+    required String tabel,
+    required String uid,
+    required String kolom,
+    required String uidInduk,
+    this.rowid = const Value.absent(),
+  }) : tabel = Value(tabel),
+       uid = Value(uid),
+       kolom = Value(kolom),
+       uidInduk = Value(uidInduk);
+  static Insertable<SinkronTautanBelumData> custom({
+    Expression<String>? tabel,
+    Expression<String>? uid,
+    Expression<String>? kolom,
+    Expression<String>? uidInduk,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (tabel != null) 'tabel': tabel,
+      if (uid != null) 'uid': uid,
+      if (kolom != null) 'kolom': kolom,
+      if (uidInduk != null) 'uid_induk': uidInduk,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SinkronTautanBelumCompanion copyWith({
+    Value<String>? tabel,
+    Value<String>? uid,
+    Value<String>? kolom,
+    Value<String>? uidInduk,
+    Value<int>? rowid,
+  }) {
+    return SinkronTautanBelumCompanion(
+      tabel: tabel ?? this.tabel,
+      uid: uid ?? this.uid,
+      kolom: kolom ?? this.kolom,
+      uidInduk: uidInduk ?? this.uidInduk,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (tabel.present) {
+      map['tabel'] = Variable<String>(tabel.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (kolom.present) {
+      map['kolom'] = Variable<String>(kolom.value);
+    }
+    if (uidInduk.present) {
+      map['uid_induk'] = Variable<String>(uidInduk.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SinkronTautanBelumCompanion(')
+          ..write('tabel: $tabel, ')
+          ..write('uid: $uid, ')
+          ..write('kolom: $kolom, ')
+          ..write('uidInduk: $uidInduk, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LampiranTable extends Lampiran
+    with TableInfo<$LampiranTable, LampiranData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LampiranTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _indukTabelMeta = const VerificationMeta(
+    'indukTabel',
+  );
+  @override
+  late final GeneratedColumn<String> indukTabel = GeneratedColumn<String>(
+    'induk_tabel',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _indukUidMeta = const VerificationMeta(
+    'indukUid',
+  );
+  @override
+  late final GeneratedColumn<String> indukUid = GeneratedColumn<String>(
+    'induk_uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jenisMeta = const VerificationMeta('jenis');
+  @override
+  late final GeneratedColumn<String> jenis = GeneratedColumn<String>(
+    'jenis',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _berkasMeta = const VerificationMeta('berkas');
+  @override
+  late final GeneratedColumn<String> berkas = GeneratedColumn<String>(
+    'berkas',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _keteranganMeta = const VerificationMeta(
+    'keterangan',
+  );
+  @override
+  late final GeneratedColumn<String> keterangan = GeneratedColumn<String>(
+    'keterangan',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _ukuranByteMeta = const VerificationMeta(
+    'ukuranByte',
+  );
+  @override
+  late final GeneratedColumn<int> ukuranByte = GeneratedColumn<int>(
+    'ukuran_byte',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _dibuatPadaMeta = const VerificationMeta(
+    'dibuatPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dibuatPada = GeneratedColumn<DateTime>(
+    'dibuat_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uid,
+    indukTabel,
+    indukUid,
+    jenis,
+    berkas,
+    keterangan,
+    ukuranByte,
+    dibuatPada,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'lampiran';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LampiranData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    }
+    if (data.containsKey('induk_tabel')) {
+      context.handle(
+        _indukTabelMeta,
+        indukTabel.isAcceptableOrUnknown(data['induk_tabel']!, _indukTabelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_indukTabelMeta);
+    }
+    if (data.containsKey('induk_uid')) {
+      context.handle(
+        _indukUidMeta,
+        indukUid.isAcceptableOrUnknown(data['induk_uid']!, _indukUidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_indukUidMeta);
+    }
+    if (data.containsKey('jenis')) {
+      context.handle(
+        _jenisMeta,
+        jenis.isAcceptableOrUnknown(data['jenis']!, _jenisMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jenisMeta);
+    }
+    if (data.containsKey('berkas')) {
+      context.handle(
+        _berkasMeta,
+        berkas.isAcceptableOrUnknown(data['berkas']!, _berkasMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_berkasMeta);
+    }
+    if (data.containsKey('keterangan')) {
+      context.handle(
+        _keteranganMeta,
+        keterangan.isAcceptableOrUnknown(data['keterangan']!, _keteranganMeta),
+      );
+    }
+    if (data.containsKey('ukuran_byte')) {
+      context.handle(
+        _ukuranByteMeta,
+        ukuranByte.isAcceptableOrUnknown(data['ukuran_byte']!, _ukuranByteMeta),
+      );
+    }
+    if (data.containsKey('dibuat_pada')) {
+      context.handle(
+        _dibuatPadaMeta,
+        dibuatPada.isAcceptableOrUnknown(data['dibuat_pada']!, _dibuatPadaMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LampiranData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LampiranData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
+      indukTabel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}induk_tabel'],
+      )!,
+      indukUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}induk_uid'],
+      )!,
+      jenis: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}jenis'],
+      )!,
+      berkas: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}berkas'],
+      )!,
+      keterangan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}keterangan'],
+      )!,
+      ukuranByte: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ukuran_byte'],
+      )!,
+      dibuatPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}dibuat_pada'],
+      )!,
+    );
+  }
+
+  @override
+  $LampiranTable createAlias(String alias) {
+    return $LampiranTable(attachedDatabase, alias);
+  }
+}
+
+class LampiranData extends DataClass implements Insertable<LampiranData> {
+  final int id;
+  final String? uid;
+
+  /// Tabel pemilik lampiran, mis. `catatan_pengetahuan`.
+  final String indukTabel;
+
+  /// uid baris pemilik (bukan id angka, supaya tetap cocok antar HP).
+  final String indukUid;
+
+  /// foto · suara
+  final String jenis;
+
+  /// Jalur berkas di HP ini (folder dokumen aplikasi, bukan cache).
+  final String berkas;
+  final String keterangan;
+  final int ukuranByte;
+  final DateTime dibuatPada;
+  const LampiranData({
+    required this.id,
+    this.uid,
+    required this.indukTabel,
+    required this.indukUid,
+    required this.jenis,
+    required this.berkas,
+    required this.keterangan,
+    required this.ukuranByte,
+    required this.dibuatPada,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
+    map['induk_tabel'] = Variable<String>(indukTabel);
+    map['induk_uid'] = Variable<String>(indukUid);
+    map['jenis'] = Variable<String>(jenis);
+    map['berkas'] = Variable<String>(berkas);
+    map['keterangan'] = Variable<String>(keterangan);
+    map['ukuran_byte'] = Variable<int>(ukuranByte);
+    map['dibuat_pada'] = Variable<DateTime>(dibuatPada);
+    return map;
+  }
+
+  LampiranCompanion toCompanion(bool nullToAbsent) {
+    return LampiranCompanion(
+      id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
+      indukTabel: Value(indukTabel),
+      indukUid: Value(indukUid),
+      jenis: Value(jenis),
+      berkas: Value(berkas),
+      keterangan: Value(keterangan),
+      ukuranByte: Value(ukuranByte),
+      dibuatPada: Value(dibuatPada),
+    );
+  }
+
+  factory LampiranData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LampiranData(
+      id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
+      indukTabel: serializer.fromJson<String>(json['indukTabel']),
+      indukUid: serializer.fromJson<String>(json['indukUid']),
+      jenis: serializer.fromJson<String>(json['jenis']),
+      berkas: serializer.fromJson<String>(json['berkas']),
+      keterangan: serializer.fromJson<String>(json['keterangan']),
+      ukuranByte: serializer.fromJson<int>(json['ukuranByte']),
+      dibuatPada: serializer.fromJson<DateTime>(json['dibuatPada']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
+      'indukTabel': serializer.toJson<String>(indukTabel),
+      'indukUid': serializer.toJson<String>(indukUid),
+      'jenis': serializer.toJson<String>(jenis),
+      'berkas': serializer.toJson<String>(berkas),
+      'keterangan': serializer.toJson<String>(keterangan),
+      'ukuranByte': serializer.toJson<int>(ukuranByte),
+      'dibuatPada': serializer.toJson<DateTime>(dibuatPada),
+    };
+  }
+
+  LampiranData copyWith({
+    int? id,
+    Value<String?> uid = const Value.absent(),
+    String? indukTabel,
+    String? indukUid,
+    String? jenis,
+    String? berkas,
+    String? keterangan,
+    int? ukuranByte,
+    DateTime? dibuatPada,
+  }) => LampiranData(
+    id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
+    indukTabel: indukTabel ?? this.indukTabel,
+    indukUid: indukUid ?? this.indukUid,
+    jenis: jenis ?? this.jenis,
+    berkas: berkas ?? this.berkas,
+    keterangan: keterangan ?? this.keterangan,
+    ukuranByte: ukuranByte ?? this.ukuranByte,
+    dibuatPada: dibuatPada ?? this.dibuatPada,
+  );
+  LampiranData copyWithCompanion(LampiranCompanion data) {
+    return LampiranData(
+      id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      indukTabel: data.indukTabel.present
+          ? data.indukTabel.value
+          : this.indukTabel,
+      indukUid: data.indukUid.present ? data.indukUid.value : this.indukUid,
+      jenis: data.jenis.present ? data.jenis.value : this.jenis,
+      berkas: data.berkas.present ? data.berkas.value : this.berkas,
+      keterangan: data.keterangan.present
+          ? data.keterangan.value
+          : this.keterangan,
+      ukuranByte: data.ukuranByte.present
+          ? data.ukuranByte.value
+          : this.ukuranByte,
+      dibuatPada: data.dibuatPada.present
+          ? data.dibuatPada.value
+          : this.dibuatPada,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LampiranData(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('indukTabel: $indukTabel, ')
+          ..write('indukUid: $indukUid, ')
+          ..write('jenis: $jenis, ')
+          ..write('berkas: $berkas, ')
+          ..write('keterangan: $keterangan, ')
+          ..write('ukuranByte: $ukuranByte, ')
+          ..write('dibuatPada: $dibuatPada')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uid,
+    indukTabel,
+    indukUid,
+    jenis,
+    berkas,
+    keterangan,
+    ukuranByte,
+    dibuatPada,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LampiranData &&
+          other.id == this.id &&
+          other.uid == this.uid &&
+          other.indukTabel == this.indukTabel &&
+          other.indukUid == this.indukUid &&
+          other.jenis == this.jenis &&
+          other.berkas == this.berkas &&
+          other.keterangan == this.keterangan &&
+          other.ukuranByte == this.ukuranByte &&
+          other.dibuatPada == this.dibuatPada);
+}
+
+class LampiranCompanion extends UpdateCompanion<LampiranData> {
+  final Value<int> id;
+  final Value<String?> uid;
+  final Value<String> indukTabel;
+  final Value<String> indukUid;
+  final Value<String> jenis;
+  final Value<String> berkas;
+  final Value<String> keterangan;
+  final Value<int> ukuranByte;
+  final Value<DateTime> dibuatPada;
+  const LampiranCompanion({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.indukTabel = const Value.absent(),
+    this.indukUid = const Value.absent(),
+    this.jenis = const Value.absent(),
+    this.berkas = const Value.absent(),
+    this.keterangan = const Value.absent(),
+    this.ukuranByte = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+  });
+  LampiranCompanion.insert({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    required String indukTabel,
+    required String indukUid,
+    required String jenis,
+    required String berkas,
+    this.keterangan = const Value.absent(),
+    this.ukuranByte = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+  }) : indukTabel = Value(indukTabel),
+       indukUid = Value(indukUid),
+       jenis = Value(jenis),
+       berkas = Value(berkas);
+  static Insertable<LampiranData> custom({
+    Expression<int>? id,
+    Expression<String>? uid,
+    Expression<String>? indukTabel,
+    Expression<String>? indukUid,
+    Expression<String>? jenis,
+    Expression<String>? berkas,
+    Expression<String>? keterangan,
+    Expression<int>? ukuranByte,
+    Expression<DateTime>? dibuatPada,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
+      if (indukTabel != null) 'induk_tabel': indukTabel,
+      if (indukUid != null) 'induk_uid': indukUid,
+      if (jenis != null) 'jenis': jenis,
+      if (berkas != null) 'berkas': berkas,
+      if (keterangan != null) 'keterangan': keterangan,
+      if (ukuranByte != null) 'ukuran_byte': ukuranByte,
+      if (dibuatPada != null) 'dibuat_pada': dibuatPada,
+    });
+  }
+
+  LampiranCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? uid,
+    Value<String>? indukTabel,
+    Value<String>? indukUid,
+    Value<String>? jenis,
+    Value<String>? berkas,
+    Value<String>? keterangan,
+    Value<int>? ukuranByte,
+    Value<DateTime>? dibuatPada,
+  }) {
+    return LampiranCompanion(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      indukTabel: indukTabel ?? this.indukTabel,
+      indukUid: indukUid ?? this.indukUid,
+      jenis: jenis ?? this.jenis,
+      berkas: berkas ?? this.berkas,
+      keterangan: keterangan ?? this.keterangan,
+      ukuranByte: ukuranByte ?? this.ukuranByte,
+      dibuatPada: dibuatPada ?? this.dibuatPada,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (indukTabel.present) {
+      map['induk_tabel'] = Variable<String>(indukTabel.value);
+    }
+    if (indukUid.present) {
+      map['induk_uid'] = Variable<String>(indukUid.value);
+    }
+    if (jenis.present) {
+      map['jenis'] = Variable<String>(jenis.value);
+    }
+    if (berkas.present) {
+      map['berkas'] = Variable<String>(berkas.value);
+    }
+    if (keterangan.present) {
+      map['keterangan'] = Variable<String>(keterangan.value);
+    }
+    if (ukuranByte.present) {
+      map['ukuran_byte'] = Variable<int>(ukuranByte.value);
+    }
+    if (dibuatPada.present) {
+      map['dibuat_pada'] = Variable<DateTime>(dibuatPada.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LampiranCompanion(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('indukTabel: $indukTabel, ')
+          ..write('indukUid: $indukUid, ')
+          ..write('jenis: $jenis, ')
+          ..write('berkas: $berkas, ')
+          ..write('keterangan: $keterangan, ')
+          ..write('ukuranByte: $ukuranByte, ')
+          ..write('dibuatPada: $dibuatPada')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -32564,6 +35173,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $TautanPengetahuanTable(this);
   late final $CatatanMakanTable catatanMakan = $CatatanMakanTable(this);
   late final $SuasanaHatiTable suasanaHati = $SuasanaHatiTable(this);
+  late final $SinkronSidikTable sinkronSidik = $SinkronSidikTable(this);
+  late final $SinkronTautanBelumTable sinkronTautanBelum =
+      $SinkronTautanBelumTable(this);
+  late final $LampiranTable lampiran = $LampiranTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -32621,6 +35234,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tautanPengetahuan,
     catatanMakan,
     suasanaHati,
+    sinkronSidik,
+    sinkronTautanBelum,
+    lampiran,
   ];
 }
 
@@ -33844,6 +36460,7 @@ typedef $$TagihanTableProcessedTableManager =
 typedef $$RiwayatPembayaranTableCreateCompanionBuilder =
     RiwayatPembayaranCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required int tagihanId,
       required DateTime periodeJatuhTempo,
       required int jumlahSen,
@@ -33855,6 +36472,7 @@ typedef $$RiwayatPembayaranTableCreateCompanionBuilder =
 typedef $$RiwayatPembayaranTableUpdateCompanionBuilder =
     RiwayatPembayaranCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<int> tagihanId,
       Value<DateTime> periodeJatuhTempo,
       Value<int> jumlahSen,
@@ -33906,6 +36524,11 @@ class $$RiwayatPembayaranTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33977,6 +36600,11 @@ class $$RiwayatPembayaranTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get periodeJatuhTempo => $composableBuilder(
     column: $table.periodeJatuhTempo,
     builder: (column) => ColumnOrderings(column),
@@ -34042,6 +36670,9 @@ class $$RiwayatPembayaranTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get periodeJatuhTempo => $composableBuilder(
     column: $table.periodeJatuhTempo,
@@ -34125,6 +36756,7 @@ class $$RiwayatPembayaranTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<int> tagihanId = const Value.absent(),
                 Value<DateTime> periodeJatuhTempo = const Value.absent(),
                 Value<int> jumlahSen = const Value.absent(),
@@ -34134,6 +36766,7 @@ class $$RiwayatPembayaranTableTableManager
                 Value<String> via = const Value.absent(),
               }) => RiwayatPembayaranCompanion(
                 id: id,
+                uid: uid,
                 tagihanId: tagihanId,
                 periodeJatuhTempo: periodeJatuhTempo,
                 jumlahSen: jumlahSen,
@@ -34145,6 +36778,7 @@ class $$RiwayatPembayaranTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required int tagihanId,
                 required DateTime periodeJatuhTempo,
                 required int jumlahSen,
@@ -34154,6 +36788,7 @@ class $$RiwayatPembayaranTableTableManager
                 Value<String> via = const Value.absent(),
               }) => RiwayatPembayaranCompanion.insert(
                 id: id,
+                uid: uid,
                 tagihanId: tagihanId,
                 periodeJatuhTempo: periodeJatuhTempo,
                 jumlahSen: jumlahSen,
@@ -34232,6 +36867,7 @@ typedef $$RiwayatPembayaranTableProcessedTableManager =
 typedef $$PemasukanBulananTableCreateCompanionBuilder =
     PemasukanBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required String bulan,
       Value<int> jumlahSen,
       Value<String> sumber,
@@ -34239,6 +36875,7 @@ typedef $$PemasukanBulananTableCreateCompanionBuilder =
 typedef $$PemasukanBulananTableUpdateCompanionBuilder =
     PemasukanBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<String> bulan,
       Value<int> jumlahSen,
       Value<String> sumber,
@@ -34255,6 +36892,11 @@ class $$PemasukanBulananTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -34288,6 +36930,11 @@ class $$PemasukanBulananTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get bulan => $composableBuilder(
     column: $table.bulan,
     builder: (column) => ColumnOrderings(column),
@@ -34315,6 +36962,9 @@ class $$PemasukanBulananTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get bulan =>
       $composableBuilder(column: $table.bulan, builder: (column) => column);
@@ -34364,11 +37014,13 @@ class $$PemasukanBulananTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> bulan = const Value.absent(),
                 Value<int> jumlahSen = const Value.absent(),
                 Value<String> sumber = const Value.absent(),
               }) => PemasukanBulananCompanion(
                 id: id,
+                uid: uid,
                 bulan: bulan,
                 jumlahSen: jumlahSen,
                 sumber: sumber,
@@ -34376,11 +37028,13 @@ class $$PemasukanBulananTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String bulan,
                 Value<int> jumlahSen = const Value.absent(),
                 Value<String> sumber = const Value.absent(),
               }) => PemasukanBulananCompanion.insert(
                 id: id,
+                uid: uid,
                 bulan: bulan,
                 jumlahSen: jumlahSen,
                 sumber: sumber,
@@ -34763,6 +37417,7 @@ typedef $$SinkronKotorTableProcessedTableManager =
 typedef $$KategoriTransaksiTableCreateCompanionBuilder =
     KategoriTransaksiCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required String kode,
       Value<String?> indukKode,
       required String nama,
@@ -34779,6 +37434,7 @@ typedef $$KategoriTransaksiTableCreateCompanionBuilder =
 typedef $$KategoriTransaksiTableUpdateCompanionBuilder =
     KategoriTransaksiCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<String> kode,
       Value<String?> indukKode,
       Value<String> nama,
@@ -34854,6 +37510,11 @@ class $$KategoriTransaksiTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -34982,6 +37643,11 @@ class $$KategoriTransaksiTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get kode => $composableBuilder(
     column: $table.kode,
     builder: (column) => ColumnOrderings(column),
@@ -35054,6 +37720,9 @@ class $$KategoriTransaksiTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get kode =>
       $composableBuilder(column: $table.kode, builder: (column) => column);
@@ -35182,6 +37851,7 @@ class $$KategoriTransaksiTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> kode = const Value.absent(),
                 Value<String?> indukKode = const Value.absent(),
                 Value<String> nama = const Value.absent(),
@@ -35196,6 +37866,7 @@ class $$KategoriTransaksiTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => KategoriTransaksiCompanion(
                 id: id,
+                uid: uid,
                 kode: kode,
                 indukKode: indukKode,
                 nama: nama,
@@ -35212,6 +37883,7 @@ class $$KategoriTransaksiTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String kode,
                 Value<String?> indukKode = const Value.absent(),
                 required String nama,
@@ -35226,6 +37898,7 @@ class $$KategoriTransaksiTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => KategoriTransaksiCompanion.insert(
                 id: id,
+                uid: uid,
                 kode: kode,
                 indukKode: indukKode,
                 nama: nama,
@@ -35326,6 +37999,7 @@ typedef $$KategoriTransaksiTableProcessedTableManager =
     >;
 typedef $$TransaksiTableCreateCompanionBuilder = TransaksiCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idTransaksi,
   Value<String> jenis,
   required DateTime tanggal,
@@ -35341,6 +38015,7 @@ typedef $$TransaksiTableCreateCompanionBuilder = TransaksiCompanion Function({
 });
 typedef $$TransaksiTableUpdateCompanionBuilder = TransaksiCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idTransaksi,
   Value<String> jenis,
   Value<DateTime> tanggal,
@@ -35406,6 +38081,11 @@ class $$TransaksiTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -35520,6 +38200,11 @@ class $$TransaksiTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idTransaksi => $composableBuilder(
     column: $table.idTransaksi,
     builder: (column) => ColumnOrderings(column),
@@ -35628,6 +38313,9 @@ class $$TransaksiTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idTransaksi => $composableBuilder(
     column: $table.idTransaksi,
@@ -35746,6 +38434,7 @@ class $$TransaksiTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idTransaksi = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
@@ -35760,6 +38449,7 @@ class $$TransaksiTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TransaksiCompanion(
                 id: id,
+                uid: uid,
                 idTransaksi: idTransaksi,
                 jenis: jenis,
                 tanggal: tanggal,
@@ -35776,6 +38466,7 @@ class $$TransaksiTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idTransaksi,
                 Value<String> jenis = const Value.absent(),
                 required DateTime tanggal,
@@ -35790,6 +38481,7 @@ class $$TransaksiTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TransaksiCompanion.insert(
                 id: id,
+                uid: uid,
                 idTransaksi: idTransaksi,
                 jenis: jenis,
                 tanggal: tanggal,
@@ -35882,6 +38574,7 @@ typedef $$TransaksiTableProcessedTableManager =
 typedef $$AnggaranBulananTableCreateCompanionBuilder =
     AnggaranBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required String periode,
       Value<int> kategoriId,
       Value<int> batasSen,
@@ -35895,6 +38588,7 @@ typedef $$AnggaranBulananTableCreateCompanionBuilder =
 typedef $$AnggaranBulananTableUpdateCompanionBuilder =
     AnggaranBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<String> periode,
       Value<int> kategoriId,
       Value<int> batasSen,
@@ -35917,6 +38611,11 @@ class $$AnggaranBulananTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -35980,6 +38679,11 @@ class $$AnggaranBulananTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get periode => $composableBuilder(
     column: $table.periode,
     builder: (column) => ColumnOrderings(column),
@@ -36037,6 +38741,9 @@ class $$AnggaranBulananTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get periode =>
       $composableBuilder(column: $table.periode, builder: (column) => column);
@@ -36114,6 +38821,7 @@ class $$AnggaranBulananTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> periode = const Value.absent(),
                 Value<int> kategoriId = const Value.absent(),
                 Value<int> batasSen = const Value.absent(),
@@ -36125,6 +38833,7 @@ class $$AnggaranBulananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => AnggaranBulananCompanion(
                 id: id,
+                uid: uid,
                 periode: periode,
                 kategoriId: kategoriId,
                 batasSen: batasSen,
@@ -36138,6 +38847,7 @@ class $$AnggaranBulananTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String periode,
                 Value<int> kategoriId = const Value.absent(),
                 Value<int> batasSen = const Value.absent(),
@@ -36149,6 +38859,7 @@ class $$AnggaranBulananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => AnggaranBulananCompanion.insert(
                 id: id,
+                uid: uid,
                 periode: periode,
                 kategoriId: kategoriId,
                 batasSen: batasSen,
@@ -36201,6 +38912,7 @@ typedef $$AnggaranBulananTableProcessedTableManager =
     >;
 typedef $$LanggananTableCreateCompanionBuilder = LanggananCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idLangganan,
   Value<int?> tagihanId,
   required String nama,
@@ -36222,6 +38934,7 @@ typedef $$LanggananTableCreateCompanionBuilder = LanggananCompanion Function({
 });
 typedef $$LanggananTableUpdateCompanionBuilder = LanggananCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idLangganan,
   Value<int?> tagihanId,
   Value<String> nama,
@@ -36293,6 +39006,11 @@ class $$LanggananTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -36437,6 +39155,11 @@ class $$LanggananTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idLangganan => $composableBuilder(
     column: $table.idLangganan,
     builder: (column) => ColumnOrderings(column),
@@ -36575,6 +39298,9 @@ class $$LanggananTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idLangganan => $composableBuilder(
     column: $table.idLangganan,
@@ -36725,6 +39451,7 @@ class $$LanggananTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idLangganan = const Value.absent(),
                 Value<int?> tagihanId = const Value.absent(),
                 Value<String> nama = const Value.absent(),
@@ -36745,6 +39472,7 @@ class $$LanggananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => LanggananCompanion(
                 id: id,
+                uid: uid,
                 idLangganan: idLangganan,
                 tagihanId: tagihanId,
                 nama: nama,
@@ -36767,6 +39495,7 @@ class $$LanggananTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idLangganan,
                 Value<int?> tagihanId = const Value.absent(),
                 required String nama,
@@ -36787,6 +39516,7 @@ class $$LanggananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => LanggananCompanion.insert(
                 id: id,
+                uid: uid,
                 idLangganan: idLangganan,
                 tagihanId: tagihanId,
                 nama: nama,
@@ -36884,6 +39614,7 @@ typedef $$LanggananTableProcessedTableManager =
     >;
 typedef $$AsetTableCreateCompanionBuilder = AsetCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idAset,
   required String nama,
   Value<String> jenis,
@@ -36898,6 +39629,7 @@ typedef $$AsetTableCreateCompanionBuilder = AsetCompanion Function({
 });
 typedef $$AsetTableUpdateCompanionBuilder = AsetCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idAset,
   Value<String> nama,
   Value<String> jenis,
@@ -36946,6 +39678,11 @@ class $$AsetTableFilterComposer extends Composer<_$AppDatabase, $AsetTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -37043,6 +39780,11 @@ class $$AsetTableOrderingComposer extends Composer<_$AppDatabase, $AsetTable> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idAset => $composableBuilder(
     column: $table.idAset,
     builder: (column) => ColumnOrderings(column),
@@ -37110,6 +39852,9 @@ class $$AsetTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idAset =>
       $composableBuilder(column: $table.idAset, builder: (column) => column);
@@ -37207,6 +39952,7 @@ class $$AsetTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idAset = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
@@ -37220,6 +39966,7 @@ class $$AsetTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => AsetCompanion(
                 id: id,
+                uid: uid,
                 idAset: idAset,
                 nama: nama,
                 jenis: jenis,
@@ -37235,6 +39982,7 @@ class $$AsetTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idAset,
                 required String nama,
                 Value<String> jenis = const Value.absent(),
@@ -37248,6 +39996,7 @@ class $$AsetTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => AsetCompanion.insert(
                 id: id,
+                uid: uid,
                 idAset: idAset,
                 nama: nama,
                 jenis: jenis,
@@ -37319,6 +40068,7 @@ typedef $$AsetTableProcessedTableManager =
     >;
 typedef $$KewajibanTableCreateCompanionBuilder = KewajibanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idKewajiban,
   required String nama,
   Value<String> jenis,
@@ -37335,6 +40085,7 @@ typedef $$KewajibanTableCreateCompanionBuilder = KewajibanCompanion Function({
 });
 typedef $$KewajibanTableUpdateCompanionBuilder = KewajibanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idKewajiban,
   Value<String> nama,
   Value<String> jenis,
@@ -37415,6 +40166,11 @@ class $$KewajibanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -37549,6 +40305,11 @@ class $$KewajibanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idKewajiban => $composableBuilder(
     column: $table.idKewajiban,
     builder: (column) => ColumnOrderings(column),
@@ -37626,6 +40387,9 @@ class $$KewajibanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idKewajiban => $composableBuilder(
     column: $table.idKewajiban,
@@ -37767,6 +40531,7 @@ class $$KewajibanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idKewajiban = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
@@ -37782,6 +40547,7 @@ class $$KewajibanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => KewajibanCompanion(
                 id: id,
+                uid: uid,
                 idKewajiban: idKewajiban,
                 nama: nama,
                 jenis: jenis,
@@ -37799,6 +40565,7 @@ class $$KewajibanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idKewajiban,
                 required String nama,
                 Value<String> jenis = const Value.absent(),
@@ -37814,6 +40581,7 @@ class $$KewajibanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => KewajibanCompanion.insert(
                 id: id,
+                uid: uid,
                 idKewajiban: idKewajiban,
                 nama: nama,
                 jenis: jenis,
@@ -37920,6 +40688,7 @@ typedef $$KewajibanTableProcessedTableManager =
 typedef $$NilaiAsetBulananTableCreateCompanionBuilder =
     NilaiAsetBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required int asetId,
       required String bulan,
       required int nilaiSen,
@@ -37936,6 +40705,7 @@ typedef $$NilaiAsetBulananTableCreateCompanionBuilder =
 typedef $$NilaiAsetBulananTableUpdateCompanionBuilder =
     NilaiAsetBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<int> asetId,
       Value<String> bulan,
       Value<int> nilaiSen,
@@ -37992,6 +40762,11 @@ class $$NilaiAsetBulananTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -38088,6 +40863,11 @@ class $$NilaiAsetBulananTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get bulan => $composableBuilder(
     column: $table.bulan,
     builder: (column) => ColumnOrderings(column),
@@ -38178,6 +40958,9 @@ class $$NilaiAsetBulananTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get bulan =>
       $composableBuilder(column: $table.bulan, builder: (column) => column);
@@ -38279,6 +41062,7 @@ class $$NilaiAsetBulananTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<int> asetId = const Value.absent(),
                 Value<String> bulan = const Value.absent(),
                 Value<int> nilaiSen = const Value.absent(),
@@ -38293,6 +41077,7 @@ class $$NilaiAsetBulananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => NilaiAsetBulananCompanion(
                 id: id,
+                uid: uid,
                 asetId: asetId,
                 bulan: bulan,
                 nilaiSen: nilaiSen,
@@ -38309,6 +41094,7 @@ class $$NilaiAsetBulananTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required int asetId,
                 required String bulan,
                 required int nilaiSen,
@@ -38323,6 +41109,7 @@ class $$NilaiAsetBulananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => NilaiAsetBulananCompanion.insert(
                 id: id,
+                uid: uid,
                 asetId: asetId,
                 bulan: bulan,
                 nilaiSen: nilaiSen,
@@ -38406,6 +41193,7 @@ typedef $$NilaiAsetBulananTableProcessedTableManager =
 typedef $$NilaiKewajibanBulananTableCreateCompanionBuilder =
     NilaiKewajibanBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required int kewajibanId,
       required String bulan,
       required int nilaiSen,
@@ -38422,6 +41210,7 @@ typedef $$NilaiKewajibanBulananTableCreateCompanionBuilder =
 typedef $$NilaiKewajibanBulananTableUpdateCompanionBuilder =
     NilaiKewajibanBulananCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<int> kewajibanId,
       Value<String> bulan,
       Value<int> nilaiSen,
@@ -38478,6 +41267,11 @@ class $$NilaiKewajibanBulananTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -38574,6 +41368,11 @@ class $$NilaiKewajibanBulananTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get bulan => $composableBuilder(
     column: $table.bulan,
     builder: (column) => ColumnOrderings(column),
@@ -38664,6 +41463,9 @@ class $$NilaiKewajibanBulananTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get bulan =>
       $composableBuilder(column: $table.bulan, builder: (column) => column);
@@ -38774,6 +41576,7 @@ class $$NilaiKewajibanBulananTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<int> kewajibanId = const Value.absent(),
                 Value<String> bulan = const Value.absent(),
                 Value<int> nilaiSen = const Value.absent(),
@@ -38788,6 +41591,7 @@ class $$NilaiKewajibanBulananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => NilaiKewajibanBulananCompanion(
                 id: id,
+                uid: uid,
                 kewajibanId: kewajibanId,
                 bulan: bulan,
                 nilaiSen: nilaiSen,
@@ -38804,6 +41608,7 @@ class $$NilaiKewajibanBulananTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required int kewajibanId,
                 required String bulan,
                 required int nilaiSen,
@@ -38818,6 +41623,7 @@ class $$NilaiKewajibanBulananTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => NilaiKewajibanBulananCompanion.insert(
                 id: id,
+                uid: uid,
                 kewajibanId: kewajibanId,
                 bulan: bulan,
                 nilaiSen: nilaiSen,
@@ -38901,6 +41707,7 @@ typedef $$NilaiKewajibanBulananTableProcessedTableManager =
     >;
 typedef $$VisiTableCreateCompanionBuilder = VisiCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idVisi,
   required String nama,
   Value<String?> keterangan,
@@ -38911,6 +41718,7 @@ typedef $$VisiTableCreateCompanionBuilder = VisiCompanion Function({
 });
 typedef $$VisiTableUpdateCompanionBuilder = VisiCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idVisi,
   Value<String> nama,
   Value<String?> keterangan,
@@ -38953,6 +41761,11 @@ class $$VisiTableFilterComposer extends Composer<_$AppDatabase, $VisiTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -39030,6 +41843,11 @@ class $$VisiTableOrderingComposer extends Composer<_$AppDatabase, $VisiTable> {
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idVisi => $composableBuilder(
     column: $table.idVisi,
     builder: (column) => ColumnOrderings(column),
@@ -39077,6 +41895,9 @@ class $$VisiTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idVisi =>
       $composableBuilder(column: $table.idVisi, builder: (column) => column);
@@ -39160,6 +41981,7 @@ class $$VisiTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idVisi = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String?> keterangan = const Value.absent(),
@@ -39169,6 +41991,7 @@ class $$VisiTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => VisiCompanion(
                 id: id,
+                uid: uid,
                 idVisi: idVisi,
                 nama: nama,
                 keterangan: keterangan,
@@ -39180,6 +42003,7 @@ class $$VisiTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idVisi,
                 required String nama,
                 Value<String?> keterangan = const Value.absent(),
@@ -39189,6 +42013,7 @@ class $$VisiTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => VisiCompanion.insert(
                 id: id,
+                uid: uid,
                 idVisi: idVisi,
                 nama: nama,
                 keterangan: keterangan,
@@ -39251,6 +42076,7 @@ typedef $$VisiTableProcessedTableManager =
     >;
 typedef $$AreaHidupTableCreateCompanionBuilder = AreaHidupCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idArea,
   Value<int?> visiId,
   required String nama,
@@ -39262,6 +42088,7 @@ typedef $$AreaHidupTableCreateCompanionBuilder = AreaHidupCompanion Function({
 });
 typedef $$AreaHidupTableUpdateCompanionBuilder = AreaHidupCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idArea,
   Value<int?> visiId,
   Value<String> nama,
@@ -39324,6 +42151,11 @@ class $$AreaHidupTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -39425,6 +42257,11 @@ class $$AreaHidupTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idArea => $composableBuilder(
     column: $table.idArea,
     builder: (column) => ColumnOrderings(column),
@@ -39495,6 +42332,9 @@ class $$AreaHidupTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idArea =>
       $composableBuilder(column: $table.idArea, builder: (column) => column);
@@ -39601,6 +42441,7 @@ class $$AreaHidupTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idArea = const Value.absent(),
                 Value<int?> visiId = const Value.absent(),
                 Value<String> nama = const Value.absent(),
@@ -39611,6 +42452,7 @@ class $$AreaHidupTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => AreaHidupCompanion(
                 id: id,
+                uid: uid,
                 idArea: idArea,
                 visiId: visiId,
                 nama: nama,
@@ -39623,6 +42465,7 @@ class $$AreaHidupTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idArea,
                 Value<int?> visiId = const Value.absent(),
                 required String nama,
@@ -39633,6 +42476,7 @@ class $$AreaHidupTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => AreaHidupCompanion.insert(
                 id: id,
+                uid: uid,
                 idArea: idArea,
                 visiId: visiId,
                 nama: nama,
@@ -39725,6 +42569,7 @@ typedef $$AreaHidupTableProcessedTableManager =
     >;
 typedef $$TujuanTableCreateCompanionBuilder = TujuanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idTujuan,
   required String nama,
   Value<String> area,
@@ -39742,6 +42587,7 @@ typedef $$TujuanTableCreateCompanionBuilder = TujuanCompanion Function({
 });
 typedef $$TujuanTableUpdateCompanionBuilder = TujuanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idTujuan,
   Value<String> nama,
   Value<String> area,
@@ -39829,6 +42675,11 @@ class $$TujuanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -39985,6 +42836,11 @@ class $$TujuanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idTujuan => $composableBuilder(
     column: $table.idTujuan,
     builder: (column) => ColumnOrderings(column),
@@ -40085,6 +42941,9 @@ class $$TujuanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idTujuan =>
       $composableBuilder(column: $table.idTujuan, builder: (column) => column);
@@ -40240,6 +43099,7 @@ class $$TujuanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idTujuan = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> area = const Value.absent(),
@@ -40256,6 +43116,7 @@ class $$TujuanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TujuanCompanion(
                 id: id,
+                uid: uid,
                 idTujuan: idTujuan,
                 nama: nama,
                 area: area,
@@ -40274,6 +43135,7 @@ class $$TujuanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idTujuan,
                 required String nama,
                 Value<String> area = const Value.absent(),
@@ -40290,6 +43152,7 @@ class $$TujuanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TujuanCompanion.insert(
                 id: id,
+                uid: uid,
                 idTujuan: idTujuan,
                 nama: nama,
                 area: area,
@@ -40411,6 +43274,7 @@ typedef $$TujuanTableProcessedTableManager =
     >;
 typedef $$ProyekTableCreateCompanionBuilder = ProyekCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idProyek,
   Value<int?> tujuanId,
   required String nama,
@@ -40424,6 +43288,7 @@ typedef $$ProyekTableCreateCompanionBuilder = ProyekCompanion Function({
 });
 typedef $$ProyekTableUpdateCompanionBuilder = ProyekCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idProyek,
   Value<int?> tujuanId,
   Value<String> nama,
@@ -40488,6 +43353,11 @@ class $$ProyekTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -40599,6 +43469,11 @@ class $$ProyekTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idProyek => $composableBuilder(
     column: $table.idProyek,
     builder: (column) => ColumnOrderings(column),
@@ -40679,6 +43554,9 @@ class $$ProyekTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idProyek =>
       $composableBuilder(column: $table.idProyek, builder: (column) => column);
@@ -40791,6 +43669,7 @@ class $$ProyekTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idProyek = const Value.absent(),
                 Value<int?> tujuanId = const Value.absent(),
                 Value<String> nama = const Value.absent(),
@@ -40803,6 +43682,7 @@ class $$ProyekTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => ProyekCompanion(
                 id: id,
+                uid: uid,
                 idProyek: idProyek,
                 tujuanId: tujuanId,
                 nama: nama,
@@ -40817,6 +43697,7 @@ class $$ProyekTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idProyek,
                 Value<int?> tujuanId = const Value.absent(),
                 required String nama,
@@ -40829,6 +43710,7 @@ class $$ProyekTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => ProyekCompanion.insert(
                 id: id,
+                uid: uid,
                 idProyek: idProyek,
                 tujuanId: tujuanId,
                 nama: nama,
@@ -40921,6 +43803,7 @@ typedef $$ProyekTableProcessedTableManager =
     >;
 typedef $$TugasTableCreateCompanionBuilder = TugasCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idTugas,
   Value<int?> tujuanId,
   Value<int?> proyekId,
@@ -40941,6 +43824,7 @@ typedef $$TugasTableCreateCompanionBuilder = TugasCompanion Function({
 });
 typedef $$TugasTableUpdateCompanionBuilder = TugasCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idTugas,
   Value<int?> tujuanId,
   Value<int?> proyekId,
@@ -41009,6 +43893,11 @@ class $$TugasTableFilterComposer extends Composer<_$AppDatabase, $TugasTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -41148,6 +44037,11 @@ class $$TugasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idTugas => $composableBuilder(
     column: $table.idTugas,
     builder: (column) => ColumnOrderings(column),
@@ -41281,6 +44175,9 @@ class $$TugasTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idTugas =>
       $composableBuilder(column: $table.idTugas, builder: (column) => column);
@@ -41419,6 +44316,7 @@ class $$TugasTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idTugas = const Value.absent(),
                 Value<int?> tujuanId = const Value.absent(),
                 Value<int?> proyekId = const Value.absent(),
@@ -41438,6 +44336,7 @@ class $$TugasTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TugasCompanion(
                 id: id,
+                uid: uid,
                 idTugas: idTugas,
                 tujuanId: tujuanId,
                 proyekId: proyekId,
@@ -41459,6 +44358,7 @@ class $$TugasTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idTugas,
                 Value<int?> tujuanId = const Value.absent(),
                 Value<int?> proyekId = const Value.absent(),
@@ -41478,6 +44378,7 @@ class $$TugasTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => TugasCompanion.insert(
                 id: id,
+                uid: uid,
                 idTugas: idTugas,
                 tujuanId: tujuanId,
                 proyekId: proyekId,
@@ -41576,6 +44477,7 @@ typedef $$TugasTableProcessedTableManager =
     >;
 typedef $$KebiasaanTableCreateCompanionBuilder = KebiasaanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idKebiasaan,
   required String nama,
   Value<String> ikon,
@@ -41589,6 +44491,7 @@ typedef $$KebiasaanTableCreateCompanionBuilder = KebiasaanCompanion Function({
 });
 typedef $$KebiasaanTableUpdateCompanionBuilder = KebiasaanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idKebiasaan,
   Value<String> nama,
   Value<String> ikon,
@@ -41635,6 +44538,11 @@ class $$KebiasaanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -41728,6 +44636,11 @@ class $$KebiasaanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idKebiasaan => $composableBuilder(
     column: $table.idKebiasaan,
     builder: (column) => ColumnOrderings(column),
@@ -41790,6 +44703,9 @@ class $$KebiasaanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idKebiasaan => $composableBuilder(
     column: $table.idKebiasaan,
@@ -41884,6 +44800,7 @@ class $$KebiasaanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idKebiasaan = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> ikon = const Value.absent(),
@@ -41896,6 +44813,7 @@ class $$KebiasaanTableTableManager
                 Value<DateTime> dibuatPada = const Value.absent(),
               }) => KebiasaanCompanion(
                 id: id,
+                uid: uid,
                 idKebiasaan: idKebiasaan,
                 nama: nama,
                 ikon: ikon,
@@ -41910,6 +44828,7 @@ class $$KebiasaanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idKebiasaan,
                 required String nama,
                 Value<String> ikon = const Value.absent(),
@@ -41922,6 +44841,7 @@ class $$KebiasaanTableTableManager
                 Value<DateTime> dibuatPada = const Value.absent(),
               }) => KebiasaanCompanion.insert(
                 id: id,
+                uid: uid,
                 idKebiasaan: idKebiasaan,
                 nama: nama,
                 ikon: ikon,
@@ -41994,6 +44914,7 @@ typedef $$KebiasaanTableProcessedTableManager =
 typedef $$LogKebiasaanTableCreateCompanionBuilder =
     LogKebiasaanCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required int kebiasaanId,
       required DateTime tanggal,
       Value<double> nilai,
@@ -42003,6 +44924,7 @@ typedef $$LogKebiasaanTableCreateCompanionBuilder =
 typedef $$LogKebiasaanTableUpdateCompanionBuilder =
     LogKebiasaanCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<int> kebiasaanId,
       Value<DateTime> tanggal,
       Value<double> nilai,
@@ -42044,6 +44966,11 @@ class $$LogKebiasaanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -42105,6 +45032,11 @@ class $$LogKebiasaanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -42160,6 +45092,9 @@ class $$LogKebiasaanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -42228,6 +45163,7 @@ class $$LogKebiasaanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<int> kebiasaanId = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<double> nilai = const Value.absent(),
@@ -42235,6 +45171,7 @@ class $$LogKebiasaanTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogKebiasaanCompanion(
                 id: id,
+                uid: uid,
                 kebiasaanId: kebiasaanId,
                 tanggal: tanggal,
                 nilai: nilai,
@@ -42244,6 +45181,7 @@ class $$LogKebiasaanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required int kebiasaanId,
                 required DateTime tanggal,
                 Value<double> nilai = const Value.absent(),
@@ -42251,6 +45189,7 @@ class $$LogKebiasaanTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogKebiasaanCompanion.insert(
                 id: id,
+                uid: uid,
                 kebiasaanId: kebiasaanId,
                 tanggal: tanggal,
                 nilai: nilai,
@@ -42324,6 +45263,7 @@ typedef $$LogKebiasaanTableProcessedTableManager =
     >;
 typedef $$PerawatanTableCreateCompanionBuilder = PerawatanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String nama,
   Value<String> kategori,
   Value<int> intervalHari,
@@ -42340,6 +45280,7 @@ typedef $$PerawatanTableCreateCompanionBuilder = PerawatanCompanion Function({
 });
 typedef $$PerawatanTableUpdateCompanionBuilder = PerawatanCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> nama,
   Value<String> kategori,
   Value<int> intervalHari,
@@ -42366,6 +45307,11 @@ class $$PerawatanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -42449,6 +45395,11 @@ class $$PerawatanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get nama => $composableBuilder(
     column: $table.nama,
     builder: (column) => ColumnOrderings(column),
@@ -42526,6 +45477,9 @@ class $$PerawatanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get nama =>
       $composableBuilder(column: $table.nama, builder: (column) => column);
@@ -42613,6 +45567,7 @@ class $$PerawatanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> kategori = const Value.absent(),
                 Value<int> intervalHari = const Value.absent(),
@@ -42628,6 +45583,7 @@ class $$PerawatanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => PerawatanCompanion(
                 id: id,
+                uid: uid,
                 nama: nama,
                 kategori: kategori,
                 intervalHari: intervalHari,
@@ -42645,6 +45601,7 @@ class $$PerawatanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String nama,
                 Value<String> kategori = const Value.absent(),
                 Value<int> intervalHari = const Value.absent(),
@@ -42660,6 +45617,7 @@ class $$PerawatanTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => PerawatanCompanion.insert(
                 id: id,
+                uid: uid,
                 nama: nama,
                 kategori: kategori,
                 intervalHari: intervalHari,
@@ -42711,6 +45669,7 @@ typedef $$PerawatanTableProcessedTableManager =
 typedef $$UkuranTubuhTableCreateCompanionBuilder =
     UkuranTubuhCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required String jenis,
       required double nilai,
       Value<String> satuan,
@@ -42721,6 +45680,7 @@ typedef $$UkuranTubuhTableCreateCompanionBuilder =
 typedef $$UkuranTubuhTableUpdateCompanionBuilder =
     UkuranTubuhCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<String> jenis,
       Value<double> nilai,
       Value<String> satuan,
@@ -42740,6 +45700,11 @@ class $$UkuranTubuhTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -42788,6 +45753,11 @@ class $$UkuranTubuhTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get jenis => $composableBuilder(
     column: $table.jenis,
     builder: (column) => ColumnOrderings(column),
@@ -42830,6 +45800,9 @@ class $$UkuranTubuhTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get jenis =>
       $composableBuilder(column: $table.jenis, builder: (column) => column);
@@ -42884,6 +45857,7 @@ class $$UkuranTubuhTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<double> nilai = const Value.absent(),
                 Value<String> satuan = const Value.absent(),
@@ -42892,6 +45866,7 @@ class $$UkuranTubuhTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => UkuranTubuhCompanion(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 nilai: nilai,
                 satuan: satuan,
@@ -42902,6 +45877,7 @@ class $$UkuranTubuhTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String jenis,
                 required double nilai,
                 Value<String> satuan = const Value.absent(),
@@ -42910,6 +45886,7 @@ class $$UkuranTubuhTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => UkuranTubuhCompanion.insert(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 nilai: nilai,
                 satuan: satuan,
@@ -42953,6 +45930,7 @@ typedef $$UkuranTubuhTableProcessedTableManager =
     >;
 typedef $$AktivitasTableCreateCompanionBuilder = AktivitasCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String jenis,
   required int durasiMenit,
   Value<double?> jarakKm,
@@ -42963,6 +45941,7 @@ typedef $$AktivitasTableCreateCompanionBuilder = AktivitasCompanion Function({
 });
 typedef $$AktivitasTableUpdateCompanionBuilder = AktivitasCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> jenis,
   Value<int> durasiMenit,
   Value<double?> jarakKm,
@@ -42983,6 +45962,11 @@ class $$AktivitasTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -43036,6 +46020,11 @@ class $$AktivitasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get jenis => $composableBuilder(
     column: $table.jenis,
     builder: (column) => ColumnOrderings(column),
@@ -43083,6 +46072,9 @@ class $$AktivitasTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get jenis =>
       $composableBuilder(column: $table.jenis, builder: (column) => column);
@@ -43141,6 +46133,7 @@ class $$AktivitasTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<int> durasiMenit = const Value.absent(),
                 Value<double?> jarakKm = const Value.absent(),
@@ -43150,6 +46143,7 @@ class $$AktivitasTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => AktivitasCompanion(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 durasiMenit: durasiMenit,
                 jarakKm: jarakKm,
@@ -43161,6 +46155,7 @@ class $$AktivitasTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String jenis,
                 required int durasiMenit,
                 Value<double?> jarakKm = const Value.absent(),
@@ -43170,6 +46165,7 @@ class $$AktivitasTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => AktivitasCompanion.insert(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 durasiMenit: durasiMenit,
                 jarakKm: jarakKm,
@@ -43211,6 +46207,7 @@ typedef $$AktivitasTableProcessedTableManager =
     >;
 typedef $$TidurTableCreateCompanionBuilder = TidurCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required DateTime tanggal,
   required DateTime jamTidur,
   required DateTime jamBangun,
@@ -43222,6 +46219,7 @@ typedef $$TidurTableCreateCompanionBuilder = TidurCompanion Function({
 });
 typedef $$TidurTableUpdateCompanionBuilder = TidurCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<DateTime> tanggal,
   Value<DateTime> jamTidur,
   Value<DateTime> jamBangun,
@@ -43242,6 +46240,11 @@ class $$TidurTableFilterComposer extends Composer<_$AppDatabase, $TidurTable> {
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -43300,6 +46303,11 @@ class $$TidurTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -43352,6 +46360,9 @@ class $$TidurTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -43413,6 +46424,7 @@ class $$TidurTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<DateTime> jamTidur = const Value.absent(),
                 Value<DateTime> jamBangun = const Value.absent(),
@@ -43423,6 +46435,7 @@ class $$TidurTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => TidurCompanion(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jamTidur: jamTidur,
                 jamBangun: jamBangun,
@@ -43435,6 +46448,7 @@ class $$TidurTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required DateTime tanggal,
                 required DateTime jamTidur,
                 required DateTime jamBangun,
@@ -43445,6 +46459,7 @@ class $$TidurTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => TidurCompanion.insert(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jamTidur: jamTidur,
                 jamBangun: jamBangun,
@@ -44859,12 +47874,14 @@ typedef $$MinumObatTableProcessedTableManager =
     >;
 typedef $$CatatanAirTableCreateCompanionBuilder = CatatanAirCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required DateTime waktu,
   Value<int> jumlahMl,
   Value<String?> catatan,
 });
 typedef $$CatatanAirTableUpdateCompanionBuilder = CatatanAirCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<DateTime> waktu,
   Value<int> jumlahMl,
   Value<String?> catatan,
@@ -44881,6 +47898,11 @@ class $$CatatanAirTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -44914,6 +47936,11 @@ class $$CatatanAirTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get waktu => $composableBuilder(
     column: $table.waktu,
     builder: (column) => ColumnOrderings(column),
@@ -44941,6 +47968,9 @@ class $$CatatanAirTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get waktu =>
       $composableBuilder(column: $table.waktu, builder: (column) => column);
@@ -44984,11 +48014,13 @@ class $$CatatanAirTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<DateTime> waktu = const Value.absent(),
                 Value<int> jumlahMl = const Value.absent(),
                 Value<String?> catatan = const Value.absent(),
               }) => CatatanAirCompanion(
                 id: id,
+                uid: uid,
                 waktu: waktu,
                 jumlahMl: jumlahMl,
                 catatan: catatan,
@@ -44996,11 +48028,13 @@ class $$CatatanAirTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required DateTime waktu,
                 Value<int> jumlahMl = const Value.absent(),
                 Value<String?> catatan = const Value.absent(),
               }) => CatatanAirCompanion.insert(
                 id: id,
+                uid: uid,
                 waktu: waktu,
                 jumlahMl: jumlahMl,
                 catatan: catatan,
@@ -45041,6 +48075,7 @@ typedef $$CatatanAirTableProcessedTableManager =
     >;
 typedef $$DokumenTableCreateCompanionBuilder = DokumenCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required String idDokumen,
   required String nama,
   Value<String> jenis,
@@ -45060,6 +48095,7 @@ typedef $$DokumenTableCreateCompanionBuilder = DokumenCompanion Function({
 });
 typedef $$DokumenTableUpdateCompanionBuilder = DokumenCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<String> idDokumen,
   Value<String> nama,
   Value<String> jenis,
@@ -45089,6 +48125,11 @@ class $$DokumenTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -45187,6 +48228,11 @@ class $$DokumenTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get idDokumen => $composableBuilder(
     column: $table.idDokumen,
     builder: (column) => ColumnOrderings(column),
@@ -45279,6 +48325,9 @@ class $$DokumenTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get idDokumen =>
       $composableBuilder(column: $table.idDokumen, builder: (column) => column);
@@ -45373,6 +48422,7 @@ class $$DokumenTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> idDokumen = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
@@ -45391,6 +48441,7 @@ class $$DokumenTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => DokumenCompanion(
                 id: id,
+                uid: uid,
                 idDokumen: idDokumen,
                 nama: nama,
                 jenis: jenis,
@@ -45411,6 +48462,7 @@ class $$DokumenTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String idDokumen,
                 required String nama,
                 Value<String> jenis = const Value.absent(),
@@ -45429,6 +48481,7 @@ class $$DokumenTableTableManager
                 Value<DateTime> diubahPada = const Value.absent(),
               }) => DokumenCompanion.insert(
                 id: id,
+                uid: uid,
                 idDokumen: idDokumen,
                 nama: nama,
                 jenis: jenis,
@@ -46331,6 +49384,7 @@ typedef $$TundaPengingatTableProcessedTableManager =
 typedef $$PembayaranKewajibanTableCreateCompanionBuilder =
     PembayaranKewajibanCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required int kewajibanId,
       required DateTime tanggal,
       required int jumlahSen,
@@ -46342,6 +49396,7 @@ typedef $$PembayaranKewajibanTableCreateCompanionBuilder =
 typedef $$PembayaranKewajibanTableUpdateCompanionBuilder =
     PembayaranKewajibanCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<int> kewajibanId,
       Value<DateTime> tanggal,
       Value<int> jumlahSen,
@@ -46393,6 +49448,11 @@ class $$PembayaranKewajibanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -46464,6 +49524,11 @@ class $$PembayaranKewajibanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -46529,6 +49594,9 @@ class $$PembayaranKewajibanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -46611,6 +49679,7 @@ class $$PembayaranKewajibanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<int> kewajibanId = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<int> jumlahSen = const Value.absent(),
@@ -46620,6 +49689,7 @@ class $$PembayaranKewajibanTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => PembayaranKewajibanCompanion(
                 id: id,
+                uid: uid,
                 kewajibanId: kewajibanId,
                 tanggal: tanggal,
                 jumlahSen: jumlahSen,
@@ -46631,6 +49701,7 @@ class $$PembayaranKewajibanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required int kewajibanId,
                 required DateTime tanggal,
                 required int jumlahSen,
@@ -46640,6 +49711,7 @@ class $$PembayaranKewajibanTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => PembayaranKewajibanCompanion.insert(
                 id: id,
+                uid: uid,
                 kewajibanId: kewajibanId,
                 tanggal: tanggal,
                 jumlahSen: jumlahSen,
@@ -46719,6 +49791,7 @@ typedef $$PembayaranKewajibanTableProcessedTableManager =
 typedef $$PengeluaranTerencanaTableCreateCompanionBuilder =
     PengeluaranTerencanaCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required String nama,
       required int jumlahSen,
       required DateTime tanggal,
@@ -46731,6 +49804,7 @@ typedef $$PengeluaranTerencanaTableCreateCompanionBuilder =
 typedef $$PengeluaranTerencanaTableUpdateCompanionBuilder =
     PengeluaranTerencanaCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<String> nama,
       Value<int> jumlahSen,
       Value<DateTime> tanggal,
@@ -46752,6 +49826,11 @@ class $$PengeluaranTerencanaTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -46810,6 +49889,11 @@ class $$PengeluaranTerencanaTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get nama => $composableBuilder(
     column: $table.nama,
     builder: (column) => ColumnOrderings(column),
@@ -46862,6 +49946,9 @@ class $$PengeluaranTerencanaTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get nama =>
       $composableBuilder(column: $table.nama, builder: (column) => column);
@@ -46938,6 +50025,7 @@ class $$PengeluaranTerencanaTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> nama = const Value.absent(),
                 Value<int> jumlahSen = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
@@ -46948,6 +50036,7 @@ class $$PengeluaranTerencanaTableTableManager
                 Value<DateTime> dibuatPada = const Value.absent(),
               }) => PengeluaranTerencanaCompanion(
                 id: id,
+                uid: uid,
                 nama: nama,
                 jumlahSen: jumlahSen,
                 tanggal: tanggal,
@@ -46960,6 +50049,7 @@ class $$PengeluaranTerencanaTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String nama,
                 required int jumlahSen,
                 required DateTime tanggal,
@@ -46970,6 +50060,7 @@ class $$PengeluaranTerencanaTableTableManager
                 Value<DateTime> dibuatPada = const Value.absent(),
               }) => PengeluaranTerencanaCompanion.insert(
                 id: id,
+                uid: uid,
                 nama: nama,
                 jumlahSen: jumlahSen,
                 tanggal: tanggal,
@@ -47022,6 +50113,7 @@ typedef $$PengeluaranTerencanaTableProcessedTableManager =
     >;
 typedef $$LogPuasaTableCreateCompanionBuilder = LogPuasaCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required DateTime tanggal,
   required String jenis,
   Value<String> status,
@@ -47030,6 +50122,7 @@ typedef $$LogPuasaTableCreateCompanionBuilder = LogPuasaCompanion Function({
 });
 typedef $$LogPuasaTableUpdateCompanionBuilder = LogPuasaCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<DateTime> tanggal,
   Value<String> jenis,
   Value<String> status,
@@ -47048,6 +50141,11 @@ class $$LogPuasaTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -47091,6 +50189,11 @@ class $$LogPuasaTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -47128,6 +50231,9 @@ class $$LogPuasaTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -47179,6 +50285,7 @@ class $$LogPuasaTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<String> status = const Value.absent(),
@@ -47186,6 +50293,7 @@ class $$LogPuasaTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogPuasaCompanion(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jenis: jenis,
                 status: status,
@@ -47195,6 +50303,7 @@ class $$LogPuasaTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required DateTime tanggal,
                 required String jenis,
                 Value<String> status = const Value.absent(),
@@ -47202,6 +50311,7 @@ class $$LogPuasaTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogPuasaCompanion.insert(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jenis: jenis,
                 status: status,
@@ -47244,6 +50354,7 @@ typedef $$LogPuasaTableProcessedTableManager =
     >;
 typedef $$LogQuranTableCreateCompanionBuilder = LogQuranCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required DateTime tanggal,
   required String jenis,
   Value<double> jumlah,
@@ -47254,6 +50365,7 @@ typedef $$LogQuranTableCreateCompanionBuilder = LogQuranCompanion Function({
 });
 typedef $$LogQuranTableUpdateCompanionBuilder = LogQuranCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<DateTime> tanggal,
   Value<String> jenis,
   Value<double> jumlah,
@@ -47274,6 +50386,11 @@ class $$LogQuranTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -47327,6 +50444,11 @@ class $$LogQuranTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -47374,6 +50496,9 @@ class $$LogQuranTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -47431,6 +50556,7 @@ class $$LogQuranTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<double> jumlah = const Value.absent(),
@@ -47440,6 +50566,7 @@ class $$LogQuranTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogQuranCompanion(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jenis: jenis,
                 jumlah: jumlah,
@@ -47451,6 +50578,7 @@ class $$LogQuranTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required DateTime tanggal,
                 required String jenis,
                 Value<double> jumlah = const Value.absent(),
@@ -47460,6 +50588,7 @@ class $$LogQuranTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogQuranCompanion.insert(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jenis: jenis,
                 jumlah: jumlah,
@@ -47504,6 +50633,7 @@ typedef $$LogQuranTableProcessedTableManager =
     >;
 typedef $$LogDzikirTableCreateCompanionBuilder = LogDzikirCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   required DateTime tanggal,
   required String jenis,
   required String nama,
@@ -47515,6 +50645,7 @@ typedef $$LogDzikirTableCreateCompanionBuilder = LogDzikirCompanion Function({
 });
 typedef $$LogDzikirTableUpdateCompanionBuilder = LogDzikirCompanion Function({
   Value<int> id,
+  Value<String?> uid,
   Value<DateTime> tanggal,
   Value<String> jenis,
   Value<String> nama,
@@ -47536,6 +50667,11 @@ class $$LogDzikirTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -47594,6 +50730,11 @@ class $$LogDzikirTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -47646,6 +50787,9 @@ class $$LogDzikirTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -47708,6 +50852,7 @@ class $$LogDzikirTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<String> nama = const Value.absent(),
@@ -47718,6 +50863,7 @@ class $$LogDzikirTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogDzikirCompanion(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jenis: jenis,
                 nama: nama,
@@ -47730,6 +50876,7 @@ class $$LogDzikirTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required DateTime tanggal,
                 required String jenis,
                 required String nama,
@@ -47740,6 +50887,7 @@ class $$LogDzikirTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => LogDzikirCompanion.insert(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 jenis: jenis,
                 nama: nama,
@@ -47786,6 +50934,7 @@ typedef $$LogDzikirTableProcessedTableManager =
 typedef $$RefleksiMuhasabahTableCreateCompanionBuilder =
     RefleksiMuhasabahCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required DateTime tanggal,
       Value<bool?> sholatTerjaga,
       Value<bool?> mengingatAllah,
@@ -47799,6 +50948,7 @@ typedef $$RefleksiMuhasabahTableCreateCompanionBuilder =
 typedef $$RefleksiMuhasabahTableUpdateCompanionBuilder =
     RefleksiMuhasabahCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<DateTime> tanggal,
       Value<bool?> sholatTerjaga,
       Value<bool?> mengingatAllah,
@@ -47821,6 +50971,11 @@ class $$RefleksiMuhasabahTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -47884,6 +51039,11 @@ class $$RefleksiMuhasabahTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get tanggal => $composableBuilder(
     column: $table.tanggal,
     builder: (column) => ColumnOrderings(column),
@@ -47941,6 +51101,9 @@ class $$RefleksiMuhasabahTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<DateTime> get tanggal =>
       $composableBuilder(column: $table.tanggal, builder: (column) => column);
@@ -48021,6 +51184,7 @@ class $$RefleksiMuhasabahTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<DateTime> tanggal = const Value.absent(),
                 Value<bool?> sholatTerjaga = const Value.absent(),
                 Value<bool?> mengingatAllah = const Value.absent(),
@@ -48032,6 +51196,7 @@ class $$RefleksiMuhasabahTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => RefleksiMuhasabahCompanion(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 sholatTerjaga: sholatTerjaga,
                 mengingatAllah: mengingatAllah,
@@ -48045,6 +51210,7 @@ class $$RefleksiMuhasabahTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required DateTime tanggal,
                 Value<bool?> sholatTerjaga = const Value.absent(),
                 Value<bool?> mengingatAllah = const Value.absent(),
@@ -48056,6 +51222,7 @@ class $$RefleksiMuhasabahTableTableManager
                 Value<DateTime> dicatatPada = const Value.absent(),
               }) => RefleksiMuhasabahCompanion.insert(
                 id: id,
+                uid: uid,
                 tanggal: tanggal,
                 sholatTerjaga: sholatTerjaga,
                 mengingatAllah: mengingatAllah,
@@ -48109,6 +51276,7 @@ typedef $$RefleksiMuhasabahTableProcessedTableManager =
 typedef $$CatatanKesehatanTableCreateCompanionBuilder =
     CatatanKesehatanCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       required String jenis,
       required DateTime waktu,
       required double nilai,
@@ -48120,6 +51288,7 @@ typedef $$CatatanKesehatanTableCreateCompanionBuilder =
 typedef $$CatatanKesehatanTableUpdateCompanionBuilder =
     CatatanKesehatanCompanion Function({
       Value<int> id,
+      Value<String?> uid,
       Value<String> jenis,
       Value<DateTime> waktu,
       Value<double> nilai,
@@ -48140,6 +51309,11 @@ class $$CatatanKesehatanTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -48193,6 +51367,11 @@ class $$CatatanKesehatanTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get jenis => $composableBuilder(
     column: $table.jenis,
     builder: (column) => ColumnOrderings(column),
@@ -48240,6 +51419,9 @@ class $$CatatanKesehatanTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
 
   GeneratedColumn<String> get jenis =>
       $composableBuilder(column: $table.jenis, builder: (column) => column);
@@ -48305,6 +51487,7 @@ class $$CatatanKesehatanTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 Value<String> jenis = const Value.absent(),
                 Value<DateTime> waktu = const Value.absent(),
                 Value<double> nilai = const Value.absent(),
@@ -48314,6 +51497,7 @@ class $$CatatanKesehatanTableTableManager
                 Value<DateTime> dibuatPada = const Value.absent(),
               }) => CatatanKesehatanCompanion(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 waktu: waktu,
                 nilai: nilai,
@@ -48325,6 +51509,7 @@ class $$CatatanKesehatanTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
                 required String jenis,
                 required DateTime waktu,
                 required double nilai,
@@ -48334,6 +51519,7 @@ class $$CatatanKesehatanTableTableManager
                 Value<DateTime> dibuatPada = const Value.absent(),
               }) => CatatanKesehatanCompanion.insert(
                 id: id,
+                uid: uid,
                 jenis: jenis,
                 waktu: waktu,
                 nilai: nilai,
@@ -52443,6 +55629,686 @@ typedef $$SuasanaHatiTableProcessedTableManager =
       SuasanaHatiData,
       PrefetchHooks Function()
     >;
+typedef $$SinkronSidikTableCreateCompanionBuilder =
+    SinkronSidikCompanion Function({
+      required String tabel,
+      required String uid,
+      required String sidik,
+      Value<DateTime> waktu,
+      Value<int> rowid,
+    });
+typedef $$SinkronSidikTableUpdateCompanionBuilder =
+    SinkronSidikCompanion Function({
+      Value<String> tabel,
+      Value<String> uid,
+      Value<String> sidik,
+      Value<DateTime> waktu,
+      Value<int> rowid,
+    });
+
+class $$SinkronSidikTableFilterComposer
+    extends Composer<_$AppDatabase, $SinkronSidikTable> {
+  $$SinkronSidikTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get tabel => $composableBuilder(
+    column: $table.tabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sidik => $composableBuilder(
+    column: $table.sidik,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get waktu => $composableBuilder(
+    column: $table.waktu,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SinkronSidikTableOrderingComposer
+    extends Composer<_$AppDatabase, $SinkronSidikTable> {
+  $$SinkronSidikTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get tabel => $composableBuilder(
+    column: $table.tabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sidik => $composableBuilder(
+    column: $table.sidik,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get waktu => $composableBuilder(
+    column: $table.waktu,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SinkronSidikTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SinkronSidikTable> {
+  $$SinkronSidikTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get tabel =>
+      $composableBuilder(column: $table.tabel, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<String> get sidik =>
+      $composableBuilder(column: $table.sidik, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get waktu =>
+      $composableBuilder(column: $table.waktu, builder: (column) => column);
+}
+
+class $$SinkronSidikTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SinkronSidikTable,
+          SinkronSidikData,
+          $$SinkronSidikTableFilterComposer,
+          $$SinkronSidikTableOrderingComposer,
+          $$SinkronSidikTableAnnotationComposer,
+          $$SinkronSidikTableCreateCompanionBuilder,
+          $$SinkronSidikTableUpdateCompanionBuilder,
+          (
+            SinkronSidikData,
+            BaseReferences<_$AppDatabase, $SinkronSidikTable, SinkronSidikData>,
+          ),
+          SinkronSidikData,
+          PrefetchHooks Function()
+        > {
+  $$SinkronSidikTableTableManager(_$AppDatabase db, $SinkronSidikTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SinkronSidikTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SinkronSidikTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SinkronSidikTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> tabel = const Value.absent(),
+                Value<String> uid = const Value.absent(),
+                Value<String> sidik = const Value.absent(),
+                Value<DateTime> waktu = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SinkronSidikCompanion(
+                tabel: tabel,
+                uid: uid,
+                sidik: sidik,
+                waktu: waktu,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String tabel,
+                required String uid,
+                required String sidik,
+                Value<DateTime> waktu = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SinkronSidikCompanion.insert(
+                tabel: tabel,
+                uid: uid,
+                sidik: sidik,
+                waktu: waktu,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SinkronSidikTable, SinkronSidikData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SinkronSidikTable,
+                    SinkronSidikData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SinkronSidikTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SinkronSidikTable,
+      SinkronSidikData,
+      $$SinkronSidikTableFilterComposer,
+      $$SinkronSidikTableOrderingComposer,
+      $$SinkronSidikTableAnnotationComposer,
+      $$SinkronSidikTableCreateCompanionBuilder,
+      $$SinkronSidikTableUpdateCompanionBuilder,
+      (
+        SinkronSidikData,
+        BaseReferences<_$AppDatabase, $SinkronSidikTable, SinkronSidikData>,
+      ),
+      SinkronSidikData,
+      PrefetchHooks Function()
+    >;
+typedef $$SinkronTautanBelumTableCreateCompanionBuilder =
+    SinkronTautanBelumCompanion Function({
+      required String tabel,
+      required String uid,
+      required String kolom,
+      required String uidInduk,
+      Value<int> rowid,
+    });
+typedef $$SinkronTautanBelumTableUpdateCompanionBuilder =
+    SinkronTautanBelumCompanion Function({
+      Value<String> tabel,
+      Value<String> uid,
+      Value<String> kolom,
+      Value<String> uidInduk,
+      Value<int> rowid,
+    });
+
+class $$SinkronTautanBelumTableFilterComposer
+    extends Composer<_$AppDatabase, $SinkronTautanBelumTable> {
+  $$SinkronTautanBelumTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get tabel => $composableBuilder(
+    column: $table.tabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kolom => $composableBuilder(
+    column: $table.kolom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uidInduk => $composableBuilder(
+    column: $table.uidInduk,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SinkronTautanBelumTableOrderingComposer
+    extends Composer<_$AppDatabase, $SinkronTautanBelumTable> {
+  $$SinkronTautanBelumTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get tabel => $composableBuilder(
+    column: $table.tabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kolom => $composableBuilder(
+    column: $table.kolom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uidInduk => $composableBuilder(
+    column: $table.uidInduk,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SinkronTautanBelumTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SinkronTautanBelumTable> {
+  $$SinkronTautanBelumTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get tabel =>
+      $composableBuilder(column: $table.tabel, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<String> get kolom =>
+      $composableBuilder(column: $table.kolom, builder: (column) => column);
+
+  GeneratedColumn<String> get uidInduk =>
+      $composableBuilder(column: $table.uidInduk, builder: (column) => column);
+}
+
+class $$SinkronTautanBelumTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SinkronTautanBelumTable,
+          SinkronTautanBelumData,
+          $$SinkronTautanBelumTableFilterComposer,
+          $$SinkronTautanBelumTableOrderingComposer,
+          $$SinkronTautanBelumTableAnnotationComposer,
+          $$SinkronTautanBelumTableCreateCompanionBuilder,
+          $$SinkronTautanBelumTableUpdateCompanionBuilder,
+          (
+            SinkronTautanBelumData,
+            BaseReferences<
+              _$AppDatabase,
+              $SinkronTautanBelumTable,
+              SinkronTautanBelumData
+            >,
+          ),
+          SinkronTautanBelumData,
+          PrefetchHooks Function()
+        > {
+  $$SinkronTautanBelumTableTableManager(
+    _$AppDatabase db,
+    $SinkronTautanBelumTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SinkronTautanBelumTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SinkronTautanBelumTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SinkronTautanBelumTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> tabel = const Value.absent(),
+                Value<String> uid = const Value.absent(),
+                Value<String> kolom = const Value.absent(),
+                Value<String> uidInduk = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SinkronTautanBelumCompanion(
+                tabel: tabel,
+                uid: uid,
+                kolom: kolom,
+                uidInduk: uidInduk,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String tabel,
+                required String uid,
+                required String kolom,
+                required String uidInduk,
+                Value<int> rowid = const Value.absent(),
+              }) => SinkronTautanBelumCompanion.insert(
+                tabel: tabel,
+                uid: uid,
+                kolom: kolom,
+                uidInduk: uidInduk,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SinkronTautanBelumTable, SinkronTautanBelumData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SinkronTautanBelumTable,
+                    SinkronTautanBelumData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SinkronTautanBelumTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SinkronTautanBelumTable,
+      SinkronTautanBelumData,
+      $$SinkronTautanBelumTableFilterComposer,
+      $$SinkronTautanBelumTableOrderingComposer,
+      $$SinkronTautanBelumTableAnnotationComposer,
+      $$SinkronTautanBelumTableCreateCompanionBuilder,
+      $$SinkronTautanBelumTableUpdateCompanionBuilder,
+      (
+        SinkronTautanBelumData,
+        BaseReferences<
+          _$AppDatabase,
+          $SinkronTautanBelumTable,
+          SinkronTautanBelumData
+        >,
+      ),
+      SinkronTautanBelumData,
+      PrefetchHooks Function()
+    >;
+typedef $$LampiranTableCreateCompanionBuilder = LampiranCompanion Function({
+  Value<int> id,
+  Value<String?> uid,
+  required String indukTabel,
+  required String indukUid,
+  required String jenis,
+  required String berkas,
+  Value<String> keterangan,
+  Value<int> ukuranByte,
+  Value<DateTime> dibuatPada,
+});
+typedef $$LampiranTableUpdateCompanionBuilder = LampiranCompanion Function({
+  Value<int> id,
+  Value<String?> uid,
+  Value<String> indukTabel,
+  Value<String> indukUid,
+  Value<String> jenis,
+  Value<String> berkas,
+  Value<String> keterangan,
+  Value<int> ukuranByte,
+  Value<DateTime> dibuatPada,
+});
+
+class $$LampiranTableFilterComposer
+    extends Composer<_$AppDatabase, $LampiranTable> {
+  $$LampiranTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get indukTabel => $composableBuilder(
+    column: $table.indukTabel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get indukUid => $composableBuilder(
+    column: $table.indukUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jenis => $composableBuilder(
+    column: $table.jenis,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get berkas => $composableBuilder(
+    column: $table.berkas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get ukuranByte => $composableBuilder(
+    column: $table.ukuranByte,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LampiranTableOrderingComposer
+    extends Composer<_$AppDatabase, $LampiranTable> {
+  $$LampiranTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get indukTabel => $composableBuilder(
+    column: $table.indukTabel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get indukUid => $composableBuilder(
+    column: $table.indukUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jenis => $composableBuilder(
+    column: $table.jenis,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get berkas => $composableBuilder(
+    column: $table.berkas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get ukuranByte => $composableBuilder(
+    column: $table.ukuranByte,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LampiranTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LampiranTable> {
+  $$LampiranTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<String> get indukTabel => $composableBuilder(
+    column: $table.indukTabel,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get indukUid =>
+      $composableBuilder(column: $table.indukUid, builder: (column) => column);
+
+  GeneratedColumn<String> get jenis =>
+      $composableBuilder(column: $table.jenis, builder: (column) => column);
+
+  GeneratedColumn<String> get berkas =>
+      $composableBuilder(column: $table.berkas, builder: (column) => column);
+
+  GeneratedColumn<String> get keterangan => $composableBuilder(
+    column: $table.keterangan,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get ukuranByte => $composableBuilder(
+    column: $table.ukuranByte,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => column,
+  );
+}
+
+class $$LampiranTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LampiranTable,
+          LampiranData,
+          $$LampiranTableFilterComposer,
+          $$LampiranTableOrderingComposer,
+          $$LampiranTableAnnotationComposer,
+          $$LampiranTableCreateCompanionBuilder,
+          $$LampiranTableUpdateCompanionBuilder,
+          (
+            LampiranData,
+            BaseReferences<_$AppDatabase, $LampiranTable, LampiranData>,
+          ),
+          LampiranData,
+          PrefetchHooks Function()
+        > {
+  $$LampiranTableTableManager(_$AppDatabase db, $LampiranTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LampiranTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LampiranTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LampiranTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
+                Value<String> indukTabel = const Value.absent(),
+                Value<String> indukUid = const Value.absent(),
+                Value<String> jenis = const Value.absent(),
+                Value<String> berkas = const Value.absent(),
+                Value<String> keterangan = const Value.absent(),
+                Value<int> ukuranByte = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+              }) => LampiranCompanion(
+                id: id,
+                uid: uid,
+                indukTabel: indukTabel,
+                indukUid: indukUid,
+                jenis: jenis,
+                berkas: berkas,
+                keterangan: keterangan,
+                ukuranByte: ukuranByte,
+                dibuatPada: dibuatPada,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
+                required String indukTabel,
+                required String indukUid,
+                required String jenis,
+                required String berkas,
+                Value<String> keterangan = const Value.absent(),
+                Value<int> ukuranByte = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+              }) => LampiranCompanion.insert(
+                id: id,
+                uid: uid,
+                indukTabel: indukTabel,
+                indukUid: indukUid,
+                jenis: jenis,
+                berkas: berkas,
+                keterangan: keterangan,
+                ukuranByte: ukuranByte,
+                dibuatPada: dibuatPada,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LampiranTable, LampiranData>(table),
+                  BaseReferences<_$AppDatabase, $LampiranTable, LampiranData>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LampiranTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LampiranTable,
+      LampiranData,
+      $$LampiranTableFilterComposer,
+      $$LampiranTableOrderingComposer,
+      $$LampiranTableAnnotationComposer,
+      $$LampiranTableCreateCompanionBuilder,
+      $$LampiranTableUpdateCompanionBuilder,
+      (
+        LampiranData,
+        BaseReferences<_$AppDatabase, $LampiranTable, LampiranData>,
+      ),
+      LampiranData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -52548,4 +56414,10 @@ class $AppDatabaseManager {
       $$CatatanMakanTableTableManager(_db, _db.catatanMakan);
   $$SuasanaHatiTableTableManager get suasanaHati =>
       $$SuasanaHatiTableTableManager(_db, _db.suasanaHati);
+  $$SinkronSidikTableTableManager get sinkronSidik =>
+      $$SinkronSidikTableTableManager(_db, _db.sinkronSidik);
+  $$SinkronTautanBelumTableTableManager get sinkronTautanBelum =>
+      $$SinkronTautanBelumTableTableManager(_db, _db.sinkronTautanBelum);
+  $$LampiranTableTableManager get lampiran =>
+      $$LampiranTableTableManager(_db, _db.lampiran);
 }

@@ -3,7 +3,7 @@
 Disusun ulang oleh Aaron (Ron) · 21 Sep 2026.
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 106 · SEBAGIAN 2 · BELUM 44** (total 152 butir)
+**Hitungan: SELESAI 109 · SEBAGIAN 0 · BELUM 43** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -36,7 +36,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-24 | Ekspor cadangan JSON + impor restore (termasuk migrasi antar HP) | - | SELESAI | `lib/core/backup/ekspor_impor.dart`, `lib/features/pengaturan/backup_screen.dart`, uji 28/28. Batas: pemilihan berkas hanya dari folder dokumen aplikasi; berkas tidak dienkripsi. |
 | FR-25 | Ekspor CSV untuk dibuka di spreadsheet | - | SELESAI | Ron 21 Sep: ekspor CSV tagihan & riwayat pembayaran (menu Uang → Ekspor CSV), uji 8 kasus. |
 | FR-26 | Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif | - | BELUM |  |
-| FR-27 | Sinkronisasi antar perangkat via file/cloud pilihan pengguna | - | BELUM |  |
+| FR-27 | Sinkronisasi antar perangkat via file/cloud pilihan pengguna | - | SELESAI | Ron 22 Sep: pilihan kanal sinkron — server sendiri (akun) atau BERKAS (ekspor .json lalu dibagikan lewat WhatsApp/Drive/USB, impor dari pemilih berkas Android). Tanpa server pun jalan. |
 | FR-28 | Grafik sederhana beban tagihan per bulan (total & per kategori) | - | SELESAI | `lib/core/laporan/beban_tagihan.dart` + layar + rute `/laporan/beban-tagihan`, uji 24/24. |
 | FR-29 | Riwayat pembayaran & statistik: rata-rata nominal, jumlah | - | SELESAI | Ron 21 Sep: statistik pembayaran — total, rata-rata, terbesar/terkecil, % tepat waktu, tren 12 bulan. |
 | FR-30 | Proyeksi arus kas 3 bulan ke depan (terinspirasi PocketSmith/ | - | SELESAI | Ron 21 Sep: proyeksi arus kas 3 bulan (tagihan semua frekuensi + langganan aktif), uji 8 kasus. |
@@ -157,7 +157,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 
 | ID | Fitur | Fase | Status | Catatan |
 |---|---|---|---|---|
-| FR-118 | Catatan & Ide | V3 | SEBAGIAN | Ron 22 Sep: catatan, kategori, tag, sematan, arsip, pencarian selesai; lampiran foto & rekaman suara menyusul (perlu izin kamera/mikrofon di HP). |
+| FR-118 | Catatan & Ide | V3 | SELESAI | Ron 22 Sep: catatan, kategori, tag, sematan, arsip, pencarian + LAMPIRAN foto & rekaman suara (kanal Android sendiri, tanpa paket tambahan; berkas disimpan di folder aplikasi). |
 | FR-119 | Jurnal Keputusan (Decision OS) | V3 | SELESAI | Ron 22 Sep: keputusan + pilihan/alasan/risiko/biaya/keyakinan, tinjauan hasil 3/6/12 bulan. |
 | FR-120 | Pelacakan Pembelajaran | V3 | SELESAI | Ron 22 Sep: topik, sumber, menit, tahap belajar + grafik 14 hari. |
 | FR-121 | Pengulangan Berkala (spaced repetition) | V4 | SELESAI | Ron 22 Sep: jadwal ulangan 1/3/7/16/35/90/180 hari dihitung dari jawaban sendiri. |
@@ -214,6 +214,6 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-147 | Notification Center | V2 | SELESAI | rute /notifikasi: riwayat + tingkat + tanda selesai |
 | FR-148 | Snooze & Reschedule Engine (memperluas FR-11 & memperbaiki PB-04) | V2 | SELESAI | 15 menit/1 jam/3 jam/besok 09:00; tercatat di audit |
 | FR-149 | AI Copilot ber-konteks | V4 | BELUM |  |
-| FR-150 | Sinkron Antar Perangkat & Cloud (memperluas FR-27) | V4 | SEBAGIAN | Ron 21 Sep: akun + server sinkron jalan, TAGIHAN sudah tersinkron; modul lain belum. |
+| FR-150 | Sinkron Antar Perangkat & Cloud (memperluas FR-27) | V4 | SELESAI | Ron 22 Sep: sinkron SEMUA MODUL (40 tabel: uang, aset, tujuan/tugas, kebiasaan, kesehatan, dokumen, pengetahuan, ibadah) — pengenal uid, kaitan antar tabel dipetakan ulang antar HP, bentrok versi-kalah disimpan, diuji dua basis data. Belum: berkas lampiran & catatan obat. |
 | FR-151 | Widget & Akses Cepat Lanjutan (memperluas FR-31) | V2 | BELUM |  |
 | FR-152 | Multi-bahasa & Multi-mata Uang (memperluas FR-52) | V4 | BELUM |  |

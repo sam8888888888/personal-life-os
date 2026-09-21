@@ -4,6 +4,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repository/akun_repository.dart';
+import '../sinkron/sinkron_semua.dart';
 import '../sinkron/sinkron_tagihan.dart';
 import '../akun/klien_akun.dart';
 import 'app_providers.dart';
@@ -25,5 +26,14 @@ final sinkronTagihanProvider = Provider<SinkronTagihan>(
     tagihan: ref.watch(tagihanRepoProvider),
     pengaturan: ref.watch(pengaturanRepoProvider),
     klien: ref.watch(klienAkunProvider),
+  ),
+);
+
+/// Mesin sinkron SEMUA MODUL (FR-150). Dipakai tombol "Sinkron sekarang".
+final sinkronSemuaProvider = Provider<SinkronSemua>(
+  (ref) => SinkronSemua(
+    db: ref.watch(databaseProvider),
+    klien: ref.watch(klienAkunProvider),
+    pengaturan: ref.watch(pengaturanRepoProvider),
   ),
 );

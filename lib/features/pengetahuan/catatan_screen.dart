@@ -13,6 +13,7 @@ import '../../core/laporan/pengetahuan_ringkas.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/waktu.dart';
+import 'kartu_lampiran.dart';
 import 'komponen_pengetahuan.dart';
 import 'provider_pengetahuan.dart';
 
@@ -164,6 +165,22 @@ class _CatatanScreenState extends ConsumerState<CatatanScreen> {
     await _muat();
   }
 
+  /// FR-118 — buka lampiran (foto & rekaman suara) milik satu catatan.
+  Future<void> _bukaLampiran(BarisCatatan c) async {
+    final uid =
+        await ref.read(pengetahuanRepoProvider).pastikanUidCatatan(c.id);
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (k) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(k).viewInsets.bottom),
+        child: KartuLampiran(indukTabel: 'catatan_pengetahuan', indukUid: uid),
+      ),
+    );
+    if (mounted) setState(() {});
+  }
+
   Future<void> _hapus(BarisCatatan c) async {
     if (!await konfirmasiHapus(context, 'Catatan "${c.judul}"')) return;
     await ref.read(pengetahuanRepoProvider).hapusCatatan(c.id);
@@ -277,6 +294,7 @@ class _CatatanScreenState extends ConsumerState<CatatanScreen> {
                           if (p == 'arsip') _ubahArsip(c);
                           if (p == 'ubah') _simpan(ada: c);
                           if (p == 'hapus') _hapus(c);
+                          if (p == 'lampiran') _bukaLampiran(c);
                         },
                         itemBuilder: (_) => [
                           PopupMenuItem(
@@ -286,6 +304,11 @@ class _CatatanScreenState extends ConsumerState<CatatanScreen> {
                               value: 'arsip',
                               child: Text(c.arsip ? 'Keluarkan dari arsip' : 'Arsipkan')),
                           const PopupMenuItem(value: 'ubah', child: Text('Ubah')),
+                          const PopupMenuItem(
+                            key: Key('menu_lampiran'),
+                            value: 'lampiran',
+                            child: Text('Lampiran (foto/suara)'),
+                          ),
                           const PopupMenuItem(value: 'hapus', child: Text('Hapus')),
                         ],
                       ),

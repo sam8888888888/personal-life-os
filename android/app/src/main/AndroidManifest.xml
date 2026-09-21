@@ -7,6 +7,11 @@
     <!-- Notifikasi waktu presisi (diminta lewat tombol di layar Pengingat). -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- FR-118: lampiran foto & rekaman suara pada catatan. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Kamera tidak wajib ada: aplikasi tetap jalan tanpa kamera. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
         android:label="Personal Life OS"
         android:name="${applicationName}"

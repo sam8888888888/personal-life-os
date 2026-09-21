@@ -8,6 +8,8 @@
 /// proyek) supaya layar tidak menunggu tanpa akhir bila database terkunci.
 library;
 
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 
 import '../../core/laporan/pengetahuan_ringkas.dart' as ringkas;
@@ -19,6 +21,8 @@ import '../database/database.dart';
 const Duration batasBacaPengetahuan = Duration(seconds: 5);
 
 class PengetahuanRepository {
+  static final Random _acakUid = Random.secure();
+
   PengetahuanRepository(this._db);
 
   final AppDatabase _db;
@@ -86,6 +90,22 @@ class PengetahuanRepository {
       diubahPada: Value(kini),
     ));
     return id;
+  }
+
+  /// Pastikan catatan punya uid stabil (dipakai lampiran FR-118 supaya
+  /// lampirannya tetap menempel walau id angkanya berbeda antar HP).
+  Future<String> pastikanUidCatatan(int id) async {
+    final baris = await (_db.select(_db.catatanPengetahuan)
+          ..where((t) => t.id.equals(id)))
+        .getSingle();
+    final lama = baris.uid;
+    if (lama != null && lama.isNotEmpty) return lama;
+    final baru = List<int>.generate(16, (_) => _acakUid.nextInt(256))
+        .map((x) => x.toRadixString(16).padLeft(2, '0'))
+        .join();
+    await (_db.update(_db.catatanPengetahuan)..where((t) => t.id.equals(id)))
+        .write(CatatanPengetahuanCompanion(uid: Value(baru)));
+    return baru;
   }
 
   Future<void> setelSemat(int id, bool disematkan) =>

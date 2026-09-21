@@ -14,6 +14,7 @@ class MainActivity : FlutterActivity() {
     private val kanalBagikan = "lifeos/bagikan"
     private val kanalBuka = "lifeos/buka"
     private var saluranRute: MethodChannel? = null
+    private val kanalMedia = KanalMedia(this)
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -28,6 +29,8 @@ class MainActivity : FlutterActivity() {
         saluranRute = saluran
         pasangKanalBagikan(flutterEngine)
         pasangKanalBuka(flutterEngine)
+        // FR-118 & FR-27: lampiran foto/suara + pemilih berkas.
+        kanalMedia.pasang(flutterEngine)
     }
 
     /// FR-49: buka tautan ke aplikasi lain (WhatsApp / SMS / Telegram).
@@ -92,6 +95,20 @@ class MainActivity : FlutterActivity() {
                 hasil.error("gagal", e.message, null)
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        kanalMedia.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        kanalMedia.onRequestPermissionsResult(requestCode, grantResults)
     }
 
     override fun onNewIntent(intent: Intent) {

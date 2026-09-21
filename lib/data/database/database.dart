@@ -78,13 +78,18 @@ part 'database.g.dart';
   TautanPengetahuan,
   CatatanMakan,
   SuasanaHati,
+  // Skema v10 — pendukung sinkron semua modul (FR-150), Aaron 22 Sep 2026.
+  SinkronSidik,
+  SinkronTautanBelum,
+  // Skema v11 — lampiran foto & rekaman suara (FR-118).
+  Lampiran,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -194,6 +199,18 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             await _pasangIndeksUnikV5();
             debugPrint('migrasi v5 selesai (visi & area hidup dibuat, '
                 'kolom tujuan.area_id ditambahkan)');
+          }
+          if (dari < 10) {
+            // v10 (FR-150): pengenal `uid` untuk tabel lama + dua tabel
+            // pendukung sinkron. Kolom baru bersifat nullable, jadi data
+            // pengguna tidak tersentuh.
+            await _buatTabelV10(m);
+            debugPrint('migrasi v10 selesai (uid sinkron + tabel pendukung)');
+          }
+          if (dari < 11) {
+            // v11 (FR-118): lampiran foto & rekaman suara pada catatan.
+            if (!await _tabelAda('lampiran')) await m.createTable(lampiran);
+            debugPrint('migrasi v11 selesai (tabel lampiran dibuat)');
           }
         },
       );
@@ -362,6 +379,62 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
       if (await _tabelAda(masuk.key)) continue;
       await m.createTable(masuk.value);
     }
+  }
+
+  /// Skema v10 (FR-150): kolom `uid` pada tabel lama + tabel sidik/tautan
+  /// pendukung sinkron. Semua kolom baru nullable — tidak ada data yang diubah.
+  Future<void> _buatTabelV10(Migrator m) async {
+    for (final masuk in <String, TableInfo<Table, dynamic>>{
+      'sinkron_sidik': sinkronSidik,
+      'sinkron_tautan_belum': sinkronTautanBelum,
+    }.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
+    final Map<String, TableInfo<Table, dynamic>> perluUid = {
+      'riwayat_pembayaran': riwayatPembayaran,
+      'pemasukan_bulanan': pemasukanBulanan,
+      'kategori_transaksi': kategoriTransaksi,
+      'transaksi': transaksi,
+      'anggaran_bulanan': anggaranBulanan,
+      'langganan': langganan,
+      'aset': aset,
+      'kewajiban': kewajiban,
+      'nilai_aset_bulanan': nilaiAsetBulanan,
+      'nilai_kewajiban_bulanan': nilaiKewajibanBulanan,
+      'visi': visi,
+      'area_hidup': areaHidup,
+      'tujuan': tujuan,
+      'proyek': proyek,
+      'tugas': tugas,
+      'kebiasaan': kebiasaan,
+      'log_kebiasaan': logKebiasaan,
+      'perawatan': perawatan,
+      'ukuran_tubuh': ukuranTubuh,
+      'aktivitas': aktivitas,
+      'tidur': tidur,
+      'catatan_air': catatanAir,
+      'dokumen': dokumen,
+      'pembayaran_kewajiban': pembayaranKewajiban,
+      'pengeluaran_terencana': pengeluaranTerencana,
+      'log_puasa': logPuasa,
+      'log_quran': logQuran,
+      'log_dzikir': logDzikir,
+      'refleksi_muhasabah': refleksiMuhasabah,
+      'catatan_kesehatan': catatanKesehatan,
+    };
+    for (final masuk in perluUid.entries) {
+      if (await _kolomAda(masuk.key, 'uid')) continue;
+      final kolomUid = masuk.value.$columns
+          .firstWhere((k) => k.$name == 'uid');
+      await m.addColumn(masuk.value, kolomUid);
+    }
+  }
+
+  /// Cek keberadaan kolom (PRAGMA) — dipakai migrasi agar aman dijalankan ulang.
+  Future<bool> _kolomAda(String namaTabel, String namaKolom) async {
+    final hasil = await customSelect('PRAGMA table_info($namaTabel)').get();
+    return hasil.any((b) => b.read<String>('name') == namaKolom);
   }
 
   /// Cek keberadaan tabel (dipakai migrasi agar aman dijalankan ulang).
