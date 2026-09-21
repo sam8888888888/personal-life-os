@@ -216,6 +216,15 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
                       ),
                       const Divider(height: 1),
                       _pintu(
+                        kunci: 'buka_janji_dokter',
+                        ikon: Icons.event_available_outlined,
+                        judul: 'Janji dokter & kontrol',
+                        keterangan:
+                            'Janji, tes lab & pengingat 7 hari/1 hari/2 jam (FR-109)',
+                        tujuan: '/kesehatan/janji',
+                      ),
+                      const Divider(height: 1),
+                      _pintu(
                         kunci: 'buka_obat',
                         ikon: Icons.medication_outlined,
                         judul: 'Obat & vitamin',

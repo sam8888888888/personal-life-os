@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/audit/audit_log.dart';
+import '../../core/laporan/obat_habis.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/waktu.dart';
 import '../../data/database/database.dart';
@@ -438,6 +439,55 @@ class _ObatScreenState extends ConsumerState<ObatScreen> {
     );
   }
 
+  /// FR-107: isi/ubah sisa obat. Sisa disimpan apa adanya + waktu diperbarui.
+  Future<void> _dialogSisa(ObatData o, int dosisHari) async {
+    final kendali = TextEditingController(text: o.sisa?.toString() ?? '');
+    final hasil = await showDialog<String>(
+      context: context,
+      builder: (konteks) => AlertDialog(
+        title: Text('Sisa ${o.nama}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Satuan: ${o.satuan} · dosis per hari: '
+                '${dosisHari == 0 ? 'belum ada jadwal' : '$dosisHari ${o.satuan}'}'),
+            const SizedBox(height: 8),
+            TextField(
+              key: const Key('input_sisa_obat'),
+              controller: kendali,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Sisa sekarang',
+                isDense: true,
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(konteks).pop(),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            key: const Key('simpan_sisa_obat'),
+            onPressed: () => Navigator.of(konteks).pop(kendali.text.trim()),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+    if (hasil == null) return;
+    final angka = hasil.trim().isEmpty ? null : int.tryParse(hasil.trim());
+    if (angka == null && hasil.trim().isNotEmpty) {
+      _pesan('Sisa obat harus berupa angka.');
+      return;
+    }
+    await ref.read(obatRepoProvider).ubahSisa(o.id, angka);
+    await _muat();
+  }
+
   Widget _barisObat(ObatData o) {
     final jadwal = _jadwal[o.id] ?? const <JadwalObatData>[];
     final dosis = o.dosisTeks?.trim();
@@ -459,6 +509,36 @@ class _ObatScreenState extends ConsumerState<ObatScreen> {
                     '${jadwal.every((j) => j.aktif) ? '' : ' (sebagian tidak aktif)'}',
             key: Key('jadwal_obat_${o.id}'),
           ),
+          // FR-107: perkiraan habis dihitung dari sisa ÷ dosis per hari.
+          Builder(builder: (_) {
+            final dosisHari = dosisPerHari(
+              o.jumlahPerMinum,
+              jadwal.where((j) => j.aktif).length,
+            );
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  kalimatSisa(
+                    namaObat: o.nama,
+                    sisa: o.sisa,
+                    dosisPerHari: dosisHari,
+                    satuan: o.satuan,
+                    sekarang: widget.jamSekarang?.call() ?? DateTime.now(),
+                  ),
+                  key: Key('sisa_obat_${o.id}'),
+                ),
+                TextButton.icon(
+                  key: Key('isi_sisa_${o.id}'),
+                  onPressed: () => _dialogSisa(o, dosisHari),
+                  icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                  label: Text(o.sisa == null
+                      ? 'Isi sisa obat'
+                      : 'Ubah sisa (${o.sisa} ${o.satuan})'),
+                ),
+              ],
+            );
+          }),
         ],
       ),
       trailing: Row(

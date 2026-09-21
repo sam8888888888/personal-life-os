@@ -45,6 +45,7 @@ import 'features/kesehatan/aktivitas_screen.dart';
 import 'features/kesehatan/air_screen.dart';
 import 'features/kesehatan/kesehatan_hub_screen.dart';
 import 'features/kesehatan/jurnal_angka_screen.dart';
+import 'features/kesehatan/janji_screen.dart';
 import 'features/kesehatan/obat_screen.dart';
 import 'features/kesehatan/ukuran_tubuh_screen.dart';
 import 'features/kesehatan/tidur_screen.dart';
@@ -348,6 +349,10 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
         GoRoute(
           path: 'jurnal-angka',
           builder: (c, s) => const JurnalAngkaScreen(),
+        ),
+        GoRoute(
+          path: 'janji',
+          builder: (c, s) => const JanjiScreen(),
         ),
         GoRoute(
           path: 'obat',

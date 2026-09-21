@@ -12,6 +12,8 @@ import '../../data/database/database.dart';
 import '../../data/repository/tagihan_repository.dart';
 import '../../features/dokumen/pengingat_dokumen.dart';
 import '../../features/ibadah/sumber_pengingat_ibadah.dart';
+import '../../features/kesehatan/pengingat_janji.dart';
+import '../../features/kesehatan/pengingat_obat_habis.dart';
 import 'jejak.dart';
 import 'layanan_notifikasi_lokal.dart';
 import 'penyinkron_pengingat.dart';
@@ -37,6 +39,9 @@ void daftarkanSumberPengingatLatar() {
   RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
   // FR-129: pengingat masa berlaku dokumen.
   daftarkanSumberPengingatDokumen();
+  // FR-107 & FR-109: sisa obat (H-5/H-1) & janji dokter (7 hari/1 hari/2 jam).
+  RegistriSumberPengingat.daftarkan(SumberPengingatObat());
+  RegistriSumberPengingat.daftarkan(SumberPengingatJanji());
 }
 
 /// Titik pendaftaran sumber pengingat **untuk isolate utama** (aplikasi).
@@ -48,6 +53,9 @@ void daftarkanSumberPengingatUtama() {
   RegistriSumberPengingat.daftarkan(SumberPengingatIbadah());
   // FR-129: pengingat masa berlaku dokumen.
   daftarkanSumberPengingatDokumen();
+  // FR-107 & FR-109: sisa obat & janji dokter.
+  RegistriSumberPengingat.daftarkan(SumberPengingatObat());
+  RegistriSumberPengingat.daftarkan(SumberPengingatJanji());
 }
 
 /// Titik masuk pekerja latar (wajib anotasi agar tidak dibuang saat build rilis).

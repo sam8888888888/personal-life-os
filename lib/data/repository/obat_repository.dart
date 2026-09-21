@@ -222,6 +222,23 @@ class ObatRepository {
         await (db.delete(db.obat)..where((o) => o.id.equals(id))).go();
       });
 
+  /// FR-107 — simpan/ubah sisa obat (null = belum dicatat).
+  ///
+  /// Sisa dipakai untuk menghitung perkiraan habis & pengingat membeli. Waktu
+  /// pembaruan selalu dicatat supaya pengguna tahu angkanya sejak kapan.
+  Future<int> ubahSisa(int id, int? sisa) async {
+    if (sisa != null && sisa < 0) {
+      throw ArgumentError('Sisa obat tidak boleh negatif.');
+    }
+    return db.transaction(() async {
+      return (db.update(db.obat)..where((o) => o.id.equals(id)))
+          .write(ObatCompanion(
+        sisa: Value(sisa),
+        sisaDiperbaruiPada: Value(sisa == null ? null : DateTime.now()),
+      ));
+    });
+  }
+
   Future<ObatData?> obatSatu(int id) => _baca(
         (db.select(db.obat)..where((o) => o.id.equals(id))).getSingleOrNull(),
       );

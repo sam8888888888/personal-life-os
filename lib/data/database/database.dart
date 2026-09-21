@@ -74,7 +74,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -146,6 +146,12 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
                 'CREATE UNIQUE INDEX IF NOT EXISTS idx_tagihan_uid '
                 'ON tagihan(uid)');
             debugPrint('migrasi v6 selesai (uid tagihan terisi, catatan perubahan siap)');
+          }
+          if (dari < 8) {
+            // v8 (FR-107): kolom sisa obat. Kolom BARU boleh kosong, jadi data
+            // obat yang sudah ada tidak berubah.
+            await _tambahKolomV8(m);
+            debugPrint('migrasi v8 selesai (kolom sisa obat ditambahkan)');
           }
           if (dari < 7) {
             // v7: lima tabel BARU (kesehatan lanjutan, janji dokter, kas
@@ -305,6 +311,12 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   }
 
   /// Skema v4: 23 tabel baru pilar kehidupan (V2).
+  /// Skema v8 (FR-107): kolom sisa obat pada tabel obat yang sudah ada.
+  Future<void> _tambahKolomV8(Migrator m) async {
+    await m.addColumn(obat, obat.sisa);
+    await m.addColumn(obat, obat.sisaDiperbaruiPada);
+  }
+
   /// Skema v7 (FR-51/94/96/105/109): lima tabel baru — tanpa menyentuh tabel
   /// lama, jadi pemutakhiran aplikasi tidak mengubah data pengguna.
   Future<void> _buatTabelV7(Migrator m) async {

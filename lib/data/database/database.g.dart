@@ -16328,6 +16328,26 @@ class $ObatTable extends Obat with TableInfo<$ObatTable, ObatData> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _sisaMeta = const VerificationMeta('sisa');
+  @override
+  late final GeneratedColumn<int> sisa = GeneratedColumn<int>(
+    'sisa',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sisaDiperbaruiPadaMeta =
+      const VerificationMeta('sisaDiperbaruiPada');
+  @override
+  late final GeneratedColumn<DateTime> sisaDiperbaruiPada =
+      GeneratedColumn<DateTime>(
+        'sisa_diperbarui_pada',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -16341,6 +16361,8 @@ class $ObatTable extends Obat with TableInfo<$ObatTable, ObatData> {
     catatan,
     dibuatPada,
     diubahPada,
+    sisa,
+    sisaDiperbaruiPada,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -16422,6 +16444,21 @@ class $ObatTable extends Obat with TableInfo<$ObatTable, ObatData> {
         diubahPada.isAcceptableOrUnknown(data['diubah_pada']!, _diubahPadaMeta),
       );
     }
+    if (data.containsKey('sisa')) {
+      context.handle(
+        _sisaMeta,
+        sisa.isAcceptableOrUnknown(data['sisa']!, _sisaMeta),
+      );
+    }
+    if (data.containsKey('sisa_diperbarui_pada')) {
+      context.handle(
+        _sisaDiperbaruiPadaMeta,
+        sisaDiperbaruiPada.isAcceptableOrUnknown(
+          data['sisa_diperbarui_pada']!,
+          _sisaDiperbaruiPadaMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -16475,6 +16512,14 @@ class $ObatTable extends Obat with TableInfo<$ObatTable, ObatData> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}diubah_pada'],
       )!,
+      sisa: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sisa'],
+      ),
+      sisaDiperbaruiPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}sisa_diperbarui_pada'],
+      ),
     );
   }
 
@@ -16498,6 +16543,10 @@ class ObatData extends DataClass implements Insertable<ObatData> {
   final String? catatan;
   final DateTime dibuatPada;
   final DateTime diubahPada;
+
+  /// FR-107: sisa obat di rumah (dalam satuan di atas). null = belum diisi.
+  final int? sisa;
+  final DateTime? sisaDiperbaruiPada;
   const ObatData({
     required this.id,
     required this.nama,
@@ -16510,6 +16559,8 @@ class ObatData extends DataClass implements Insertable<ObatData> {
     this.catatan,
     required this.dibuatPada,
     required this.diubahPada,
+    this.sisa,
+    this.sisaDiperbaruiPada,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -16533,6 +16584,12 @@ class ObatData extends DataClass implements Insertable<ObatData> {
     }
     map['dibuat_pada'] = Variable<DateTime>(dibuatPada);
     map['diubah_pada'] = Variable<DateTime>(diubahPada);
+    if (!nullToAbsent || sisa != null) {
+      map['sisa'] = Variable<int>(sisa);
+    }
+    if (!nullToAbsent || sisaDiperbaruiPada != null) {
+      map['sisa_diperbarui_pada'] = Variable<DateTime>(sisaDiperbaruiPada);
+    }
     return map;
   }
 
@@ -16557,6 +16614,10 @@ class ObatData extends DataClass implements Insertable<ObatData> {
           : Value(catatan),
       dibuatPada: Value(dibuatPada),
       diubahPada: Value(diubahPada),
+      sisa: sisa == null && nullToAbsent ? const Value.absent() : Value(sisa),
+      sisaDiperbaruiPada: sisaDiperbaruiPada == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sisaDiperbaruiPada),
     );
   }
 
@@ -16577,6 +16638,10 @@ class ObatData extends DataClass implements Insertable<ObatData> {
       catatan: serializer.fromJson<String?>(json['catatan']),
       dibuatPada: serializer.fromJson<DateTime>(json['dibuatPada']),
       diubahPada: serializer.fromJson<DateTime>(json['diubahPada']),
+      sisa: serializer.fromJson<int?>(json['sisa']),
+      sisaDiperbaruiPada: serializer.fromJson<DateTime?>(
+        json['sisaDiperbaruiPada'],
+      ),
     );
   }
   @override
@@ -16594,6 +16659,8 @@ class ObatData extends DataClass implements Insertable<ObatData> {
       'catatan': serializer.toJson<String?>(catatan),
       'dibuatPada': serializer.toJson<DateTime>(dibuatPada),
       'diubahPada': serializer.toJson<DateTime>(diubahPada),
+      'sisa': serializer.toJson<int?>(sisa),
+      'sisaDiperbaruiPada': serializer.toJson<DateTime?>(sisaDiperbaruiPada),
     };
   }
 
@@ -16609,6 +16676,8 @@ class ObatData extends DataClass implements Insertable<ObatData> {
     Value<String?> catatan = const Value.absent(),
     DateTime? dibuatPada,
     DateTime? diubahPada,
+    Value<int?> sisa = const Value.absent(),
+    Value<DateTime?> sisaDiperbaruiPada = const Value.absent(),
   }) => ObatData(
     id: id ?? this.id,
     nama: nama ?? this.nama,
@@ -16621,6 +16690,10 @@ class ObatData extends DataClass implements Insertable<ObatData> {
     catatan: catatan.present ? catatan.value : this.catatan,
     dibuatPada: dibuatPada ?? this.dibuatPada,
     diubahPada: diubahPada ?? this.diubahPada,
+    sisa: sisa.present ? sisa.value : this.sisa,
+    sisaDiperbaruiPada: sisaDiperbaruiPada.present
+        ? sisaDiperbaruiPada.value
+        : this.sisaDiperbaruiPada,
   );
   ObatData copyWithCompanion(ObatCompanion data) {
     return ObatData(
@@ -16641,6 +16714,10 @@ class ObatData extends DataClass implements Insertable<ObatData> {
       diubahPada: data.diubahPada.present
           ? data.diubahPada.value
           : this.diubahPada,
+      sisa: data.sisa.present ? data.sisa.value : this.sisa,
+      sisaDiperbaruiPada: data.sisaDiperbaruiPada.present
+          ? data.sisaDiperbaruiPada.value
+          : this.sisaDiperbaruiPada,
     );
   }
 
@@ -16657,7 +16734,9 @@ class ObatData extends DataClass implements Insertable<ObatData> {
           ..write('aktif: $aktif, ')
           ..write('catatan: $catatan, ')
           ..write('dibuatPada: $dibuatPada, ')
-          ..write('diubahPada: $diubahPada')
+          ..write('diubahPada: $diubahPada, ')
+          ..write('sisa: $sisa, ')
+          ..write('sisaDiperbaruiPada: $sisaDiperbaruiPada')
           ..write(')'))
         .toString();
   }
@@ -16675,6 +16754,8 @@ class ObatData extends DataClass implements Insertable<ObatData> {
     catatan,
     dibuatPada,
     diubahPada,
+    sisa,
+    sisaDiperbaruiPada,
   );
   @override
   bool operator ==(Object other) =>
@@ -16690,7 +16771,9 @@ class ObatData extends DataClass implements Insertable<ObatData> {
           other.aktif == this.aktif &&
           other.catatan == this.catatan &&
           other.dibuatPada == this.dibuatPada &&
-          other.diubahPada == this.diubahPada);
+          other.diubahPada == this.diubahPada &&
+          other.sisa == this.sisa &&
+          other.sisaDiperbaruiPada == this.sisaDiperbaruiPada);
 }
 
 class ObatCompanion extends UpdateCompanion<ObatData> {
@@ -16705,6 +16788,8 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
   final Value<String?> catatan;
   final Value<DateTime> dibuatPada;
   final Value<DateTime> diubahPada;
+  final Value<int?> sisa;
+  final Value<DateTime?> sisaDiperbaruiPada;
   const ObatCompanion({
     this.id = const Value.absent(),
     this.nama = const Value.absent(),
@@ -16717,6 +16802,8 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
     this.catatan = const Value.absent(),
     this.dibuatPada = const Value.absent(),
     this.diubahPada = const Value.absent(),
+    this.sisa = const Value.absent(),
+    this.sisaDiperbaruiPada = const Value.absent(),
   });
   ObatCompanion.insert({
     this.id = const Value.absent(),
@@ -16730,6 +16817,8 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
     this.catatan = const Value.absent(),
     this.dibuatPada = const Value.absent(),
     this.diubahPada = const Value.absent(),
+    this.sisa = const Value.absent(),
+    this.sisaDiperbaruiPada = const Value.absent(),
   }) : nama = Value(nama);
   static Insertable<ObatData> custom({
     Expression<int>? id,
@@ -16743,6 +16832,8 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
     Expression<String>? catatan,
     Expression<DateTime>? dibuatPada,
     Expression<DateTime>? diubahPada,
+    Expression<int>? sisa,
+    Expression<DateTime>? sisaDiperbaruiPada,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -16756,6 +16847,9 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
       if (catatan != null) 'catatan': catatan,
       if (dibuatPada != null) 'dibuat_pada': dibuatPada,
       if (diubahPada != null) 'diubah_pada': diubahPada,
+      if (sisa != null) 'sisa': sisa,
+      if (sisaDiperbaruiPada != null)
+        'sisa_diperbarui_pada': sisaDiperbaruiPada,
     });
   }
 
@@ -16771,6 +16865,8 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
     Value<String?>? catatan,
     Value<DateTime>? dibuatPada,
     Value<DateTime>? diubahPada,
+    Value<int?>? sisa,
+    Value<DateTime?>? sisaDiperbaruiPada,
   }) {
     return ObatCompanion(
       id: id ?? this.id,
@@ -16784,6 +16880,8 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
       catatan: catatan ?? this.catatan,
       dibuatPada: dibuatPada ?? this.dibuatPada,
       diubahPada: diubahPada ?? this.diubahPada,
+      sisa: sisa ?? this.sisa,
+      sisaDiperbaruiPada: sisaDiperbaruiPada ?? this.sisaDiperbaruiPada,
     );
   }
 
@@ -16823,6 +16921,14 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
     if (diubahPada.present) {
       map['diubah_pada'] = Variable<DateTime>(diubahPada.value);
     }
+    if (sisa.present) {
+      map['sisa'] = Variable<int>(sisa.value);
+    }
+    if (sisaDiperbaruiPada.present) {
+      map['sisa_diperbarui_pada'] = Variable<DateTime>(
+        sisaDiperbaruiPada.value,
+      );
+    }
     return map;
   }
 
@@ -16839,7 +16945,9 @@ class ObatCompanion extends UpdateCompanion<ObatData> {
           ..write('aktif: $aktif, ')
           ..write('catatan: $catatan, ')
           ..write('dibuatPada: $dibuatPada, ')
-          ..write('diubahPada: $diubahPada')
+          ..write('diubahPada: $diubahPada, ')
+          ..write('sisa: $sisa, ')
+          ..write('sisaDiperbaruiPada: $sisaDiperbaruiPada')
           ..write(')'))
         .toString();
   }
@@ -37969,6 +38077,8 @@ typedef $$ObatTableCreateCompanionBuilder = ObatCompanion Function({
   Value<String?> catatan,
   Value<DateTime> dibuatPada,
   Value<DateTime> diubahPada,
+  Value<int?> sisa,
+  Value<DateTime?> sisaDiperbaruiPada,
 });
 typedef $$ObatTableUpdateCompanionBuilder = ObatCompanion Function({
   Value<int> id,
@@ -37982,6 +38092,8 @@ typedef $$ObatTableUpdateCompanionBuilder = ObatCompanion Function({
   Value<String?> catatan,
   Value<DateTime> dibuatPada,
   Value<DateTime> diubahPada,
+  Value<int?> sisa,
+  Value<DateTime?> sisaDiperbaruiPada,
 });
 
 final class $$ObatTableReferences
@@ -38085,6 +38197,16 @@ class $$ObatTableFilterComposer extends Composer<_$AppDatabase, $ObatTable> {
 
   ColumnFilters<DateTime> get diubahPada => $composableBuilder(
     column: $table.diubahPada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sisa => $composableBuilder(
+    column: $table.sisa,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get sisaDiperbaruiPada => $composableBuilder(
+    column: $table.sisaDiperbaruiPada,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -38201,6 +38323,16 @@ class $$ObatTableOrderingComposer extends Composer<_$AppDatabase, $ObatTable> {
     column: $table.diubahPada,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get sisa => $composableBuilder(
+    column: $table.sisa,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get sisaDiperbaruiPada => $composableBuilder(
+    column: $table.sisaDiperbaruiPada,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ObatTableAnnotationComposer
@@ -38248,6 +38380,14 @@ class $$ObatTableAnnotationComposer
 
   GeneratedColumn<DateTime> get diubahPada => $composableBuilder(
     column: $table.diubahPada,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sisa =>
+      $composableBuilder(column: $table.sisa, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get sisaDiperbaruiPada => $composableBuilder(
+    column: $table.sisaDiperbaruiPada,
     builder: (column) => column,
   );
 
@@ -38341,6 +38481,8 @@ class $$ObatTableTableManager
                 Value<String?> catatan = const Value.absent(),
                 Value<DateTime> dibuatPada = const Value.absent(),
                 Value<DateTime> diubahPada = const Value.absent(),
+                Value<int?> sisa = const Value.absent(),
+                Value<DateTime?> sisaDiperbaruiPada = const Value.absent(),
               }) => ObatCompanion(
                 id: id,
                 nama: nama,
@@ -38353,6 +38495,8 @@ class $$ObatTableTableManager
                 catatan: catatan,
                 dibuatPada: dibuatPada,
                 diubahPada: diubahPada,
+                sisa: sisa,
+                sisaDiperbaruiPada: sisaDiperbaruiPada,
               ),
           createCompanionCallback:
               ({
@@ -38367,6 +38511,8 @@ class $$ObatTableTableManager
                 Value<String?> catatan = const Value.absent(),
                 Value<DateTime> dibuatPada = const Value.absent(),
                 Value<DateTime> diubahPada = const Value.absent(),
+                Value<int?> sisa = const Value.absent(),
+                Value<DateTime?> sisaDiperbaruiPada = const Value.absent(),
               }) => ObatCompanion.insert(
                 id: id,
                 nama: nama,
@@ -38379,6 +38525,8 @@ class $$ObatTableTableManager
                 catatan: catatan,
                 dibuatPada: dibuatPada,
                 diubahPada: diubahPada,
+                sisa: sisa,
+                sisaDiperbaruiPada: sisaDiperbaruiPada,
               ),
           withReferenceMapper: (p0) => p0
               .map(

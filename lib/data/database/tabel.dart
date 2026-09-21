@@ -589,6 +589,9 @@ class Obat extends Table {
   TextColumn get catatan => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+  /// FR-107: sisa obat di rumah (dalam satuan di atas). null = belum diisi.
+  IntColumn get sisa => integer().nullable()();
+  DateTimeColumn get sisaDiperbaruiPada => dateTime().nullable()();
 }
 
 /// Jam minum obat (FR-106) — satu baris per jam, mis. 08:00 dan 20:00.
