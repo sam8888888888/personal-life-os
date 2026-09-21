@@ -22,7 +22,10 @@ enum FilterTagihan { semua, belumDibayar, sudahDibayar, nonaktif }
 const int saringTanpaKategori = -1;
 
 class DaftarTagihanScreen extends ConsumerStatefulWidget {
-  const DaftarTagihanScreen({super.key});
+  const DaftarTagihanScreen({super.key, this.sekarang});
+
+  /// Waktu sekarang (bisa disuntik saat uji supaya hasilnya pasti).
+  final DateTime Function()? sekarang;
 
   @override
   ConsumerState<DaftarTagihanScreen> createState() => _DaftarTagihanScreenState();
@@ -34,6 +37,27 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
   /// null = semua kategori; [saringTanpaKategori] = tagihan tanpa kategori;
   /// selain itu = id kategori yang dipilih pengguna.
   int? _kategori;
+
+  /// FR-07: kata pencarian (nama tagihan & catatan).
+  String _cari = '';
+
+  /// FR-07: saringan bulan (null = semua bulan).
+  DateTime? _bulan;
+
+  /// FR-07: hanya yang terlambat (aktif, belum lunas, lewat jatuh tempo).
+  bool _terlambatSaja = false;
+
+  DateTime get _kini => (widget.sekarang ?? DateTime.now)();
+  DateTime get _awalHariIni =>
+      DateTime(_kini.year, _kini.month, _kini.day);
+
+  bool _cocokCari(TagihanData t) {
+    final q = _cari.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    if (t.nama.toLowerCase().contains(q)) return true;
+    final cat = t.catatan?.toLowerCase() ?? '';
+    return cat.contains(q);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +84,16 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
             FilterTagihan.nonaktif => !t.statusAktif,
           };
           if (!lolosStatus) return false;
+          if (_terlambatSaja &&
+              !(t.statusAktif && !t.lunas && t.jatuhTempo.isBefore(_awalHariIni))) {
+            return false;
+          }
+          if (!_cocokCari(t)) return false;
+          if (_bulan != null &&
+              !(t.jatuhTempo.year == _bulan!.year &&
+                  t.jatuhTempo.month == _bulan!.month)) {
+            return false;
+          }
           if (kategoriEfektif == null) return true;
           if (kategoriEfektif == saringTanpaKategori) return t.kategoriId == null;
           return t.kategoriId == kategoriEfektif;
@@ -72,16 +106,57 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
 
         return Column(
           children: [
-            SizedBox(
-              height: 56,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            // FR-07: pencarian + saringan bulan.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      key: const Key('cari_tagihan'),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        prefixIcon: Icon(Icons.search, size: 20),
+                        hintText: 'Cari nama tagihan atau catatan',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (v) => setState(() => _cari = v),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  DropdownButton<DateTime?>(
+                    key: const Key('pilih_bulan_tagihan'),
+                    value: _bulan,
+                    hint: const Text('Semua bulan'),
+                    items: <DropdownMenuItem<DateTime?>>[
+                      const DropdownMenuItem<DateTime?>(
+                          value: null, child: Text('Semua bulan')),
+                      for (final b in pilihanBulan(acuan: _kini))
+                        DropdownMenuItem<DateTime?>(
+                            value: b, child: Text(fmtBulanTahun(b))),
+                    ],
+                    onChanged: (v) => setState(() => _bulan = v),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
                 children: [
                   _chip('Belum dibayar', FilterTagihan.belumDibayar),
                   _chip('Sudah dibayar', FilterTagihan.sudahDibayar),
                   _chip('Aktif', FilterTagihan.semua),
                   _chip('Nonaktif', FilterTagihan.nonaktif),
+                  // FR-07: status "Terlambat" memakai saringan tersendiri.
+                FilterChip(
+                  key: const Key('chip_terlambat'),
+                  label: const Text('Terlambat'),
+                  selected: _terlambatSaja,
+                  onSelected: (v) => setState(() => _terlambatSaja = v),
+                ),
                 ],
               ),
             ),
@@ -281,3 +356,28 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
     }
   }
 }
+
+/// Pilihan bulan: 12 bulan ke belakang + 6 bulan ke depan, terdekat dulu.
+///
+/// Bulan mendatang ikut ditampilkan karena tagihan berulang sering jatuh tempo
+/// bulan depan — tanpa itu pengguna tidak bisa melihatnya dari daftar.
+List<DateTime> pilihanBulan({DateTime? acuan, int mundur = 12, int maju = 6}) {
+  final kini = acuan ?? DateTime.now();
+  final bulan = <DateTime>[];
+  for (var i = 0; i <= mundur; i++) {
+    bulan.add(DateTime(kini.year, kini.month - i, 1));
+  }
+  for (var i = 1; i <= maju; i++) {
+    bulan.add(DateTime(kini.year, kini.month + i, 1));
+  }
+  bulan.sort((a, b) => b.compareTo(a));
+  return bulan;
+}
+
+const List<String> namaBulanSingkat = [
+  '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+  'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+];
+
+/// Label bulan dalam bahasa Indonesia (mis. "Sep 2026").
+String fmtBulanTahun(DateTime b) => '${namaBulanSingkat[b.month]} ${b.year}';
