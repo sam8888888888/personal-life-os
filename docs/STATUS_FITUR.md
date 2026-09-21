@@ -3,7 +3,7 @@
 Disusun ulang oleh Aaron (Ron) · 21 Sep 2026.
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 77 · SEBAGIAN 2 · BELUM 73** (total 152 butir)
+**Hitungan: SELESAI 97 · SEBAGIAN 1 · BELUM 54** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -18,7 +18,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-06 | Status: Belum Bayar / Lunas (+tanggal bayar) / Terlambat | - | SELESAI |  |
 | FR-07 | Pencarian & filter (kategori, status, bulan) | - | SELESAI | Ron 21 Sep: kotak pencarian (nama/catatan) + saringan bulan (termasuk bulan mendatang) + status terlambat. |
 | FR-08 | Kategori kustom + ikon & warna per kategori | - | SELESAI | layar `/tagihan/kategori`, uji 29/29. Kolom `warna` = teks `#RRGGBB` (tanpa migrasi). |
-| FR-09 | Duplikasi cepat tagihan (salin sebagai template pribadi) | - | BELUM |  |
+| FR-09 | Duplikasi cepat tagihan (salin sebagai template pribadi) | - | SELESAI | Ron 21 Sep: duplikat cepat tagihan + template pribadi yang tersimpan. |
 | FR-10 | Lead time kustom per tagihan: H-7 / H-3 / H-1 / hari-H / kustom | - | SELESAI |  |
 | FR-11 | Aksi dari notifikasi: "✓ Sudah bayar" (tanpa buka aplikasi) | - | SELESAI |  |
 | FR-12 | Anti-bising: maksimum N notifikasi per tagihan per siklus | - | SELESAI |  |
@@ -26,7 +26,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-14 | Kanal notifikasi: Tagihan (wajib), Terlambat (urgent), Ringkasan | - | SELESAI |  |
 | FR-15 | Ringkasan mingguan (setiap Senin pagi): daftar tagihan 7 hari ke | - | SELESAI |  |
 | FR-16 | Notifikasi "tagihan terlambat" sekali per hari hingga dibayar | - | SELESAI |  |
-| FR-17 | Pengingat pintar berbasis pola: bila pengguna biasanya bayar | - | BELUM |  |
+| FR-17 | Pengingat pintar berbasis pola: bila pengguna biasanya bayar | - | SELESAI | Ron 21 Sep: pola bayar dipelajari dari riwayat; lead pengingat disarankan aplikasi. |
 | FR-18 | 4 tab utama: Ringkasan (hari ini/7 hari/menyusul + uang | - | SELESAI |  |
 | FR-19 | Kartu ringkasan: total tagihan bulan berjalan, total belum bayar | - | SELESAI |  |
 | FR-20 | Input pemasukan bulanan opsional untuk menghitung "uang tersisa" | - | SELESAI |  |
@@ -41,28 +41,28 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-29 | Riwayat pembayaran & statistik: rata-rata nominal, jumlah | - | SELESAI | Ron 21 Sep: statistik pembayaran — total, rata-rata, terbesar/terkecil, % tepat waktu, tren 12 bulan. |
 | FR-30 | Proyeksi arus kas 3 bulan ke depan (terinspirasi PocketSmith/ | - | SELESAI | Ron 21 Sep: proyeksi arus kas 3 bulan (tagihan semua frekuensi + langganan aktif), uji 8 kasus. |
 | FR-31 | Widget layar utama: tagihan 7 hari ke depan + total; tap membuka detai | - | BELUM |  |
-| FR-32 | Ringkasan harian pagi (toggle): tagihan hari ini & besok + total (F02) | - | SEBAGIAN |  |
+| FR-32 | Ringkasan harian pagi (toggle): tagihan hari ini & besok + total (F02) | - | SELESAI | Ron 21 Sep: ringkasan pagi — tagihan hari ini, besok, dan total 7 hari. |
 | FR-33 | "Uang aman sampai gajian": input tanggal gajian & saldo opsional → pro | - | SELESAI | Ron 21 Sep: uang aman sampai gajian — tanggal gajian + saldo opsional, tagihan lewat jatuh tempo tetap dihitung. |
 | FR-34 | Kalkulator denda terhindarkan: estimasi denda/bunga yang dihindari tia | - | SELESAI | Ron 21 Sep: kalkulator denda terhindarkan (aturan denda per tagihan: persen/bulan atau nominal tetap). |
 | FR-35 | Deteksi kenaikan tagihan: pembandingan nominal terhadap rata-rata 3 bu | - | SELESAI | Ron 21 Sep: deteksi kenaikan tagihan — nominal terakhir vs rata-rata 3 sebelumnya, berikut buktinya. |
 | FR-36 | Skor Disiplin Tagihan lokal (0–100) + streak bebas denda + daftar capa | - | SELESAI | Ron 21 Sep: skor disiplin tagihan lokal 0–100 + rentetan & capaian, dengan penegasan bukan skor kredit. |
-| FR-37 | Rekap Tahunan ala "Wrapped": statistik tahunan + kartu berbagi gambar  | - | BELUM |  |
+| FR-37 | Rekap Tahunan ala "Wrapped": statistik tahunan + kartu berbagi gambar  | - | SELESAI | Ron 21 Sep: rekap tahunan (total, tepat waktu, bulan tersibuk) + kartu berbagi PNG. |
 | FR-38 | Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi kolom  | - | BELUM |  |
 | FR-39 | Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta | - | BELUM |  |
-| FR-40 | Pembelajaran pola tanggal bayar dari riwayat; usul penyesuaian penging | - | BELUM |  |
-| FR-41 | Ekspor tagihan mendatang ke Google Kalender; opsi impor .ics (F11) | - | BELUM |  |
-| FR-42 | Pusat Bayar: preferensi aplikasi bayar per tagihan, salin nomor VA/QRI | - | BELUM |  |
+| FR-40 | Pembelajaran pola tanggal bayar dari riwayat; usul penyesuaian penging | - | SELESAI | Ron 21 Sep: pengingat pintar mengikuti pola bayar pengguna (layar Pola bayar). |
+| FR-41 | Ekspor tagihan mendatang ke Google Kalender; opsi impor .ics (F11) | - | SELESAI | Ron 21 Sep: ekspor jadwal tagihan ke .ics (Google Kalender), periode 3/6/12/24 bulan. |
+| FR-42 | Pusat Bayar: preferensi aplikasi bayar per tagihan, salin nomor VA/QRI | - | SELESAI | Ron 21 Sep: Pusat Bayar — VA/QRIS, salin nomor sekali tekan, catatan konfirmasi. |
 | FR-43 | Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, notifika | - | BELUM |  |
 | FR-44 | Multi-profil terpisah (pribadi/keluarga/usaha) | - | BELUM |  |
-| FR-45 | Laporan bulanan PDF/Excel + tombol bagikan | - | BELUM |  |
-| FR-46 | Deteksi langganan duplikat & tagihan yang berhenti muncul (F16) | - | BELUM |  |
+| FR-45 | Laporan bulanan PDF/Excel + tombol bagikan | - | SELESAI | Ron 21 Sep: tombol bagikan laporan bulanan (PDF & CSV) lewat kanal Android sendiri. |
+| FR-46 | Deteksi langganan duplikat & tagihan yang berhenti muncul (F16) | - | SELESAI | Ron 21 Sep: deteksi tagihan berulang yang berhenti muncul + bukti & matikan pengingatnya. |
 | FR-47 | v2 | - | BELUM |  |
 | FR-48 | v2 | - | BELUM |  |
-| FR-49 | Pengingat Multi-Kanal | - | BELUM |  |
+| FR-49 | Pengingat Multi-Kanal | - | SELESAI | Ron 21 Sep: pengingat multi-kanal (notifikasi/WhatsApp/SMS/Telegram) + teks siap kirim. Pengiriman otomatis via WA Business belum ada (dinyatakan di layar). |
 | FR-50 | v2 | - | BELUM |  |
-| FR-51 | Catatan Kas & Utang Informal (cash ledger): | - | BELUM |  |
-| FR-52 | Multi-Mata Uang & Konversi: setiap tagihan memakai | - | BELUM |  |
-| FR-53 | Document Vault & Masa Berlaku: dokumen (STNK, pajak | - | BELUM |  |
+| FR-51 | Catatan Kas & Utang Informal (cash ledger): | - | SELESAI | Ron 21 Sep: catatan kas & utang informal — saldo per pihak + jatuh tempo dekat. |
+| FR-52 | Multi-Mata Uang & Konversi: setiap tagihan memakai | - | SELESAI | Ron 21 Sep: mata uang per tagihan + konversi; kurs diisi pengguna, sumber & tanggal ditampilkan. |
+| FR-53 | Document Vault & Masa Berlaku: dokumen (STNK, pajak | - | SELESAI | Ron 21 Sep: brankas dokumen + masa berlaku (Dinda) dilengkapi tombol 'salin nomor' tanpa membuka berkas (Ron). |
 | FR-54 | Modul Kesehatan (opsional): pengingat obat/suplemen | - | BELUM |  |
 | FR-55 | v2 | - | BELUM |  |
 | FR-56 | Sub-Akses Keluarga (opsional sinkron): berbagi | - | BELUM |  |
@@ -118,14 +118,14 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-86 | Jadwal Sholat | V1.5 | SELESAI |  |
 | FR-87 | Adzan & Pengingat Sholat | V1.5 | SELESAI | pengingat 5 waktu (bawaan mati, bisa dinyalakan), mode sebelum/tepat/sesudah + geser menit. Uji 20/20. |
 | FR-88 | Pelacakan Sholat 5 Waktu | V1.5 | SELESAI |  |
-| FR-89 | Riwayat & Konsistensi Sholat | V2 | BELUM | belum dijadwalkan; data pendukung sudah ada |
+| FR-89 | Riwayat & Konsistensi Sholat | V2 | SELESAI | Terverifikasi 21 Sep: rekap mingguan/bulanan per waktu; angka dibandingkan dengan data mentah di uji lama; label 'tercatat'. |
 | FR-90 | Kalender Hijriah | V1.5 | SELESAI |  |
 | FR-91 | Ramadan Mode | V2 | SELESAI | rute /ibadah/ramadan |
 | FR-92 | Pelacakan Puasa | V2 | SELESAI | rute /ibadah/puasa |
 | FR-93 | Pelacakan Quran | V2 | SELESAI | rute /ibadah/quran + kartu progres di briefing pagi |
-| FR-94 | Pelacakan Hafalan (Hifz) | V3 | BELUM |  |
+| FR-94 | Pelacakan Hafalan (Hifz) | V3 | SELESAI | Ron 21 Sep: pelacakan hafalan per juz/surah + status + jadwal ulangan versi pengguna. |
 | FR-95 | Dzikir & Doa | V2 | SELESAI | rute /ibadah/dzikir; 4 adhkar pagi bisa ditandai dari FR-99 |
-| FR-96 | Zakat & Sedekah | V3 | BELUM |  |
+| FR-96 | Zakat & Sedekah | V3 | SELESAI | Ron 21 Sep: catatan infaq/sedekah + asisten hitung zakat (nisab 85 gram emas dari harga yang diisi pengguna, haul 354 hari, asumsi terbuka). |
 | FR-97 | Rencana Haji & Umrah | V3 | BELUM |  |
 | FR-98 | Arah Kiblat & Masjid Terdekat | V3 | BELUM |  |
 | FR-99 | Islamic Morning Briefing (signature) | V2 | SELESAI | kartu ibadah pagi di briefing: sapaan, progres Quran, 4 adhkar; 3 uji |
@@ -138,12 +138,12 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-101 | Health Dashboard (tren) | V2 | SELESAI | rute /kesehatan |
 | FR-102 | Pencatat Aktivitas | V2 | SELESAI | rute /kesehatan/aktivitas |
 | FR-103 | Pencatat Tidur | V2 | SELESAI | rute /kesehatan/tidur |
-| FR-104 | Berat & Ukuran Tubuh | V2 | BELUM |  |
-| FR-105 | Jurnal Kesehatan (angka) | V2 | BELUM |  |
+| FR-104 | Berat & Ukuran Tubuh | V2 | SELESAI | Ron 21 Sep: berat & ukuran tubuh — IMT dengan ambang umum, target & tren 30 hari. |
+| FR-105 | Jurnal Kesehatan (angka) | V2 | SELESAI | Ron 21 Sep: jurnal angka kesehatan — tekanan darah 2 angka, satuan per jenis, tren 30 hari. |
 | FR-106 | Manajer Obat & Vitamin | V2 | SELESAI | rute /kesehatan/obat + penanda minum |
-| FR-107 | Perkiraan Obat Habis & Pengingat Beli | V2 | BELUM |  |
+| FR-107 | Perkiraan Obat Habis & Pengingat Beli | V2 | SELESAI | Ron 21 Sep: perkiraan obat habis (sisa ÷ dosis per hari) + pengingat H-5/H-1. |
 | FR-108 | Brankas Catatan Medis | V3 | BELUM |  |
-| FR-109 | Janji Dokter di Kalender | V2 | BELUM |  |
+| FR-109 | Janji Dokter di Kalender | V2 | SELESAI | Ron 21 Sep: janji dokter/lab/kontrol + pengingat 7 hari, 1 hari, dan 2 jam sebelum. |
 | FR-110 | Catatan Makan Ringkas (quick log) | V3 | BELUM |  |
 | FR-111 | Pencatat Air | V2 | SELESAI | tombol +250 ml / +500 ml |
 | FR-112 | Jurnal Suasana Hati & Stres | V2 | BELUM |  |
