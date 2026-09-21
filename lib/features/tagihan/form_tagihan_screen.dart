@@ -13,6 +13,7 @@ import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
 import '../../data/database/database.dart';
 import '../../data/model/enums.dart';
+import '../../data/repository/template_pribadi.dart';
 import '../../data/repository/template_tagihan.dart';
 import 'ikon_warna_kategori.dart';
 import 'kelola_kategori_tagihan_screen.dart';
@@ -38,6 +39,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
   Frekuensi _frekuensi = Frekuensi.bulanan;
   // FR-10: default cerdas H-3, H-1, dan hari-H.
   Set<int> _lead = {3, 1, 0};
+  List<TemplatePribadi> _templatePribadi = const [];
   TimeOfDay _jam = const TimeOfDay(hour: 9, minute: 0);
   PrioritasTagihan _prioritas = PrioritasTagihan.biasa;
   int? _kategoriId;
@@ -46,6 +48,7 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
   void initState() {
     super.initState();
     if (widget.id != null) _muatData();
+    _muatTemplatePribadi();
   }
 
   Future<void> _muatData() async {
@@ -96,6 +99,48 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
     super.dispose();
   }
 
+  Future<void> _muatTemplatePribadi() async {
+    final daftar = await PenyimpananTemplatePribadi(
+            ref.read(pengaturanRepoProvider))
+        .semua();
+    if (!mounted) return;
+    setState(() => _templatePribadi = daftar);
+  }
+
+  /// FR-09: simpan isian sekarang sebagai template pribadi.
+  Future<void> _simpanTemplatePribadi() async {
+    final nama = _nama.text.trim();
+    if (nama.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Isi nama tagihan dulu, baru disimpan sebagai template.')));
+      return;
+    }
+    final sen = _jumlah.text.trim().isEmpty
+        ? 0
+        : rupiahKeSen(parseRupiah(_jumlah.text) ?? 0);
+    final daftar = await PenyimpananTemplatePribadi(
+            ref.read(pengaturanRepoProvider))
+        .tambah(TemplatePribadi(
+      nama: nama,
+      perkiraanSen: sen,
+      frekuensi: _frekuensi.nilaiDb,
+      leadHari: _lead.toList()..sort((a, b) => b.compareTo(a)),
+      catatan: _catatan.text.trim().isEmpty ? null : _catatan.text.trim(),
+    ));
+    if (!mounted) return;
+    setState(() => _templatePribadi = daftar);
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Template pribadi disimpan: $nama')));
+  }
+
+  Future<void> _hapusTemplatePribadi(String nama) async {
+    final daftar = await PenyimpananTemplatePribadi(
+            ref.read(pengaturanRepoProvider))
+        .hapus(nama);
+    if (!mounted) return;
+    setState(() => _templatePribadi = daftar);
+  }
+
   @override
   Widget build(BuildContext context) {
     final kategori = ref.watch(kategoriProvider).value ?? const <KategoriData>[];
@@ -136,6 +181,49 @@ class _FormTagihanScreenState extends ConsumerState<FormTagihanScreen> {
                         ),
                       ))
                   .toList(),
+            ),
+          ),
+          if (_templatePribadi.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Text('Template pribadi:', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 42,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  for (final t in _templatePribadi)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InputChip(
+                        key: Key('template_pribadi_${t.nama}'),
+                        label: Text(t.nama),
+                        avatar: const Icon(Icons.person_outline, size: 16),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () => _hapusTemplatePribadi(t.nama),
+                        onPressed: () => setState(() {
+                          _nama.text = t.nama;
+                          _jumlah.text = t.perkiraanSen == 0
+                              ? ''
+                              : (t.perkiraanSen / 100).round().toString();
+                          _frekuensi = Frekuensi.dariDb(t.frekuensi);
+                          _lead = t.leadHari.toSet();
+                          _catatan.text = t.catatan ?? '';
+                        }),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              key: const Key('simpan_template_pribadi'),
+              onPressed: _simpanTemplatePribadi,
+              icon: const Icon(Icons.bookmark_add_outlined, size: 18),
+              label: const Text('Simpan isian sebagai template'),
             ),
           ),
           const SizedBox(height: 16),

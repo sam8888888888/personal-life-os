@@ -204,6 +204,7 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
                             KartuTagihan(
                               tagihan: t,
                               onTap: () => context.push('/ubah/${t.id}'),
+                              onDuplikat: () => _aksiDuplikat(context, t),
                               onTandaiLunas: t.lunas
                                   ? null
                                   : () => _aksiLunas(context, t.id, t.jatuhTempo),
@@ -308,6 +309,28 @@ class _DaftarTagihanScreenState extends ConsumerState<DaftarTagihanScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// FR-09: salin tagihan sebagai tagihan baru (siap disunting).
+  Future<void> _aksiDuplikat(BuildContext context, TagihanData t) async {
+    final idBaru =
+        await ref.read(tagihanRepoProvider).duplikat(t.id);
+    await catatAuditAman(
+      ref.read(databaseProvider),
+      modul: ModulAudit.tagihan,
+      aksi: 'duplikat tagihan',
+      ringkas: '${t.nama} → salinan #$idBaru',
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Tagihan disalin: ${t.nama} (salinan)'),
+        action: SnackBarAction(
+          label: 'Ubah salinan',
+          onPressed: () => context.push('/ubah/$idBaru'),
+        ),
       ),
     );
   }

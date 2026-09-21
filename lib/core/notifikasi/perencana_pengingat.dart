@@ -248,7 +248,18 @@ class PerencanaPengingat {
       final hari = DateTime(sekarang.year, sekarang.month, sekarang.day + i);
       final waktu = DateTime(hari.year, hari.month, hari.day, j, m);
       if (waktu.isBefore(batasAwal) || waktu.isAfter(batasAkhir)) continue;
-      final (jumlah, total) = _tagihanDalam(
+      final besok = DateTime(hari.year, hari.month, hari.day + 1);
+      final (jumlahHariIni, totalHariIni) = _tagihanDalam(
+        tagihan,
+        DateTime(hari.year, hari.month, hari.day),
+        besok,
+      );
+      final (jumlahBesok, totalBesok) = _tagihanDalam(
+        tagihan,
+        besok,
+        DateTime(besok.year, besok.month, besok.day + 1),
+      );
+      final (jumlahTujuhHari, totalTujuhHari) = _tagihanDalam(
         tagihan,
         DateTime(hari.year, hari.month, hari.day),
         DateTime(hari.year, hari.month, hari.day + 7),
@@ -259,9 +270,14 @@ class PerencanaPengingat {
         waktu: waktu,
         kanal: KanalNotifikasi.briefing,
         judul: 'Ringkasan pagi siap',
-        isi: jumlah == 0
-            ? 'Buka aplikasi untuk melihat agenda hari ini.'
-            : '$jumlah tagihan dalam 7 hari ke depan (${fmtRpDariSen(total)}).',
+        isi: _isiRingkasanPagi(
+          jumlahHariIni: jumlahHariIni,
+          totalHariIni: totalHariIni,
+          jumlahBesok: jumlahBesok,
+          totalBesok: totalBesok,
+          jumlahTujuhHari: jumlahTujuhHari,
+          totalTujuhHari: totalTujuhHari,
+        ),
       ));
     }
     return hasil;
@@ -294,6 +310,35 @@ class PerencanaPengingat {
       }
     }
     return hasil;
+  }
+
+  /// FR-32: teks ringkasan pagi — hari ini, besok, dan total 7 hari.
+  ///
+  /// Sengaja menyebut angka rupiah supaya pengguna tahu besarnya di layar kunci
+  /// tanpa membuka aplikasi.
+  String _isiRingkasanPagi({
+    required int jumlahHariIni,
+    required int totalHariIni,
+    required int jumlahBesok,
+    required int totalBesok,
+    required int jumlahTujuhHari,
+    required int totalTujuhHari,
+  }) {
+    if (jumlahHariIni == 0 && jumlahBesok == 0) {
+      return jumlahTujuhHari == 0
+          ? 'Tidak ada tagihan hari ini atau besok.'
+          : 'Hari ini & besok tidak ada tagihan. '
+              '$jumlahTujuhHari tagihan dalam 7 hari ke depan '
+              '(\${fmtRpDariSen(totalTujuhHari)}).';
+    }
+    final hariIni = jumlahHariIni == 0
+        ? 'Hari ini tidak ada tagihan'
+        : 'Hari ini $jumlahHariIni tagihan (${fmtRpDariSen(totalHariIni)})';
+    final besokTeks = jumlahBesok == 0
+        ? 'besok tidak ada'
+        : 'besok $jumlahBesok (${fmtRpDariSen(totalBesok)})';
+    return '$hariIni, $besokTeks. '
+        'Total 7 hari: ${fmtRpDariSen(totalTujuhHari)}.';
   }
 
   /// Jumlah & total tagihan aktif belum lunas dalam rentang [dari, sampai).

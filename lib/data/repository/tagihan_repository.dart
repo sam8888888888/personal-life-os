@@ -321,6 +321,41 @@ class TagihanRepository {
         await tandaiUidDari(id);
       });
 
+  /// FR-09: salin satu tagihan sebagai tagihan baru (siap disunting).
+  ///
+  /// Yang disalin: jenis, nominal, mata uang, kategori, frekuensi, jadwal
+  /// pengingat, catatan, dan tautan bayar. Yang direset: `lunas`,
+  /// `tanggalLunas` (salinan selalu mulai belum dibayar) dan `uid` baru supaya
+  /// sinkron antar HP tidak menganggapnya baris yang sama.
+  ///
+  /// [namaBaru] boleh diisi; bawaan = nama lama + " (salinan)".
+  Future<int> duplikat(int id, {String? namaBaru, DateTime? jatuhTempoBaru}) async {
+    final asal = await (db.select(db.tagihan)..where((t) => t.id.equals(id)))
+        .getSingle();
+    final kini = DateTime.now();
+    return db.into(db.tagihan).insert(TagihanCompanion.insert(
+          uid: Value(uidBaru()),
+          jenis: Value(asal.jenis),
+          nama: namaBaru ?? '${asal.nama} (salinan)',
+          jumlahSen: Value(asal.jumlahSen),
+          kodeMataUang: Value(asal.kodeMataUang),
+          kategoriId: Value(asal.kategoriId),
+          jatuhTempo: jatuhTempoBaru ?? asal.jatuhTempo,
+          frekuensi: Value(asal.frekuensi),
+          kustomHariN: Value(asal.kustomHariN),
+          pengingatLeadHari: Value(asal.pengingatLeadHari),
+          pengingatJam: Value(asal.pengingatJam),
+          kanalPengingat: Value(asal.kanalPengingat),
+          prioritas: Value(asal.prioritas),
+          catatan: Value(asal.catatan),
+          tautanBayar: Value(asal.tautanBayar),
+          statusAktif: Value(asal.statusAktif),
+          lunas: const Value(false),
+          dibuatPada: Value(kini),
+          diubahPada: Value(kini),
+        ));
+  }
+
   /// Semua riwayat pembayaran + nama tagihannya (FR-25 ekspor CSV).
   ///
   /// Nama diambil dari tagihan; kalau tagihannya sudah dihapus, ditulis

@@ -15,6 +15,7 @@ class KartuTagihan extends StatelessWidget {
     this.onTap,
     this.onTandaiLunas,
     this.onUndoLunas,
+    this.onDuplikat,
     this.tampilkanJarakHari = true,
   });
 
@@ -22,6 +23,9 @@ class KartuTagihan extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onTandaiLunas;
   final VoidCallback? onUndoLunas;
+
+  /// FR-09: salin tagihan ini menjadi tagihan baru (opsional).
+  final VoidCallback? onDuplikat;
   final bool tampilkanJarakHari;
 
   @override
@@ -100,6 +104,13 @@ class KartuTagihan extends StatelessWidget {
                       tooltip: 'Batalkan status lunas',
                       onPressed: onUndoLunas,
                       icon: Icon(Icons.undo, color: skema.onSurfaceVariant),
+                    ),
+                  if (onDuplikat != null)
+                    IconButton(
+                      key: Key('duplikat_tagihan_${tagihan.id}'),
+                      tooltip: 'Duplikat tagihan',
+                      onPressed: onDuplikat,
+                      icon: Icon(Icons.copy_outlined, color: skema.onSurfaceVariant),
                     ),
                 ],
                 ),
