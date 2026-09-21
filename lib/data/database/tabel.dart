@@ -934,3 +934,158 @@ class ZakatSedekah extends Table {
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+/// FR-118 — Catatan & ide bebas (modul Pengetahuan).
+class CatatanPengetahuan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get judul => text()();
+  TextColumn get isi => text()();
+
+  /// Gagasan · rencana · kutipan · pelajaran · lain
+  TextColumn get kategori => text().withDefault(const Constant('gagasan'))();
+  TextColumn get tag => text().nullable()();
+  BoolColumn get disematkan => boolean().withDefault(const Constant(false))();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-119 — Jurnal keputusan (Decision OS): apa diputuskan, pilihan yang
+/// dipertimbangkan, keyakinan, dan hasil yang ditinjau kemudian.
+class Keputusan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get judul => text()();
+  TextColumn get konteks => text().nullable()();
+
+  /// Pilihan yang dipertimbangkan — satu pilihan per baris (apa adanya).
+  TextColumn get pilihan => text().nullable()();
+  TextColumn get dipilih => text().nullable()();
+  TextColumn get alasan => text().nullable()();
+  TextColumn get harapan => text().nullable()();
+  /// Risiko yang disadari saat memutuskan (boleh kosong).
+  TextColumn get risiko => text().nullable()();
+  /// Biaya/ongkos yang disadari saat memutuskan, ditulis bebas (boleh kosong).
+  TextColumn get biaya => text().nullable()();
+
+  /// Keyakinan saat memutuskan (0–100 %).
+  IntColumn get keyakinan => integer().withDefault(const Constant(50))();
+  DateTimeColumn get diputuskanPada => dateTime()();
+
+  /// Tanggal rencana meninjau hasil (boleh kosong).
+  DateTimeColumn get tinjauPada => dateTime().nullable()();
+  TextColumn get hasil => text().nullable()();
+  DateTimeColumn get hasilPada => dateTime().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-120 — Pelacakan pembelajaran: topik, sumber, menit belajar per catatan.
+class Pembelajaran extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get topik => text()();
+  TextColumn get sumber => text().nullable()();
+  IntColumn get menit => integer().withDefault(const Constant(0))();
+  DateTimeColumn get tanggal => dateTime()();
+
+  /// belajar · latihan · selesai
+  TextColumn get status => text().withDefault(const Constant('belajar'))();
+  TextColumn get catatan => text().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-121 — Pengulangan berkala: kartu tanya-jawab dengan kotak (box) dan
+/// jadwal ulangan yang dihitung dari jawaban pengguna.
+class KartuUlangan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get pertanyaan => text()();
+  TextColumn get jawaban => text()();
+  TextColumn get topik => text().nullable()();
+
+  /// Kotak 0–6; makin tinggi = makin lama jaraknya (lihat ulangan_berkala.dart).
+  IntColumn get kotak => integer().withDefault(const Constant(0))();
+  DateTimeColumn get ulanganBerikut => dateTime()();
+  DateTimeColumn get terakhirDiulang => dateTime().nullable()();
+  IntColumn get jumlahDiulang => integer().withDefault(const Constant(0))();
+  IntColumn get jumlahBenar => integer().withDefault(const Constant(0))();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-122 — Pelacakan buku & bacaan.
+class Bacaan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get judul => text()();
+  TextColumn get penulis => text().nullable()();
+
+  /// buku · artikel · jurnal · audio · lain
+  TextColumn get jenis => text().withDefault(const Constant('buku'))();
+  IntColumn get halamanTotal => integer().nullable()();
+  IntColumn get halamanKini => integer().withDefault(const Constant(0))();
+
+  /// antre · dibaca · selesai · berhenti
+  TextColumn get status => text().withDefault(const Constant('antre'))();
+  DateTimeColumn get mulaiPada => dateTime().nullable()();
+  DateTimeColumn get selesaiPada => dateTime().nullable()();
+
+  /// Penilaian pengguna 0–5 (boleh kosong).
+  IntColumn get nilai => integer().nullable()();
+  TextColumn get catatan => text().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-123 — Penghubung pengetahuan: tautan antar butir (catatan, keputusan,
+/// bacaan, kartu ulangan) tanpa mengubah isi butir yang ditautkan.
+class TautanPengetahuan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// catatan · keputusan · bacaan · kartu · pembelajaran
+  TextColumn get jenisA => text()();
+  IntColumn get idA => integer()();
+  TextColumn get judulA => text().withDefault(const Constant(''))();
+  TextColumn get jenisB => text()();
+  IntColumn get idB => integer()();
+  TextColumn get judulB => text().withDefault(const Constant(''))();
+  TextColumn get label => text().nullable()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-110 — Catatan makan ringkas (quick log).
+class CatatanMakan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// sarapan · makan_siang · makan_malam · camilan
+  TextColumn get jenis => text()();
+  TextColumn get isi => text()();
+  TextColumn get porsi => text().nullable()();
+  /// Penilaian pengguna sendiri: baik / cukup / kurang (boleh kosong).
+  TextColumn get mutu => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get waktu => dateTime()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-112 — Jurnal suasana hati & stres (skala 1–5, apa adanya dari pengguna).
+class SuasanaHati extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  /// 1 = paling berat … 5 = paling ringan (label ada di layar).
+  IntColumn get skor => integer()();
+  IntColumn get energi => integer().nullable()();
+  IntColumn get stres => integer().nullable()();
+  TextColumn get pemicu => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get waktu => dateTime()();
+  TextColumn get uid => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}

@@ -68,13 +68,23 @@ part 'database.g.dart';
   KasInformal,
   Hafalan,
   ZakatSedekah,
+  // Skema v9 — Pengetahuan (FR-118/119/120/121/122/123) & kesehatan ringkas
+  // (FR-110 makan, FR-112 suasana hati), ditambahkan Aaron 21 Sep 2026.
+  CatatanPengetahuan,
+  Keputusan,
+  Pembelajaran,
+  KartuUlangan,
+  Bacaan,
+  TautanPengetahuan,
+  CatatanMakan,
+  SuasanaHati,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -146,6 +156,13 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
                 'CREATE UNIQUE INDEX IF NOT EXISTS idx_tagihan_uid '
                 'ON tagihan(uid)');
             debugPrint('migrasi v6 selesai (uid tagihan terisi, catatan perubahan siap)');
+          }
+          if (dari < 9) {
+            // v9: delapan tabel BARU (pengetahuan + makan & suasana hati).
+            // Tanpa mengubah tabel lama, jadi data pengguna tidak tersentuh.
+            await _buatTabelV9(m);
+            debugPrint('migrasi v9 selesai (tabel pengetahuan & catatan makan/'
+                'suasana hati dibuat)');
           }
           if (dari < 8) {
             // v8 (FR-107): kolom sisa obat. Kolom BARU boleh kosong, jadi data
@@ -322,6 +339,28 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
     if (!nama.contains('sisa')) await m.addColumn(obat, obat.sisa);
     if (!nama.contains('sisa_diperbarui_pada')) {
       await m.addColumn(obat, obat.sisaDiperbaruiPada);
+    }
+  }
+
+  /// Skema v9 (batch 3): delapan tabel baru — pengetahuan (FR-118…FR-123) dan
+  /// catatan makan (FR-110) + suasana hati (FR-112).
+  ///
+  /// Dibuat dengan pemeriksaan keberadaan tabel lebih dulu: sebagian basis data
+  /// lama dibangun dari definisi tabel terbaru, jadi tabelnya bisa sudah ada.
+  Future<void> _buatTabelV9(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> tabel = {
+      'catatan_pengetahuan': catatanPengetahuan,
+      'keputusan': keputusan,
+      'pembelajaran': pembelajaran,
+      'kartu_ulangan': kartuUlangan,
+      'bacaan': bacaan,
+      'tautan_pengetahuan': tautanPengetahuan,
+      'catatan_makan': catatanMakan,
+      'suasana_hati': suasanaHati,
+    };
+    for (final masuk in tabel.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
     }
   }
 

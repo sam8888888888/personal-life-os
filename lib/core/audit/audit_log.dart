@@ -33,6 +33,7 @@ abstract final class ModulAudit {
   static const String kebiasaan = 'kebiasaan';
   static const String kesehatan = 'kesehatan';
   static const String ibadah = 'ibadah';
+  static const String pengetahuan = 'pengetahuan';
   static const String dokumen = 'dokumen';
   static const String pengaturan = 'pengaturan';
   static const String notifikasi = 'notifikasi';
@@ -51,6 +52,7 @@ abstract final class ModulAudit {
     kebiasaan,
     kesehatan,
     ibadah,
+    pengetahuan,
     dokumen,
     pengaturan,
     notifikasi,

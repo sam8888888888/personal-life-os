@@ -126,10 +126,11 @@ void main() {
     expect(pemasukan.single.jumlahSen, 1200000000);
 
     // 3. Versi skema di database naik ke versi terakhir aplikasi:
-    //    v2 -> v3 -> v4 -> v5 (v4 menambah 23 tabel pilar kehidupan, v5
-    //    menambah visi & area hidup + kolom tujuan.area_id).
+    //    v2 -> v3 -> v4 -> v5 -> v6 -> v7 -> v8 -> v9 (v4 menambah 23 tabel
+    //    pilar kehidupan, v5 visi & area hidup + tujuan.area_id, v6-v8 tabel
+    //    kesehatan/dokumen/sinkron, v9 delapan tabel modul Pengetahuan).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 8);
+    expect(versi.data.values.first, 9);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();

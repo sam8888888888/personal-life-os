@@ -3,7 +3,7 @@
 Disusun ulang oleh Aaron (Ron) · 21 Sep 2026.
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 97 · SEBAGIAN 1 · BELUM 54** (total 152 butir)
+**Hitungan: SELESAI 106 · SEBAGIAN 2 · BELUM 44** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -144,25 +144,25 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-107 | Perkiraan Obat Habis & Pengingat Beli | V2 | SELESAI | Ron 21 Sep: perkiraan obat habis (sisa ÷ dosis per hari) + pengingat H-5/H-1. |
 | FR-108 | Brankas Catatan Medis | V3 | BELUM |  |
 | FR-109 | Janji Dokter di Kalender | V2 | SELESAI | Ron 21 Sep: janji dokter/lab/kontrol + pengingat 7 hari, 1 hari, dan 2 jam sebelum. |
-| FR-110 | Catatan Makan Ringkas (quick log) | V3 | BELUM |  |
+| FR-110 | Catatan Makan Ringkas (quick log) | V3 | SELESAI | Ron 22 Sep: catat cepat per waktu makan, porsi, dan penilaian sendiri (baik/cukup/kurang). |
 | FR-111 | Pencatat Air | V2 | SELESAI | tombol +250 ml / +500 ml |
-| FR-112 | Jurnal Suasana Hati & Stres | V2 | BELUM |  |
-| FR-113 | Mesin Temuan Kesehatan (insight) | V3 | BELUM |  |
+| FR-112 | Jurnal Suasana Hati & Stres | V2 | SELESAI | Ron 22 Sep: suasana hati, energi & stres 1-5, pemicu, catatan; rata-rata & arah 14 hari. |
+| FR-113 | Mesin Temuan Kesehatan (insight) | V3 | SELESAI | Ron 22 Sep: temuan dihitung dari angka sendiri (berat, tekanan, tidur, air, suasana) + angka pendukung; bukan diagnosis. |
 | FR-114 | Peringatan Dini (watch) | V3 | BELUM |  |
 | FR-115 | Mode Kunjungan Dokter | V3 | BELUM |  |
-| FR-116 | Laporan Kesehatan Bulanan | V3 | BELUM |  |
+| FR-116 | Laporan Kesehatan Bulanan | V3 | SELESAI | Ron 22 Sep: laporan bulanan + tiga kelompok: membaik / berubah / perlu diperhatikan. |
 | FR-117 | Profil Kesehatan & Kartu Darurat | V2 | BELUM |  |
 
 ## 6 · Pengetahuan
 
 | ID | Fitur | Fase | Status | Catatan |
 |---|---|---|---|---|
-| FR-118 | Catatan & Ide | V3 | BELUM |  |
-| FR-119 | Jurnal Keputusan (Decision OS) | V3 | BELUM |  |
-| FR-120 | Pelacakan Pembelajaran | V3 | BELUM |  |
-| FR-121 | Pengulangan Berkala (spaced repetition) | V4 | BELUM |  |
-| FR-122 | Pelacakan Buku & Bacaan | V3 | BELUM |  |
-| FR-123 | Penghubung Pengetahuan | V4 | BELUM |  |
+| FR-118 | Catatan & Ide | V3 | SEBAGIAN | Ron 22 Sep: catatan, kategori, tag, sematan, arsip, pencarian selesai; lampiran foto & rekaman suara menyusul (perlu izin kamera/mikrofon di HP). |
+| FR-119 | Jurnal Keputusan (Decision OS) | V3 | SELESAI | Ron 22 Sep: keputusan + pilihan/alasan/risiko/biaya/keyakinan, tinjauan hasil 3/6/12 bulan. |
+| FR-120 | Pelacakan Pembelajaran | V3 | SELESAI | Ron 22 Sep: topik, sumber, menit, tahap belajar + grafik 14 hari. |
+| FR-121 | Pengulangan Berkala (spaced repetition) | V4 | SELESAI | Ron 22 Sep: jadwal ulangan 1/3/7/16/35/90/180 hari dihitung dari jawaban sendiri. |
+| FR-122 | Pelacakan Buku & Bacaan | V3 | SELESAI | Ron 22 Sep: daftar baca, progres halaman, status, catatan & penilaian sendiri. |
+| FR-123 | Penghubung Pengetahuan | V4 | SELESAI | Ron 22 Sep: tautan catatan/keputusan/bacaan/kartu/pembelajaran dengan tujuan, proyek, tugas, dokumen. |
 
 ## 7 · Rumah & Aset
 

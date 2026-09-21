@@ -51,6 +51,18 @@ import 'features/kesehatan/janji_screen.dart';
 import 'features/kesehatan/obat_screen.dart';
 import 'features/kesehatan/ukuran_tubuh_screen.dart';
 import 'features/kesehatan/tidur_screen.dart';
+import 'features/kesehatan/makan_screen.dart' show MakanRingkasScreen;
+import 'features/kesehatan/suasana_screen.dart' show SuasanaHatiScreen;
+import 'features/kesehatan/temuan_screen.dart' show TemuanKesehatanScreen;
+import 'features/kesehatan/laporan_kesehatan_bulanan_screen.dart'
+    show LaporanKesehatanBulananScreen;
+import 'features/pengetahuan/bacaan_screen.dart';
+import 'features/pengetahuan/catatan_screen.dart';
+import 'features/pengetahuan/keputusan_screen.dart';
+import 'features/pengetahuan/pembelajaran_screen.dart';
+import 'features/pengetahuan/pengetahuan_hub_screen.dart';
+import 'features/pengetahuan/tautan_screen.dart';
+import 'features/pengetahuan/ulangan_screen.dart';
 import 'features/laporan/beban_tagihan_screen.dart';
 import 'features/laporan/denda_terhindarkan_screen.dart';
 import 'features/laporan/kenaikan_tagihan_screen.dart';
@@ -383,6 +395,52 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
           path: 'air',
           builder: (c, s) => const AirScreen(),
         ),
+        GoRoute(
+          path: 'makan',
+          builder: (c, s) => const MakanRingkasScreen(),
+        ),
+        GoRoute(
+          path: 'suasana',
+          builder: (c, s) => const SuasanaHatiScreen(),
+        ),
+        GoRoute(
+          path: 'temuan',
+          builder: (c, s) => const TemuanKesehatanScreen(),
+        ),
+        GoRoute(
+          path: 'laporan-bulanan',
+          builder: (c, s) => const LaporanKesehatanBulananScreen(),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/pengetahuan',
+      builder: (c, s) => const PengetahuanHubScreen(),
+      routes: [
+        GoRoute(
+          path: 'catatan',
+          builder: (c, s) => const CatatanScreen(),
+        ),
+        GoRoute(
+          path: 'keputusan',
+          builder: (c, s) => const KeputusanScreen(),
+        ),
+        GoRoute(
+          path: 'ulangan',
+          builder: (c, s) => const UlanganScreen(),
+        ),
+        GoRoute(
+          path: 'bacaan',
+          builder: (c, s) => const BacaanScreen(),
+        ),
+        GoRoute(
+          path: 'pembelajaran',
+          builder: (c, s) => const PembelajaranScreen(),
+        ),
+        GoRoute(
+          path: 'tautan',
+          builder: (c, s) => const TautanScreen(),
+        ),
       ],
     ),
     GoRoute(
@@ -439,6 +497,7 @@ class KerangkaNavigasi extends StatelessWidget {
       '/aksi',
       '/kesehatan',
       '/dokumen',
+      '/pengetahuan',
     ],
   };
 
