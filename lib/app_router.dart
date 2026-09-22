@@ -58,6 +58,10 @@ import 'features/ritme/ramalan_saldo_screen.dart';
 import 'features/ritme/tinjauan_tahun_screen.dart';
 import 'features/kesehatan/energi_tidur_screen.dart';
 import 'features/ibadah/rencana_ibadah_screen.dart';
+import 'features/ibadah/kiblat_screen.dart';
+import 'features/perjalanan/perjalanan_screen.dart';
+import 'features/keluarga/tanggung_jawab_screen.dart';
+import 'core/utils/bahasa.dart';
 import 'features/ritme/laporan_bulanan_screen.dart';
 import 'features/ritme/lini_masa_screen.dart';
 import 'features/ritme/tinjauan_pekan_screen.dart';
@@ -456,6 +460,21 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/ibadah/rencana',
       builder: (c, s) => const RencanaIbadahScreen(),
     ),
+    // FR-134/135 — Travel OS: perjalanan + jurnal perjalanan.
+    GoRoute(
+      path: '/perjalanan',
+      builder: (c, s) => const PerjalananScreen(),
+    ),
+    // FR-133 — kas & tanggung jawab rumah tangga.
+    GoRoute(
+      path: '/rumah-tangga',
+      builder: (c, s) => const TanggungJawabScreen(),
+    ),
+    // FR-98 — arah kiblat & masjid terdekat.
+    GoRoute(
+      path: '/ibadah/kiblat',
+      builder: (c, s) => const KiblatScreen(),
+    ),
     // FR-145 — laporan bulanan lintas pilar (signature).
     GoRoute(
       path: '/laporan-hidup',
@@ -610,6 +629,16 @@ class KerangkaNavigasi extends StatelessWidget {
     (path: '/lainnya', label: 'Lainnya', ikon: Icons.more_horiz_outlined, ikonAktif: Icons.more_horiz),
   ];
 
+  /// FR-152 — label tab mengikuti bahasa yang dipilih di Pengaturan.
+  static String _labelTab(String indonesia) => switch (indonesia) {
+        'Hari Ini' => tr('tab.hariIni'),
+        'Uang' => tr('tab.uang'),
+        'Kerja' => tr('tab.kerja'),
+        'Ibadah' => tr('tab.ibadah'),
+        'Lainnya' => tr('tab.lainnya'),
+        _ => indonesia,
+      };
+
   /// Layar lama tetap menyalakan tab induknya.
   static const _grup = <int, List<String>>{
     1: ['/uang', '/ringkasan', '/tagihan', '/kalender', '/ubah'],
@@ -660,7 +689,9 @@ class KerangkaNavigasi extends StatelessWidget {
         onDestinationSelected: (n) => context.go(_tab[n].path),
         destinations: _tab
             .map((t) => NavigationDestination(
-                  icon: Icon(t.ikon), selectedIcon: Icon(t.ikonAktif), label: t.label,
+                  icon: Icon(t.ikon),
+                  selectedIcon: Icon(t.ikonAktif),
+                  label: _labelTab(t.label),
                 ))
             .toList(),
       ),

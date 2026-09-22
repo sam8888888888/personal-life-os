@@ -47,6 +47,8 @@ class MainActivity : FlutterActivity() {
         kanalKunci.pasang(flutterEngine.dartExecutor.binaryMessenger)
         kanalLencana.pasang(flutterEngine.dartExecutor.binaryMessenger)
         kanalWidget.pasang(flutterEngine.dartExecutor.binaryMessenger)
+        // FR-98 — arah hadap perangkat untuk layar kiblat.
+        KanalKompas.pasang(flutterEngine, this)
     }
 
     /// FR-49: buka tautan ke aplikasi lain (WhatsApp / SMS / Telegram).

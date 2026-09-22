@@ -287,6 +287,24 @@ class LainnyaScreen extends ConsumerWidget {
                   onTap: () => context.push('/ramalan-saldo'),
                 ),
                 ListTile(
+                  key: const Key('buka_perjalanan'),
+                  leading: const Icon(Icons.flight_takeoff_outlined),
+                  title: const Text('Perjalanan'),
+                  subtitle: const Text('Itinerary, tiket, hotel, anggaran, '
+                      'daftar bawaan, dokumen + jurnal perjalanan (FR-134/135)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/perjalanan'),
+                ),
+                ListTile(
+                  key: const Key('buka_rumah_tangga'),
+                  leading: const Icon(Icons.family_restroom_outlined),
+                  title: const Text('Tanggung jawab rumah'),
+                  subtitle: const Text('Siapa bayar apa, pengingat halus satu '
+                      'ketukan, catatan pelunasan (FR-133)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/rumah-tangga'),
+                ),
+                ListTile(
                   key: const Key('buka_tinjauan_tahun'),
                   leading: const Icon(Icons.event_note_outlined),
                   title: const Text('Tinjauan tahun'),

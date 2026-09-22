@@ -96,6 +96,11 @@ part 'database.g.dart';
   // haji/umrah (FR-97), ditambahkan Aaron 22 Sep 2026.
   RencanaIbadah,
   PersiapanIbadah,
+  // Skema v16 — Travel OS (FR-134/135) & kas rumah tangga (FR-133).
+  Perjalanan,
+  ItemPerjalanan,
+  CatatanPerjalanan,
+  TanggungJawabRumah,
 ])
 class AppDatabase extends _$AppDatabase {
   /// [nama] = nama berkas basis data. FR-44 (multi-profil) memakai nama
@@ -105,7 +110,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -242,6 +247,12 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
             await _buatTabelV14(m);
             debugPrint('migrasi v14 selesai (tinjauan mingguan & arsip laporan)');
+          }
+          if (dari < 16) {
+            // v16 (FR-133/134/135): perjalanan, jurnal perjalanan, kas rumah
+            // tangga, dan kolom transaksi.perjalanan_uid.
+            await _buatTabelV16(m);
+            debugPrint('migrasi v16 selesai (perjalanan, jurnal, rumah tangga)');
           }
           if (dari < 15) {
             // v15 (FR-84/97): energi & fokus harian, serta rencana haji/umrah.
@@ -567,6 +578,28 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
       if (await _kolomAda('tidur', namaKolom)) continue;
       final kolom = tidur.$columns.firstWhere((k) => k.$name == namaKolom);
       await m.addColumn(tidur, kolom);
+    }
+  }
+
+  /// Skema v16 (FR-133/134/135). Aman dijalankan ulang: tabel lewat
+  /// `_tabelAda`, kolom lewat `_kolomAda` (PRAGMA) — sebagian basis data dibuat
+  /// dari definisi tabel terbaru sehingga `addColumn` tanpa pemeriksaan bisa
+  /// meledak `duplicate column name`.
+  Future<void> _buatTabelV16(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> baru = {
+      'perjalanan': perjalanan,
+      'item_perjalanan': itemPerjalanan,
+      'catatan_perjalanan': catatanPerjalanan,
+      'tanggung_jawab_rumah': tanggungJawabRumah,
+    };
+    for (final masuk in baru.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
+    if (!await _kolomAda('transaksi', 'perjalanan_uid')) {
+      final kolom =
+          transaksi.$columns.firstWhere((k) => k.$name == 'perjalanan_uid');
+      await m.addColumn(transaksi, kolom);
     }
   }
 

@@ -133,6 +133,16 @@ class IbadahHubScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_kiblat'),
+                  leading: const Icon(Icons.explore_outlined),
+                  title: const Text('Arah kiblat & masjid terdekat'),
+                  subtitle: const Text('Kompas + cadangan arah mata angin, '
+                      'daftar masjid sekitar (FR-98)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ibadah/kiblat'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_dzikir'),
                   leading: const Icon(Icons.radio_button_checked),
                   title: const Text('Dzikir & doa'),

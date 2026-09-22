@@ -17,6 +17,8 @@ import 'core/profil/profil_providers.dart';
 import 'core/theme/app_tema.dart';
 import 'core/widget_utama/aksi_widget.dart';
 import 'core/widget_utama/widget_hari_ini.dart';
+import 'core/utils/bahasa.dart';
+import 'features/pengaturan/fr152_pengaturan.dart';
 import 'features/pengaturan/mata_uang_pengaturan.dart';
 import 'features/pengaturan/mode_tema_pengaturan.dart';
 import 'features/pengaturan/penjaga_cadangan_otomatis.dart';
@@ -80,6 +82,8 @@ class PersonalLifeOsApp extends ConsumerWidget {
     // FR-21 — terang / gelap / ikut sistem. Ukuran teks tetap mengikuti
     // pengaturan sistem perangkat.
     final modeTema = ref.watch(modeTemaProvider).value ?? ModeTema.sistem;
+    // FR-152 — bahasa pilihan pengguna (Indonesia/Melayu/Inggris).
+    final bahasa = ref.watch(bahasaProvider).value ?? bahasaAktif;
     return MaterialApp.router(
       scaffoldMessengerKey: pesanGlobal,
       title: 'Personal Life OS',
@@ -87,8 +91,12 @@ class PersonalLifeOsApp extends ConsumerWidget {
       theme: AppTema.terang(),
       darkTheme: AppTema.gelap(),
       themeMode: modeTema.mode,
-      locale: const Locale('id', 'ID'),
-      supportedLocales: const [Locale('id', 'ID'), Locale('en', 'US')],
+      locale: bahasa.locale,
+      supportedLocales: const [
+        Locale('id', 'ID'),
+        Locale('ms', 'MY'),
+        Locale('en', 'US'),
+      ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

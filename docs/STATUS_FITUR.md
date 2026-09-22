@@ -1,9 +1,9 @@
 # STATUS FITUR PRD v3.1 — 152 butir
 
-Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 9: FR-84, FR-97, FR-142, FR-143, FR-146 selesai).
+Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 10: FR-98, FR-133, FR-134, FR-135, FR-152 selesai).
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 134 · SEBAGIAN 0 · BELUM 18** (total 152 butir)
+**Hitungan: SELESAI 139 · SEBAGIAN 0 · BELUM 13** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -126,8 +126,8 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-94 | Pelacakan Hafalan (Hifz) | V3 | SELESAI | Ron 21 Sep: pelacakan hafalan per juz/surah + status + jadwal ulangan versi pengguna. |
 | FR-95 | Dzikir & Doa | V2 | SELESAI | rute /ibadah/dzikir; 4 adhkar pagi bisa ditandai dari FR-99 |
 | FR-96 | Zakat & Sedekah | V3 | SELESAI | Ron 21 Sep: catatan infaq/sedekah + asisten hitung zakat (nisab 85 gram emas dari harga yang diisi pengguna, haul 354 hari, asumsi terbuka). |
-| FR-97 | Rencana Haji & Umrah | V3 | SELESAI | Ron 22 Sep: 'Rencana haji & umrah' menyimpan target dana + daftar persiapan dokumen; progres menampilkan persen tercapai, sisa, dan setoran per bulan sampai tanggal target, lengkap dengan peringatan bila target belum diisi / tanggal sudah lewat / setoran tidak realistis. Tabel baru rencana_ibadah & persiapan_ibadah ikut mesin sinkron FR-150. Uji: mesin + repositori + layar. |
-| FR-98 | Arah Kiblat & Masjid Terdekat | V3 | BELUM |  |
+| FR-97 | Rencana Haji & Umrah | V3 | SELESAI | Ron 22 Sep: 'Rencana haji & umrah' menyimpan target dana + daftar persiapan dokumen; progres menampilkan persen tercapai, sisa, dan setoran per bulan sampai tanggal target, lengkap dengan peringatan bila target belum diisi / tanggal sudah lewat / setoran tidak realistis. Tabel baru rencana_ibadah & persiapan_ibadah ikut mesin sinkron 150. Uji: mesin + repositori + layar. |
+| FR-98 | Arah Kiblat & Masjid Terdekat | V3 | SELESAI | Ron 22 Sep: 'Arah kiblat & masjid terdekat' menghitung arah kiblat dari koordinat (dengan peringatan kalibrasi); bila sensor kompas tidak ada / izin ditolak, layar TIDAK menampilkan angka palsu - hanya derajat + arah mata angin + kalimat sensor tidak tersedia. Pencarian masjid via Overpass disimpan (sumber + waktu) sehingga tetap terbaca offline; kegagalan jaringan dilaporkan apa adanya dan data lama tetap dipakai. Kanal kompas Android (KanalKompas.kt) + uji tirus. Uji: mesin + repositori + layar. |
 | FR-99 | Islamic Morning Briefing (signature) | V2 | SELESAI | kartu ibadah pagi di briefing: sapaan, progres Quran, 4 adhkar; 3 uji |
 | FR-100 | Islamic Evening Review & Muhasabah | V2 | SELESAI | rute /ibadah/muhasabah |
 
@@ -187,14 +187,14 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 |---|---|---|---|---|
 | FR-131 | Anggota Keluarga & Tanggung Jawab | V3 | SELESAI | Ron 22 Sep: anggota keluarga + pemilik & penanggung jawab per item (contoh PRD: tagihan sekolah milik anak, ditanggung pasangan); saringan per anggota bekerja; anggota bertanda pribadi hanya tampil setelah perangkat dibuka. |
 | FR-132 | Kalender Keluarga | V3 | SELESAI | Ron 22 Sep: kalender keluarga — satu tampilan agenda semua anggota (tagihan, tugas, janji kesehatan, jadwal perawatan, ulang tahun) dengan WARNA BERBEDA per anggota; saringan per anggota; warna ditetapkan dari urutan anggota sehingga tidak pernah sama. |
-| FR-133 | Kas & Tanggung Jawab Rumah Tangga (memperluas FR-43 & FR-47) | V3 | BELUM |  |
+| FR-133 | Kas & Tanggung Jawab Rumah Tangga (memperluas FR-43 & FR-47) | V3 | SELESAI | Ron 22 Sep: 'Kas & tanggung jawab rumah tangga' mencatat siapa bayar apa (pemilik, penanggung jawab, jatuh tempo) + riwayat pelunasan; ringkasan per anggota; pengingat halus SATU KETUKAN hanya boleh terkirim bila pengguna menyalakan izin (saklar di tabel pengaturan), maksimal sekali sehari, pada jam wajar 08.00-21.00 - kalau tidak, layar menyebut alasannya. Tabel tanggung_jawab_rumah ikut mesin sinkron 150. Uji: mesin + repositori + layar. |
 
 ## 10 · Perjalanan
 
 | ID | Fitur | Fase | Status | Catatan |
 |---|---|---|---|---|
-| FR-134 | Perencanaan Perjalanan | V4 | BELUM |  |
-| FR-135 | Jurnal Perjalanan | V4 | BELUM |  |
+| FR-134 | Perencanaan Perjalanan | V4 | SELESAI | Ron 22 Sep: 'Perencanaan perjalanan' menyatukan jadwal + anggaran + dokumen dalam satu perjalanan: agenda/tiket/hotel/dokumen/daftar bawaan; realisasi anggaran dihitung dari transaksi keuangan yang bertaut perjalanan (tanpa input ulang); pengingat keberangkatan H-7/H-1/H-0 sebagai sumber pengingat tambahan. Tabel perjalanan & item_perjalanan ikut mesin sinkron 150. Uji: mesin + repositori + layar. |
+| FR-135 | Jurnal Perjalanan | V4 | SELESAI | Ron 22 Sep: 'Jurnal perjalanan' menyimpan cerita + foto + penilaian per hari; SETIAP pengeluaran yang dicatat langsung menjadi transaksi di laporan keuangan (tanpa input ulang) dan ditandai di layar; catatan lama yang belum bertaut transaksi dilaporkan apa adanya (bukan disembunyikan). Tabel catatan_perjalanan ikut mesin sinkron 150. Uji: mesin + repositori + layar. |
 
 ## 11 · Platform & Kecerdasan
 
@@ -216,4 +216,4 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-149 | AI Copilot ber-konteks | V4 | BELUM |  |
 | FR-150 | Sinkron Antar Perangkat & Cloud (memperluas FR-27) | V4 | SELESAI | Ron 22 Sep: sinkron SEMUA MODUL (40 tabel: uang, aset, tujuan/tugas, kebiasaan, kesehatan, dokumen, pengetahuan, ibadah) — pengenal uid, kaitan antar tabel dipetakan ulang antar HP, bentrok versi-kalah disimpan, diuji dua basis data. Belum: berkas lampiran & catatan obat. |
 | FR-151 | Widget & Akses Cepat Lanjutan (memperluas FR-31) | V2 | SELESAI | Ron 22 Sep: tombol di widget LANGSUNG menjalankan aksi saat aplikasi terbuka dari widget (satu ketukan, bukan membuka formulir lagi) dan menulis ke basis data yang sama sehingga tersinkron; baris widget bisa ditandai lunas satu per satu; aksi cepat ikon bertambah: 'Catat pengeluaran' dan 'Widget tagihan'. Uji: aksi lunas benar-benar mengubah data. |
-| FR-152 | Multi-bahasa & Multi-mata Uang (memperluas FR-52) | V4 | BELUM |  |
+| FR-152 | Multi-bahasa & Multi-mata Uang (memperluas FR-52) | V4 | SELESAI | Ron 22 Sep: multi-bahasa (Indonesia/Melayu/Inggris) untuk kerangka aplikasi, Pengaturan, dan tab; kurs selalu disimpan bersama SUMBER + WAKTU pembaruan, bisa diambil dari jaringan atau diisi manual, dan setiap nilai yang belum punya kurs disebut belum bisa dikonversi (tidak dikira-kira). Uji: mesin + repositori + layar. |

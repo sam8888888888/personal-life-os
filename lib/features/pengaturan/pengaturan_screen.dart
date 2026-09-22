@@ -13,6 +13,7 @@ import 'mode_tema_pengaturan.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
 import 'mata_uang_pengaturan.dart';
+import 'fr152_pengaturan.dart';
 
 class PengaturanScreen extends ConsumerStatefulWidget {
   const PengaturanScreen({super.key});
@@ -101,6 +102,11 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
             if (m != null) _ubahMataUang(m);
           },
         ),
+        const Divider(height: 40),
+        const PilihanBahasa(),
+        const SizedBox(height: 8),
+        const Divider(height: 40),
+        const BagianKurs(),
         const Divider(height: 40),
         const Text('Tema',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),

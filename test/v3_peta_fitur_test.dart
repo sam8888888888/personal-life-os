@@ -49,7 +49,10 @@ void main() {
         // Batch 8: kunci, lencana, widget, multi-profil, aksi cepat.
         'FR-22', 'FR-26', 'FR-31', 'FR-44', 'FR-151',
         // Batch 9: energi harian, rencana ibadah, temuan pintar, ramalan, tahun.
-        'FR-84', 'FR-97', 'FR-142', 'FR-143', 'FR-146']) {
+        'FR-84', 'FR-97', 'FR-142', 'FR-143', 'FR-146',
+        // Batch 10: perjalanan, jurnal perjalanan, kas rumah tangga,
+        // arah kiblat, multi-bahasa & kurs.
+        'FR-98', 'FR-133', 'FR-134', 'FR-135', 'FR-152']) {
         expect(cari(id).status, StatusFitur.selesai, reason: '$id seharusnya Selesai');
       }
     });

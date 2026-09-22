@@ -176,6 +176,10 @@ class Transaksi extends Table {
   IntColumn get tagihanId => integer().nullable().references(Tagihan, #id)();
   /// 'YYYY-MM' periode tagihan yang dibayar, bila [tagihanId] terisi.
   TextColumn get periodeTagihan => text().nullable()();
+  /// Bila transaksi ini bagian dari sebuah perjalanan (FR-134/135): uid
+  /// perjalanannya — supaya anggaran perjalanan terhubung laporan keuangan
+  /// tanpa mencatat pengeluaran dua kali.
+  TextColumn get perjalananUid => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 
@@ -1447,4 +1451,95 @@ class PersiapanIbadah extends Table {
   DateTimeColumn get tanggalTarget => dateTime().nullable()();
   TextColumn get catatan => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+
+/// Perjalanan (FR-134) — satu perjalanan menyatukan jadwal, anggaran
+/// (terhubung Finance lewat `transaksi.perjalanan_uid`) dan dokumen
+/// (lewat `item_perjalanan.dokumen_uid`).
+class Perjalanan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150).
+  TextColumn get uid => text().nullable()();
+  TextColumn get idPerjalanan => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get tujuan => text().withDefault(const Constant(''))();
+  DateTimeColumn get mulai => dateTime()();
+  DateTimeColumn get sampai => dateTime()();
+  /// Anggaran dalam sen; 0 = belum diisi (layar menyebut apa adanya).
+  IntColumn get anggaranSen => integer().withDefault(const Constant(0))();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Isi perjalanan (FR-134): agenda, tiket, hotel, dokumen, daftar bawaan.
+class ItemPerjalanan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get idItem => text()();
+  /// uid perjalanan induk (bukan id angka) supaya tetap cocok antar HP.
+  TextColumn get perjalananUid => text()();
+  /// agenda / tiket / hotel / bawaan / dokumen / lain.
+  TextColumn get jenis => text().withDefault(const Constant('lain'))();
+  TextColumn get judul => text().withLength(min: 1, max: 160)();
+  DateTimeColumn get waktu => dateTime().nullable()();
+  TextColumn get tempat => text().nullable()();
+  /// Perkiraan biaya (sen) — rencana, bukan realisasi.
+  IntColumn get biayaSen => integer().withDefault(const Constant(0))();
+  /// Untuk bawaan/agenda: sudah dibawa/dikerjakan.
+  BoolColumn get selesai => boolean().withDefault(const Constant(false))();
+  /// uid dokumen pada Document OS (FR-128/129) bila item ini menautkan dokumen.
+  TextColumn get dokumenUid => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  IntColumn get urutan => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Catatan jurnal perjalanan (FR-135): tempat, kenangan, penilaian, foto.
+///
+/// `transaksiId` adalah tautan ke baris keuangan yang DIBUAT OTOMATIS saat
+/// pengeluaran diisi — inilah yang membuat pengeluaran perjalanan masuk
+/// laporan keuangan tanpa input ulang.
+class CatatanPerjalanan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get idCatatan => text()();
+  TextColumn get perjalananUid => text()();
+  DateTimeColumn get tanggal => dateTime()();
+  TextColumn get judul => text().withLength(min: 1, max: 160)();
+  TextColumn get tempat => text().nullable()();
+  TextColumn get cerita => text().nullable()();
+  /// 1–5; null = belum dinilai.
+  IntColumn get penilaian => integer().nullable()();
+  IntColumn get pengeluaranSen => integer().withDefault(const Constant(0))();
+  IntColumn get transaksiId =>
+      integer().nullable().references(Transaksi, #id)();
+  IntColumn get jumlahFoto => integer().withDefault(const Constant(0))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Kas & tanggung jawab rumah tangga (FR-133): "siapa bayar apa".
+class TanggungJawabRumah extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get idTanggungJawab => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  IntColumn get jumlahSen => integer().withDefault(const Constant(0))();
+  DateTimeColumn get jatuhTempo => dateTime()();
+  /// sekali / bulanan / tahunan.
+  TextColumn get frekuensi => text().withDefault(const Constant('bulanan'))();
+  /// Untuk siapa (pemilik manfaat) & siapa yang membayar.
+  TextColumn get pemilikNama => text().nullable()();
+  TextColumn get penanggungJawabNama => text().nullable()();
+  BoolColumn get lunas => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get tanggalBayar => dateTime().nullable()();
+  TextColumn get catatanPelunasan => text().nullable()();
+  /// Kapan pengingat halus terakhir dikirim (pembatas sekali sehari).
+  DateTimeColumn get diingatkanPada => dateTime().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }

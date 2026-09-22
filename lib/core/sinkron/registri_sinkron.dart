@@ -400,4 +400,37 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomKunci: db.persiapanIbadah.id,
         kaitan: {'rencana_id': 'rencana_ibadah'},
       ),
+
+      // ── perjalanan & rumah tangga (batch 10) ──────────────────────────────
+      // Induk (perjalanan) lebih dulu; item & jurnal memakai
+      // `kaitan: {'perjalanan_uid': 'perjalanan'}`.
+      JalurSinkron(
+        nama: 'perjalanan',
+        tabel: db.perjalanan,
+        kolomUid: db.perjalanan.uid,
+        kolomKunci: db.perjalanan.id,
+        kolomDiubah: db.perjalanan.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'item_perjalanan',
+        tabel: db.itemPerjalanan,
+        kolomUid: db.itemPerjalanan.uid,
+        kolomKunci: db.itemPerjalanan.id,
+        kaitan: {'perjalanan_uid': 'perjalanan'},
+      ),
+      JalurSinkron(
+        nama: 'catatan_perjalanan',
+        tabel: db.catatanPerjalanan,
+        kolomUid: db.catatanPerjalanan.uid,
+        kolomKunci: db.catatanPerjalanan.id,
+        kolomDiubah: db.catatanPerjalanan.diubahPada,
+        kaitan: {'perjalanan_uid': 'perjalanan'},
+      ),
+      JalurSinkron(
+        nama: 'tanggung_jawab_rumah',
+        tabel: db.tanggungJawabRumah,
+        kolomUid: db.tanggungJawabRumah.uid,
+        kolomKunci: db.tanggungJawabRumah.id,
+        kolomDiubah: db.tanggungJawabRumah.diubahPada,
+      ),
     ];

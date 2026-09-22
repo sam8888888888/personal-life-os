@@ -895,7 +895,7 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     fase: 'V3',
     status: StatusFitur.selesai,
     rincian: 'Rencana Haji & Umrah — target dana (terhubung Goal & Finance), daftar persiapan dokumen',
-    catatan: 'Ron 22 Sep: \'Rencana haji & umrah\' menyimpan target dana + daftar persiapan dokumen; progres menampilkan persen tercapai, sisa, dan setoran per bulan sampai tanggal target, lengkap dengan peringatan bila target belum diisi / tanggal sudah lewat / setoran tidak realistis. Tabel baru rencana_ibadah & persiapan_ibadah ikut mesin sinkron FR-150. Uji: mesin + repositori + layar.',
+    catatan: 'Ron 22 Sep: \'Rencana haji & umrah\' menyimpan target dana + daftar persiapan dokumen; progres menampilkan persen tercapai, sisa, dan setoran per bulan sampai tanggal target, lengkap dengan peringatan bila target belum diisi / tanggal sudah lewat / setoran tidak realistis. Tabel baru rencana_ibadah & persiapan_ibadah ikut mesin sinkron 150. Uji: mesin + repositori + layar.',
     rute: '/ibadah/rencana',
 
   ),
@@ -904,8 +904,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Arah Kiblat & Masjid Terdekat',
     modul: '4 · Ibadah (Islamic OS)',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Arah Kiblat & Masjid Terdekat — kompas dengan kalibrasi + cadangan arah mata angin bila sensor tidak layak; daftar masjid terdekat',
+    catatan: 'Ron 22 Sep: \'Arah kiblat & masjid terdekat\' menghitung arah kiblat dari koordinat (dengan peringatan kalibrasi); bila sensor kompas tidak ada / izin ditolak, layar TIDAK menampilkan angka palsu - hanya derajat + arah mata angin + kalimat sensor tidak tersedia. Pencarian masjid via Overpass disimpan (sumber + waktu) sehingga tetap terbaca offline; kegagalan jaringan dilaporkan apa adanya dan data lama tetap dipakai. Kanal kompas Android (KanalKompas.kt) + uji tirus. Uji: mesin + repositori + layar.',
+    rute: '/ibadah/kiblat',
+
   ),
   ButirFitur(
     id: 'FR-99',
@@ -1243,24 +1246,33 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Kas & Tanggung Jawab Rumah Tangga (memperluas FR-43 & FR-47)',
     modul: '9 · Keluarga',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Kas & Tanggung Jawab Rumah Tangga (memperluas FR-43 & FR-47) — "siapa bayar apa", pengingat halus satu ketukan, catatan pelunasan',
+    catatan: 'Ron 22 Sep: \'Kas & tanggung jawab rumah tangga\' mencatat siapa bayar apa (pemilik, penanggung jawab, jatuh tempo) + riwayat pelunasan; ringkasan per anggota; pengingat halus SATU KETUKAN hanya boleh terkirim bila pengguna menyalakan izin (saklar di tabel pengaturan), maksimal sekali sehari, pada jam wajar 08.00-21.00 - kalau tidak, layar menyebut alasannya. Tabel tanggung_jawab_rumah ikut mesin sinkron 150. Uji: mesin + repositori + layar.',
+    rute: '/rumah-tangga',
+
   ),
   ButirFitur(
     id: 'FR-134',
     nama: 'Perencanaan Perjalanan',
     modul: '10 · Perjalanan',
     fase: 'V4',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Perencanaan Perjalanan — itinerary, tiket, hotel, anggaran, daftar bawaan, dokumen, pengingat keberangkatan',
+    catatan: 'Ron 22 Sep: \'Perencanaan perjalanan\' menyatukan jadwal + anggaran + dokumen dalam satu perjalanan: agenda/tiket/hotel/dokumen/daftar bawaan; realisasi anggaran dihitung dari transaksi keuangan yang bertaut perjalanan (tanpa input ulang); pengingat keberangkatan H-7/H-1/H-0 sebagai sumber pengingat tambahan. Tabel perjalanan & item_perjalanan ikut mesin sinkron 150. Uji: mesin + repositori + layar.',
+    rute: '/perjalanan',
+
   ),
   ButirFitur(
     id: 'FR-135',
     nama: 'Jurnal Perjalanan',
     modul: '10 · Perjalanan',
     fase: 'V4',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Jurnal Perjalanan — foto, pengeluaran, tempat, penilaian, kenangan',
+    catatan: 'Ron 22 Sep: \'Jurnal perjalanan\' menyimpan cerita + foto + penilaian per hari; SETIAP pengeluaran yang dicatat langsung menjadi transaksi di laporan keuangan (tanpa input ulang) dan ditandai di layar; catatan lama yang belum bertaut transaksi dilaporkan apa adanya (bukan disembunyikan). Tabel catatan_perjalanan ikut mesin sinkron 150. Uji: mesin + repositori + layar.',
+    rute: '/perjalanan (jurnal di dalam perjalanan)',
+
   ),
   ButirFitur(
     id: 'FR-136',
@@ -1420,8 +1432,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Multi-bahasa & Multi-mata Uang (memperluas FR-52)',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V4',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Multi-bahasa & Multi-mata Uang (memperluas FR-52) — Indonesia, Melayu, Inggris + Rupiah/Ringgit/USD',
+    catatan: 'Ron 22 Sep: multi-bahasa (Indonesia/Melayu/Inggris) untuk kerangka aplikasi, Pengaturan, dan tab; kurs selalu disimpan bersama SUMBER + WAKTU pembaruan, bisa diambil dari jaringan atau diisi manual, dan setiap nilai yang belum punya kurs disebut belum bisa dikonversi (tidak dikira-kira). Uji: mesin + repositori + layar.',
+    rute: 'Pengaturan (bahasa & kurs)',
+
   ),
 ];
 

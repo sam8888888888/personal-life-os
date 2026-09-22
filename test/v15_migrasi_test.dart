@@ -130,9 +130,10 @@ void main() {
     //    pilar kehidupan, v5 visi & area hidup + tujuan.area_id, v6-v8 tabel
     //    kesehatan/dokumen/sinkron, v9 delapan tabel modul Pengetahuan,
     //    v14 tinjauan mingguan & arsip laporan, v15 energi harian (FR-84) &
-    //    rencana haji/umrah (FR-97)).
+    //    rencana haji/umrah (FR-97), v16 perjalanan & kas rumah tangga
+    //    (FR-133/134/135)).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 15);
+    expect(versi.data.values.first, 16);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();

@@ -43,5 +43,15 @@ num? parseRupiah(String? s) {
 /// Rp 150.000 -> 15000000 sen (satuan terkecil; IDR tanpa desimal).
 int rupiahKeSen(num jumlah) => (jumlah * 100).round();
 
+/// Ketikan pengguna ("Rp 1.500.000", "1.5jt", kosong) -> sen.
+///
+/// Kosong atau tidak terbaca = 0 (form menganggap belum diisi) — dipakai layar
+/// perjalanan, jurnal, dan rumah tangga. Tidak untuk perhitungan yang butuh
+/// membedakan "nol" dan "tidak diisi".
+int senDariKetikan(String? teks) {
+  final v = parseRupiah(teks);
+  return v == null ? 0 : rupiahKeSen(v);
+}
+
 /// 15000000 sen -> "Rp 150.000" (mengikuti mata uang aktif, FR-67)
 String fmtRpDariSen(int sen) => fmtUangDariSen(sen);
