@@ -7,4 +7,6 @@
     <string name="aksi_hari_panjang">Lihat tagihan hari ini</string>
     <string name="aksi_pengingat_pendek">Pengingat</string>
     <string name="aksi_pengingat_panjang">Buka pengingat &amp; izin</string>
+    <string name="aksi_darurat_pendek">Kartu darurat</string>
+    <string name="aksi_darurat_panjang">Buka kartu darurat (bisa dari layar kunci)</string>
 </resources>

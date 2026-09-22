@@ -85,13 +85,18 @@ part 'database.g.dart';
   Lampiran,
   // Skema v12 — Home & Asset OS (FR-124/125/126/127), Aaron 22 Sep 2026.
   RiwayatPerawatanAset,
+  // Skema v13 — Family OS (FR-131), profil kesehatan (FR-117),
+  // brankas catatan medis (FR-108).
+  AnggotaKeluarga,
+  ProfilKesehatan,
+  CatatanMedis,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -218,6 +223,11 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v12 (FR-124…FR-127): aset fisik + perawatan aset.
             await _buatTabelV12(m);
             debugPrint('migrasi v12 selesai (aset fisik & riwayat perawatan)');
+          }
+          if (dari < 13) {
+            // v13 (FR-108/117/131): keluarga, profil kesehatan, catatan medis.
+            await _buatTabelV13(m);
+            debugPrint('migrasi v13 selesai (keluarga, profil & catatan medis)');
           }
         },
       );
@@ -462,6 +472,37 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
         'lokasi',
       ],
       'perawatan': ['aset_id'],
+    };
+    for (final masuk in tabelSasaran.entries) {
+      for (final namaKolom in kolomPerlu[masuk.key] ?? const <String>[]) {
+        if (await _kolomAda(masuk.key, namaKolom)) continue;
+        final kolom = masuk.value.$columns
+            .firstWhere((k) => k.$name == namaKolom);
+        await m.addColumn(masuk.value, kolom);
+      }
+    }
+  }
+
+  /// Skema v13 (FR-108/117/131): keluarga, profil kesehatan, catatan medis.
+  ///
+  /// Aman dijalankan ulang: tabel lewat `_tabelAda`, kolom lewat `_kolomAda`.
+  Future<void> _buatTabelV13(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> baru = {
+      'anggota_keluarga': anggotaKeluarga,
+      'profil_kesehatan': profilKesehatan,
+      'catatan_medis': catatanMedis,
+    };
+    for (final masuk in baru.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
+    final Map<String, TableInfo<Table, dynamic>> tabelSasaran = {
+      'tagihan': tagihan,
+      'tugas': tugas,
+    };
+    const Map<String, List<String>> kolomPerlu = {
+      'tagihan': ['pemilik_id', 'penanggung_jawab_id'],
+      'tugas': ['pemilik_id', 'penanggung_jawab_id'],
     };
     for (final masuk in tabelSasaran.entries) {
       for (final namaKolom in kolomPerlu[masuk.key] ?? const <String>[]) {

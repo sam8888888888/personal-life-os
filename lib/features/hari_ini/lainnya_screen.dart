@@ -158,6 +158,57 @@ class LainnyaScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_keluarga'),
+                  leading: const Icon(Icons.family_restroom_outlined),
+                  title: const Text('Keluarga & tanggung jawab'),
+                  subtitle: const Text(
+                      'Anggota keluarga, pemilik & penanggung jawab item (FR-131)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/keluarga'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_catatan_medis'),
+                  leading: const Icon(Icons.medical_information_outlined),
+                  title: const Text('Brankas catatan medis'),
+                  subtitle: const Text(
+                      'Lab, resep, imunisasi, tagihan medis + cari kata (FR-108)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/kesehatan/catatan-medis'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_peringatan_dini'),
+                  leading: const Icon(Icons.notifications_active_outlined),
+                  title: const Text('Peringatan dini'),
+                  subtitle: const Text(
+                      'Pantauan pola dari catatan sendiri, ambang bisa diatur (FR-114)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/kesehatan/peringatan-dini'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_kunjungan'),
+                  leading: const Icon(Icons.description_outlined),
+                  title: const Text('Mode kunjungan dokter'),
+                  subtitle: const Text(
+                      'Ringkasan 30 hari jadi 1 halaman PDF (FR-115)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/kesehatan/kunjungan'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_profil_kesehatan'),
+                  leading: const Icon(Icons.emergency_outlined),
+                  title: const Text('Profil kesehatan & kartu darurat'),
+                  subtitle: const Text(
+                      'Golongan darah, alergi, kontak darurat — offline (FR-117)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/kesehatan/profil-kesehatan'),
+                ),
+                const Divider(height: 1),
+
+                ListTile(
                   key: const Key('buka_cadangan_lainnya'),
                   leading: const Icon(Icons.backup_outlined),
                   title: const Text('Data & cadangan'),

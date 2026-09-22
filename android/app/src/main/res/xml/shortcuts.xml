@@ -43,4 +43,19 @@
         </intent>
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
+    <!-- FR-117: kartu darurat — boleh tampil di atas layar kunci. -->
+    <shortcut
+        android:shortcutId="kartu_darurat"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/aksi_darurat_pendek"
+        android:shortcutLongLabel="@string/aksi_darurat_panjang">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.personallifeos.personal_life_os"
+            android:targetClass="com.personallifeos.personal_life_os.MainActivity">
+            <extra android:name="rute" android:value="/kesehatan/kartu-darurat" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
 </shortcuts>

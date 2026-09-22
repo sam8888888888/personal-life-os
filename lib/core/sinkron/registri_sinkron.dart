@@ -66,6 +66,10 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomUid: db.tagihan.uid,
         kolomKunci: db.tagihan.id,
         kolomDiubah: db.tagihan.diubahPada,
+        kaitan: <String, String>{
+          'pemilik_id': 'anggota_keluarga',
+          'penanggung_jawab_id': 'anggota_keluarga',
+        },
       ),
       JalurSinkron(
         nama: 'riwayat_pembayaran',
@@ -215,6 +219,8 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kaitan: <String, String>{
           'tujuan_id': 'tujuan',
           'proyek_id': 'proyek',
+          'pemilik_id': 'anggota_keluarga',
+          'penanggung_jawab_id': 'anggota_keluarga',
         },
       ),
       JalurSinkron(
@@ -339,5 +345,27 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         tabel: db.zakatSedekah,
         kolomUid: db.zakatSedekah.uid,
         kolomKunci: db.zakatSedekah.id,
+      ),
+
+      // ── keluarga & kesehatan lanjutan (batch 6) ───────────────────────────
+      // Anggota keluarga lebih dulu supaya kaitan pemilik/penanggung jawab pada
+      // tagihan & tugas bisa dipetakan ke uid anggota di HP penerima.
+      JalurSinkron(
+        nama: 'anggota_keluarga',
+        tabel: db.anggotaKeluarga,
+        kolomUid: db.anggotaKeluarga.uid,
+        kolomKunci: db.anggotaKeluarga.id,
+      ),
+      JalurSinkron(
+        nama: 'profil_kesehatan',
+        tabel: db.profilKesehatan,
+        kolomUid: db.profilKesehatan.uid,
+        kolomKunci: db.profilKesehatan.id,
+      ),
+      JalurSinkron(
+        nama: 'catatan_medis',
+        tabel: db.catatanMedis,
+        kolomUid: db.catatanMedis.uid,
+        kolomKunci: db.catatanMedis.id,
       ),
     ];

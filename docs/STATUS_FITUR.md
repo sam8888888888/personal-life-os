@@ -3,7 +3,7 @@
 Disusun ulang oleh Aaron (Ron) · 21 Sep 2026.
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 109 · SEBAGIAN 0 · BELUM 43** (total 152 butir)
+**Hitungan: SELESAI 119 · SEBAGIAN 0 · BELUM 33** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -142,16 +142,16 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-105 | Jurnal Kesehatan (angka) | V2 | SELESAI | Ron 21 Sep: jurnal angka kesehatan — tekanan darah 2 angka, satuan per jenis, tren 30 hari. |
 | FR-106 | Manajer Obat & Vitamin | V2 | SELESAI | rute /kesehatan/obat + penanda minum |
 | FR-107 | Perkiraan Obat Habis & Pengingat Beli | V2 | SELESAI | Ron 21 Sep: perkiraan obat habis (sisa ÷ dosis per hari) + pengingat H-5/H-1. |
-| FR-108 | Brankas Catatan Medis | V3 | BELUM |  |
+| FR-108 | Brankas Catatan Medis | V3 | SELESAI | Ron 22 Sep: brankas catatan medis — jenis (lab, tahunan, resep, imunisasi, tagihan medis, dokter, pencitraan), pencarian kata menjangkau judul/hasil/ringkasan/tenaga kesehatan/fasilitas + lampiran berkas TERENKRIPSI (AES-256-GCM, kunci di Android Keystore, tidak diekspor). Bila perangkat tidak mendukung enkripsi, berkas TIDAK disimpan. |
 | FR-109 | Janji Dokter di Kalender | V2 | SELESAI | Ron 21 Sep: janji dokter/lab/kontrol + pengingat 7 hari, 1 hari, dan 2 jam sebelum. |
 | FR-110 | Catatan Makan Ringkas (quick log) | V3 | SELESAI | Ron 22 Sep: catat cepat per waktu makan, porsi, dan penilaian sendiri (baik/cukup/kurang). |
 | FR-111 | Pencatat Air | V2 | SELESAI | tombol +250 ml / +500 ml |
 | FR-112 | Jurnal Suasana Hati & Stres | V2 | SELESAI | Ron 22 Sep: suasana hati, energi & stres 1-5, pemicu, catatan; rata-rata & arah 14 hari. |
 | FR-113 | Mesin Temuan Kesehatan (insight) | V3 | SELESAI | Ron 22 Sep: temuan dihitung dari angka sendiri (berat, tekanan, tidur, air, suasana) + angka pendukung; bukan diagnosis. |
-| FR-114 | Peringatan Dini (watch) | V3 | BELUM |  |
-| FR-115 | Mode Kunjungan Dokter | V3 | BELUM |  |
+| FR-114 | Peringatan Dini (watch) | V3 | SELESAI | Ron 22 Sep: peringatan dini dari catatan sendiri — berat naik N minggu, tidur di bawah kebiasaan, aktivitas menurun 14 hari, sistolik naik; ambang bisa diatur & tersimpan; tiap peringatan memuat saran netral tanpa kata menghakimi, disertai catatan 'bukan diagnosis'. |
+| FR-115 | Mode Kunjungan Dokter | V3 | SELESAI | Ron 22 Sep: mode kunjungan dokter — ringkasan 30 hari (berat, tekanan, tidur, aktivitas, suasana, keluhan) jadi SATU halaman PDF; angkanya dihitung dari fungsi yang sama dengan layar sehingga identik dengan data aplikasi. |
 | FR-116 | Laporan Kesehatan Bulanan | V3 | SELESAI | Ron 22 Sep: laporan bulanan + tiga kelompok: membaik / berubah / perlu diperhatikan. |
-| FR-117 | Profil Kesehatan & Kartu Darurat | V2 | BELUM |  |
+| FR-117 | Profil Kesehatan & Kartu Darurat | V2 | SELESAI | Ron 22 Sep: profil kesehatan (golongan darah, alergi, kondisi, obat penting, kontak darurat) + kartu darurat OFFLINE; pintasan Android membuka kartu langsung dari layar kunci (setShowWhenLocked) sementara rincian sensitif hanya tampil setelah perangkat dibuka. |
 
 ## 6 · Pengetahuan
 
@@ -168,10 +168,10 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 
 | ID | Fitur | Fase | Status | Catatan |
 |---|---|---|---|---|
-| FR-124 | Daftar Aset | V3 | BELUM |  |
-| FR-125 | Jadwal & Riwayat Perawatan Aset | V3 | BELUM |  |
-| FR-126 | Garansi & Invoice | V3 | BELUM |  |
-| FR-127 | Perkiraan Umur Pakai & Penggantian | V4 | BELUM |  |
+| FR-124 | Daftar Aset | V3 | SELESAI | Ron 22 Sep: daftar aset fisik (rumah, kendaraan, perangkat, furnitur, elektronik) — tanggal beli, harga, nomor seri, garansi, masa pakai, lokasi; total nilai tampil & ikut Kekayaan Bersih tanpa input ulang. |
+| FR-125 | Jadwal & Riwayat Perawatan Aset | V3 | SELESAI | Ron 22 Sep: jadwal perawatan terikat aset + riwayat perbaikan berbiaya (bisa dikaitkan ke pengeluaran), total & rata-rata per tahun, pengingat perawatan terpasang di isolate utama & latar. |
+| FR-126 | Garansi & Invoice | V3 | SELESAI | Ron 22 Sep: garansi per aset (tanggal berakhir) + status aktif/segera berakhir/berakhir; yang berakhir <= 30 hari muncul sebagai Perhatian di Today. |
+| FR-127 | Perkiraan Umur Pakai & Penggantian | V4 | SELESAI | Ron 22 Sep: perkiraan umur pakai & waktu penggantian dari tanggal beli + masa pakai, lengkap dengan DASAR perhitungan & saran dana per bulan (estimasi, bukan klaim). |
 
 ## 8 · Dokumen
 
@@ -179,13 +179,13 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 |---|---|---|---|---|
 | FR-128 | Brankas Dokumen & Masa Berlaku (memperluas FR-53) | V2 | SELESAI | dengan catatan (daftar + masa berlaku + nama berkas; enkripsi berkas BELUM — layar menuliskan itu apa adanya |
 | FR-129 | Pengingat Perpanjangan Berlapis | V2 | SELESAI | lead 90/30/7/1 hari, bisa diubah; terdaftar di isolate utama & latar |
-| FR-130 | Salin Cepat & Bagikan Terkendali | V2 | BELUM |  |
+| FR-130 | Salin Cepat & Bagikan Terkendali | V2 | SELESAI | Ron 22 Sep: salin nomor sekali ketuk + bagikan tersamar — nomor disamarkan, berkas asli hanya ikut bila pengguna mencentangnya sendiri dan berkasnya ada. |
 
 ## 9 · Keluarga
 
 | ID | Fitur | Fase | Status | Catatan |
 |---|---|---|---|---|
-| FR-131 | Anggota Keluarga & Tanggung Jawab | V3 | BELUM |  |
+| FR-131 | Anggota Keluarga & Tanggung Jawab | V3 | SELESAI | Ron 22 Sep: anggota keluarga + pemilik & penanggung jawab per item (contoh PRD: tagihan sekolah milik anak, ditanggung pasangan); saringan per anggota bekerja; anggota bertanda pribadi hanya tampil setelah perangkat dibuka. |
 | FR-132 | Kalender Keluarga | V3 | BELUM |  |
 | FR-133 | Kas & Tanggung Jawab Rumah Tangga (memperluas FR-43 & FR-47) | V3 | BELUM |  |
 

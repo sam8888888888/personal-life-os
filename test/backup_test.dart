@@ -200,13 +200,17 @@ Future<void> ketukNyata(WidgetTester t, Finder f, {int milidetik = 700}) async {
 ///
 /// ListView bisa sudah membangun widget di luar layar (`cacheExtent`), jadi
 /// setelah ditemukan widget tetap digeser masuk lewat `ensureVisible`.
-Future<void> gulirKe(WidgetTester t, Finder f, {int langkah = 8}) async {
+// Langkah 24 (bukan 8): daftar di layar Cadangan bertambah panjang setiap
+// skema naik, dan baris berkas cadangan ada di bagian paling bawah.
+Future<void> gulirKe(WidgetTester t, Finder f, {int langkah = 30}) async {
+  // 30 langkah x 300 px: baris paling bawah (daftar berkas cadangan) makin jauh
+  // setiap kali skema bertambah — dulu 8 x 200 px sempat tidak sampai.
   for (var i = 0; i < langkah && f.evaluate().isEmpty; i++) {
-    await t.drag(find.byType(Scrollable).first, const Offset(0, -200));
+    await t.drag(find.byType(Scrollable).first, const Offset(0, -300));
     await t.pump(const Duration(milliseconds: 120));
   }
-  for (var i = 0; i < langkah * 2 && f.evaluate().isEmpty; i++) {
-    await t.drag(find.byType(Scrollable).first, const Offset(0, 200));
+  for (var i = 0; i < langkah && f.evaluate().isEmpty; i++) {
+    await t.drag(find.byType(Scrollable).first, const Offset(0, 300));
     await t.pump(const Duration(milliseconds: 120));
   }
   if (f.evaluate().isNotEmpty) {
@@ -275,7 +279,7 @@ void main() {
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 56,
+      expect(tabel.length, 59,
           reason: '13 tabel v3 + 23 tabel v4 + 2 tabel v5 (visi, area_hidup) '
               '+ 1 tabel v6 (sinkron_kotor) + 5 tabel v7 (catatan kesehatan, '
               'janji kesehatan, kas informal, hafalan, zakat_sedekah) '

@@ -47,6 +47,12 @@ import 'features/dokumen/dokumen_screen.dart';
 import 'features/kalender/kalender_keuangan_screen.dart';
 import 'features/kalender/kalender_screen.dart';
 import 'features/kesehatan/aktivitas_screen.dart';
+import 'features/keluarga/anggota_screen.dart';
+import 'features/kesehatan/catatan_medis_screen.dart';
+import 'features/kesehatan/kartu_darurat_screen.dart';
+import 'features/kesehatan/kunjungan_screen.dart';
+import 'features/kesehatan/peringatan_dini_screen.dart';
+import 'features/kesehatan/profil_kesehatan_screen.dart';
 import 'features/kesehatan/air_screen.dart';
 import 'features/kesehatan/kesehatan_hub_screen.dart';
 import 'features/kesehatan/jurnal_angka_screen.dart';
@@ -383,6 +389,11 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/cari',
       builder: (c, s) => const PencarianScreen(),
     ),
+    // FR-131 — anggota keluarga & tanggung jawab.
+    GoRoute(
+      path: '/keluarga',
+      builder: (c, s) => const AnggotaScreen(),
+    ),
     // Modul kesehatan V2 (FR-101/102/103/106/111).
     GoRoute(
       path: '/kesehatan',
@@ -431,6 +442,26 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
         GoRoute(
           path: 'laporan-bulanan',
           builder: (c, s) => const LaporanKesehatanBulananScreen(),
+        ),
+        GoRoute(
+          path: 'peringatan-dini',
+          builder: (c, s) => const PeringatanDiniScreen(),
+        ),
+        GoRoute(
+          path: 'kunjungan',
+          builder: (c, s) => const KunjunganScreen(),
+        ),
+        GoRoute(
+          path: 'profil-kesehatan',
+          builder: (c, s) => const ProfilKesehatanScreen(),
+        ),
+        GoRoute(
+          path: 'kartu-darurat',
+          builder: (c, s) => const KartuDaruratScreen(),
+        ),
+        GoRoute(
+          path: 'catatan-medis',
+          builder: (c, s) => const CatatanMedisScreen(),
         ),
       ],
     ),

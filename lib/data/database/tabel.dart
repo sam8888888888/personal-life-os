@@ -53,6 +53,12 @@ class Tagihan extends Table {
   BoolColumn get statusAktif => boolean().withDefault(const Constant(true))();
   /// false = sudah dibayar di periode berjalan.
   BoolColumn get lunas => boolean().withDefault(const Constant(false))();
+  // --- FR-131 (skema v13): pemilik & penanggung jawab tagihan ----------
+  // PENANDA_BATCH6_TAGIHAN
+  /// Anggota keluarga yang memiliki tagihan (mis. uang sekolah → anak).
+  IntColumn get pemilikId => integer().nullable()();
+  /// Anggota keluarga yang menanggung pembayarannya (mis. pasangan).
+  IntColumn get penanggungJawabId => integer().nullable()();
   DateTimeColumn get tanggalLunas => dateTime().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
@@ -516,6 +522,12 @@ class Tugas extends Table {
   TextColumn get kanalPengingat => text().withDefault(const Constant('push'))();
   BoolColumn get selesai => boolean().withDefault(const Constant(false))();
   DateTimeColumn get selesaiPada => dateTime().nullable()();
+  // --- FR-131 (skema v13): pemilik & penanggung jawab item --------------
+  // PENANDA_BATCH6_PEMILIK
+  /// Anggota keluarga yang memiliki item ini (mis. tagihan sekolah → anak).
+  IntColumn get pemilikId => integer().nullable()();
+  /// Anggota keluarga yang menanggung/mengerjakan item ini.
+  IntColumn get penanggungJawabId => integer().nullable()();
   IntColumn get urutan => integer().withDefault(const Constant(0))();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
@@ -1274,6 +1286,81 @@ class RiwayatPerawatanAset extends Table {
   /// Transaksi pengeluaran terkait (opsional) — FR-125.
   IntColumn get transaksiId => integer().nullable()();
   TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+
+// =================== BATCH 6 (skema v13) ==================================
+// FR-131 Family OS, FR-117 profil kesehatan, FR-108 brankas catatan medis.
+
+/// Anggota keluarga & tanggung jawab — FR-131.
+///
+/// `pribadi` = data anggota ini terbatas: item yang pemilik/penanggung
+/// jawabnya anggota ini disembunyikan di daftar sampai perangkat dibuka
+/// (kunci layar dilepas). Dipakai untuk data anak.
+class AnggotaKeluarga extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  /// Pengenal stabil lintas HP.
+  TextColumn get idAnggota => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  /// pasangan / anak / orangtua / saudara / lain.
+  TextColumn get hubungan => text().withDefault(const Constant('lain'))();
+  DateTimeColumn get tanggalLahir => dateTime().nullable()();
+  /// true = data anggota ini dibatasi (mis. anak).
+  BoolColumn get pribadi => boolean().withDefault(const Constant(false))();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Profil kesehatan & kontak darurat — FR-117.
+///
+/// Satu baris (id = 1) yang menyimpan keadaan Papi. `sembunyikanRincianDikunci`
+/// menentukan apakah rincian sensitif (kondisi/obat/catatan) disembunyikan saat
+/// kartu dibuka dari pintasan DI LAYAR KUNCI.
+class ProfilKesehatan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get golonganDarah => text().nullable()();
+  TextColumn get alergi => text().nullable()();
+  TextColumn get kondisi => text().nullable()();
+  TextColumn get obatPenting => text().nullable()();
+  TextColumn get kontakNama => text().nullable()();
+  TextColumn get kontakHubungan => text().nullable()();
+  TextColumn get kontakTelepon => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get sembunyikanRincianDikunci =>
+      boolean().withDefault(const Constant(true))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Brankas catatan medis — FR-108.
+///
+/// Berkas lampiran disimpan di `lampiran` (induk_tabel = `catatan_medis`) dan
+/// DIENKRIPSI lewat Android Keystore (kanal `lifeos/berkas_medis`); bila
+/// perangkat tidak mendukung, berkas TIDAK disimpan — layar menyatakannya apa
+/// adanya, bukan menyimpan berkas mentah diam-diam.
+class CatatanMedis extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  /// lab / tahunan / resep / imunisasi / tagihan_medis / dokter / pencitraan / lain
+  TextColumn get jenis => text().withDefault(const Constant('lab'))();
+  TextColumn get judul => text().withLength(min: 1, max: 200)();
+  DateTimeColumn get tanggal => dateTime()();
+  /// Dokter / tenaga kesehatan yang menangani (opsional).
+  TextColumn get tenagaKesehatan => text().nullable()();
+  /// Laboratorium / rumah sakit / klinik (opsional).
+  TextColumn get fasilitas => text().nullable()();
+  /// Angka & hasil penting (opsional) — ikut pencarian.
+  TextColumn get hasil => text().nullable()();
+  /// Kesimpulan/ringkasan dari tenaga kesehatan (opsional).
+  TextColumn get ringkasan => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }

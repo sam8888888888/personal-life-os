@@ -11,10 +11,17 @@ import io.flutter.plugin.common.MethodChannel
 /// aplikasi sudah berjalan (onNewIntent).
 class MainActivity : FlutterActivity() {
     private val kanal = "lifeos/rute"
+    private val RUTE_KARTU_DARURAT = "/kesehatan/kartu-darurat"
     private val kanalBagikan = "lifeos/bagikan"
     private val kanalBuka = "lifeos/buka"
     private var saluranRute: MethodChannel? = null
     private val kanalMedia = KanalMedia(this)
+
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        // FR-117: pintasan kartu darurat boleh tampil tanpa membuka kunci.
+        tampilkanDiAtasKunci(ruteDari(intent))
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -115,9 +122,17 @@ class MainActivity : FlutterActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         val rute = ruteDari(intent)
+        tampilkanDiAtasKunci(rute)
         if (rute != null) {
             saluranRute?.invokeMethod("ruteBaru", rute)
         }
+    }
+
+    /// Kartu darurat (FR-117) diizinkan tampil di atas layar kunci.
+    private fun tampilkanDiAtasKunci(rute: String?) {
+        val darurat = rute == RUTE_KARTU_DARURAT
+        setShowWhenLocked(darurat)
+        setTurnScreenOn(darurat)
     }
 
     private fun ruteDari(intent: Intent?): String? {
