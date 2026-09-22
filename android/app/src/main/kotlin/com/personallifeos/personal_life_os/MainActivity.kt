@@ -20,6 +20,11 @@ class MainActivity : FlutterActivity() {
     private val kanalKunci = KanalKunci(this)
     private val kanalLencana = KanalLencana(this)
     private val kanalWidget = KanalWidget(this)
+    // FR-58 (suara) & FR-39 (SMS bank)
+    private val kanalSuara = KanalSuara(this)
+    private val kanalSms = KanalSms(this)
+    // FR-38/FR-50 — OCR di perangkat (tagihan dari foto, struk, nota).
+    private val kanalOcr = KanalOcr(this)
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +54,11 @@ class MainActivity : FlutterActivity() {
         kanalWidget.pasang(flutterEngine.dartExecutor.binaryMessenger)
         // FR-98 — arah hadap perangkat untuk layar kiblat.
         KanalKompas.pasang(flutterEngine, this)
+        // FR-58 — pengenalan suara bawaan Android.
+        kanalSuara.pasang(flutterEngine)
+        // FR-39 — baca SMS bank (hanya bila izin diberikan).
+        kanalSms.pasang(flutterEngine)
+        kanalOcr.pasang(flutterEngine)
     }
 
     /// FR-49: buka tautan ke aplikasi lain (WhatsApp / SMS / Telegram).
@@ -129,6 +139,8 @@ class MainActivity : FlutterActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         kanalMedia.onRequestPermissionsResult(requestCode, grantResults)
+        kanalSuara.onRequestPermissionsResult(requestCode, grantResults)
+        kanalSms.onRequestPermissionsResult(requestCode, grantResults)
     }
 
     override fun onNewIntent(intent: Intent) {

@@ -305,6 +305,14 @@ class LainnyaScreen extends ConsumerWidget {
                   onTap: () => context.push('/rumah-tangga'),
                 ),
                 ListTile(
+                  key: const Key('buka_impor_foto'),
+                  leading: const Icon(Icons.document_scanner_outlined),
+                  title: const Text('Impor dari foto'),
+                  subtitle: const Text('Foto tagihan, struk, atau nota — dibaca '
+                      'di perangkat, diperiksa dulu (FR-38 & FR-50)'),
+                  onTap: () => context.push('/tagihan/impor-foto'),
+                ),
+                ListTile(
                   key: const Key('buka_mode_rumah_tangga'),
                   leading: const Icon(Icons.home_work_outlined),
                   title: const Text('Mode rumah tangga'),

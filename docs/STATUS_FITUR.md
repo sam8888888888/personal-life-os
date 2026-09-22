@@ -1,9 +1,9 @@
 # STATUS FITUR PRD v3.1 — 152 butir
 
-Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 12: FR-39, FR-43, FR-56, FR-57, FR-58 selesai).
+Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 13: FR-38 & FR-50 selesai; FR-59 SEBAGIAN — baca notifikasi bank tidak dikerjakan atas keputusan pemilik).
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 149 · SEBAGIAN 0 · BELUM 3** (total 152 butir)
+**Hitungan: SELESAI 151 · SEBAGIAN 1 · BELUM 0** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -47,7 +47,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-35 | Deteksi kenaikan tagihan: pembandingan nominal terhadap rata-rata 3 bu | - | SELESAI | Ron 21 Sep: deteksi kenaikan tagihan — nominal terakhir vs rata-rata 3 sebelumnya, berikut buktinya. |
 | FR-36 | Skor Disiplin Tagihan lokal (0–100) + streak bebas denda + daftar capa | - | SELESAI | Ron 21 Sep: skor disiplin tagihan lokal 0–100 + rentetan & capaian, dengan penegasan bukan skor kredit. |
 | FR-37 | Rekap Tahunan ala "Wrapped": statistik tahunan + kartu berbagi gambar  | - | SELESAI | Ron 21 Sep: rekap tahunan (total, tepat waktu, bulan tersibuk) + kartu berbagi PNG. |
-| FR-38 | Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi kolom  | - | BELUM |  |
+| FR-38 | Impor tagihan dari foto/screenshot dengan OCR di perangkat | F08 | SELESAI | Ron 22 Sep: OCR ML Kit model terbundel (offline, tanpa Play Services, tidak dikirim keluar); nominal/jatuh tempo/nomor pelanggan jadi DRAF yang wajib diperiksa. Rute /tagihan/impor-foto. |
 | FR-39 | Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta | V2 | SELESAI | Ron 22 Sep: izin bawaan mati + dialog sistem; penguraian di perangkat; usulan saja (tagihan tidak pernah ditandai lunas sendiri). Rute /uang/pemindai-bank. |
 | FR-40 | Pembelajaran pola tanggal bayar dari riwayat; usul penyesuaian penging | - | SELESAI | Ron 21 Sep: pengingat pintar mengikuti pola bayar pengguna (layar Pola bayar). |
 | FR-41 | Ekspor tagihan mendatang ke Google Kalender; opsi impor .ics (F11) | - | SELESAI | Ron 21 Sep: ekspor jadwal tagihan ke .ics (Google Kalender), periode 3/6/12/24 bulan. |
@@ -59,7 +59,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-47 | v2 (Split bill & patungan) | V2 | SELESAI | Ron 22 Sep: grup/anggota/belanja/bagian; bagi rata selalu pas dengan total; hasil "siapa transfer ke siapa". Rute /patungan. |
 | FR-48 | v2 (Dana persiapan & arus kas) | V2 | SELESAI | Ron 22 Sep: dana + setoran; setoran per bulan dari tanggal target; arus kas bersih = kas − alokasi. Rute /laporan/dana-persiapan. |
 | FR-49 | Pengingat Multi-Kanal | - | SELESAI | Ron 21 Sep: pengingat multi-kanal (notifikasi/WhatsApp/SMS/Telegram) + teks siap kirim. Pengiriman otomatis via WA Business belum ada (dinyatakan di layar). |
-| FR-50 | v2 | - | BELUM |  |
+| FR-50 | Perluas impor OCR ke struk belanja & nota manual | V2 | SELESAI | Ron 22 Sep: satu layar Tagihan / Struk-Nota; baris barang terbaca, selisih jumlah barang vs TOTAL dikatakan apa adanya; struk disimpan sebagai pengeluaran (sumber: ocr). Rute /tagihan/impor-foto. |
 | FR-51 | Catatan Kas & Utang Informal (cash ledger): | - | SELESAI | Ron 21 Sep: catatan kas & utang informal — saldo per pihak + jatuh tempo dekat. |
 | FR-52 | Multi-Mata Uang & Konversi: setiap tagihan memakai | - | SELESAI | Ron 21 Sep: mata uang per tagihan + konversi; kurs diisi pengguna, sumber & tanggal ditampilkan. |
 | FR-53 | Document Vault & Masa Berlaku: dokumen (STNK, pajak | - | SELESAI | Ron 21 Sep: brankas dokumen + masa berlaku (Dinda) dilengkapi tombol 'salin nomor' tanpa membuka berkas (Ron). |
@@ -68,7 +68,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-56 | Sub-Akses Keluarga (opsional sinkron): berbagi | F8 | SELESAI | Ron 22 Sep: izin per anggota × modul (bawaan MATI), penegakan di lapisan data; paket berbagi hanya izin + jumlah baris. Rute /keluarga/sub-akses. |
 | FR-57 | Perawatan berkala (memakai mesin FR-125) | F8 | SELESAI | Ron 22 Sep: sudah ada sejak FR-125 (intervalHari + berikutnya + leadHari, template bawaan, SumberPengingatPerawatan terdaftar); batch 12 memverifikasi & menguji — tanpa tabel/mesin kembar. Rute /aksi/perawatan. |
 | FR-58 | Voice & Parsing Cerdas | F8 | SELESAI | Ron 22 Sep: satu kalimat jadi draf (pengeluaran/tagihan/dana/perawatan); pengenalan suara bawaan Android, penguraian di perangkat, draf wajib dikonfirmasi. Rute /suara. |
-| FR-59 | F8 kandidat | - | BELUM |  |
+| FR-59 | Auto-catat pengeluaran (perluas FR-39) | F8 | SEBAGIAN | Ron 22 Sep: dari SMS bank sudah bisa (catat pengeluaran / tandai lunas, satu ketukan). Membaca NOTIFIKASI aplikasi bank SENGAJA TIDAK dikerjakan — keputusan pemilik, izin baca semua notifikasi terlalu berisiko. |
 
 ## 1 · Today / Pusat Harian
 

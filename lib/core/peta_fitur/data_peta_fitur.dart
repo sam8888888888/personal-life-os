@@ -359,11 +359,19 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
   ),
   ButirFitur(
     id: 'FR-38',
-    nama: 'Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi kolom ',
+    nama: 'Impor tagihan dari foto/screenshot dengan OCR di perangkat',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi kolom otomatis + konfirmasi pengguna (F08).',
+    fase: 'F08',
+    status: StatusFitur.selesai,
+    rincian: 'Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi '
+        'kolom otomatis + konfirmasi pengguna (F08).',
+    catatan: 'Ron 22 Sep: OCR ML Kit dengan model TERBUNDEL (jalan tanpa '
+        'internet, tanpa Play Services); foto diproses di HP dan tidak dikirim '
+        'ke mana pun. Nomor pelanggan, nominal (dari baris TOTAL), dan jatuh '
+        'tempo ditebak dari teks lalu ditampilkan sebagai DRAF — pengguna '
+        'melengkapi & menyetujui dulu. Konsekuensi jujur: ukuran APK naik dan '
+        'kualitas hasil bergantung pada foto.',
+    rute: '/tagihan/impor-foto',
   ),
   ButirFitur(
     id: 'FR-39',
@@ -500,11 +508,17 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
   ),
   ButirFitur(
     id: 'FR-50',
-    nama: 'v2',
+    nama: 'Perluas impor OCR ke struk belanja & nota manual',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'v2 — perluas FR-38',
+    fase: 'V2',
+    status: StatusFitur.selesai,
+    rincian: 'v2 — perluas FR-38 ke struk belanja & nota manual.',
+    catatan: 'Ron 22 Sep: satu layar dengan pilihan Tagihan / Struk-Nota. '
+        'Baris barang ikut terbaca (nama + harga), lalu diperiksa: bila jumlah '
+        'barang tidak sama dengan TOTAL di struk, layar mengatakan '
+        'selisihnya — bukan didiamkan. Hasil struk disimpan sebagai '
+        'PENGELUARAN (sumber: ocr), bukan tagihan.',
+    rute: '/tagihan/impor-foto',
   ),
   ButirFitur(
     id: 'FR-51',
@@ -608,11 +622,18 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
   ),
   ButirFitur(
     id: 'FR-59',
-    nama: 'F8 kandidat',
+    nama: 'Auto-catat pengeluaran (perluas FR-39)',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'F8 kandidat — perluas FR-39',
+    fase: 'F8',
+    status: StatusFitur.sebagian,
+    rincian: 'F8 kandidat — perluas FR-39 (auto-catat pengeluaran dari pesan '
+        'bank).',
+    catatan: 'Ron 22 Sep: dari SMS bank SUDAH bisa — pesan yang cocok bisa '
+        'langsung dicatat sebagai pengeluaran atau ditandai melunasi tagihan '
+        '(satu ketukan, lewat /uang/pemindai-bank). Membaca NOTIFIKASI '
+        'aplikasi bank SENGAJA TIDAK DIKERJAKAN atas keputusan pemilik: izin '
+        'baca semua notifikasi terlalu luas/berisiko. Jadi statusnya '
+        'SEBAGIAN, bukan selesai.',
   ),
   ButirFitur(
     id: 'FR-60',

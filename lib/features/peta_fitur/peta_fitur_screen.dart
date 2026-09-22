@@ -62,33 +62,38 @@ class _PetaFiturScreenState extends State<PetaFiturScreen> {
       showDragHandle: true,
       builder: (c) => Padding(
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${b.id} · ${_label[b.status]}',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: _warna(c, b.status))),
-            const SizedBox(height: 8),
-            Text(b.nama, style: const TextStyle(fontSize: 16)),
-            if (b.rincian.isNotEmpty) ...[
+        // Catatan sebuah butir bisa panjang (mis. alasan sebuah butir hanya
+        // sebetah sebagian); isinya digulir supaya tidak terpotong di layar
+        // kecil — dulu di sini muncul RenderFlex overflow 32 px.
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${b.id} · ${_label[b.status]}',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: _warna(c, b.status))),
               const SizedBox(height: 8),
-              Text(b.rincian),
+              Text(b.nama, style: const TextStyle(fontSize: 16)),
+              if (b.rincian.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(b.rincian),
+              ],
+              if (b.catatan.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text('Catatan: ${b.catatan}',
+                    style: const TextStyle(fontStyle: FontStyle.italic)),
+              ],
+              if (b.rute == null) ...[
+                const SizedBox(height: 12),
+                const Text(
+                  'Layarnya belum ada — butir ini belum dikerjakan.',
+                  style: TextStyle(fontStyle: FontStyle.italic),
+                ),
+              ],
             ],
-            if (b.catatan.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text('Catatan: ${b.catatan}',
-                  style: const TextStyle(fontStyle: FontStyle.italic)),
-            ],
-            if (b.rute == null) ...[
-              const SizedBox(height: 12),
-              const Text(
-                'Layarnya belum ada — butir ini belum dikerjakan.',
-                style: TextStyle(fontStyle: FontStyle.italic),
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

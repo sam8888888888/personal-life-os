@@ -56,4 +56,7 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     // FR-45: FileProvider untuk membagikan berkas laporan.
     implementation("androidx.core:core-ktx:1.13.1")
+    // FR-38/FR-50 — OCR di perangkat (model terbundel, tanpa Play Services
+    // dan tetap jalan tanpa internet). Konsekuensi jujur: ukuran APK naik.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
 }

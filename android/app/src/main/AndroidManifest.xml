@@ -10,6 +10,8 @@
     <!-- FR-118: lampiran foto & rekaman suara pada catatan. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- FR-39 — baca SMS bank (diminta lewat dialog sistem, opt-in). -->
+    <uses-permission android:name="android.permission.READ_SMS"/>
     <!-- Kamera tidak wajib ada: aplikasi tetap jalan tanpa kamera. -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application

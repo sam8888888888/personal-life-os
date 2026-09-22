@@ -68,6 +68,7 @@ import 'features/rumah/rumah_tangga_screen.dart';
 import 'features/keluarga/sub_akses_screen.dart';
 import 'features/uang/pemindai_bank_screen.dart';
 import 'features/suara/suara_screen.dart';
+import 'features/tagihan/impor_ocr_screen.dart';
 import 'features/perjalanan/perjalanan_screen.dart';
 import 'features/keluarga/tanggung_jawab_screen.dart';
 import 'core/utils/bahasa.dart';
@@ -523,6 +524,11 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/suara',
       builder: (c, s) => const SuaraScreen(),
+    ),
+    // Batch 13 — FR-38 impor tagihan dari foto, FR-50 perluasan ke struk/nota.
+    GoRoute(
+      path: '/tagihan/impor-foto',
+      builder: (c, s) => const ImporOcrScreen(),
     ),
     // FR-145 — laporan bulanan lintas pilar (signature).
     GoRoute(

@@ -58,16 +58,19 @@ void main() {
         'FR-47', 'FR-48', 'FR-54', 'FR-55', 'FR-149',
         // Batch 12: mode rumah tangga, sub-akses keluarga, pemindai SMS bank,
         // perawatan berkala (verifikasi), ucapkan-tulis.
-        'FR-39', 'FR-43', 'FR-56', 'FR-57', 'FR-58']) {
+        'FR-39', 'FR-43', 'FR-56', 'FR-57', 'FR-58',
+        // Batch 13: impor tagihan dari foto (OCR) & perluasan ke struk/nota.
+        'FR-38', 'FR-50']) {
         expect(cari(id).status, StatusFitur.selesai, reason: '$id seharusnya Selesai');
       }
     });
 
     test('yang belum dikerjakan TIDAK diberi tanda Selesai', () {
-      expect(cari('FR-38').status, StatusFitur.belum);   // impor tagihan dari foto (OCR)
-      expect(cari('FR-50').status, StatusFitur.belum);   // perluas OCR (struk/nota)
-      expect(cari('FR-59').status, StatusFitur.belum);   // auto-catat dari notifikasi
-      expect(cari('FR-56').status, StatusFitur.selesai); // Batch 12
+      expect(cari('FR-38').status, StatusFitur.selesai); // Batch 13 (OCR)
+      expect(cari('FR-50').status, StatusFitur.selesai); // Batch 13 (struk/nota)
+      // FR-59 hanya SEBAGIAN: dari SMS bisa, dari notifikasi TIDAK dikerjakan
+      // (keputusan pemilik — baca semua notifikasi terlalu berisiko).
+      expect(cari('FR-59').status, StatusFitur.sebagian);
       expect(cari('FR-26').status, StatusFitur.selesai);  // kunci aplikasi (Batch 8)
     });
 
@@ -111,16 +114,21 @@ void main() {
       await tutup(t);
     });
 
-    testWidgets('saringan "Belum" menyembunyikan yang sudah selesai', (t) async {
+    testWidgets('saringan "Belum" tidak lagi memuat butir yang sudah selesai',
+        (t) async {
       await buka(t);
       await t.ensureVisible(find.byKey(const Key('peta_saring_belum')));
       await t.tap(find.byKey(const Key('peta_saring_belum')));
       await t.pumpAndSettle();
-      expect(find.byKey(const Key('peta_FR-38')), findsOneWidget);
+      expect(find.byKey(const Key('peta_FR-38')), findsNothing,
+          reason: 'FR-38 selesai sejak Batch 13 → tidak muncul di saringan Belum');
       expect(find.byKey(const Key('peta_FR-26')), findsNothing,
           reason: 'FR-26 sudah selesai → tidak muncul di saringan Belum');
       expect(find.byKey(const Key('peta_FR-21')), findsNothing,
           reason: 'FR-21 sudah selesai → tidak muncul di saringan Belum');
+      // Batch 13: seluruh 152 butir kini selesai ATAU sebagian → saringan
+      // "belum" memang kosong, dan layar mengatakannya.
+      expect(find.text('Tidak ada butir yang cocok.'), findsOneWidget);
       await tutup(t);
     });
 
@@ -133,14 +141,21 @@ void main() {
       await tutup(t);
     });
 
-    testWidgets('butir tanpa layar: dibuka → dijelaskan belum dikerjakan',
+    testWidgets('butir tanpa layar: dibuka → dijelaskan apa adanya',
         (t) async {
+      // Batch 13: FR-38 sudah SELESAI (impor dari foto), jadi contoh "butir
+      // tanpa layar" sekarang FR-59 — statusnya SEBAGIAN dan memang tanpa
+      // layar sendiri, dengan catatan jujur kenapa.
       await buka(t);
-      await t.enterText(find.byKey(const Key('peta_cari')), 'FR-38');
+      await t.enterText(find.byKey(const Key('peta_cari')), 'FR-59');
       await t.pumpAndSettle();
-      await t.ensureVisible(find.byKey(const Key('peta_FR-38')));
-      await t.tap(find.byKey(const Key('peta_FR-38')));
+      await t.ensureVisible(find.byKey(const Key('peta_FR-59')));
+      await t.tap(find.byKey(const Key('peta_FR-59')));
       await t.pumpAndSettle();
+      // Di dialog muncul sebagai "Catatan: ..." (baris daftar memakai versi
+      // pendek 2 baris), jadi tuntutannya diarahkan ke teks dialog.
+      expect(find.textContaining('Catatan: Ron 22 Sep'), findsOneWidget,
+          reason: 'alasan tidak dikerjakannya harus dikatakan terus terang');
       expect(find.text('Layarnya belum ada — butir ini belum dikerjakan.'),
           findsOneWidget);
       await tutup(t);
