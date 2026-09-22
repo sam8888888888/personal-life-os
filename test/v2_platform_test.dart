@@ -624,11 +624,16 @@ void main() {
           .where((f) => f.path.endsWith('.json') && f.lengthSync() > 0)
           .toList();
       await ketuk(t, find.byKey(const Key('ekspor_json')));
-      await t.runAsync(() async {
-        for (var i = 0; i < 40 && berkasJsonTerisi().isEmpty; i++) {
-          await Future<void>.delayed(const Duration(milliseconds: 25));
-        }
-      });
+      // Jendela tunggu I/O nyata: 20 putaran x 250 ms (±5 detik), sama seperti
+      // uji berkas lain di repo ini. Jendela lama (40 x 25 ms = 1 detik) pernah
+      // MERAH saat SUITE PENUH berjalan: mesin sibuk membuat berkas belum
+      // selesai ditulis padahal layarnya benar. Jendela lebih lebar = daya tahan
+      // terhadap beban mesin, bukan pelonggaran harapan uji.
+      for (var i = 0; i < 20 && berkasJsonTerisi().isEmpty; i++) {
+        await t.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 250)));
+        await t.pump(const Duration(milliseconds: 50));
+      }
       await t.pump(const Duration(milliseconds: 200));
       final berkas = berkasJsonTerisi();
       expect(berkas.length, 1, reason: 'satu berkas JSON dibuat & terisi');
