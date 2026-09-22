@@ -14,6 +14,7 @@ library;
 
 import 'package:drift/drift.dart';
 
+import '../../core/kesehatan/rencana_obat.dart';
 import '../../core/utils/waktu.dart';
 import '../database/database.dart';
 import 'kesehatan_repository.dart'
@@ -463,6 +464,39 @@ class ObatRepository {
     final tgl = awalHari(hari);
     final semua = await riwayatMinum(hari: 1, sampai: tgl);
     return semua.where((b) => hariSama(b.catatan.waktuRencana, tgl)).toList();
+  }
+
+  /// FR-54 — jam minum siap dihitung (pengingat & konteks AI Copilot).
+  ///
+  /// Menggabungkan obat AKTIF dengan jadwal AKTIF-nya. Jam dibawa apa adanya;
+  /// pemanggil memakai `menitDariJam` untuk memeriksa kewajarannya.
+  Future<List<JadwalRingkas>> jadwalRingkas() async {
+    final daftar = await daftarObat(aktifSaja: true);
+    final hasil = <JadwalRingkas>[];
+    for (final o in daftar) {
+      final jam = await jadwalObat(o.id, aktifSaja: true);
+      for (final j in jam) {
+        hasil.add(JadwalRingkas(
+          obatId: o.id,
+          jadwalId: j.id,
+          nama: o.nama,
+          jam: j.jam,
+          dosis: _dosisObat(o),
+          aktif: o.aktif && j.aktif,
+          mulai: o.mulai,
+          selesai: o.selesai,
+        ));
+      }
+    }
+    return hasil;
+  }
+
+  /// Teks dosis apa adanya dari label (aplikasi tidak menghitung dosis).
+  String _dosisObat(ObatData o) {
+    final dosis = (o.dosisTeks ?? '').trim();
+    final satuan = o.satuan.trim();
+    if (dosis.isEmpty) return '${o.jumlahPerMinum} $satuan';
+    return '$dosis · ${o.jumlahPerMinum} $satuan';
   }
 
   ObatData? _cariObat(List<ObatData> daftar, int id) {

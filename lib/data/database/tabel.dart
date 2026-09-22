@@ -1543,3 +1543,85 @@ class TanggungJawabRumah extends Table {
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+
+/// FR-48 — Dana persiapan: uang yang disisihkan untuk kebutuhan terencana.
+class DanaPersiapan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  IntColumn get targetSen => integer().withDefault(const Constant(0))();
+  IntColumn get tersediaSen => integer().withDefault(const Constant(0))();
+  DateTimeColumn get tanggalTarget => dateTime().nullable()();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-48 — riwayat setoran tiap dana persiapan.
+class SetoranDana extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get danaUid => text()();
+  IntColumn get jumlahSen => integer()();
+  DateTimeColumn get tanggal => dateTime()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-47 — grup patungan.
+class GrupPatungan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get catatan => text().nullable()();
+  TextColumn get kodeUndangan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-47 — anggota grup patungan.
+class AnggotaPatungan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get grupUid => text()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-47 — belanja/nota di dalam grup.
+class BelanjaPatungan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get grupUid => text()();
+  TextColumn get judul => text().withLength(min: 1, max: 160)();
+  IntColumn get totalSen => integer().withDefault(const Constant(0))();
+  TextColumn get pembayar => text().withDefault(const Constant(''))();
+  DateTimeColumn get tanggal => dateTime()();
+  TextColumn get cara => text().withDefault(const Constant('sama'))();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-47 — bagian tiap anggota pada satu belanja.
+class BagianPatungan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get belanjaUid => text()();
+  TextColumn get anggota => text().withDefault(const Constant(''))();
+  IntColumn get jumlahSen => integer().withDefault(const Constant(0))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-55 — catatan delegasi pengingat (siapa diminta apa, kapan).
+class DelegasiPengingat extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get judul => text().withLength(min: 1, max: 160)();
+  TextColumn get keNama => text().withDefault(const Constant(''))();
+  TextColumn get nomor => text().withDefault(const Constant(''))();
+  TextColumn get kanal => text().withDefault(const Constant('wa'))();
+  DateTimeColumn get waktu => dateTime()();
+  TextColumn get teks => text().withDefault(const Constant(''))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}

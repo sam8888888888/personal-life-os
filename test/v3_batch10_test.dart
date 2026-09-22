@@ -715,7 +715,7 @@ void main() {
     test('basis data baru: skema 16, tabel batch 10 ada, kolom baru ada', () async {
       final db = _db();
       addTearDown(db.close);
-      expect(db.schemaVersion, 16);
+      expect(db.schemaVersion, 17);
       final baris = await db.customSelect(
           "SELECT name FROM sqlite_master WHERE type='table'").get();
       final nama = baris.map((r) => r.data['name'] as String).toSet();

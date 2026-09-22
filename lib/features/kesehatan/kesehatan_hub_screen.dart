@@ -234,6 +234,15 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
                       ),
                       const Divider(height: 1),
                       _pintu(
+                        kunci: 'buka_jadwal_obat',
+                        ikon: Icons.alarm_outlined,
+                        judul: 'Pengingat obat & suplemen',
+                        keterangan: 'Jadwal jam minum + catatan kepatuhan '
+                            '(opsional, perlu izin) — FR-54',
+                        tujuan: '/kesehatan/obat/jadwal',
+                      ),
+                      const Divider(height: 1),
+                      _pintu(
                         kunci: 'buka_obat',
                         ikon: Icons.medication_outlined,
                         judul: 'Obat & vitamin',

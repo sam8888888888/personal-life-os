@@ -52,14 +52,17 @@ void main() {
         'FR-84', 'FR-97', 'FR-142', 'FR-143', 'FR-146',
         // Batch 10: perjalanan, jurnal perjalanan, kas rumah tangga,
         // arah kiblat, multi-bahasa & kurs.
-        'FR-98', 'FR-133', 'FR-134', 'FR-135', 'FR-152']) {
+        'FR-98', 'FR-133', 'FR-134', 'FR-135', 'FR-152',
+        // Batch 11: dana persiapan, pengingat obat, patungan, delegasi,
+        // AI Copilot ber-konteks.
+        'FR-47', 'FR-48', 'FR-54', 'FR-55', 'FR-149']) {
         expect(cari(id).status, StatusFitur.selesai, reason: '$id seharusnya Selesai');
       }
     });
 
     test('yang belum dikerjakan TIDAK diberi tanda Selesai', () {
       expect(cari('FR-38').status, StatusFitur.belum);   // impor tagihan dari foto (OCR)
-      expect(cari('FR-149').status, StatusFitur.belum);  // AI Copilot
+      expect(cari('FR-56').status, StatusFitur.belum);  // sub-akses keluarga
       expect(cari('FR-26').status, StatusFitur.selesai);  // kunci aplikasi (Batch 8)
     });
 

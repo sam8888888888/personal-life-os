@@ -101,6 +101,16 @@ part 'database.g.dart';
   ItemPerjalanan,
   CatatanPerjalanan,
   TanggungJawabRumah,
+  // Skema v17 — dana persiapan (FR-48), grup patungan (FR-47), dan
+  // delegasi pengingat (FR-55). Jadwal obat FR-54 MEMAKAI tabel obat
+  // yang sudah ada sejak FR-106 (`Obat`, `JadwalObat`, `MinumObat`).
+  DanaPersiapan,
+  SetoranDana,
+  GrupPatungan,
+  AnggotaPatungan,
+  BelanjaPatungan,
+  BagianPatungan,
+  DelegasiPengingat,
 ])
 class AppDatabase extends _$AppDatabase {
   /// [nama] = nama berkas basis data. FR-44 (multi-profil) memakai nama
@@ -110,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -247,6 +257,13 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
             await _buatTabelV14(m);
             debugPrint('migrasi v14 selesai (tinjauan mingguan & arsip laporan)');
+          }
+          if (dari < 17) {
+            // v17 (FR-47/48/54/55): dana persiapan, setoran dana, jadwal obat,
+            // catatan minum, grup/anggota/belanja/bagian patungan, delegasi.
+            await _buatTabelV17(m);
+            debugPrint('migrasi v17 selesai (dana persiapan, obat, patungan, '
+                'delegasi)');
           }
           if (dari < 16) {
             // v16 (FR-133/134/135): perjalanan, jurnal perjalanan, kas rumah
@@ -585,6 +602,27 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   /// `_tabelAda`, kolom lewat `_kolomAda` (PRAGMA) — sebagian basis data dibuat
   /// dari definisi tabel terbaru sehingga `addColumn` tanpa pemeriksaan bisa
   /// meledak `duplicate column name`.
+  /// v17 (FR-47/48/55) — 7 tabel baru: dana persiapan + setoran, grup
+  /// patungan (anggota/belanja/bagian), dan delegasi pengingat.
+  ///
+  /// FR-54 tidak menambah tabel: pengingat obat memakai `obat`,
+  /// `jadwal_obat`, `minum_obat` dari FR-106.
+  Future<void> _buatTabelV17(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> baru = {
+      'dana_persiapan': danaPersiapan,
+      'setoran_dana': setoranDana,
+      'grup_patungan': grupPatungan,
+      'anggota_patungan': anggotaPatungan,
+      'belanja_patungan': belanjaPatungan,
+      'bagian_patungan': bagianPatungan,
+      'delegasi_pengingat': delegasiPengingat,
+    };
+    for (final masuk in baru.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
+  }
+
   Future<void> _buatTabelV16(Migrator m) async {
     final Map<String, TableInfo<Table, dynamic>> baru = {
       'perjalanan': perjalanan,

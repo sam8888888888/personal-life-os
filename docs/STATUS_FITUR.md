@@ -1,9 +1,9 @@
 # STATUS FITUR PRD v3.1 — 152 butir
 
-Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 10: FR-98, FR-133, FR-134, FR-135, FR-152 selesai).
+Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 11: FR-47, FR-48, FR-54, FR-55, FR-149 selesai).
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 139 · SEBAGIAN 0 · BELUM 13** (total 152 butir)
+**Hitungan: SELESAI 144 · SEBAGIAN 0 · BELUM 8** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -56,15 +56,15 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-44 | Multi-profil terpisah (pribadi/keluarga/usaha) | - | SELESAI | Ron 22 Sep: profil pribadi/keluarga/usaha masing-masing punya BERKAS basis data SENDIRI sehingga data tidak bercampur (dibuktikan uji dengan dua basis data terpisah); profil 'Pribadi' memakai berkas lama sehingga data pengguna yang sudah ada tidak hilang; profil aktif harus dipindah dulu sebelum dihapus; pindah profil = pindah berkas basis data. Uji: 7 kasus. |
 | FR-45 | Laporan bulanan PDF/Excel + tombol bagikan | - | SELESAI | Ron 21 Sep: tombol bagikan laporan bulanan (PDF & CSV) lewat kanal Android sendiri. |
 | FR-46 | Deteksi langganan duplikat & tagihan yang berhenti muncul (F16) | - | SELESAI | Ron 21 Sep: deteksi tagihan berulang yang berhenti muncul + bukti & matikan pengingatnya. |
-| FR-47 | v2 | - | BELUM |  |
-| FR-48 | v2 | - | BELUM |  |
+| FR-47 | v2 (Split bill & patungan) | V2 | SELESAI | Ron 22 Sep: grup/anggota/belanja/bagian; bagi rata selalu pas dengan total; hasil "siapa transfer ke siapa". Rute /patungan. |
+| FR-48 | v2 (Dana persiapan & arus kas) | V2 | SELESAI | Ron 22 Sep: dana + setoran; setoran per bulan dari tanggal target; arus kas bersih = kas − alokasi. Rute /laporan/dana-persiapan. |
 | FR-49 | Pengingat Multi-Kanal | - | SELESAI | Ron 21 Sep: pengingat multi-kanal (notifikasi/WhatsApp/SMS/Telegram) + teks siap kirim. Pengiriman otomatis via WA Business belum ada (dinyatakan di layar). |
 | FR-50 | v2 | - | BELUM |  |
 | FR-51 | Catatan Kas & Utang Informal (cash ledger): | - | SELESAI | Ron 21 Sep: catatan kas & utang informal — saldo per pihak + jatuh tempo dekat. |
 | FR-52 | Multi-Mata Uang & Konversi: setiap tagihan memakai | - | SELESAI | Ron 21 Sep: mata uang per tagihan + konversi; kurs diisi pengguna, sumber & tanggal ditampilkan. |
 | FR-53 | Document Vault & Masa Berlaku: dokumen (STNK, pajak | - | SELESAI | Ron 21 Sep: brankas dokumen + masa berlaku (Dinda) dilengkapi tombol 'salin nomor' tanpa membuka berkas (Ron). |
-| FR-54 | Modul Kesehatan (opsional): pengingat obat/suplemen | - | BELUM |  |
-| FR-55 | v2 | - | BELUM |  |
+| FR-54 | Modul Kesehatan (opsional): pengingat obat/suplemen | V2 | SELESAI | Ron 22 Sep: memakai ULANG modul obat FR-106; pengingat opsional (izin wajib); slot yang sudah dicatat tidak diulang. Rute /kesehatan/obat/jadwal. |
+| FR-55 | v2 (Delegasi cepat WhatsApp) | V2 | SELESAI | Ron 22 Sep: menyiapkan teks + tautan WhatsApp/SMS, tidak mengirim sendiri; nomor divalidasi. Rute /tagihan/delegasi. |
 | FR-56 | Sub-Akses Keluarga (opsional sinkron): berbagi | - | BELUM |  |
 | FR-57 | F8 kandidat | - | BELUM |  |
 | FR-58 | F8 kandidat | - | BELUM |  |
@@ -213,7 +213,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-146 | Annual Life Review | V4 | SELESAI | Ron 22 Sep: 'Tinjauan tahun' merangkum tahun berjalan per pilar (uang, kesehatan, ibadah, hubungan, pengetahuan) dari data nyata; hanya tampil bila data mencakup minimal 6 bulan — kalau kurang, layar menyebut berapa bulan data yang ada dan tidak mengarang hasil. Uji: mesin + layar. |
 | FR-147 | Notification Center | V2 | SELESAI | rute /notifikasi: riwayat + tingkat + tanda selesai |
 | FR-148 | Snooze & Reschedule Engine (memperluas FR-11 & memperbaiki PB-04) | V2 | SELESAI | 15 menit/1 jam/3 jam/besok 09:00; tercatat di audit |
-| FR-149 | AI Copilot ber-konteks | V4 | BELUM |  |
+| FR-149 | AI Copilot ber-konteks | V4 | SELESAI | Ron 22 Sep: hanya data pengguna; izin + kunci sendiri; daftar data yang dikirim ditampilkan; offline/izin mati = fitur mati dengan alasan. Rute /copilot. |
 | FR-150 | Sinkron Antar Perangkat & Cloud (memperluas FR-27) | V4 | SELESAI | Ron 22 Sep: sinkron SEMUA MODUL (40 tabel: uang, aset, tujuan/tugas, kebiasaan, kesehatan, dokumen, pengetahuan, ibadah) — pengenal uid, kaitan antar tabel dipetakan ulang antar HP, bentrok versi-kalah disimpan, diuji dua basis data. Belum: berkas lampiran & catatan obat. |
 | FR-151 | Widget & Akses Cepat Lanjutan (memperluas FR-31) | V2 | SELESAI | Ron 22 Sep: tombol di widget LANGSUNG menjalankan aksi saat aplikasi terbuka dari widget (satu ketukan, bukan membuka formulir lagi) dan menulis ke basis data yang sama sehingga tersinkron; baris widget bisa ditandai lunas satu per satu; aksi cepat ikon bertambah: 'Catat pengeluaran' dan 'Widget tagihan'. Uji: aksi lunas benar-benar mengubah data. |
 | FR-152 | Multi-bahasa & Multi-mata Uang (memperluas FR-52) | V4 | SELESAI | Ron 22 Sep: multi-bahasa (Indonesia/Melayu/Inggris) untuk kerangka aplikasi, Pengaturan, dan tab; kurs selalu disimpan bersama SUMBER + WAKTU pembaruan, bisa diambil dari jaringan atau diisi manual, dan setiap nilai yang belum punya kurs disebut belum bisa dikonversi (tidak dikira-kira). Uji: mesin + repositori + layar. |

@@ -59,6 +59,11 @@ import 'features/ritme/tinjauan_tahun_screen.dart';
 import 'features/kesehatan/energi_tidur_screen.dart';
 import 'features/ibadah/rencana_ibadah_screen.dart';
 import 'features/ibadah/kiblat_screen.dart';
+import 'features/laporan/dana_persiapan_screen.dart';
+import 'features/kesehatan/jadwal_obat_screen.dart';
+import 'features/rumah/patungan_screen.dart';
+import 'features/tagihan/delegasi_screen.dart';
+import 'features/ritme/copilot_screen.dart';
 import 'features/perjalanan/perjalanan_screen.dart';
 import 'features/keluarga/tanggung_jawab_screen.dart';
 import 'core/utils/bahasa.dart';
@@ -474,6 +479,28 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/ibadah/kiblat',
       builder: (c, s) => const KiblatScreen(),
+    ),
+    // Batch 11 — FR-48 dana persiapan, FR-54 jadwal obat, FR-47 patungan,
+    // FR-55 delegasi pengingat, FR-149 AI Copilot.
+    GoRoute(
+      path: '/laporan/dana-persiapan',
+      builder: (c, s) => const DanaPersiapanScreen(),
+    ),
+    GoRoute(
+      path: '/kesehatan/obat/jadwal',
+      builder: (c, s) => const JadwalObatScreen(),
+    ),
+    GoRoute(
+      path: '/patungan',
+      builder: (c, s) => const PatunganScreen(),
+    ),
+    GoRoute(
+      path: '/tagihan/delegasi',
+      builder: (c, s) => const DelegasiScreen(),
+    ),
+    GoRoute(
+      path: '/copilot',
+      builder: (c, s) => const CopilotScreen(),
     ),
     // FR-145 — laporan bulanan lintas pilar (signature).
     GoRoute(

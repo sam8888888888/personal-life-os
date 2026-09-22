@@ -444,19 +444,35 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
   ),
   ButirFitur(
     id: 'FR-47',
-    nama: 'v2',
+    nama: 'Split Bill & Patungan (memperluas FR-43)',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'v2 — perluas FR-43',
+    fase: 'V2',
+    status: StatusFitur.selesai,
+    rincian: 'Split bill & patungan: grup (kode undangan), anggota, belanja '
+        'sama rata atau bagian khusus, hasil "siapa transfer ke siapa"',
+    catatan: 'Ron 22 Sep: pembagian sama rata membagi sisa sen ke depan '
+        'sehingga jumlah bagian SELALU sama dengan total (bukan dibulatkan '
+        'diam-diam); hasil menandai belumBisa bila bagian belum diisi atau '
+        'jumlahnya tidak sama dengan total. Tabel grup/anggota/belanja/bagian '
+        'ikut mesin sinkron 150. Uji: mesin + repositori + layar.',
+    rute: '/patungan',
   ),
   ButirFitur(
     id: 'FR-48',
-    nama: 'v2',
+    nama: 'Dasbor Arus Kas & Dana Persiapan (perkuat FR-33/FR-30)',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'v2 — perkuat FR-33/FR-30',
+    fase: 'V2',
+    status: StatusFitur.selesai,
+    rincian: 'Dana persiapan: uang yang disisihkan untuk kebutuhan terencana '
+        '(pajak, sekolah, servis, tiket pulang) + sisa & setoran per bulan + '
+        'arus kas bersih',
+    catatan: 'Ron 22 Sep: setoran per bulan dihitung dari tanggal target; bila '
+        'target/tanggal belum diisi, angkanya dinyatakan belum bisa dihitung '
+        '(bukan ditebak). Arus kas bersih = arus kas − alokasi bulan ini, dan '
+        'peringatan muncul bila alokasi melebihi arus kas. Tabel '
+        'dana_persiapan & setoran_dana ikut mesin sinkron 150. Uji: mesin + '
+        'repositori + layar.',
+    rute: '/laporan/dana-persiapan',
   ),
   ButirFitur(
     id: 'FR-49',
@@ -507,16 +523,31 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     id: 'FR-54',
     nama: 'Modul Kesehatan (opsional): pengingat obat/suplemen',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
+    fase: 'V2',
+    status: StatusFitur.selesai,
+    rincian: 'Pengingat obat/suplemen: saklar izin, jam minum hari ini, tanda '
+        'sudah minum / tunda / terlewat, dan jam berikutnya',
+    catatan: 'Ron 22 Sep: MEMAKAI ULANG modul obat FR-106 (tabel obat, '
+        'jadwal_obat, minum_obat + ObatRepository) — tidak ada tabel atau '
+        'layar obat kedua. Pengingat MATI secara bawaan dan hanya berbunyi '
+        'setelah izin dinyalakan; slot yang sudah dicatat tidak diingatkan dua '
+        'kali. Uji: mesin rencana + sumber pengingat + layar.',
+    rute: '/kesehatan/obat/jadwal',
   ),
   ButirFitur(
     id: 'FR-55',
-    nama: 'v2',
+    nama: 'Delegasi Cepat via WhatsApp (memperluas FR-49)',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'v2 — perluas FR-49',
+    fase: 'V2',
+    status: StatusFitur.selesai,
+    rincian: 'Delegasi cepat: pilih pengingat (tagihan belum lunas atau tulis '
+        'sendiri), nama & nomor tujuan, teks siap kirim + tautan WhatsApp/SMS',
+    catatan: 'Ron 22 Sep: aplikasi TIDAK mengirim pesan sendiri — hanya '
+        'menyiapkan teks + tautan yang membuka WhatsApp/SMS di HP. Nomor '
+        'dirapikan lewat normalisasi FR-49 (tidak ditulis ulang); nomor tidak '
+        'sah ditolak dengan alasan yang bisa dibaca. Tabel delegasi_pengingat '
+        'ikut mesin sinkron 150. Uji: mesin + repositori + layar.',
+    rute: '/tagihan/delegasi',
   ),
   ButirFitur(
     id: 'FR-56',
@@ -1403,8 +1434,16 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'AI Copilot ber-konteks',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V4',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'AI Copilot ber-konteks — tanya jawab atas data sendiri ("apa yang harus saya prioritaskan besok?"), dengan izin eksplisit & penjelasan data apa yang dikirim',
+    catatan: 'Ron 22 Sep: jawaban memakai HANYA data pengguna sendiri '
+        '(tagihan belum lunas, dana persiapan, jadwal obat, perjalanan '
+        'terdekat). Butuh izin eksplisit + kunci API milik pengguna; layar '
+        'menampilkan daftar data yang akan dikirim sebelum tombol Tanya. Tanpa '
+        'izin / kunci / alamat benar / saat offline → fitur MATI dengan alasan '
+        'jelas. Jawaban layanan AI diuraikan apa adanya (401/429/5xx '
+        'dibedakan). Uji: mesin + repositori + layar, tanpa jaringan sungguhan.',
+    rute: '/copilot',
   ),
   ButirFitur(
     id: 'FR-150',

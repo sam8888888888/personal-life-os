@@ -61,6 +61,53 @@ const Map<String, List<String>> _kamus = {
   'umum.ubah': ['Ubah', 'Ubah', 'Edit'],
   'umum.belumAda': ['Belum ada data.', 'Belum ada data.', 'No data yet.'],
   'umum.belumBisa': ['Belum bisa dihitung', 'Belum boleh dikira', 'Not computable yet'],
+  // Batch 11 — FR-47/48/54/55/149.
+  'dana.judul': ['Dana persiapan', 'Dana persiapan', 'Sinking funds'],
+  'dana.tambah': ['Dana baru', 'Dana baharu', 'New fund'],
+  'dana.ubah': ['Ubah dana', 'Ubah dana', 'Edit fund'],
+  'dana.setor': ['Setor', 'Setor', 'Deposit'],
+  'obat.judul': [
+    'Pengingat obat & suplemen',
+    'Peringatan ubat & suplemen',
+    'Medicine & supplement reminders'
+  ],
+  'obat.tambah': ['Jadwal baru', 'Jadual baharu', 'New schedule'],
+  'obat.izin': [
+    'Izinkan pengingat obat',
+    'Benarkan peringatan ubat',
+    'Allow medicine reminders'
+  ],
+  'obat.minum': ['Sudah minum', 'Sudah makan ubat', 'Taken'],
+  'obat.terlewat': ['Terlewat', 'Terlepas', 'Missed'],
+  'patungan.judul': ['Patungan', 'Patungan', 'Split bill'],
+  'patungan.tambah': ['Grup baru', 'Kumpulan baharu', 'New group'],
+  'patungan.anggota': ['Anggota', 'Anggota', 'Members'],
+  'patungan.belanja': ['Belanja', 'Belanja', 'Expenses'],
+  'patungan.hasil': [
+    'Siapa bayar ke siapa',
+    'Siapa bayar kepada siapa',
+    'Who pays whom'
+  ],
+  'delegasi.judul': [
+    'Delegasi pengingat',
+    'Delegasi peringatan',
+    'Reminder delegation'
+  ],
+  'delegasi.tambah': ['Pengingat baru', 'Peringatan baharu', 'New reminder'],
+  'delegasi.kirim': ['Kirim pengingat', 'Hantar peringatan', 'Send reminder'],
+  'copilot.judul': ['AI Copilot', 'AI Copilot', 'AI Copilot'],
+  'copilot.izin': [
+    'Izinkan AI Copilot membaca data saya',
+    'Benarkan AI Copilot membaca data saya',
+    'Allow AI Copilot to read my data'
+  ],
+  'copilot.tanya': ['Tanya', 'Tanya', 'Ask'],
+  'copilot.dataDikirim': [
+    'Data yang akan dikirim',
+    'Data yang akan dihantar',
+    'Data to be sent'
+  ],
+
   'umum.dasarData': ['Dasar data', 'Asas data', 'Data basis'],
   'umum.wajibDiisi': ['Wajib diisi.', 'Wajib diisi.', 'Required.'],
   'umum.selesai': ['Selesai', 'Selesai', 'Done'],

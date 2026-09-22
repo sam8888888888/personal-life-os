@@ -305,6 +305,38 @@ class LainnyaScreen extends ConsumerWidget {
                   onTap: () => context.push('/rumah-tangga'),
                 ),
                 ListTile(
+                  key: const Key('buka_dana_persiapan'),
+                  leading: const Icon(Icons.savings_outlined),
+                  title: const Text('Dana persiapan'),
+                  subtitle: const Text('Uang yang disisihkan untuk kebutuhan '
+                      'terencana + arus kas bersih'),
+                  onTap: () => context.push('/laporan/dana-persiapan'),
+                ),
+                ListTile(
+                  key: const Key('buka_patungan'),
+                  leading: const Icon(Icons.groups_outlined),
+                  title: const Text('Patungan & split bill'),
+                  subtitle: const Text('Grup belanja bersama: siapa bayar '
+                      'berapa, siapa transfer ke siapa'),
+                  onTap: () => context.push('/patungan'),
+                ),
+                ListTile(
+                  key: const Key('buka_delegasi'),
+                  leading: const Icon(Icons.send_outlined),
+                  title: const Text('Delegasi pengingat (WhatsApp)'),
+                  subtitle: const Text('Teruskan pengingat tagihan ke '
+                      'keluarga lewat WhatsApp/SMS'),
+                  onTap: () => context.push('/tagihan/delegasi'),
+                ),
+                ListTile(
+                  key: const Key('buka_copilot'),
+                  leading: const Icon(Icons.psychology_outlined),
+                  title: const Text('AI Copilot ber-konteks'),
+                  subtitle: const Text('Tanya jawab atas data sendiri — '
+                      'dengan izin & penjelasan data yang dikirim'),
+                  onTap: () => context.push('/copilot'),
+                ),
+                ListTile(
                   key: const Key('buka_tinjauan_tahun'),
                   leading: const Icon(Icons.event_note_outlined),
                   title: const Text('Tinjauan tahun'),

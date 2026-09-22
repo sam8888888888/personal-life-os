@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/app_providers.dart';
 import '../../data/repository/kesehatan_repository.dart';
 import '../../data/repository/obat_repository.dart';
+import 'pengingat_jadwal_obat.dart';
 
 /// Penyimpanan & hitungan kesehatan (ukuran tubuh, aktivitas, tidur, air).
 final kesehatanRepoProvider = Provider<KesehatanRepository>(
@@ -18,4 +19,9 @@ final kesehatanRepoProvider = Provider<KesehatanRepository>(
 /// Penyimpanan obat, jadwal minum & catatan minum.
 final obatRepoProvider = Provider<ObatRepository>(
   (ref) => ObatRepository(ref.watch(databaseProvider)),
+);
+
+/// FR-54 — izin pengingat obat (saklar tersimpan di tabel `pengaturan`).
+final izinPengingatObatProvider = Provider<IzinPengingatObat>(
+  (ref) => IzinPengingatObat(ref.watch(databaseProvider)),
 );

@@ -433,4 +433,60 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomKunci: db.tanggungJawabRumah.id,
         kolomDiubah: db.tanggungJawabRumah.diubahPada,
       ),
+
+      // ── dana persiapan, obat, patungan, delegasi (batch 11) ───────────────
+      // Induk lebih dulu; anak memakai `kaitan` ke induknya.
+      JalurSinkron(
+        nama: 'dana_persiapan',
+        tabel: db.danaPersiapan,
+        kolomUid: db.danaPersiapan.uid,
+        kolomKunci: db.danaPersiapan.id,
+        kolomDiubah: db.danaPersiapan.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'setoran_dana',
+        tabel: db.setoranDana,
+        kolomUid: db.setoranDana.uid,
+        kolomKunci: db.setoranDana.id,
+        kolomDiubah: db.setoranDana.diubahPada,
+        kaitan: {'dana_uid': 'dana_persiapan'},
+      ),
+      JalurSinkron(
+        nama: 'grup_patungan',
+        tabel: db.grupPatungan,
+        kolomUid: db.grupPatungan.uid,
+        kolomKunci: db.grupPatungan.id,
+        kolomDiubah: db.grupPatungan.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'anggota_patungan',
+        tabel: db.anggotaPatungan,
+        kolomUid: db.anggotaPatungan.uid,
+        kolomKunci: db.anggotaPatungan.id,
+        kolomDiubah: db.anggotaPatungan.diubahPada,
+        kaitan: {'grup_uid': 'grup_patungan'},
+      ),
+      JalurSinkron(
+        nama: 'belanja_patungan',
+        tabel: db.belanjaPatungan,
+        kolomUid: db.belanjaPatungan.uid,
+        kolomKunci: db.belanjaPatungan.id,
+        kolomDiubah: db.belanjaPatungan.diubahPada,
+        kaitan: {'grup_uid': 'grup_patungan'},
+      ),
+      JalurSinkron(
+        nama: 'bagian_patungan',
+        tabel: db.bagianPatungan,
+        kolomUid: db.bagianPatungan.uid,
+        kolomKunci: db.bagianPatungan.id,
+        kolomDiubah: db.bagianPatungan.diubahPada,
+        kaitan: {'belanja_uid': 'belanja_patungan'},
+      ),
+      JalurSinkron(
+        nama: 'delegasi_pengingat',
+        tabel: db.delegasiPengingat,
+        kolomUid: db.delegasiPengingat.uid,
+        kolomKunci: db.delegasiPengingat.id,
+        kolomDiubah: db.delegasiPengingat.diubahPada,
+      ),
     ];

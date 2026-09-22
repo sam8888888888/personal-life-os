@@ -21,6 +21,7 @@ import 'penyinkron_pengingat.dart';
 import 'sumber_pengingat_tambahan.dart';
 import '../../features/ritme/pengingat_tinjauan_pekan.dart';
 import '../../features/perjalanan/pengingat_perjalanan.dart';
+import '../../features/kesehatan/pengingat_jadwal_obat.dart';
 
 /// Nama unik pekerjaan berkala.
 const String tugasSinkronPengingat = 'plo.pengingat.sinkron';
@@ -51,6 +52,8 @@ void daftarkanSumberPengingatLatar() {
   RegistriSumberPengingat.daftarkan(SumberPengingatTinjauanPekan());
   // FR-134: pengingat keberangkatan perjalanan (H-7/H-1/H-0).
   daftarkanSumberPengingatPerjalanan();
+  // FR-54: jadwal minum obat/suplemen (hanya yang izinnya menyala).
+  daftarkanSumberPengingatJadwalObat();
 }
 
 /// Titik pendaftaran sumber pengingat **untuk isolate utama** (aplikasi).
@@ -71,6 +74,8 @@ void daftarkanSumberPengingatUtama() {
   RegistriSumberPengingat.daftarkan(SumberPengingatTinjauanPekan());
   // FR-134: pengingat keberangkatan perjalanan (H-7/H-1/H-0).
   daftarkanSumberPengingatPerjalanan();
+  // FR-54: jadwal minum obat/suplemen (hanya yang izinnya menyala).
+  daftarkanSumberPengingatJadwalObat();
 }
 
 /// Titik masuk pekerja latar (wajib anotasi agar tidak dibuang saat build rilis).
