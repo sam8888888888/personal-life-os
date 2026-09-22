@@ -9,4 +9,14 @@
     <string name="aksi_pengingat_panjang">Buka pengingat &amp; izin</string>
     <string name="aksi_darurat_pendek">Kartu darurat</string>
     <string name="aksi_darurat_panjang">Buka kartu darurat (bisa dari layar kunci)</string>
+    <!-- FR-151: aksi cepat tambahan dari ikon aplikasi. -->
+    <string name="aksi_pengeluaran_pendek">Catat pengeluaran</string>
+    <string name="aksi_pengeluaran_panjang">Catat pengeluaran baru</string>
+    <string name="aksi_stok_pendek">Widget tagihan</string>
+    <string name="aksi_stok_panjang">Buka pengaturan ikon &amp; widget</string>
+    <!-- FR-31 & FR-151: widget layar utama. -->
+    <string name="widget_nama">Tagihan 7 hari</string>
+    <string name="widget_keterangan">Tagihan 7 hari ke depan beserta totalnya. Bisa langsung menandai lunas.</string>
+    <string name="widget_tombol_lunas">Tandai lunas</string>
+    <string name="widget_tombol_catat">Catat pengeluaran</string>
 </resources>

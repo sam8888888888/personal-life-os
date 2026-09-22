@@ -43,6 +43,35 @@
         </intent>
         <categories android:name="android.shortcut.conversation" />
     </shortcut>
+    <!-- FR-151: aksi cepat tambahan dari ikon aplikasi. -->
+    <shortcut
+        android:shortcutId="catat_pengeluaran"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/aksi_pengeluaran_pendek"
+        android:shortcutLongLabel="@string/aksi_pengeluaran_panjang">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.personallifeos.personal_life_os"
+            android:targetClass="com.personallifeos.personal_life_os.MainActivity">
+            <extra android:name="aksi" android:value="tambah-pengeluaran" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="ikon_widget"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/aksi_stok_pendek"
+        android:shortcutLongLabel="@string/aksi_stok_panjang">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.personallifeos.personal_life_os"
+            android:targetClass="com.personallifeos.personal_life_os.MainActivity">
+            <extra android:name="rute" android:value="/pengaturan/ikon-widget" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
     <!-- FR-117: kartu darurat — boleh tampil di atas layar kunci. -->
     <shortcut
         android:shortcutId="kartu_darurat"

@@ -206,7 +206,10 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Badge/angka tagihan hari ini di ikon launcher (bila API',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: lencana angka di ikon aplikasi = jumlah tagihan yang jatuh tempo hari ini atau sudah lewat & belum lunas; dikirim ke peluncur lewat siaran khas Samsung/Sony/HTC/LG/Nova/ADW. Peluncur yang tidak mendukung lencana tidak menampilkannya — dinyatakan di layar, bukan dijanjikan. Uji: hitungan + kanal (kanal tiruan mencatat angka yang dikirim).',
+    rute: '/pengaturan/ikon-widget',
+
   ),
   ButirFitur(
     id: 'FR-23',
@@ -242,8 +245,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif.',
+    catatan: 'Ron 22 Sep: PIN 4-12 angka disimpan sebagai turunan PBKDF2-HMAC-SHA256 (PIN mentah tidak pernah ditulis); salah 5 kali -> percobaan ditahan 30 detik; boleh dibuka dengan kunci perangkat HP (sidik jari/PIN HP lewat Android Keyguard); tirai kunci menahan ISI aplikasi sampai PIN benar; masa tenggang sebelum terkunci lagi bisa diatur (langsung/30 dtk/1 mnt/5 mnt). Uji: 11 kasus (logika + layar).',
+    rute: '/pengaturan/kunci',
+
   ),
   ButirFitur(
     id: 'FR-27',
@@ -286,8 +292,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Widget layar utama: tagihan 7 hari ke depan + total; tap membuka detai',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Widget layar utama: tagihan 7 hari ke depan + total; tap membuka detail tagihan (F01).',
+    catatan: 'Ron 22 Sep: widget layar utama \'Tagihan 7 hari\' — judul (jumlah tagihan hari ini / 7 hari ke depan) + total + tiga tagihan terdekat dengan nominalnya; menekan baris membuka daftar tagihan; isi dikirim ulang setiap data tagihan berubah; bisa dinyalakan/dimatikan di Pengaturan -> Ikon & widget. Uji: penyusun isi + kanal.',
+    rute: '/pengaturan/ikon-widget',
+
   ),
   ButirFitur(
     id: 'FR-32',
@@ -407,8 +416,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Multi-profil terpisah (pribadi/keluarga/usaha)',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Multi-profil terpisah (pribadi/keluarga/usaha) — kandidat Premium (F14).',
+    catatan: 'Ron 22 Sep: profil pribadi/keluarga/usaha masing-masing punya BERKAS basis data SENDIRI sehingga data tidak bercampur (dibuktikan uji dengan dua basis data terpisah); profil \'Pribadi\' memakai berkas lama sehingga data pengguna yang sudah ada tidak hilang; profil aktif harus dipindah dulu sebelum dihapus; pindah profil = pindah berkas basis data. Uji: 7 kasus.',
+    rute: '/pengaturan/profil',
+
   ),
   ButirFitur(
     id: 'FR-45',
@@ -1382,8 +1394,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Widget & Akses Cepat Lanjutan (memperluas FR-31)',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V2',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Widget & Akses Cepat Lanjutan (memperluas FR-31) — widget Today interaktif (aksi langsung), aksi cepat ikon, tombol panel cepat',
+    catatan: 'Ron 22 Sep: tombol di widget LANGSUNG menjalankan aksi saat aplikasi terbuka dari widget (satu ketukan, bukan membuka formulir lagi) dan menulis ke basis data yang sama sehingga tersinkron; baris widget bisa ditandai lunas satu per satu; aksi cepat ikon bertambah: \'Catat pengeluaran\' dan \'Widget tagihan\'. Uji: aksi lunas benar-benar mengubah data.',
+    rute: '/pengaturan/ikon-widget',
+
   ),
   ButirFitur(
     id: 'FR-152',

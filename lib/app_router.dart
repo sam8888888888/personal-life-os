@@ -90,6 +90,9 @@ import 'features/platform/audit_log_screen.dart';
 import 'features/platform/pusat_notifikasi_screen.dart';
 import 'features/pengaturan/backup_screen.dart';
 import 'features/pengaturan/pengaturan_screen.dart';
+import 'features/pengaturan/kunci_screen.dart';
+import 'features/pengaturan/profil_screen.dart';
+import 'features/pengaturan/ikon_layar_utama_screen.dart';
 import 'features/ringkasan/ringkasan_screen.dart';
 import 'features/tagihan/daftar_tagihan_screen.dart';
 import 'features/tagihan/kelola_kategori_tagihan_screen.dart';
@@ -136,6 +139,19 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
         GoRoute(path: '/tagihan', builder: (c, s) => const DaftarTagihanScreen()),
         GoRoute(path: '/kalender', builder: (c, s) => const KalenderScreen()),
         GoRoute(path: '/pengaturan', builder: (c, s) => const PengaturanScreen()),
+      // FR-26 / FR-44 / FR-22+FR-31+FR-151
+      GoRoute(
+        path: '/pengaturan/kunci',
+        builder: (c, s) => const KunciScreen(),
+      ),
+      GoRoute(
+        path: '/pengaturan/profil',
+        builder: (c, s) => const ProfilScreen(),
+      ),
+      GoRoute(
+        path: '/pengaturan/ikon-widget',
+        builder: (c, s) => const IkonLayarUtamaScreen(),
+      ),
       ],
     ),
     GoRoute(

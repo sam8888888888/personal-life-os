@@ -94,7 +94,10 @@ part 'database.g.dart';
   ArsipLaporanBulanan,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_buka());
+  /// [nama] = nama berkas basis data. FR-44 (multi-profil) memakai nama
+  /// berbeda per profil; bawaan tetap nama lama supaya data pengguna yang
+  /// sudah ada tidak hilang.
+  AppDatabase({String nama = 'personal_life_os'}) : super(_buka(nama));
   AppDatabase.forTesting(super.e);
 
   @override
@@ -692,6 +695,6 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
     }
   }
 
-  static QueryExecutor _buka() =>
-      driftDatabase(name: 'personal_life_os', native: const DriftNativeOptions());
+  static QueryExecutor _buka(String nama) =>
+      driftDatabase(name: nama, native: const DriftNativeOptions());
 }

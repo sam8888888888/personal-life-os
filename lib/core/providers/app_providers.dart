@@ -15,13 +15,51 @@ import '../notifikasi/penyinkron_pengingat.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/pengaturan_repository.dart';
 import '../../data/repository/tagihan_repository.dart';
+import '../kunci/kunci_aplikasi.dart';
+import '../platform/kanal_kunci.dart';
+import '../profil/profil_providers.dart';
 
 /// Satu instance database untuk seluruh aplikasi.
+///
+/// FR-44: nama berkasnya mengikuti profil yang sedang dipakai, jadi berpindah
+/// profil = berpindah basis data (data tidak bercampur). Saat profil berganti,
+/// instance lama ditutup (`ref.onDispose`) lalu yang baru dibuka.
 final databaseProvider = Provider<AppDatabase>((ref) {
-  final db = AppDatabase();
+  final profil = ref.watch(profilAktifProvider);
+  final db = AppDatabase(nama: profil.namaBerkasAktif);
   ref.onDispose(db.close);
   return db;
 });
+
+// ---------------------------------------------------------------------------
+// FR-26: kunci aplikasi (PIN / kunci perangkat)
+// ---------------------------------------------------------------------------
+
+/// Layanan kunci aplikasi.
+final kunciAplikasiProvider = Provider<KunciAplikasi>(
+    (ref) => KunciAplikasi(ref.watch(pengaturanRepoProvider)));
+
+/// Jembatan ke kunci perangkat Android.
+final kunciPerangkatProvider =
+    Provider<KunciPerangkat>((ref) => const KunciPerangkat());
+
+/// Apakah kunci aplikasi sedang dipakai.
+final kunciAktifProvider = FutureProvider<bool>(
+    (ref) => ref.watch(kunciAplikasiProvider).aktif());
+
+/// Apakah aplikasi boleh dibuka dengan kunci perangkat HP.
+final bukaPerangkatProvider = FutureProvider<bool>(
+    (ref) => ref.watch(kunciAplikasiProvider).bukaPerangkatAktif());
+
+/// Apakah HP ini punya kunci perangkat sama sekali.
+final kunciPerangkatTersediaProvider = FutureProvider<bool>((ref) async {
+  if (!(await ref.watch(bukaPerangkatProvider.future))) return false;
+  return ref.watch(kunciPerangkatProvider).tersedia();
+});
+
+/// Masa tenggang sebelum aplikasi terkunci lagi (detik).
+final tenggangKunciProvider = FutureProvider<int>(
+    (ref) => ref.watch(kunciAplikasiProvider).tenggangDetik());
 
 final tagihanRepoProvider =
     Provider<TagihanRepository>((ref) => TagihanRepository(ref.watch(databaseProvider)));

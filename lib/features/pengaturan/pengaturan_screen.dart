@@ -188,6 +188,31 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
           label: const Text('Kalender Hijriah'),
         ),
         const Divider(height: 40),
+        const Text('Kunci, profil & ikon',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        const Text('Kunci aplikasi dengan PIN, pisahkan data per profil '
+            '(pribadi/keluarga/usaha), dan atur lencana ikon serta widget '
+            'layar utama.'),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: () => context.push('/pengaturan/kunci'),
+          icon: const Icon(Icons.lock_outline),
+          label: const Text('Kunci aplikasi'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => context.push('/pengaturan/profil'),
+          icon: const Icon(Icons.people_outline),
+          label: const Text('Profil (pribadi / keluarga / usaha)'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => context.push('/pengaturan/ikon-widget'),
+          icon: const Icon(Icons.widgets_outlined),
+          label: const Text('Ikon & widget layar utama'),
+        ),
+        const Divider(height: 40),
         const Text('Tentang',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
         const SizedBox(height: 6),

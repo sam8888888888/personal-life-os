@@ -1,23 +1,26 @@
-import 'package:flutter/services.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'app_router.dart';
+import 'core/kunci/penjaga_kunci.dart';
+import 'core/lencana/lencana_ikon.dart';
 import 'core/notifikasi/kerja_latar.dart';
 import 'core/notifikasi/layanan_notifikasi_lokal.dart';
 import 'core/notifikasi/pemantau_pengingat.dart';
+import 'core/profil/profil.dart';
+import 'core/profil/profil_providers.dart';
 import 'core/theme/app_tema.dart';
+import 'core/widget_utama/aksi_widget.dart';
+import 'core/widget_utama/widget_hari_ini.dart';
 import 'features/pengaturan/mata_uang_pengaturan.dart';
 import 'features/pengaturan/mode_tema_pengaturan.dart';
 import 'features/pengaturan/penjaga_cadangan_otomatis.dart';
 import 'data/repository/demo_seeder.dart';
-
-/// A2: kanal aksi cepat dari ikon aplikasi (shortcut Android).
-const MethodChannel _kanalRute = MethodChannel('lifeos/rute');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,27 +28,34 @@ Future<void> main() async {
   await initializeDateFormatting('id_ID');
   await initializeDateFormatting('ms_MY');
   await seedDemoJikaDiminta(); // hanya aktif bila dibangun dengan --dart-define=DEMO_SEED=true
+  // FR-44: profil aktif dibaca SEBELUM basis data dibuka, supaya aplikasi
+  // langsung memakai berkas basis data profil yang benar.
+  final folderDokumen = await getApplicationDocumentsDirectory();
+  final profilLayanan = ProfilLayanan(folder: folderDokumen);
+  final daftarProfil = await profilLayanan.muat();
   // F3: siapkan notifikasi + pekerja latar (tidak memblokir tampilan).
   unawaited(siapkanPengingatSaatMulai());
-  // A2: bila aplikasi dibuka dari aksi cepat saat sudah berjalan.
-  _kanalRute.setMethodCallHandler((panggilan) async {
-    if (panggilan.method == 'ruteBaru' && panggilan.arguments is String) {
-      appRouter.go(panggilan.arguments as String);
-    }
-    return null;
-  });
-  runApp(const ProviderScope(
-      child: PenjagaCadanganOtomatis(
-          child: PemantauPengingat(
-              child: MuatMataUang(
-                  child: MuatModeTema(child: PersonalLifeOsApp()))))));
-  // A2: bila aplikasi dibuka dari aksi cepat dari kondisi tertutup.
-  try {
-    final rute = await _kanalRute.invokeMethod<String>('ruteAwal');
-    if (rute != null && rute.isNotEmpty) appRouter.go(rute);
-  } catch (e) {
-    debugPrint('ruteAwal gagal: $e');
-  }
+  runApp(ProviderScope(
+    overrides: [
+      profilLayananProvider.overrideWithValue(profilLayanan),
+      profilAwalProvider.overrideWithValue(daftarProfil),
+    ],
+    child: const PenanganAksiWidget(
+      child: PenjagaKunci(
+        child: PemantauLencana(
+          child: PemantauWidget(
+            child: PenjagaCadanganOtomatis(
+              child: PemantauPengingat(
+                child: MuatMataUang(
+                  child: MuatModeTema(child: PersonalLifeOsApp()),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  ));
 }
 
 /// Siapkan layanan notifikasi & daftarkan pekerja latar Workmanager.
@@ -71,6 +81,7 @@ class PersonalLifeOsApp extends ConsumerWidget {
     // pengaturan sistem perangkat.
     final modeTema = ref.watch(modeTemaProvider).value ?? ModeTema.sistem;
     return MaterialApp.router(
+      scaffoldMessengerKey: pesanGlobal,
       title: 'Personal Life OS',
       debugShowCheckedModeBanner: false,
       theme: AppTema.terang(),

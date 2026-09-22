@@ -52,8 +52,8 @@ void main() {
 
     test('yang belum dikerjakan TIDAK diberi tanda Selesai', () {
       expect(cari('FR-38').status, StatusFitur.belum);   // impor tagihan dari foto (OCR)
-      expect(cari('FR-26').status, StatusFitur.belum);   // kunci aplikasi
       expect(cari('FR-149').status, StatusFitur.belum);  // AI Copilot
+      expect(cari('FR-26').status, StatusFitur.selesai);  // kunci aplikasi (Batch 8)
     });
 
     test('sinkron ditandai Selesai TAPI cacatnya ditulis apa adanya', () {
@@ -101,7 +101,9 @@ void main() {
       await t.ensureVisible(find.byKey(const Key('peta_saring_belum')));
       await t.tap(find.byKey(const Key('peta_saring_belum')));
       await t.pumpAndSettle();
-      expect(find.byKey(const Key('peta_FR-26')), findsOneWidget);
+      expect(find.byKey(const Key('peta_FR-38')), findsOneWidget);
+      expect(find.byKey(const Key('peta_FR-26')), findsNothing,
+          reason: 'FR-26 sudah selesai → tidak muncul di saringan Belum');
       expect(find.byKey(const Key('peta_FR-21')), findsNothing,
           reason: 'FR-21 sudah selesai → tidak muncul di saringan Belum');
       await tutup(t);
@@ -119,9 +121,10 @@ void main() {
     testWidgets('butir tanpa layar: dibuka → dijelaskan belum dikerjakan',
         (t) async {
       await buka(t);
-      await t.enterText(find.byKey(const Key('peta_cari')), 'FR-26');
+      await t.enterText(find.byKey(const Key('peta_cari')), 'FR-38');
       await t.pumpAndSettle();
-      await t.tap(find.byKey(const Key('peta_FR-26')));
+      await t.ensureVisible(find.byKey(const Key('peta_FR-38')));
+      await t.tap(find.byKey(const Key('peta_FR-38')));
       await t.pumpAndSettle();
       expect(find.text('Layarnya belum ada — butir ini belum dikerjakan.'),
           findsOneWidget);

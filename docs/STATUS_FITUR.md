@@ -31,16 +31,16 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-19 | Kartu ringkasan: total tagihan bulan berjalan, total belum bayar | - | SELESAI |  |
 | FR-20 | Input pemasukan bulanan opsional untuk menghitung "uang tersisa" | - | SELESAI |  |
 | FR-21 | Mode gelap & terang, aksent warna, ukuran teks mengikuti sistem | - | SELESAI | Ron 20 Sep: mode terang/gelap/ikut sistem + saklar di Pengaturan. |
-| FR-22 | Badge/angka tagihan hari ini di ikon launcher (bila API | - | BELUM |  |
+| FR-22 | Badge/angka tagihan hari ini di ikon launcher (bila API | - | SELESAI | Ron 22 Sep: lencana angka di ikon aplikasi = jumlah tagihan yang jatuh tempo hari ini atau sudah lewat & belum lunas; dikirim ke peluncur lewat siaran khas Samsung/Sony/HTC/LG/Nova/ADW. Peluncur yang tidak mendukung lencana tidak menampilkannya — dinyatakan di layar, bukan dijanjikan. Uji: hitungan + kanal (kanal tiruan mencatat angka yang dikirim). |
 | FR-23 | Semua data lokal (SQLite), tanpa akun, tanpa telemetri wajib | - | SELESAI | Diperbarui 21 Sep: data tetap lokal; akun kini OPSIONAL untuk sinkron (FR-150). |
 | FR-24 | Ekspor cadangan JSON + impor restore (termasuk migrasi antar HP) | - | SELESAI | `lib/core/backup/ekspor_impor.dart`, `lib/features/pengaturan/backup_screen.dart`, uji 28/28. Batas: pemilihan berkas hanya dari folder dokumen aplikasi; berkas tidak dienkripsi. |
 | FR-25 | Ekspor CSV untuk dibuka di spreadsheet | - | SELESAI | Ron 21 Sep: ekspor CSV tagihan & riwayat pembayaran (menu Uang → Ekspor CSV), uji 8 kasus. |
-| FR-26 | Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif | - | BELUM |  |
+| FR-26 | Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif | - | SELESAI | Ron 22 Sep: PIN 4-12 angka disimpan sebagai turunan PBKDF2-HMAC-SHA256 (PIN mentah tidak pernah ditulis); salah 5 kali -> percobaan ditahan 30 detik; boleh dibuka dengan kunci perangkat HP (sidik jari/PIN HP lewat Android Keyguard); tirai kunci menahan ISI aplikasi sampai PIN benar; masa tenggang sebelum terkunci lagi bisa diatur (langsung/30 dtk/1 mnt/5 mnt). Uji: 11 kasus (logika + layar). |
 | FR-27 | Sinkronisasi antar perangkat via file/cloud pilihan pengguna | - | SELESAI | Ron 22 Sep: pilihan kanal sinkron — server sendiri (akun) atau BERKAS (ekspor .json lalu dibagikan lewat WhatsApp/Drive/USB, impor dari pemilih berkas Android). Tanpa server pun jalan. |
 | FR-28 | Grafik sederhana beban tagihan per bulan (total & per kategori) | - | SELESAI | `lib/core/laporan/beban_tagihan.dart` + layar + rute `/laporan/beban-tagihan`, uji 24/24. |
 | FR-29 | Riwayat pembayaran & statistik: rata-rata nominal, jumlah | - | SELESAI | Ron 21 Sep: statistik pembayaran — total, rata-rata, terbesar/terkecil, % tepat waktu, tren 12 bulan. |
 | FR-30 | Proyeksi arus kas 3 bulan ke depan (terinspirasi PocketSmith/ | - | SELESAI | Ron 21 Sep: proyeksi arus kas 3 bulan (tagihan semua frekuensi + langganan aktif), uji 8 kasus. |
-| FR-31 | Widget layar utama: tagihan 7 hari ke depan + total; tap membuka detai | - | BELUM |  |
+| FR-31 | Widget layar utama: tagihan 7 hari ke depan + total; tap membuka detai | - | SELESAI | Ron 22 Sep: widget layar utama 'Tagihan 7 hari' — judul (jumlah tagihan hari ini / 7 hari ke depan) + total + tiga tagihan terdekat dengan nominalnya; menekan baris membuka daftar tagihan; isi dikirim ulang setiap data tagihan berubah; bisa dinyalakan/dimatikan di Pengaturan -> Ikon & widget. Uji: penyusun isi + kanal. |
 | FR-32 | Ringkasan harian pagi (toggle): tagihan hari ini & besok + total (F02) | - | SELESAI | Ron 21 Sep: ringkasan pagi — tagihan hari ini, besok, dan total 7 hari. |
 | FR-33 | "Uang aman sampai gajian": input tanggal gajian & saldo opsional → pro | - | SELESAI | Ron 21 Sep: uang aman sampai gajian — tanggal gajian + saldo opsional, tagihan lewat jatuh tempo tetap dihitung. |
 | FR-34 | Kalkulator denda terhindarkan: estimasi denda/bunga yang dihindari tia | - | SELESAI | Ron 21 Sep: kalkulator denda terhindarkan (aturan denda per tagihan: persen/bulan atau nominal tetap). |
@@ -53,7 +53,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-41 | Ekspor tagihan mendatang ke Google Kalender; opsi impor .ics (F11) | - | SELESAI | Ron 21 Sep: ekspor jadwal tagihan ke .ics (Google Kalender), periode 3/6/12/24 bulan. |
 | FR-42 | Pusat Bayar: preferensi aplikasi bayar per tagihan, salin nomor VA/QRI | - | SELESAI | Ron 21 Sep: Pusat Bayar — VA/QRIS, salin nomor sekali tekan, catatan konfirmasi. |
 | FR-43 | Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, notifika | - | BELUM |  |
-| FR-44 | Multi-profil terpisah (pribadi/keluarga/usaha) | - | BELUM |  |
+| FR-44 | Multi-profil terpisah (pribadi/keluarga/usaha) | - | SELESAI | Ron 22 Sep: profil pribadi/keluarga/usaha masing-masing punya BERKAS basis data SENDIRI sehingga data tidak bercampur (dibuktikan uji dengan dua basis data terpisah); profil 'Pribadi' memakai berkas lama sehingga data pengguna yang sudah ada tidak hilang; profil aktif harus dipindah dulu sebelum dihapus; pindah profil = pindah berkas basis data. Uji: 7 kasus. |
 | FR-45 | Laporan bulanan PDF/Excel + tombol bagikan | - | SELESAI | Ron 21 Sep: tombol bagikan laporan bulanan (PDF & CSV) lewat kanal Android sendiri. |
 | FR-46 | Deteksi langganan duplikat & tagihan yang berhenti muncul (F16) | - | SELESAI | Ron 21 Sep: deteksi tagihan berulang yang berhenti muncul + bukti & matikan pengingatnya. |
 | FR-47 | v2 | - | BELUM |  |
@@ -215,5 +215,5 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-148 | Snooze & Reschedule Engine (memperluas FR-11 & memperbaiki PB-04) | V2 | SELESAI | 15 menit/1 jam/3 jam/besok 09:00; tercatat di audit |
 | FR-149 | AI Copilot ber-konteks | V4 | BELUM |  |
 | FR-150 | Sinkron Antar Perangkat & Cloud (memperluas FR-27) | V4 | SELESAI | Ron 22 Sep: sinkron SEMUA MODUL (40 tabel: uang, aset, tujuan/tugas, kebiasaan, kesehatan, dokumen, pengetahuan, ibadah) — pengenal uid, kaitan antar tabel dipetakan ulang antar HP, bentrok versi-kalah disimpan, diuji dua basis data. Belum: berkas lampiran & catatan obat. |
-| FR-151 | Widget & Akses Cepat Lanjutan (memperluas FR-31) | V2 | BELUM |  |
+| FR-151 | Widget & Akses Cepat Lanjutan (memperluas FR-31) | V2 | SELESAI | Ron 22 Sep: tombol di widget LANGSUNG menjalankan aksi saat aplikasi terbuka dari widget (satu ketukan, bukan membuka formulir lagi) dan menulis ke basis data yang sama sehingga tersinkron; baris widget bisa ditandai lunas satu per satu; aksi cepat ikon bertambah: 'Catat pengeluaran' dan 'Widget tagihan'. Uji: aksi lunas benar-benar mengubah data. |
 | FR-152 | Multi-bahasa & Multi-mata Uang (memperluas FR-52) | V4 | BELUM |  |

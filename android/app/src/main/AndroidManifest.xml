@@ -42,6 +42,18 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- FR-31 & FR-151: widget "Tagihan 7 hari" di layar utama. -->
+        <receiver
+            android:name=".WidgetHariIni"
+            android:exported="false"
+            android:label="@string/widget_nama">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_hari_ini_info"/>
+        </receiver>
         <!-- F3: notifikasi terjadwal + aksi dari notifikasi. -->
         <receiver
             android:exported="false"

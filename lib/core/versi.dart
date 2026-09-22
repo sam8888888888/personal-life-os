@@ -5,10 +5,10 @@
 library;
 
 /// Versi yang tampil ke pengguna.
-const String versiAplikasi = '1.7.0';
+const String versiAplikasi = '1.8.0';
 
 /// Nomor build (harus sama dengan versionCode di android/app/build.gradle.kts).
-const int nomorBuild = 8;
+const int nomorBuild = 9;
 
 /// Keterangan jalur pengembangan (bukan nomor versi).
 const String jalurPengembangan = 'V3';

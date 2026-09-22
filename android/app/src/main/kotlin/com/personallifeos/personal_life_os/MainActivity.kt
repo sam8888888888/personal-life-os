@@ -16,6 +16,10 @@ class MainActivity : FlutterActivity() {
     private val kanalBuka = "lifeos/buka"
     private var saluranRute: MethodChannel? = null
     private val kanalMedia = KanalMedia(this)
+    // FR-26 / FR-22 / FR-31 & FR-151
+    private val kanalKunci = KanalKunci(this)
+    private val kanalLencana = KanalLencana(this)
+    private val kanalWidget = KanalWidget(this)
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,10 +31,11 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         val saluran = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, kanal)
         saluran.setMethodCallHandler { panggilan, hasil ->
-            if (panggilan.method == "ruteAwal") {
-                hasil.success(ruteDari(intent))
-            } else {
-                hasil.notImplemented()
+            when (panggilan.method) {
+                "ruteAwal" -> hasil.success(ruteDari(intent))
+                // FR-151: aksi dari widget/aksi cepat ikon.
+                "aksiAwal" -> hasil.success(aksiDari(intent))
+                else -> hasil.notImplemented()
             }
         }
         saluranRute = saluran
@@ -38,6 +43,10 @@ class MainActivity : FlutterActivity() {
         pasangKanalBuka(flutterEngine)
         // FR-118 & FR-27: lampiran foto/suara + pemilih berkas.
         kanalMedia.pasang(flutterEngine)
+        // FR-26 / FR-22 / FR-31 & FR-151
+        kanalKunci.pasang(flutterEngine.dartExecutor.binaryMessenger)
+        kanalLencana.pasang(flutterEngine.dartExecutor.binaryMessenger)
+        kanalWidget.pasang(flutterEngine.dartExecutor.binaryMessenger)
     }
 
     /// FR-49: buka tautan ke aplikasi lain (WhatsApp / SMS / Telegram).
@@ -107,6 +116,8 @@ class MainActivity : FlutterActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         kanalMedia.onActivityResult(requestCode, resultCode, data)
+        // FR-26: hasil permintaan kunci perangkat.
+        kanalKunci.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onRequestPermissionsResult(
@@ -123,9 +134,26 @@ class MainActivity : FlutterActivity() {
         setIntent(intent)
         val rute = ruteDari(intent)
         tampilkanDiAtasKunci(rute)
-        if (rute != null) {
-            saluranRute?.invokeMethod("ruteBaru", rute)
+        val aksi = aksiDari(intent)
+        when {
+            // FR-151: aksi lebih diutamakan daripada sekadar membuka halaman.
+            aksi != null -> saluranRute?.invokeMethod("aksiBaru", aksi)
+            rute != null -> saluranRute?.invokeMethod("ruteBaru", rute)
         }
+    }
+
+    /**
+     * FR-151: aksi yang datang dari widget layar utama / aksi cepat ikon
+     * (`aksi` wajib, `id` opsional). Dijalankan Dart saat aplikasi terbuka.
+     */
+    private fun aksiDari(intent: Intent?): Map<String, String>? {
+        val aksi = intent?.getStringExtra("aksi")
+        if (aksi.isNullOrBlank()) return null
+        val peta = HashMap<String, String>()
+        peta["aksi"] = aksi
+        intent.getStringExtra("id")?.let { if (it.isNotBlank()) peta["id"] = it }
+        intent.getStringExtra("judul")?.let { if (it.isNotBlank()) peta["judul"] = it }
+        return peta
     }
 
     /// Kartu darurat (FR-117) diizinkan tampil di atas layar kunci.
