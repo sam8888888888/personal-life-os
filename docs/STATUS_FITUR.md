@@ -3,7 +3,7 @@
 Disusun ulang oleh Aaron (Ron) · 21 Sep 2026.
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 119 · SEBAGIAN 0 · BELUM 33** (total 152 butir)
+**Hitungan: SELESAI 124 · SEBAGIAN 0 · BELUM 28** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -186,7 +186,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | ID | Fitur | Fase | Status | Catatan |
 |---|---|---|---|---|
 | FR-131 | Anggota Keluarga & Tanggung Jawab | V3 | SELESAI | Ron 22 Sep: anggota keluarga + pemilik & penanggung jawab per item (contoh PRD: tagihan sekolah milik anak, ditanggung pasangan); saringan per anggota bekerja; anggota bertanda pribadi hanya tampil setelah perangkat dibuka. |
-| FR-132 | Kalender Keluarga | V3 | BELUM |  |
+| FR-132 | Kalender Keluarga | V3 | SELESAI | Ron 22 Sep: kalender keluarga — satu tampilan agenda semua anggota (tagihan, tugas, janji kesehatan, jadwal perawatan, ulang tahun) dengan WARNA BERBEDA per anggota; saringan per anggota; warna ditetapkan dari urutan anggota sehingga tidak pernah sama. |
 | FR-133 | Kas & Tanggung Jawab Rumah Tangga (memperluas FR-43 & FR-47) | V3 | BELUM |  |
 
 ## 10 · Perjalanan
@@ -204,12 +204,12 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-137 | Cadangan Otomatis + Rotasi + Cek Integritas | V2 | SELESAI | dengan catatan (saklar bawaan MATI; berjalan saat aplikasi dibuka, bukan penjadwal OS; rotasi hanya menghapus berkas yang dicatatnya sendiri; 10 uji |
 | FR-138 | Audit Log Pengguna | V2 | SELESAI | Ron 20 Sep: catatan aktivitas mencakup uang, kategori, langganan, kesehatan. |
 | FR-139 | Search Everything (signature) | V2 | SELESAI | satu kotak cari lintas tabel; rute /cari; 15 uji |
-| FR-140 | Life Timeline (signature) | V3 | BELUM |  |
-| FR-141 | Personal Analytics | V3 | BELUM |  |
+| FR-140 | Life Timeline (signature) | V3 | SELESAI | Ron 22 Sep: lini masa hidup (signature) — kejadian dari 14 sumber data tersusun per bulan, dapat dicari & disaring per modul, tiap baris menyebut asal datanya (mis. tugas#12), plus rangkuman 'apa yang terjadi bulan ini'. |
+| FR-141 | Personal Analytics | V3 | SELESAI | Ron 22 Sep: analitik pribadi lintas modul untuk 7/30/90 hari & 1 tahun; SETIAP angka menampilkan baris sumber (tabel & rentangnya) sehingga tidak ada angka misterius. |
 | FR-142 | Smart Insights | V3 | BELUM |  |
 | FR-143 | Forecast | V4 | BELUM |  |
-| FR-144 | Weekly Life Review | V3 | BELUM |  |
-| FR-145 | Monthly Life Report (signature) | V3 | BELUM |  |
+| FR-144 | Weekly Life Review | V3 | SELESAI | Ron 22 Sep: tinjauan pekan per 6 pilar (uang, kesehatan, tujuan & tugas, pengetahuan, ibadah, rumah & aset) membandingkan pekan ini vs pekan lalu dengan angka pendukung; tiga kolom isian tersimpan; teks ringkas bisa disalin untuk notifikasi; pengingat Minggu malam otomatis DILEWATI bila pekan itu sudah diisi. |
+| FR-145 | Monthly Life Report (signature) | V3 | SELESAI | Ron 22 Sep: laporan bulanan (signature) — keuangan, tagihan, tujuan, tugas, langganan, kekayaan bersih + 'membaik / berubah / perlu perhatian'; bisa diarsipkan (angka kunci tersimpan sebagai JSON untuk pembanding bulan berikutnya) dan dibagikan sebagai PDF. |
 | FR-146 | Annual Life Review | V4 | BELUM |  |
 | FR-147 | Notification Center | V2 | SELESAI | rute /notifikasi: riwayat + tingkat + tanda selesai |
 | FR-148 | Snooze & Reschedule Engine (memperluas FR-11 & memperbaiki PB-04) | V2 | SELESAI | 15 menit/1 jam/3 jam/besok 09:00; tercatat di audit |

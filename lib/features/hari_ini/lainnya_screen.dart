@@ -220,6 +220,66 @@ class LainnyaScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          Card(
+            margin: EdgeInsets.zero,
+            child: Column(
+              children: [
+                const ListTile(
+                  leading: Icon(Icons.auto_graph_outlined),
+                  title: Text('Ritme hidup'),
+                  subtitle: Text('Kalender keluarga, lini masa, analitik, '
+                      'tinjauan pekan, laporan bulanan'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_kalender_keluarga'),
+                  leading: const Icon(Icons.calendar_month_outlined),
+                  title: const Text('Kalender keluarga'),
+                  subtitle: const Text('Agenda semua anggota, warna berbeda '
+                      'per anggota, termasuk ulang tahun'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/kalender-keluarga'),
+                ),
+                ListTile(
+                  key: const Key('buka_lini_masa'),
+                  leading: const Icon(Icons.timeline_outlined),
+                  title: const Text('Lini masa hidup'),
+                  subtitle: const Text('Seluruh kejadian per bulan, bisa '
+                      'dicari & disaring per modul'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/lini-masa'),
+                ),
+                ListTile(
+                  key: const Key('buka_analitik'),
+                  leading: const Icon(Icons.insights_outlined),
+                  title: const Text('Analitik pribadi'),
+                  subtitle: const Text('Ringkasan 7/30/90 hari & 1 tahun — '
+                      'tiap angka menyebut sumbernya'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/analitik'),
+                ),
+                ListTile(
+                  key: const Key('buka_tinjauan_pekan'),
+                  leading: const Icon(Icons.event_repeat_outlined),
+                  title: const Text('Tinjauan pekan'),
+                  subtitle: const Text('Apa yang membaik, perlu perhatian, '
+                      'dan fokus pekan depan'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tinjauan-pekan'),
+                ),
+                ListTile(
+                  key: const Key('buka_laporan_hidup'),
+                  leading: const Icon(Icons.summarize_outlined),
+                  title: const Text('Laporan bulanan'),
+                  subtitle: const Text('Keuangan, tagihan, tujuan, langganan, '
+                      'kekayaan bersih — bisa jadi PDF'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/laporan-hidup'),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 12),
           Text(
             'Personal Life OS · versi 0.6.0 (fase V2 — Pilar Kehidupan)',

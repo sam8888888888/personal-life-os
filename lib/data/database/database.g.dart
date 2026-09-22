@@ -38517,6 +38517,981 @@ class CatatanMedisCompanion extends UpdateCompanion<CatatanMedi> {
   }
 }
 
+class $TinjauanMingguanTable extends TinjauanMingguan
+    with TableInfo<$TinjauanMingguanTable, TinjauanMingguanData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TinjauanMingguanTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pekanMulaiMeta = const VerificationMeta(
+    'pekanMulai',
+  );
+  @override
+  late final GeneratedColumn<DateTime> pekanMulai = GeneratedColumn<DateTime>(
+    'pekan_mulai',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _membaikMeta = const VerificationMeta(
+    'membaik',
+  );
+  @override
+  late final GeneratedColumn<String> membaik = GeneratedColumn<String>(
+    'membaik',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _perluPerhatianMeta = const VerificationMeta(
+    'perluPerhatian',
+  );
+  @override
+  late final GeneratedColumn<String> perluPerhatian = GeneratedColumn<String>(
+    'perlu_perhatian',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fokusPekanDepanMeta = const VerificationMeta(
+    'fokusPekanDepan',
+  );
+  @override
+  late final GeneratedColumn<String> fokusPekanDepan = GeneratedColumn<String>(
+    'fokus_pekan_depan',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _selesaiMeta = const VerificationMeta(
+    'selesai',
+  );
+  @override
+  late final GeneratedColumn<bool> selesai = GeneratedColumn<bool>(
+    'selesai',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("selesai" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _dibuatPadaMeta = const VerificationMeta(
+    'dibuatPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dibuatPada = GeneratedColumn<DateTime>(
+    'dibuat_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _diubahPadaMeta = const VerificationMeta(
+    'diubahPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> diubahPada = GeneratedColumn<DateTime>(
+    'diubah_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uid,
+    pekanMulai,
+    membaik,
+    perluPerhatian,
+    fokusPekanDepan,
+    selesai,
+    dibuatPada,
+    diubahPada,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tinjauan_mingguan';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TinjauanMingguanData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    }
+    if (data.containsKey('pekan_mulai')) {
+      context.handle(
+        _pekanMulaiMeta,
+        pekanMulai.isAcceptableOrUnknown(data['pekan_mulai']!, _pekanMulaiMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pekanMulaiMeta);
+    }
+    if (data.containsKey('membaik')) {
+      context.handle(
+        _membaikMeta,
+        membaik.isAcceptableOrUnknown(data['membaik']!, _membaikMeta),
+      );
+    }
+    if (data.containsKey('perlu_perhatian')) {
+      context.handle(
+        _perluPerhatianMeta,
+        perluPerhatian.isAcceptableOrUnknown(
+          data['perlu_perhatian']!,
+          _perluPerhatianMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fokus_pekan_depan')) {
+      context.handle(
+        _fokusPekanDepanMeta,
+        fokusPekanDepan.isAcceptableOrUnknown(
+          data['fokus_pekan_depan']!,
+          _fokusPekanDepanMeta,
+        ),
+      );
+    }
+    if (data.containsKey('selesai')) {
+      context.handle(
+        _selesaiMeta,
+        selesai.isAcceptableOrUnknown(data['selesai']!, _selesaiMeta),
+      );
+    }
+    if (data.containsKey('dibuat_pada')) {
+      context.handle(
+        _dibuatPadaMeta,
+        dibuatPada.isAcceptableOrUnknown(data['dibuat_pada']!, _dibuatPadaMeta),
+      );
+    }
+    if (data.containsKey('diubah_pada')) {
+      context.handle(
+        _diubahPadaMeta,
+        diubahPada.isAcceptableOrUnknown(data['diubah_pada']!, _diubahPadaMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TinjauanMingguanData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TinjauanMingguanData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
+      pekanMulai: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}pekan_mulai'],
+      )!,
+      membaik: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}membaik'],
+      ),
+      perluPerhatian: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}perlu_perhatian'],
+      ),
+      fokusPekanDepan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fokus_pekan_depan'],
+      ),
+      selesai: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}selesai'],
+      )!,
+      dibuatPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}dibuat_pada'],
+      )!,
+      diubahPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}diubah_pada'],
+      )!,
+    );
+  }
+
+  @override
+  $TinjauanMingguanTable createAlias(String alias) {
+    return $TinjauanMingguanTable(attachedDatabase, alias);
+  }
+}
+
+class TinjauanMingguanData extends DataClass
+    implements Insertable<TinjauanMingguanData> {
+  final int id;
+  final String? uid;
+
+  /// Senin awal pekan (jam 00:00) — penanda unik satu pekan.
+  final DateTime pekanMulai;
+  final String? membaik;
+  final String? perluPerhatian;
+  final String? fokusPekanDepan;
+  final bool selesai;
+  final DateTime dibuatPada;
+  final DateTime diubahPada;
+  const TinjauanMingguanData({
+    required this.id,
+    this.uid,
+    required this.pekanMulai,
+    this.membaik,
+    this.perluPerhatian,
+    this.fokusPekanDepan,
+    required this.selesai,
+    required this.dibuatPada,
+    required this.diubahPada,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
+    map['pekan_mulai'] = Variable<DateTime>(pekanMulai);
+    if (!nullToAbsent || membaik != null) {
+      map['membaik'] = Variable<String>(membaik);
+    }
+    if (!nullToAbsent || perluPerhatian != null) {
+      map['perlu_perhatian'] = Variable<String>(perluPerhatian);
+    }
+    if (!nullToAbsent || fokusPekanDepan != null) {
+      map['fokus_pekan_depan'] = Variable<String>(fokusPekanDepan);
+    }
+    map['selesai'] = Variable<bool>(selesai);
+    map['dibuat_pada'] = Variable<DateTime>(dibuatPada);
+    map['diubah_pada'] = Variable<DateTime>(diubahPada);
+    return map;
+  }
+
+  TinjauanMingguanCompanion toCompanion(bool nullToAbsent) {
+    return TinjauanMingguanCompanion(
+      id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
+      pekanMulai: Value(pekanMulai),
+      membaik: membaik == null && nullToAbsent
+          ? const Value.absent()
+          : Value(membaik),
+      perluPerhatian: perluPerhatian == null && nullToAbsent
+          ? const Value.absent()
+          : Value(perluPerhatian),
+      fokusPekanDepan: fokusPekanDepan == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fokusPekanDepan),
+      selesai: Value(selesai),
+      dibuatPada: Value(dibuatPada),
+      diubahPada: Value(diubahPada),
+    );
+  }
+
+  factory TinjauanMingguanData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TinjauanMingguanData(
+      id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
+      pekanMulai: serializer.fromJson<DateTime>(json['pekanMulai']),
+      membaik: serializer.fromJson<String?>(json['membaik']),
+      perluPerhatian: serializer.fromJson<String?>(json['perluPerhatian']),
+      fokusPekanDepan: serializer.fromJson<String?>(json['fokusPekanDepan']),
+      selesai: serializer.fromJson<bool>(json['selesai']),
+      dibuatPada: serializer.fromJson<DateTime>(json['dibuatPada']),
+      diubahPada: serializer.fromJson<DateTime>(json['diubahPada']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
+      'pekanMulai': serializer.toJson<DateTime>(pekanMulai),
+      'membaik': serializer.toJson<String?>(membaik),
+      'perluPerhatian': serializer.toJson<String?>(perluPerhatian),
+      'fokusPekanDepan': serializer.toJson<String?>(fokusPekanDepan),
+      'selesai': serializer.toJson<bool>(selesai),
+      'dibuatPada': serializer.toJson<DateTime>(dibuatPada),
+      'diubahPada': serializer.toJson<DateTime>(diubahPada),
+    };
+  }
+
+  TinjauanMingguanData copyWith({
+    int? id,
+    Value<String?> uid = const Value.absent(),
+    DateTime? pekanMulai,
+    Value<String?> membaik = const Value.absent(),
+    Value<String?> perluPerhatian = const Value.absent(),
+    Value<String?> fokusPekanDepan = const Value.absent(),
+    bool? selesai,
+    DateTime? dibuatPada,
+    DateTime? diubahPada,
+  }) => TinjauanMingguanData(
+    id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
+    pekanMulai: pekanMulai ?? this.pekanMulai,
+    membaik: membaik.present ? membaik.value : this.membaik,
+    perluPerhatian: perluPerhatian.present
+        ? perluPerhatian.value
+        : this.perluPerhatian,
+    fokusPekanDepan: fokusPekanDepan.present
+        ? fokusPekanDepan.value
+        : this.fokusPekanDepan,
+    selesai: selesai ?? this.selesai,
+    dibuatPada: dibuatPada ?? this.dibuatPada,
+    diubahPada: diubahPada ?? this.diubahPada,
+  );
+  TinjauanMingguanData copyWithCompanion(TinjauanMingguanCompanion data) {
+    return TinjauanMingguanData(
+      id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      pekanMulai: data.pekanMulai.present
+          ? data.pekanMulai.value
+          : this.pekanMulai,
+      membaik: data.membaik.present ? data.membaik.value : this.membaik,
+      perluPerhatian: data.perluPerhatian.present
+          ? data.perluPerhatian.value
+          : this.perluPerhatian,
+      fokusPekanDepan: data.fokusPekanDepan.present
+          ? data.fokusPekanDepan.value
+          : this.fokusPekanDepan,
+      selesai: data.selesai.present ? data.selesai.value : this.selesai,
+      dibuatPada: data.dibuatPada.present
+          ? data.dibuatPada.value
+          : this.dibuatPada,
+      diubahPada: data.diubahPada.present
+          ? data.diubahPada.value
+          : this.diubahPada,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TinjauanMingguanData(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('pekanMulai: $pekanMulai, ')
+          ..write('membaik: $membaik, ')
+          ..write('perluPerhatian: $perluPerhatian, ')
+          ..write('fokusPekanDepan: $fokusPekanDepan, ')
+          ..write('selesai: $selesai, ')
+          ..write('dibuatPada: $dibuatPada, ')
+          ..write('diubahPada: $diubahPada')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uid,
+    pekanMulai,
+    membaik,
+    perluPerhatian,
+    fokusPekanDepan,
+    selesai,
+    dibuatPada,
+    diubahPada,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TinjauanMingguanData &&
+          other.id == this.id &&
+          other.uid == this.uid &&
+          other.pekanMulai == this.pekanMulai &&
+          other.membaik == this.membaik &&
+          other.perluPerhatian == this.perluPerhatian &&
+          other.fokusPekanDepan == this.fokusPekanDepan &&
+          other.selesai == this.selesai &&
+          other.dibuatPada == this.dibuatPada &&
+          other.diubahPada == this.diubahPada);
+}
+
+class TinjauanMingguanCompanion extends UpdateCompanion<TinjauanMingguanData> {
+  final Value<int> id;
+  final Value<String?> uid;
+  final Value<DateTime> pekanMulai;
+  final Value<String?> membaik;
+  final Value<String?> perluPerhatian;
+  final Value<String?> fokusPekanDepan;
+  final Value<bool> selesai;
+  final Value<DateTime> dibuatPada;
+  final Value<DateTime> diubahPada;
+  const TinjauanMingguanCompanion({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.pekanMulai = const Value.absent(),
+    this.membaik = const Value.absent(),
+    this.perluPerhatian = const Value.absent(),
+    this.fokusPekanDepan = const Value.absent(),
+    this.selesai = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+    this.diubahPada = const Value.absent(),
+  });
+  TinjauanMingguanCompanion.insert({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    required DateTime pekanMulai,
+    this.membaik = const Value.absent(),
+    this.perluPerhatian = const Value.absent(),
+    this.fokusPekanDepan = const Value.absent(),
+    this.selesai = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+    this.diubahPada = const Value.absent(),
+  }) : pekanMulai = Value(pekanMulai);
+  static Insertable<TinjauanMingguanData> custom({
+    Expression<int>? id,
+    Expression<String>? uid,
+    Expression<DateTime>? pekanMulai,
+    Expression<String>? membaik,
+    Expression<String>? perluPerhatian,
+    Expression<String>? fokusPekanDepan,
+    Expression<bool>? selesai,
+    Expression<DateTime>? dibuatPada,
+    Expression<DateTime>? diubahPada,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
+      if (pekanMulai != null) 'pekan_mulai': pekanMulai,
+      if (membaik != null) 'membaik': membaik,
+      if (perluPerhatian != null) 'perlu_perhatian': perluPerhatian,
+      if (fokusPekanDepan != null) 'fokus_pekan_depan': fokusPekanDepan,
+      if (selesai != null) 'selesai': selesai,
+      if (dibuatPada != null) 'dibuat_pada': dibuatPada,
+      if (diubahPada != null) 'diubah_pada': diubahPada,
+    });
+  }
+
+  TinjauanMingguanCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? uid,
+    Value<DateTime>? pekanMulai,
+    Value<String?>? membaik,
+    Value<String?>? perluPerhatian,
+    Value<String?>? fokusPekanDepan,
+    Value<bool>? selesai,
+    Value<DateTime>? dibuatPada,
+    Value<DateTime>? diubahPada,
+  }) {
+    return TinjauanMingguanCompanion(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      pekanMulai: pekanMulai ?? this.pekanMulai,
+      membaik: membaik ?? this.membaik,
+      perluPerhatian: perluPerhatian ?? this.perluPerhatian,
+      fokusPekanDepan: fokusPekanDepan ?? this.fokusPekanDepan,
+      selesai: selesai ?? this.selesai,
+      dibuatPada: dibuatPada ?? this.dibuatPada,
+      diubahPada: diubahPada ?? this.diubahPada,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (pekanMulai.present) {
+      map['pekan_mulai'] = Variable<DateTime>(pekanMulai.value);
+    }
+    if (membaik.present) {
+      map['membaik'] = Variable<String>(membaik.value);
+    }
+    if (perluPerhatian.present) {
+      map['perlu_perhatian'] = Variable<String>(perluPerhatian.value);
+    }
+    if (fokusPekanDepan.present) {
+      map['fokus_pekan_depan'] = Variable<String>(fokusPekanDepan.value);
+    }
+    if (selesai.present) {
+      map['selesai'] = Variable<bool>(selesai.value);
+    }
+    if (dibuatPada.present) {
+      map['dibuat_pada'] = Variable<DateTime>(dibuatPada.value);
+    }
+    if (diubahPada.present) {
+      map['diubah_pada'] = Variable<DateTime>(diubahPada.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TinjauanMingguanCompanion(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('pekanMulai: $pekanMulai, ')
+          ..write('membaik: $membaik, ')
+          ..write('perluPerhatian: $perluPerhatian, ')
+          ..write('fokusPekanDepan: $fokusPekanDepan, ')
+          ..write('selesai: $selesai, ')
+          ..write('dibuatPada: $dibuatPada, ')
+          ..write('diubahPada: $diubahPada')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ArsipLaporanBulananTable extends ArsipLaporanBulanan
+    with TableInfo<$ArsipLaporanBulananTable, ArsipLaporanBulananData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ArsipLaporanBulananTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bulanMeta = const VerificationMeta('bulan');
+  @override
+  late final GeneratedColumn<String> bulan = GeneratedColumn<String>(
+    'bulan',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ringkasTeksMeta = const VerificationMeta(
+    'ringkasTeks',
+  );
+  @override
+  late final GeneratedColumn<String> ringkasTeks = GeneratedColumn<String>(
+    'ringkas_teks',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _angkaJsonMeta = const VerificationMeta(
+    'angkaJson',
+  );
+  @override
+  late final GeneratedColumn<String> angkaJson = GeneratedColumn<String>(
+    'angka_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
+  static const VerificationMeta _dibuatPadaMeta = const VerificationMeta(
+    'dibuatPada',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dibuatPada = GeneratedColumn<DateTime>(
+    'dibuat_pada',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uid,
+    bulan,
+    ringkasTeks,
+    angkaJson,
+    dibuatPada,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'arsip_laporan_bulanan';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ArsipLaporanBulananData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    }
+    if (data.containsKey('bulan')) {
+      context.handle(
+        _bulanMeta,
+        bulan.isAcceptableOrUnknown(data['bulan']!, _bulanMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bulanMeta);
+    }
+    if (data.containsKey('ringkas_teks')) {
+      context.handle(
+        _ringkasTeksMeta,
+        ringkasTeks.isAcceptableOrUnknown(
+          data['ringkas_teks']!,
+          _ringkasTeksMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_ringkasTeksMeta);
+    }
+    if (data.containsKey('angka_json')) {
+      context.handle(
+        _angkaJsonMeta,
+        angkaJson.isAcceptableOrUnknown(data['angka_json']!, _angkaJsonMeta),
+      );
+    }
+    if (data.containsKey('dibuat_pada')) {
+      context.handle(
+        _dibuatPadaMeta,
+        dibuatPada.isAcceptableOrUnknown(data['dibuat_pada']!, _dibuatPadaMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ArsipLaporanBulananData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ArsipLaporanBulananData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      ),
+      bulan: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bulan'],
+      )!,
+      ringkasTeks: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ringkas_teks'],
+      )!,
+      angkaJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}angka_json'],
+      )!,
+      dibuatPada: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}dibuat_pada'],
+      )!,
+    );
+  }
+
+  @override
+  $ArsipLaporanBulananTable createAlias(String alias) {
+    return $ArsipLaporanBulananTable(attachedDatabase, alias);
+  }
+}
+
+class ArsipLaporanBulananData extends DataClass
+    implements Insertable<ArsipLaporanBulananData> {
+  final int id;
+  final String? uid;
+
+  /// 'YYYY-MM'.
+  final String bulan;
+  final String ringkasTeks;
+  final String angkaJson;
+  final DateTime dibuatPada;
+  const ArsipLaporanBulananData({
+    required this.id,
+    this.uid,
+    required this.bulan,
+    required this.ringkasTeks,
+    required this.angkaJson,
+    required this.dibuatPada,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || uid != null) {
+      map['uid'] = Variable<String>(uid);
+    }
+    map['bulan'] = Variable<String>(bulan);
+    map['ringkas_teks'] = Variable<String>(ringkasTeks);
+    map['angka_json'] = Variable<String>(angkaJson);
+    map['dibuat_pada'] = Variable<DateTime>(dibuatPada);
+    return map;
+  }
+
+  ArsipLaporanBulananCompanion toCompanion(bool nullToAbsent) {
+    return ArsipLaporanBulananCompanion(
+      id: Value(id),
+      uid: uid == null && nullToAbsent ? const Value.absent() : Value(uid),
+      bulan: Value(bulan),
+      ringkasTeks: Value(ringkasTeks),
+      angkaJson: Value(angkaJson),
+      dibuatPada: Value(dibuatPada),
+    );
+  }
+
+  factory ArsipLaporanBulananData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ArsipLaporanBulananData(
+      id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String?>(json['uid']),
+      bulan: serializer.fromJson<String>(json['bulan']),
+      ringkasTeks: serializer.fromJson<String>(json['ringkasTeks']),
+      angkaJson: serializer.fromJson<String>(json['angkaJson']),
+      dibuatPada: serializer.fromJson<DateTime>(json['dibuatPada']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String?>(uid),
+      'bulan': serializer.toJson<String>(bulan),
+      'ringkasTeks': serializer.toJson<String>(ringkasTeks),
+      'angkaJson': serializer.toJson<String>(angkaJson),
+      'dibuatPada': serializer.toJson<DateTime>(dibuatPada),
+    };
+  }
+
+  ArsipLaporanBulananData copyWith({
+    int? id,
+    Value<String?> uid = const Value.absent(),
+    String? bulan,
+    String? ringkasTeks,
+    String? angkaJson,
+    DateTime? dibuatPada,
+  }) => ArsipLaporanBulananData(
+    id: id ?? this.id,
+    uid: uid.present ? uid.value : this.uid,
+    bulan: bulan ?? this.bulan,
+    ringkasTeks: ringkasTeks ?? this.ringkasTeks,
+    angkaJson: angkaJson ?? this.angkaJson,
+    dibuatPada: dibuatPada ?? this.dibuatPada,
+  );
+  ArsipLaporanBulananData copyWithCompanion(ArsipLaporanBulananCompanion data) {
+    return ArsipLaporanBulananData(
+      id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      bulan: data.bulan.present ? data.bulan.value : this.bulan,
+      ringkasTeks: data.ringkasTeks.present
+          ? data.ringkasTeks.value
+          : this.ringkasTeks,
+      angkaJson: data.angkaJson.present ? data.angkaJson.value : this.angkaJson,
+      dibuatPada: data.dibuatPada.present
+          ? data.dibuatPada.value
+          : this.dibuatPada,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArsipLaporanBulananData(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('bulan: $bulan, ')
+          ..write('ringkasTeks: $ringkasTeks, ')
+          ..write('angkaJson: $angkaJson, ')
+          ..write('dibuatPada: $dibuatPada')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, uid, bulan, ringkasTeks, angkaJson, dibuatPada);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ArsipLaporanBulananData &&
+          other.id == this.id &&
+          other.uid == this.uid &&
+          other.bulan == this.bulan &&
+          other.ringkasTeks == this.ringkasTeks &&
+          other.angkaJson == this.angkaJson &&
+          other.dibuatPada == this.dibuatPada);
+}
+
+class ArsipLaporanBulananCompanion
+    extends UpdateCompanion<ArsipLaporanBulananData> {
+  final Value<int> id;
+  final Value<String?> uid;
+  final Value<String> bulan;
+  final Value<String> ringkasTeks;
+  final Value<String> angkaJson;
+  final Value<DateTime> dibuatPada;
+  const ArsipLaporanBulananCompanion({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.bulan = const Value.absent(),
+    this.ringkasTeks = const Value.absent(),
+    this.angkaJson = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+  });
+  ArsipLaporanBulananCompanion.insert({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    required String bulan,
+    required String ringkasTeks,
+    this.angkaJson = const Value.absent(),
+    this.dibuatPada = const Value.absent(),
+  }) : bulan = Value(bulan),
+       ringkasTeks = Value(ringkasTeks);
+  static Insertable<ArsipLaporanBulananData> custom({
+    Expression<int>? id,
+    Expression<String>? uid,
+    Expression<String>? bulan,
+    Expression<String>? ringkasTeks,
+    Expression<String>? angkaJson,
+    Expression<DateTime>? dibuatPada,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
+      if (bulan != null) 'bulan': bulan,
+      if (ringkasTeks != null) 'ringkas_teks': ringkasTeks,
+      if (angkaJson != null) 'angka_json': angkaJson,
+      if (dibuatPada != null) 'dibuat_pada': dibuatPada,
+    });
+  }
+
+  ArsipLaporanBulananCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? uid,
+    Value<String>? bulan,
+    Value<String>? ringkasTeks,
+    Value<String>? angkaJson,
+    Value<DateTime>? dibuatPada,
+  }) {
+    return ArsipLaporanBulananCompanion(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      bulan: bulan ?? this.bulan,
+      ringkasTeks: ringkasTeks ?? this.ringkasTeks,
+      angkaJson: angkaJson ?? this.angkaJson,
+      dibuatPada: dibuatPada ?? this.dibuatPada,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (bulan.present) {
+      map['bulan'] = Variable<String>(bulan.value);
+    }
+    if (ringkasTeks.present) {
+      map['ringkas_teks'] = Variable<String>(ringkasTeks.value);
+    }
+    if (angkaJson.present) {
+      map['angka_json'] = Variable<String>(angkaJson.value);
+    }
+    if (dibuatPada.present) {
+      map['dibuat_pada'] = Variable<DateTime>(dibuatPada.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ArsipLaporanBulananCompanion(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('bulan: $bulan, ')
+          ..write('ringkasTeks: $ringkasTeks, ')
+          ..write('angkaJson: $angkaJson, ')
+          ..write('dibuatPada: $dibuatPada')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -38602,6 +39577,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $CatatanMedisTable catatanMedis = $CatatanMedisTable(this);
+  late final $TinjauanMingguanTable tinjauanMingguan = $TinjauanMingguanTable(
+    this,
+  );
+  late final $ArsipLaporanBulananTable arsipLaporanBulanan =
+      $ArsipLaporanBulananTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -38666,6 +39646,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     anggotaKeluarga,
     profilKesehatan,
     catatanMedis,
+    tinjauanMingguan,
+    arsipLaporanBulanan,
   ];
 }
 
@@ -61361,6 +62343,552 @@ typedef $$CatatanMedisTableProcessedTableManager =
       CatatanMedi,
       PrefetchHooks Function()
     >;
+typedef $$TinjauanMingguanTableCreateCompanionBuilder =
+    TinjauanMingguanCompanion Function({
+      Value<int> id,
+      Value<String?> uid,
+      required DateTime pekanMulai,
+      Value<String?> membaik,
+      Value<String?> perluPerhatian,
+      Value<String?> fokusPekanDepan,
+      Value<bool> selesai,
+      Value<DateTime> dibuatPada,
+      Value<DateTime> diubahPada,
+    });
+typedef $$TinjauanMingguanTableUpdateCompanionBuilder =
+    TinjauanMingguanCompanion Function({
+      Value<int> id,
+      Value<String?> uid,
+      Value<DateTime> pekanMulai,
+      Value<String?> membaik,
+      Value<String?> perluPerhatian,
+      Value<String?> fokusPekanDepan,
+      Value<bool> selesai,
+      Value<DateTime> dibuatPada,
+      Value<DateTime> diubahPada,
+    });
+
+class $$TinjauanMingguanTableFilterComposer
+    extends Composer<_$AppDatabase, $TinjauanMingguanTable> {
+  $$TinjauanMingguanTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get pekanMulai => $composableBuilder(
+    column: $table.pekanMulai,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get membaik => $composableBuilder(
+    column: $table.membaik,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get perluPerhatian => $composableBuilder(
+    column: $table.perluPerhatian,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fokusPekanDepan => $composableBuilder(
+    column: $table.fokusPekanDepan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get selesai => $composableBuilder(
+    column: $table.selesai,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TinjauanMingguanTableOrderingComposer
+    extends Composer<_$AppDatabase, $TinjauanMingguanTable> {
+  $$TinjauanMingguanTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get pekanMulai => $composableBuilder(
+    column: $table.pekanMulai,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get membaik => $composableBuilder(
+    column: $table.membaik,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get perluPerhatian => $composableBuilder(
+    column: $table.perluPerhatian,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fokusPekanDepan => $composableBuilder(
+    column: $table.fokusPekanDepan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get selesai => $composableBuilder(
+    column: $table.selesai,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TinjauanMingguanTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TinjauanMingguanTable> {
+  $$TinjauanMingguanTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get pekanMulai => $composableBuilder(
+    column: $table.pekanMulai,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get membaik =>
+      $composableBuilder(column: $table.membaik, builder: (column) => column);
+
+  GeneratedColumn<String> get perluPerhatian => $composableBuilder(
+    column: $table.perluPerhatian,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fokusPekanDepan => $composableBuilder(
+    column: $table.fokusPekanDepan,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get selesai =>
+      $composableBuilder(column: $table.selesai, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get diubahPada => $composableBuilder(
+    column: $table.diubahPada,
+    builder: (column) => column,
+  );
+}
+
+class $$TinjauanMingguanTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TinjauanMingguanTable,
+          TinjauanMingguanData,
+          $$TinjauanMingguanTableFilterComposer,
+          $$TinjauanMingguanTableOrderingComposer,
+          $$TinjauanMingguanTableAnnotationComposer,
+          $$TinjauanMingguanTableCreateCompanionBuilder,
+          $$TinjauanMingguanTableUpdateCompanionBuilder,
+          (
+            TinjauanMingguanData,
+            BaseReferences<
+              _$AppDatabase,
+              $TinjauanMingguanTable,
+              TinjauanMingguanData
+            >,
+          ),
+          TinjauanMingguanData,
+          PrefetchHooks Function()
+        > {
+  $$TinjauanMingguanTableTableManager(
+    _$AppDatabase db,
+    $TinjauanMingguanTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TinjauanMingguanTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TinjauanMingguanTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TinjauanMingguanTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
+                Value<DateTime> pekanMulai = const Value.absent(),
+                Value<String?> membaik = const Value.absent(),
+                Value<String?> perluPerhatian = const Value.absent(),
+                Value<String?> fokusPekanDepan = const Value.absent(),
+                Value<bool> selesai = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+                Value<DateTime> diubahPada = const Value.absent(),
+              }) => TinjauanMingguanCompanion(
+                id: id,
+                uid: uid,
+                pekanMulai: pekanMulai,
+                membaik: membaik,
+                perluPerhatian: perluPerhatian,
+                fokusPekanDepan: fokusPekanDepan,
+                selesai: selesai,
+                dibuatPada: dibuatPada,
+                diubahPada: diubahPada,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
+                required DateTime pekanMulai,
+                Value<String?> membaik = const Value.absent(),
+                Value<String?> perluPerhatian = const Value.absent(),
+                Value<String?> fokusPekanDepan = const Value.absent(),
+                Value<bool> selesai = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+                Value<DateTime> diubahPada = const Value.absent(),
+              }) => TinjauanMingguanCompanion.insert(
+                id: id,
+                uid: uid,
+                pekanMulai: pekanMulai,
+                membaik: membaik,
+                perluPerhatian: perluPerhatian,
+                fokusPekanDepan: fokusPekanDepan,
+                selesai: selesai,
+                dibuatPada: dibuatPada,
+                diubahPada: diubahPada,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TinjauanMingguanTable, TinjauanMingguanData>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $TinjauanMingguanTable,
+                    TinjauanMingguanData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TinjauanMingguanTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TinjauanMingguanTable,
+      TinjauanMingguanData,
+      $$TinjauanMingguanTableFilterComposer,
+      $$TinjauanMingguanTableOrderingComposer,
+      $$TinjauanMingguanTableAnnotationComposer,
+      $$TinjauanMingguanTableCreateCompanionBuilder,
+      $$TinjauanMingguanTableUpdateCompanionBuilder,
+      (
+        TinjauanMingguanData,
+        BaseReferences<
+          _$AppDatabase,
+          $TinjauanMingguanTable,
+          TinjauanMingguanData
+        >,
+      ),
+      TinjauanMingguanData,
+      PrefetchHooks Function()
+    >;
+typedef $$ArsipLaporanBulananTableCreateCompanionBuilder =
+    ArsipLaporanBulananCompanion Function({
+      Value<int> id,
+      Value<String?> uid,
+      required String bulan,
+      required String ringkasTeks,
+      Value<String> angkaJson,
+      Value<DateTime> dibuatPada,
+    });
+typedef $$ArsipLaporanBulananTableUpdateCompanionBuilder =
+    ArsipLaporanBulananCompanion Function({
+      Value<int> id,
+      Value<String?> uid,
+      Value<String> bulan,
+      Value<String> ringkasTeks,
+      Value<String> angkaJson,
+      Value<DateTime> dibuatPada,
+    });
+
+class $$ArsipLaporanBulananTableFilterComposer
+    extends Composer<_$AppDatabase, $ArsipLaporanBulananTable> {
+  $$ArsipLaporanBulananTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bulan => $composableBuilder(
+    column: $table.bulan,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ringkasTeks => $composableBuilder(
+    column: $table.ringkasTeks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get angkaJson => $composableBuilder(
+    column: $table.angkaJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ArsipLaporanBulananTableOrderingComposer
+    extends Composer<_$AppDatabase, $ArsipLaporanBulananTable> {
+  $$ArsipLaporanBulananTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bulan => $composableBuilder(
+    column: $table.bulan,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ringkasTeks => $composableBuilder(
+    column: $table.ringkasTeks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get angkaJson => $composableBuilder(
+    column: $table.angkaJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ArsipLaporanBulananTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ArsipLaporanBulananTable> {
+  $$ArsipLaporanBulananTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<String> get bulan =>
+      $composableBuilder(column: $table.bulan, builder: (column) => column);
+
+  GeneratedColumn<String> get ringkasTeks => $composableBuilder(
+    column: $table.ringkasTeks,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get angkaJson =>
+      $composableBuilder(column: $table.angkaJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dibuatPada => $composableBuilder(
+    column: $table.dibuatPada,
+    builder: (column) => column,
+  );
+}
+
+class $$ArsipLaporanBulananTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ArsipLaporanBulananTable,
+          ArsipLaporanBulananData,
+          $$ArsipLaporanBulananTableFilterComposer,
+          $$ArsipLaporanBulananTableOrderingComposer,
+          $$ArsipLaporanBulananTableAnnotationComposer,
+          $$ArsipLaporanBulananTableCreateCompanionBuilder,
+          $$ArsipLaporanBulananTableUpdateCompanionBuilder,
+          (
+            ArsipLaporanBulananData,
+            BaseReferences<
+              _$AppDatabase,
+              $ArsipLaporanBulananTable,
+              ArsipLaporanBulananData
+            >,
+          ),
+          ArsipLaporanBulananData,
+          PrefetchHooks Function()
+        > {
+  $$ArsipLaporanBulananTableTableManager(
+    _$AppDatabase db,
+    $ArsipLaporanBulananTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ArsipLaporanBulananTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ArsipLaporanBulananTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ArsipLaporanBulananTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
+                Value<String> bulan = const Value.absent(),
+                Value<String> ringkasTeks = const Value.absent(),
+                Value<String> angkaJson = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+              }) => ArsipLaporanBulananCompanion(
+                id: id,
+                uid: uid,
+                bulan: bulan,
+                ringkasTeks: ringkasTeks,
+                angkaJson: angkaJson,
+                dibuatPada: dibuatPada,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> uid = const Value.absent(),
+                required String bulan,
+                required String ringkasTeks,
+                Value<String> angkaJson = const Value.absent(),
+                Value<DateTime> dibuatPada = const Value.absent(),
+              }) => ArsipLaporanBulananCompanion.insert(
+                id: id,
+                uid: uid,
+                bulan: bulan,
+                ringkasTeks: ringkasTeks,
+                angkaJson: angkaJson,
+                dibuatPada: dibuatPada,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<
+                    $ArsipLaporanBulananTable,
+                    ArsipLaporanBulananData
+                  >(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ArsipLaporanBulananTable,
+                    ArsipLaporanBulananData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ArsipLaporanBulananTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ArsipLaporanBulananTable,
+      ArsipLaporanBulananData,
+      $$ArsipLaporanBulananTableFilterComposer,
+      $$ArsipLaporanBulananTableOrderingComposer,
+      $$ArsipLaporanBulananTableAnnotationComposer,
+      $$ArsipLaporanBulananTableCreateCompanionBuilder,
+      $$ArsipLaporanBulananTableUpdateCompanionBuilder,
+      (
+        ArsipLaporanBulananData,
+        BaseReferences<
+          _$AppDatabase,
+          $ArsipLaporanBulananTable,
+          ArsipLaporanBulananData
+        >,
+      ),
+      ArsipLaporanBulananData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -61480,4 +63008,8 @@ class $AppDatabaseManager {
       $$ProfilKesehatanTableTableManager(_db, _db.profilKesehatan);
   $$CatatanMedisTableTableManager get catatanMedis =>
       $$CatatanMedisTableTableManager(_db, _db.catatanMedis);
+  $$TinjauanMingguanTableTableManager get tinjauanMingguan =>
+      $$TinjauanMingguanTableTableManager(_db, _db.tinjauanMingguan);
+  $$ArsipLaporanBulananTableTableManager get arsipLaporanBulanan =>
+      $$ArsipLaporanBulananTableTableManager(_db, _db.arsipLaporanBulanan);
 }

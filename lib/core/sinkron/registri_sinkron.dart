@@ -368,4 +368,18 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomUid: db.catatanMedis.uid,
         kolomKunci: db.catatanMedis.id,
       ),
+
+      // ── ritme hidup (batch 7) ─────────────────────────────────────────────
+      JalurSinkron(
+        nama: 'tinjauan_mingguan',
+        tabel: db.tinjauanMingguan,
+        kolomUid: db.tinjauanMingguan.uid,
+        kolomKunci: db.tinjauanMingguan.id,
+      ),
+      JalurSinkron(
+        nama: 'arsip_laporan_bulanan',
+        tabel: db.arsipLaporanBulanan,
+        kolomUid: db.arsipLaporanBulanan.uid,
+        kolomKunci: db.arsipLaporanBulanan.id,
+      ),
     ];

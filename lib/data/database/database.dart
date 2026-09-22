@@ -90,13 +90,15 @@ part 'database.g.dart';
   AnggotaKeluarga,
   ProfilKesehatan,
   CatatanMedis,
+  TinjauanMingguan,
+  ArsipLaporanBulanan,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -228,6 +230,11 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v13 (FR-108/117/131): keluarga, profil kesehatan, catatan medis.
             await _buatTabelV13(m);
             debugPrint('migrasi v13 selesai (keluarga, profil & catatan medis)');
+          }
+          if (dari < 14) {
+            // v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
+            await _buatTabelV14(m);
+            debugPrint('migrasi v14 selesai (tinjauan mingguan & arsip laporan)');
           }
         },
       );
@@ -480,6 +487,20 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             .firstWhere((k) => k.$name == namaKolom);
         await m.addColumn(masuk.value, kolom);
       }
+    }
+  }
+
+  /// Skema v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
+  ///
+  /// Aman dijalankan ulang: tabel lewat `_tabelAda`.
+  Future<void> _buatTabelV14(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> baru = {
+      'tinjauan_mingguan': tinjauanMingguan,
+      'arsip_laporan_bulanan': arsipLaporanBulanan,
+    };
+    for (final masuk in baru.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
     }
   }
 

@@ -1364,3 +1364,38 @@ class CatatanMedis extends Table {
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+
+/// FR-144 — tinjauan mingguan per pilar.
+///
+/// Satu baris per pekan (kunci: Senin pekan itu). Bagian yang diisi pengguna
+/// hanya tiga kalimat bebas: apa yang membaik, apa yang perlu perhatian, dan
+/// fokus pekan depan. Angka pendukungnya dihitung dari data, bukan disimpan di
+/// sini, supaya tidak ada angka basi.
+class TinjauanMingguan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  /// Senin awal pekan (jam 00:00) — penanda unik satu pekan.
+  DateTimeColumn get pekanMulai => dateTime()();
+  TextColumn get membaik => text().nullable()();
+  TextColumn get perluPerhatian => text().nullable()();
+  TextColumn get fokusPekanDepan => text().nullable()();
+  BoolColumn get selesai => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-145 — arsip laporan bulanan (signature).
+///
+/// Teks ringkas disimpan supaya laporan yang sudah dibuat bisa dibaca ulang
+/// atau dibagikan tanpa menghitung ulang; angka kunci disimpan sebagai JSON
+/// supaya bisa dibandingkan antar bulan ("apa yang membaik / berubah").
+class ArsipLaporanBulanan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  /// 'YYYY-MM'.
+  TextColumn get bulan => text()();
+  TextColumn get ringkasTeks => text()();
+  TextColumn get angkaJson => text().withDefault(const Constant('{}'))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}

@@ -19,6 +19,7 @@ import 'jejak.dart';
 import 'layanan_notifikasi_lokal.dart';
 import 'penyinkron_pengingat.dart';
 import 'sumber_pengingat_tambahan.dart';
+import '../../features/ritme/pengingat_tinjauan_pekan.dart';
 
 /// Nama unik pekerjaan berkala.
 const String tugasSinkronPengingat = 'plo.pengingat.sinkron';
@@ -45,6 +46,8 @@ void daftarkanSumberPengingatLatar() {
   RegistriSumberPengingat.daftarkan(SumberPengingatJanji());
   // FR-125: jadwal perawatan aset (servis berkala, ganti oli, dsb).
   RegistriSumberPengingat.daftarkan(SumberPengingatPerawatan());
+  // FR-144: tinjauan pekan (Minggu malam, dilewati bila sudah diisi).
+  RegistriSumberPengingat.daftarkan(SumberPengingatTinjauanPekan());
 }
 
 /// Titik pendaftaran sumber pengingat **untuk isolate utama** (aplikasi).
@@ -61,6 +64,8 @@ void daftarkanSumberPengingatUtama() {
   RegistriSumberPengingat.daftarkan(SumberPengingatJanji());
   // FR-125: jadwal perawatan aset (servis berkala, ganti oli, dsb).
   RegistriSumberPengingat.daftarkan(SumberPengingatPerawatan());
+  // FR-144: tinjauan pekan (Minggu malam, dilewati bila sudah diisi).
+  RegistriSumberPengingat.daftarkan(SumberPengingatTinjauanPekan());
 }
 
 /// Titik masuk pekerja latar (wajib anotasi agar tidak dibuang saat build rilis).

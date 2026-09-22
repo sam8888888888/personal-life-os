@@ -1216,7 +1216,8 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Kalender Keluarga',
     modul: '9 · Keluarga',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: kalender keluarga — satu tampilan agenda semua anggota (tagihan, tugas, janji kesehatan, jadwal perawatan, ulang tahun) dengan WARNA BERBEDA per anggota; saringan per anggota; warna ditetapkan dari urutan anggota sehingga tidak pernah sama.',
     rincian: 'Kalender Keluarga — agenda bersama, ulang tahun, anniversary, kegiatan sekolah anak dalam satu tampilan',
   ),
   ButirFitur(
@@ -1285,7 +1286,8 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Life Timeline (signature)',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: lini masa hidup (signature) — kejadian dari 14 sumber data tersusun per bulan, dapat dicari & disaring per modul, tiap baris menyebut asal datanya (mis. tugas#12), plus rangkuman \'apa yang terjadi bulan ini\'.',
     rincian: 'Life Timeline (signature) — seluruh kejadian hidup tersusun per hari/bulan/tahun, dapat dicari & disaring per modul',
   ),
   ButirFitur(
@@ -1293,7 +1295,8 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Personal Analytics',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: analitik pribadi lintas modul untuk 7/30/90 hari & 1 tahun; SETIAP angka menampilkan baris sumber (tabel & rentangnya) sehingga tidak ada angka misterius.',
     rincian: 'Personal Analytics — ringkasan lintas modul untuk 7/30/90 hari dan 1 tahun',
   ),
   ButirFitur(
@@ -1317,7 +1320,8 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Weekly Life Review',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: tinjauan pekan per 6 pilar (uang, kesehatan, tujuan & tugas, pengetahuan, ibadah, rumah & aset) membandingkan pekan ini vs pekan lalu dengan angka pendukung; tiga kolom isian tersimpan; teks ringkas bisa disalin untuk notifikasi; pengingat Minggu malam otomatis DILEWATI bila pekan itu sudah diisi.',
     rincian: 'Weekly Life Review — rekap mingguan per pilar: apa yang membaik, apa yang perlu perhatian, fokus minggu depan',
   ),
   ButirFitur(
@@ -1325,7 +1329,8 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Monthly Life Report (signature)',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: laporan bulanan (signature) — keuangan, tagihan, tujuan, tugas, langganan, kekayaan bersih + \'membaik / berubah / perlu perhatian\'; bisa diarsipkan (angka kunci tersimpan sebagai JSON untuk pembanding bulan berikutnya) dan dibagikan sebagai PDF.',
     rincian: 'Monthly Life Report (signature) — laporan bulanan: keuangan, tagihan, tujuan, tugas, langganan, kekayaan bersih + "apa yang membaik / berubah / perlu perhatian"',
   ),
   ButirFitur(

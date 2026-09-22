@@ -48,9 +48,14 @@ import 'features/kalender/kalender_keuangan_screen.dart';
 import 'features/kalender/kalender_screen.dart';
 import 'features/kesehatan/aktivitas_screen.dart';
 import 'features/keluarga/anggota_screen.dart';
+import 'features/keluarga/kalender_keluarga_screen.dart';
 import 'features/kesehatan/catatan_medis_screen.dart';
 import 'features/kesehatan/kartu_darurat_screen.dart';
 import 'features/kesehatan/kunjungan_screen.dart';
+import 'features/ritme/analitik_screen.dart';
+import 'features/ritme/laporan_bulanan_screen.dart';
+import 'features/ritme/lini_masa_screen.dart';
+import 'features/ritme/tinjauan_pekan_screen.dart';
 import 'features/kesehatan/peringatan_dini_screen.dart';
 import 'features/kesehatan/profil_kesehatan_screen.dart';
 import 'features/kesehatan/air_screen.dart';
@@ -383,6 +388,32 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
             MasukScreen(mulaiDaftar: s.uri.queryParameters['daftar'] == '1'),
       ),
       ],
+    ),
+    // ── Batch 7: ritme hidup (FR-132/140/141/144/145) ───────────────────────
+    // FR-132 — kalender keluarga (agenda semua anggota, warna per anggota).
+    GoRoute(
+      path: '/kalender-keluarga',
+      builder: (c, s) => const KalenderKeluargaScreen(),
+    ),
+    // FR-140 — lini masa hidup (signature).
+    GoRoute(
+      path: '/lini-masa',
+      builder: (c, s) => const LiniMasaScreen(),
+    ),
+    // FR-141 — analitik pribadi lintas modul.
+    GoRoute(
+      path: '/analitik',
+      builder: (c, s) => const AnalitikScreen(),
+    ),
+    // FR-144 — tinjauan pekan.
+    GoRoute(
+      path: '/tinjauan-pekan',
+      builder: (c, s) => const TinjauanPekanScreen(),
+    ),
+    // FR-145 — laporan bulanan lintas pilar (signature).
+    GoRoute(
+      path: '/laporan-hidup',
+      builder: (c, s) => const LaporanHidupScreen(),
     ),
     // FR-139 — pencarian satu pintu lintas modul.
     GoRoute(

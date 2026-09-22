@@ -139,7 +139,10 @@ void main() {
 
   /// Gulir daftar ke bawah sampai target terlihat (ListView hanya membangun
   /// baris yang terlihat).
-  Future<void> gulirKe(WidgetTester t, Finder target, {int maks = 8}) async {
+  // Langkah 24 (bukan 8): daftar di tab Lainnya bertambah panjang setiap
+  // modul baru masuk (batch 5, 6, 7). Uji tetap menuntut hal yang sama —
+  // hanya jangkauan gulirnya yang disesuaikan dengan isi layar.
+  Future<void> gulirKe(WidgetTester t, Finder target, {int maks = 24}) async {
     for (var i = 0; i < maks; i++) {
       if (target.evaluate().isNotEmpty) break;
       await t.drag(find.byType(Scrollable).first, const Offset(0, -220));
@@ -305,10 +308,15 @@ void main() {
       expect(find.text('Ringkasan pagi'), findsOneWidget);
       expect(find.text('Pengingat & Izin'), findsOneWidget);
       expect(find.text('Pengaturan'), findsOneWidget);
-      await gulirKe(t, find.textContaining('versi 0.6.0'));
-      expect(find.textContaining('versi 0.6.0'), findsOneWidget);
+      // Pintu modul di TENGAH daftar diperiksa lebih dulu, baru menggulir ke
+      // teks versi di paling bawah: daftar ini dibangun malas, jadi isi yang
+      // sudah terlewat tidak ada lagi di pohon widget. Ekspektasinya tetap
+      // sama — keduanya wajib ada, hanya urutannya mengikuti posisi gulir.
+      await gulirKe(t, find.byKey(const Key('buka_cari')));
       expect(find.byKey(const Key('buka_cari')), findsOneWidget);
       expect(find.byKey(const Key('buka_kesehatan')), findsOneWidget);
+      await gulirKe(t, find.textContaining('versi 0.6.0'));
+      expect(find.textContaining('versi 0.6.0'), findsOneWidget);
       await tutup(t);
     });
 

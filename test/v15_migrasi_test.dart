@@ -130,7 +130,7 @@ void main() {
     //    pilar kehidupan, v5 visi & area hidup + tujuan.area_id, v6-v8 tabel
     //    kesehatan/dokumen/sinkron, v9 delapan tabel modul Pengetahuan).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 13);
+    expect(versi.data.values.first, 14);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();
