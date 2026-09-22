@@ -83,13 +83,15 @@ part 'database.g.dart';
   SinkronTautanBelum,
   // Skema v11 — lampiran foto & rekaman suara (FR-118).
   Lampiran,
+  // Skema v12 — Home & Asset OS (FR-124/125/126/127), Aaron 22 Sep 2026.
+  RiwayatPerawatanAset,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_buka());
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -211,6 +213,11 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v11 (FR-118): lampiran foto & rekaman suara pada catatan.
             if (!await _tabelAda('lampiran')) await m.createTable(lampiran);
             debugPrint('migrasi v11 selesai (tabel lampiran dibuat)');
+          }
+          if (dari < 12) {
+            // v12 (FR-124…FR-127): aset fisik + perawatan aset.
+            await _buatTabelV12(m);
+            debugPrint('migrasi v12 selesai (aset fisik & riwayat perawatan)');
           }
         },
       );
@@ -428,6 +435,41 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
       final kolomUid = masuk.value.$columns
           .firstWhere((k) => k.$name == 'uid');
       await m.addColumn(masuk.value, kolomUid);
+    }
+  }
+
+  /// Skema v12 (FR-124…FR-127): aset fisik + riwayat perawatan berbiaya.
+  ///
+  /// Aman dijalankan ulang: tabel lewat `_tabelAda`, kolom lewat `_kolomAda`
+  /// (PRAGMA). Sebagian basis data lama dibuat dari definisi tabel terbaru,
+  /// jadi tanpa pemeriksaan itu `addColumn` bisa meledak `duplicate column
+  /// name` dan update aplikasi di HP gagal.
+  Future<void> _buatTabelV12(Migrator m) async {
+    if (!await _tabelAda('riwayat_perawatan_aset')) {
+      await m.createTable(riwayatPerawatanAset);
+    }
+    final Map<String, TableInfo<Table, dynamic>> tabelSasaran = {
+      'aset': aset,
+      'perawatan': perawatan,
+    };
+    const Map<String, List<String>> kolomPerlu = {
+      'aset': [
+        'nomor_seri',
+        'tanggal_beli',
+        'harga_beli_sen',
+        'garansi_sampai',
+        'masa_pakai_bulan',
+        'lokasi',
+      ],
+      'perawatan': ['aset_id'],
+    };
+    for (final masuk in tabelSasaran.entries) {
+      for (final namaKolom in kolomPerlu[masuk.key] ?? const <String>[]) {
+        if (await _kolomAda(masuk.key, namaKolom)) continue;
+        final kolom = masuk.value.$columns
+            .firstWhere((k) => k.$name == namaKolom);
+        await m.addColumn(masuk.value, kolom);
+      }
     }
   }
 

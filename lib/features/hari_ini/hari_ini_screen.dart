@@ -13,12 +13,13 @@ import '../../core/audit/audit_log.dart';
 import '../../core/hari_ini/hari_berat.dart';
 import '../../core/hari_ini/model_hari_ini.dart';
 import '../../core/hari_ini/penyusun_hari_ini.dart';
+import '../../data/database/database.dart';
+import '../rumah/rumah_providers.dart';
 import '../../core/ibadah/kalender_hijriah.dart';
 import '../../core/notifikasi/perencana_pengingat.dart';
 import '../../core/notifikasi/tunda_pengingat.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
-import '../../data/database/database.dart';
 import '../../data/repository/notifikasi_riwayat_repository.dart';
 import 'kartu_hari_berat.dart';
 import 'kartu_pilar.dart';
@@ -149,12 +150,33 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
     );
     final tinjauanAktif = ref.watch(tinjauanMalamAktifProvider).value ?? true;
 
+    // FR-126 & FR-125: garansi aset yang hampir berakhir + perawatan yang
+    // mendekat, keduanya muncul sebagai Perhatian (maks 5 butir).
+    final garansiAset = ref.watch(garansiDekatProvider).value ?? const <AsetData>[];
+    final perawatanDekat =
+        ref.watch(perawatanDekatProvider).value ?? const <PerawatanData>[];
+
     final data = DataHariIni(
       sekarang: _sekarang,
       tagihan: tagihan,
       jumlahSholatTercatat: _jumlahSholat,
       statusIzinPengingat: izin == null ? null : (izin.siap ? 'diizinkan' : 'belum'),
       namaPanggilan: widget.namaPanggilan,
+      garansiAset: [
+        for (final a in garansiAset)
+          if (a.garansiSampai != null)
+            RingkasGaransiAset(
+                asetId: a.id, nama: a.nama, sampai: a.garansiSampai!),
+      ],
+      perawatanAset: [
+        for (final w in perawatanDekat)
+          RingkasPerawatanAset(
+            perawatanId: w.id,
+            nama: w.nama,
+            berikutnya: w.berikutnya,
+            asetId: w.asetId,
+          ),
+      ],
     );
     final ringkas = susunHariIni(data);
     final hijri = hijriahDariMasehi(_sekarang);

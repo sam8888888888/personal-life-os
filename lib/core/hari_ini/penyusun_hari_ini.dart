@@ -128,6 +128,8 @@ class DataHariIni {
     this.cuaca,
     this.sumberCuaca = '',
     this.daring = true,
+    this.garansiAset = const [],
+    this.perawatanAset = const [],
   });
 
   final DateTime sekarang;
@@ -143,6 +145,12 @@ class DataHariIni {
   final String? cuaca;
   final String sumberCuaca;
   final bool daring;
+
+  /// Garansi aset yang berakhir ≤ 30 hari (FR-126).
+  final List<RingkasGaransiAset> garansiAset;
+
+  /// Jadwal perawatan aset yang jatuh tempo ≤ 14 hari (FR-125).
+  final List<RingkasPerawatanAset> perawatanAset;
 
   /// Salinan dengan data yang berubah (dipakai layar saat data baru datang).
   DataHariIni salinDengan({
@@ -160,6 +168,8 @@ class DataHariIni {
         cuaca: cuaca,
         sumberCuaca: sumberCuaca,
         daring: daring ?? this.daring,
+        garansiAset: garansiAset,
+        perawatanAset: perawatanAset,
       );
 }
 
@@ -373,6 +383,35 @@ List<ButirPerhatian> susunPerhatian(DataHariIni data) {
     ));
   }
 
+  for (final g in data.garansiAset) {
+    final sisa = sisaHariKe(data.sekarang, g.sampai);
+    butir.add(ButirPerhatian(
+      id: 'garansi-${g.asetId}',
+      jenis: JenisPerhatian.garansiAset,
+      judul: 'Garansi hampir berakhir',
+      // Alasan wajib membawa data nyata (§5.1).
+      alasan: '${g.nama} · garansi sampai ${fmtTanggalAman2(g.sampai)}'
+          '${sisa < 0 ? ' (sudah lewat ${-sisa} hari)' : ' · $sisa hari lagi'}',
+      labelTombol: 'Buka aset',
+      rute: '/rumah/aset/${g.asetId}',
+      tingkat: sisa < 0 ? TingkatPrioritas.merah : TingkatPrioritas.kuning,
+    ));
+  }
+
+  for (final w in data.perawatanAset) {
+    final sisa = sisaHariKe(data.sekarang, w.berikutnya);
+    butir.add(ButirPerhatian(
+      id: 'perawatan-${w.perawatanId}',
+      jenis: JenisPerhatian.perawatanAset,
+      judul: 'Perawatan mendekat',
+      alasan: '${w.nama} · jadwal ${fmtTanggalAman2(w.berikutnya)}'
+          '${sisa < 0 ? ' (lewat ${-sisa} hari)' : ' · $sisa hari lagi'}',
+      labelTombol: w.asetId == null ? 'Buka Aksi' : 'Buka aset',
+      rute: w.asetId == null ? '/aksi/perawatan' : '/rumah/aset/${w.asetId}',
+      tingkat: sisa < 0 ? TingkatPrioritas.oranye : TingkatPrioritas.kuning,
+    ));
+  }
+
   butir.sort((a, b) {
     final p = a.jenis.prioritas.compareTo(b.jenis.prioritas);
     if (p != 0) return p;
@@ -391,4 +430,16 @@ RingkasanHariIni susunHariIni(DataHariIni data) {
     perhatian: susunPerhatian(data),
     pilar: Pilar.values.map((p) => angkaPilar(p, data)).toList(),
   );
+}
+
+/// Format tanggal tanpa data locale (dipakai alasan Perhatian).
+///
+/// Tidak memakai `DateFormat` ber-locale: layar Today bisa dibangun sebelum
+/// `initializeDateFormatting` jalan.
+String fmtTanggalAman2(DateTime d) {
+  const bulan = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+    'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
+  ];
+  return '${d.day} ${bulan[d.month - 1]} ${d.year}';
 }

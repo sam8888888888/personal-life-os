@@ -115,7 +115,14 @@ class NilaiPilar {
 }
 
 /// Jenis butir Perhatian (FR-62). Nomor mengikuti urutan prioritas (§5.1).
-enum JenisPerhatian { tagihanTerlambat, hambatanSistem, tenggatDekat, dokumenKedaluwarsa }
+enum JenisPerhatian {
+  tagihanTerlambat,
+  hambatanSistem,
+  tenggatDekat,
+  dokumenKedaluwarsa,
+  garansiAset,
+  perawatanAset,
+}
 
 extension InfoPerhatian on JenisPerhatian {
   int get prioritas => switch (this) {
@@ -123,6 +130,8 @@ extension InfoPerhatian on JenisPerhatian {
         JenisPerhatian.hambatanSistem => 1,
         JenisPerhatian.tenggatDekat => 2,
         JenisPerhatian.dokumenKedaluwarsa => 3,
+        JenisPerhatian.garansiAset => 4,
+        JenisPerhatian.perawatanAset => 5,
       };
 }
 
@@ -202,4 +211,32 @@ class IsiBriefing {
   final String? cuaca;
   final String sumberCuaca;
   final bool daring;
+}
+
+/// Ringkas garansi aset untuk Perhatian (FR-126).
+class RingkasGaransiAset {
+  const RingkasGaransiAset({
+    required this.asetId,
+    required this.nama,
+    required this.sampai,
+  });
+
+  final int asetId;
+  final String nama;
+  final DateTime sampai;
+}
+
+/// Ringkas jadwal perawatan untuk Perhatian (FR-125).
+class RingkasPerawatanAset {
+  const RingkasPerawatanAset({
+    required this.perawatanId,
+    required this.nama,
+    required this.berikutnya,
+    this.asetId,
+  });
+
+  final int perawatanId;
+  final String nama;
+  final DateTime berikutnya;
+  final int? asetId;
 }

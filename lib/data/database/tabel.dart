@@ -263,6 +263,22 @@ class Aset extends Table {
   /// true = disembunyikan; riwayat nilai tetap ada. Dipakai sebagai ganti
   /// hapus selama riwayat masih ada (keputusan rancangan §4.6).
   BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+
+  // --- Aset fisik (FR-124/126/127, skema v12) ---------------------------
+  // Semua nullable: aset keuangan lama (kas/bank/investasi) tidak punya
+  // kolom ini dan tidak dipaksa mengisinya.
+  /// Nomor seri / nomor rangka / nomor polisi. Dipakai saat klaim garansi.
+  TextColumn get nomorSeri => text().nullable()();
+  /// Tanggal beli — dasar hitungan umur pakai (FR-127).
+  DateTimeColumn get tanggalBeli => dateTime().nullable()();
+  /// Harga beli (sen). Dipakai sebagai nilai aset bila belum ada nilai bulanan.
+  IntColumn get hargaBeliSen => integer().nullable()();
+  /// Tanggal garansi berakhir (FR-126).
+  DateTimeColumn get garansiSampai => dateTime().nullable()();
+  /// Perkiraan masa pakai dalam bulan (FR-127).
+  IntColumn get masaPakaiBulan => integer().nullable()();
+  /// Lokasi/penempatan aset, mis. "Rumah Surabaya".
+  TextColumn get lokasi => text().nullable()();
   TextColumn get catatan => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
@@ -565,6 +581,9 @@ class Perawatan extends Table {
   DateTimeColumn get berikutnya => dateTime()();
   /// Kode template bawaan (mis. `oli_mobil`); null = dibuat pengguna sendiri.
   TextColumn get templateKode => text().nullable()();
+  /// Aset yang dirawat (FR-125). null = perawatan lepas (tidak terikat aset).
+  IntColumn get asetId => integer().nullable()();
+
   /// Lead days notifikasi, teks "7,1".
   TextColumn get leadHari => text().withDefault(const Constant('7,1'))();
   IntColumn get urutan => integer().withDefault(const Constant(0))();
@@ -1233,4 +1252,28 @@ class Lampiran extends Table {
   TextColumn get keterangan => text().withDefault(const Constant(''))();
   IntColumn get ukuranByte => integer().withDefault(const Constant(0))();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+
+/// Riwayat perawatan/perbaikan aset — FR-125.
+///
+/// Dipisah dari [Perawatan] (yang menyimpan JADWAL) karena riwayat bisa
+/// banyak baris per aset dan menyimpan biaya. `transaksiId` opsional mengaitkan
+/// biaya ke pengeluaran yang sudah dicatat, jadi laporan tidak menghitung biaya
+/// dua kali; biaya yang belum dikaitkan tetap dijumlahkan terpisah.
+class RiwayatPerawatanAset extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150).
+  TextColumn get uid => text().nullable()();
+  IntColumn get asetId => integer()();
+  /// Uraian pekerjaan, mis. "ganti oli + filter udara".
+  TextColumn get uraian => text().withLength(min: 1, max: 200)();
+  DateTimeColumn get tanggal => dateTime()();
+  /// Biaya (sen). 0 = belum diisi.
+  IntColumn get biayaSen => integer().withDefault(const Constant(0))();
+  /// Transaksi pengeluaran terkait (opsional) — FR-125.
+  IntColumn get transaksiId => integer().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }

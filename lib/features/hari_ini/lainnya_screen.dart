@@ -118,6 +118,16 @@ class LainnyaScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_aset'),
+                  leading: const Icon(Icons.home_work_outlined),
+                  title: const Text('Aset & Rumah'),
+                  subtitle: const Text(
+                      'Rumah, kendaraan, perangkat: beli, garansi, perawatan'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/rumah/aset'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_notifikasi'),
                   leading: const Icon(Icons.notifications_active_outlined),
                   title: const Text('Pusat notifikasi'),

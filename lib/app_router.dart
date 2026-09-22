@@ -39,6 +39,9 @@ import 'features/akun/akun_screen.dart';
 import 'features/peta_fitur/peta_fitur_screen.dart';
 import 'features/akun/masuk_screen.dart';
 import 'features/cari/pencarian_screen.dart';
+import 'features/rumah/aset_detail_screen.dart';
+import 'features/rumah/aset_fisik_screen.dart';
+import 'features/rumah/form_aset_fisik_screen.dart';
 import 'features/dokumen/dokumen_form_screen.dart';
 import 'features/dokumen/dokumen_screen.dart';
 import 'features/kalender/kalender_keuangan_screen.dart';
@@ -176,6 +179,24 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       builder: (c, s) => const PusatNotifikasiScreen(),
     ),
     // Batch 2 V2: dokumen (FR-128/129) dan uang lanjutan (FR-74/75).
+    // Home & Asset OS (FR-124…FR-127).
+    GoRoute(
+      path: '/rumah/aset',
+      builder: (c, s) => const RumahAsetScreen(),
+      routes: [
+        GoRoute(
+          path: 'form',
+          builder: (c, s) => FormAsetFisikScreen(
+            id: int.tryParse(s.uri.queryParameters['id'] ?? ''),
+          ),
+        ),
+        GoRoute(
+          path: ':id',
+          builder: (c, s) =>
+              AsetDetailScreen(id: int.parse(s.pathParameters['id']!)),
+        ),
+      ],
+    ),
     GoRoute(
       path: '/dokumen',
       builder: (c, s) => const DokumenScreen(),

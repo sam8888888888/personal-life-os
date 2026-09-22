@@ -401,7 +401,11 @@ class AsetRepository {
           ..orderBy([(n) => OrderingTerm.desc(n.bulan)])
           ..limit(1))
         .getSingleOrNull();
-    return baris?.nilaiSen ?? a.nilaiAwalSen;
+    // FR-124: aset fisik (rumah/kendaraan/perangkat) sering belum punya nilai
+    // bulanan. Harga beli dipakai sebagai nilai supaya aset fisik masuk
+    // Kekayaan Bersih (FR-76) tanpa input ulang. Nilai bulanan tetap menang.
+    final nilaiAwal = a.nilaiAwalSen != 0 ? a.nilaiAwalSen : (a.hargaBeliSen ?? 0);
+    return baris?.nilaiSen ?? nilaiAwal;
   }
 
   Future<int> _nilaiKewajibanPada(KewajibanData k, String bulan) async {
