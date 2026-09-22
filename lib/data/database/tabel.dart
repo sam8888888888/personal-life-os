@@ -1625,3 +1625,73 @@ class DelegasiPengingat extends Table {
   TextColumn get teks => text().withDefault(const Constant(''))();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+
+/// FR-43 — rumah tangga (wadah tagihan bersama; anggota memakai tabel
+/// `anggota_keluarga` yang sudah ada, jadi orangnya satu sumber).
+class RumahTangga extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  TextColumn get kodeUndangan => text().nullable()();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-43 — tagihan bersama di dalam satu rumah tangga.
+class TagihanRumahBersama extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get rumahUid => text()();
+  TextColumn get judul => text().withLength(min: 1, max: 160)();
+  IntColumn get totalSen => integer().withDefault(const Constant(0))();
+  DateTimeColumn get jatuhTempo => dateTime()();
+  TextColumn get penanggung => text().withDefault(const Constant(''))();
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-43 — bagian satu anggota pada satu tagihan bersama + catatan bayarnya.
+class BagianTagihanRumah extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  TextColumn get tagihanUid => text()();
+  TextColumn get anggota => text().withLength(min: 1, max: 120)();
+  IntColumn get jumlahSen => integer().withDefault(const Constant(0))();
+  IntColumn get dibayarSen => integer().withDefault(const Constant(0))();
+  DateTimeColumn get waktuBayar => dateTime().nullable()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-56 — izin sub-akses keluarga per anggota × modul (bawaan: tidak aktif).
+class IzinSubAksesKeluarga extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  IntColumn get anggotaId => integer()();
+  TextColumn get modul => text()();
+  BoolColumn get bolehLihat => boolean().withDefault(const Constant(true))();
+  BoolColumn get bolehTambah => boolean().withDefault(const Constant(false))();
+  BoolColumn get aktif => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// FR-39/FR-59 — hasil pemindaian SMS bank (on-device, opt-in).
+class PemindaianBank extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  IntColumn get pesanId => integer().nullable()();
+  TextColumn get sumber => text()();
+  TextColumn get teks => text()();
+  DateTimeColumn get waktuPesan => dateTime()();
+  IntColumn get nominalSen => integer().nullable()();
+  TextColumn get jenis => text().withDefault(const Constant('tidak'))();
+  TextColumn get keterangan => text().nullable()();
+  IntColumn get saldoSen => integer().nullable()();
+  IntColumn get keyakinan => integer().withDefault(const Constant(0))();
+  TextColumn get status => text().withDefault(const Constant('baru'))();
+  TextColumn get tagihanUid => text().nullable()();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}

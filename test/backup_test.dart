@@ -279,8 +279,10 @@ void main() {
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 74,
-          reason: 'seluruh tabel Drift ikut ter-ekspor, termasuk 4 tabel batch 10 '
+      expect(tabel.length, 79,
+          reason: 'seluruh tabel Drift ikut ter-ekspor, termasuk 5 tabel batch 12 '
+              '(rumah_tangga, tagihan_rumah_bersama, bagian_tagihan_rumah, '
+              'izin_sub_akses_keluarga, pemindaian_bank) serta 4 tabel batch 10 '
               '(perjalanan, item_perjalanan, catatan_perjalanan, '
               'tanggung_jawab_rumah) dan 7 tabel batch 11 (dana_persiapan, '
               'setoran_dana, grup_patungan, anggota_patungan, belanja_patungan, '

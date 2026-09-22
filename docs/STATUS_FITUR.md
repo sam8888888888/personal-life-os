@@ -1,9 +1,9 @@
 # STATUS FITUR PRD v3.1 — 152 butir
 
-Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 11: FR-47, FR-48, FR-54, FR-55, FR-149 selesai).
+Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 12: FR-39, FR-43, FR-56, FR-57, FR-58 selesai).
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 144 · SEBAGIAN 0 · BELUM 8** (total 152 butir)
+**Hitungan: SELESAI 149 · SEBAGIAN 0 · BELUM 3** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -48,11 +48,11 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-36 | Skor Disiplin Tagihan lokal (0–100) + streak bebas denda + daftar capa | - | SELESAI | Ron 21 Sep: skor disiplin tagihan lokal 0–100 + rentetan & capaian, dengan penegasan bukan skor kredit. |
 | FR-37 | Rekap Tahunan ala "Wrapped": statistik tahunan + kartu berbagi gambar  | - | SELESAI | Ron 21 Sep: rekap tahunan (total, tepat waktu, bulan tersibuk) + kartu berbagi PNG. |
 | FR-38 | Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi kolom  | - | BELUM |  |
-| FR-39 | Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta | - | BELUM |  |
+| FR-39 | Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta | V2 | SELESAI | Ron 22 Sep: izin bawaan mati + dialog sistem; penguraian di perangkat; usulan saja (tagihan tidak pernah ditandai lunas sendiri). Rute /uang/pemindai-bank. |
 | FR-40 | Pembelajaran pola tanggal bayar dari riwayat; usul penyesuaian penging | - | SELESAI | Ron 21 Sep: pengingat pintar mengikuti pola bayar pengguna (layar Pola bayar). |
 | FR-41 | Ekspor tagihan mendatang ke Google Kalender; opsi impor .ics (F11) | - | SELESAI | Ron 21 Sep: ekspor jadwal tagihan ke .ics (Google Kalender), periode 3/6/12/24 bulan. |
 | FR-42 | Pusat Bayar: preferensi aplikasi bayar per tagihan, salin nomor VA/QRI | - | SELESAI | Ron 21 Sep: Pusat Bayar — VA/QRIS, salin nomor sekali tekan, catatan konfirmasi. |
-| FR-43 | Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, notifika | - | BELUM |  |
+| FR-43 | Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, notifika | V2 | SELESAI | Ron 22 Sep: kode undangan tanpa akun, tagihan bersama (bagi rata selalu pas), riwayat siapa bayar apa; pengingat disiapkan, tidak dikirim sendiri. Rute /rumah/mode-rumah-tangga. |
 | FR-44 | Multi-profil terpisah (pribadi/keluarga/usaha) | - | SELESAI | Ron 22 Sep: profil pribadi/keluarga/usaha masing-masing punya BERKAS basis data SENDIRI sehingga data tidak bercampur (dibuktikan uji dengan dua basis data terpisah); profil 'Pribadi' memakai berkas lama sehingga data pengguna yang sudah ada tidak hilang; profil aktif harus dipindah dulu sebelum dihapus; pindah profil = pindah berkas basis data. Uji: 7 kasus. |
 | FR-45 | Laporan bulanan PDF/Excel + tombol bagikan | - | SELESAI | Ron 21 Sep: tombol bagikan laporan bulanan (PDF & CSV) lewat kanal Android sendiri. |
 | FR-46 | Deteksi langganan duplikat & tagihan yang berhenti muncul (F16) | - | SELESAI | Ron 21 Sep: deteksi tagihan berulang yang berhenti muncul + bukti & matikan pengingatnya. |
@@ -65,9 +65,9 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-53 | Document Vault & Masa Berlaku: dokumen (STNK, pajak | - | SELESAI | Ron 21 Sep: brankas dokumen + masa berlaku (Dinda) dilengkapi tombol 'salin nomor' tanpa membuka berkas (Ron). |
 | FR-54 | Modul Kesehatan (opsional): pengingat obat/suplemen | V2 | SELESAI | Ron 22 Sep: memakai ULANG modul obat FR-106; pengingat opsional (izin wajib); slot yang sudah dicatat tidak diulang. Rute /kesehatan/obat/jadwal. |
 | FR-55 | v2 (Delegasi cepat WhatsApp) | V2 | SELESAI | Ron 22 Sep: menyiapkan teks + tautan WhatsApp/SMS, tidak mengirim sendiri; nomor divalidasi. Rute /tagihan/delegasi. |
-| FR-56 | Sub-Akses Keluarga (opsional sinkron): berbagi | - | BELUM |  |
-| FR-57 | F8 kandidat | - | BELUM |  |
-| FR-58 | F8 kandidat | - | BELUM |  |
+| FR-56 | Sub-Akses Keluarga (opsional sinkron): berbagi | F8 | SELESAI | Ron 22 Sep: izin per anggota × modul (bawaan MATI), penegakan di lapisan data; paket berbagi hanya izin + jumlah baris. Rute /keluarga/sub-akses. |
+| FR-57 | Perawatan berkala (memakai mesin FR-125) | F8 | SELESAI | Ron 22 Sep: sudah ada sejak FR-125 (intervalHari + berikutnya + leadHari, template bawaan, SumberPengingatPerawatan terdaftar); batch 12 memverifikasi & menguji — tanpa tabel/mesin kembar. Rute /aksi/perawatan. |
+| FR-58 | Voice & Parsing Cerdas | F8 | SELESAI | Ron 22 Sep: satu kalimat jadi draf (pengeluaran/tagihan/dana/perawatan); pengenalan suara bawaan Android, penguraian di perangkat, draf wajib dikonfirmasi. Rute /suara. |
 | FR-59 | F8 kandidat | - | BELUM |  |
 
 ## 1 · Today / Pusat Harian

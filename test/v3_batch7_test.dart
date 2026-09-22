@@ -818,7 +818,7 @@ void main() {
     test('schemaVersion 16 dan tabel batch 7 masih ada', () async {
       // Batch 10 menaikkan skema ke 16 (perjalanan FR-134, jurnal perjalanan
       // FR-135, kas rumah tangga FR-133); dua tabel batch 7 tetap harus ada.
-      expect(db.schemaVersion, 17);
+      expect(db.schemaVersion, 18);
       final tinjauan = await db.select(db.tinjauanMingguan).get();
       final arsip = await db.select(db.arsipLaporanBulanan).get();
       expect(tinjauan, isEmpty);

@@ -370,8 +370,15 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran tagihan & saldo; tanpa cloud; alur izin …',
+    status: StatusFitur.selesai,
+    rincian: 'Pemindai SMS/notifikasi bank on-device (opt-in): deteksi '
+        'pembayaran tagihan & saldo; tanpa cloud; alur izin berlapis',
+    catatan: 'Ron 22 Sep: izin MATI secara bawaan & diminta lewat dialog '
+        'sistem; penguraian berjalan di perangkat (kanal lifeos/sms); hasil '
+        'hanya USULAN — tagihan tidak pernah ditandai lunas sendiri. Yang '
+        'tidak dikenali disebut alasannya, bukan ditebak. Notifikasi aplikasi '
+        'bank (NotificationListener) belum dibuat — ada di FR-59.',
+    rute: '/uang/pemindai-bank',
   ),
   ButirFitur(
     id: 'FR-40',
@@ -408,8 +415,15 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, notifika',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, notifikasi ke semua anggota, riwayat "siapa baya…',
+    status: StatusFitur.selesai,
+    rincian: 'Mode Rumah Tangga: kode undangan tanpa akun, tagihan bersama, '
+        'notifikasi ke semua anggota, riwayat "siapa bayar apa"',
+    catatan: 'Ron 22 Sep: kode undangan 6 karakter dari daftar aman (tanpa '
+        'akun); anggota memakai daftar anggota keluarga yang sudah ada (tidak '
+        'ada tabel orang kedua); pembagian memakai bagi rata FR-47 sehingga '
+        'jumlah bagian SELALU pas dengan total; pengingat hanya DISIAPKAN '
+        '(disalin + tautan WhatsApp) — aplikasi tidak mengirim sendiri.',
+    rute: '/rumah/mode-rumah-tangga',
   ),
   ButirFitur(
     id: 'FR-44',
@@ -554,23 +568,43 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Sub-Akses Keluarga (opsional sinkron): berbagi',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
+    catatan: 'Ron 22 Sep: izin per anggota × modul; SEMUA modul mati secara '
+        'bawaan dan penegakannya ada di lapisan data (bolehLihat/bolehTambah), '
+        'bukan sekadar menyembunyikan menu. Paket berbagi hanya memuat daftar '
+        'izin + JUMLAH baris per modul — isi catatan pribadi tidak ikut, supaya '
+        'berkas yang salah kirim tidak membocorkan keuangan/kesehatan.',
+    rute: '/keluarga/sub-akses',
   ),
   ButirFitur(
     id: 'FR-57',
-    nama: 'F8 kandidat',
+    nama: 'Perawatan berkala (F8 kandidat)',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'F8 kandidat — engine sama dgn FR-03, biaya rendah',
+    fase: 'F8',
+    status: StatusFitur.selesai,
+    rincian: 'Perawatan berkala: jadwal berulang per aset/rumah + pengingat '
+        'H-7/H-1, memakai mesin perawatan FR-125 (engine sama dengan FR-03)',
+    catatan: 'Ron 22 Sep: sudah ada sejak FR-125 (tabel `perawatan` dengan '
+        'intervalHari/berikutnya/leadHari, template bawaan, layar, dan '
+        '`SumberPengingatPerawatan` yang terdaftar di isolate utama+latarbelakang). '
+        'Batch 12 MEMVERIFIKASI dan mengujinya — sengaja TIDAK membuat tabel '
+        'atau mesin perawatan kedua.',
+    rute: '/aksi/perawatan',
   ),
   ButirFitur(
     id: 'FR-58',
-    nama: 'F8 kandidat',
+    nama: 'Voice & Parsing Cerdas (F8 kandidat, bertahap)',
     modul: '0 · Dasar & Tagihan (V1)',
-    fase: '-',
-    status: StatusFitur.belum,
-    rincian: 'F8 kandidat — bertahap',
+    fase: 'F8',
+    status: StatusFitur.selesai,
+    rincian: 'Satu kalimat (diucapkan atau ditulis) jadi DRAF pengeluaran/'
+        'tagihan/dana/perawatan; pengguna memeriksa dulu sebelum disimpan',
+    catatan: 'Ron 22 Sep: pengenalan suara memakai fitur bawaan Android '
+        '(kanal lifeos/suara) — aplikasi hanya menerima teksnya, tidak '
+        'menyimpan rekaman; penguraian nominal/tanggal berjalan di perangkat '
+        'dan kalimat yang belum dikenali dijawab dengan saran, bukan ditebak. '
+        'Draf dana & perawatan diarahkan ke layarnya (tidak menebak isian).',
+    rute: '/suara',
   ),
   ButirFitur(
     id: 'FR-59',

@@ -489,4 +489,44 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomKunci: db.delegasiPengingat.id,
         kolomDiubah: db.delegasiPengingat.diubahPada,
       ),
+
+      // ── rumah tangga, sub-akses keluarga, pemindai bank (batch 12) ────────
+      // Induk lebih dulu; anak memakai `kaitan` ke induknya.
+      JalurSinkron(
+        nama: 'rumah_tangga',
+        tabel: db.rumahTangga,
+        kolomUid: db.rumahTangga.uid,
+        kolomKunci: db.rumahTangga.id,
+        kolomDiubah: db.rumahTangga.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'tagihan_rumah_bersama',
+        tabel: db.tagihanRumahBersama,
+        kolomUid: db.tagihanRumahBersama.uid,
+        kolomKunci: db.tagihanRumahBersama.id,
+        kolomDiubah: db.tagihanRumahBersama.diubahPada,
+        kaitan: {'rumah_uid': 'rumah_tangga'},
+      ),
+      JalurSinkron(
+        nama: 'bagian_tagihan_rumah',
+        tabel: db.bagianTagihanRumah,
+        kolomUid: db.bagianTagihanRumah.uid,
+        kolomKunci: db.bagianTagihanRumah.id,
+        kolomDiubah: db.bagianTagihanRumah.diubahPada,
+        kaitan: {'tagihan_uid': 'tagihan_rumah_bersama'},
+      ),
+      JalurSinkron(
+        nama: 'izin_sub_akses_keluarga',
+        tabel: db.izinSubAksesKeluarga,
+        kolomUid: db.izinSubAksesKeluarga.uid,
+        kolomKunci: db.izinSubAksesKeluarga.id,
+        kolomDiubah: db.izinSubAksesKeluarga.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'pemindaian_bank',
+        tabel: db.pemindaianBank,
+        kolomUid: db.pemindaianBank.uid,
+        kolomKunci: db.pemindaianBank.id,
+        kolomDiubah: db.pemindaianBank.diubahPada,
+      ),
     ];

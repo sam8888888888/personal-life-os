@@ -64,6 +64,10 @@ import 'features/kesehatan/jadwal_obat_screen.dart';
 import 'features/rumah/patungan_screen.dart';
 import 'features/tagihan/delegasi_screen.dart';
 import 'features/ritme/copilot_screen.dart';
+import 'features/rumah/rumah_tangga_screen.dart';
+import 'features/keluarga/sub_akses_screen.dart';
+import 'features/uang/pemindai_bank_screen.dart';
+import 'features/suara/suara_screen.dart';
 import 'features/perjalanan/perjalanan_screen.dart';
 import 'features/keluarga/tanggung_jawab_screen.dart';
 import 'core/utils/bahasa.dart';
@@ -501,6 +505,24 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/copilot',
       builder: (c, s) => const CopilotScreen(),
+    ),
+    // Batch 12 — FR-43 mode rumah tangga, FR-56 sub-akses keluarga,
+    // FR-39 pemindai bank, FR-58 ucapkan/tulis.
+    GoRoute(
+      path: '/rumah/mode-rumah-tangga',
+      builder: (c, s) => const RumahTanggaScreen(),
+    ),
+    GoRoute(
+      path: '/keluarga/sub-akses',
+      builder: (c, s) => const SubAksesScreen(),
+    ),
+    GoRoute(
+      path: '/uang/pemindai-bank',
+      builder: (c, s) => const PemindaiBankScreen(),
+    ),
+    GoRoute(
+      path: '/suara',
+      builder: (c, s) => const SuaraScreen(),
     ),
     // FR-145 — laporan bulanan lintas pilar (signature).
     GoRoute(

@@ -111,6 +111,13 @@ part 'database.g.dart';
   BelanjaPatungan,
   BagianPatungan,
   DelegasiPengingat,
+  // Skema v18 — rumah tangga (FR-43), sub-akses keluarga (FR-56),
+  // pemindaian bank (FR-39).
+  RumahTangga,
+  TagihanRumahBersama,
+  BagianTagihanRumah,
+  IzinSubAksesKeluarga,
+  PemindaianBank,
 ])
 class AppDatabase extends _$AppDatabase {
   /// [nama] = nama berkas basis data. FR-44 (multi-profil) memakai nama
@@ -120,7 +127,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -257,6 +264,13 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
             await _buatTabelV14(m);
             debugPrint('migrasi v14 selesai (tinjauan mingguan & arsip laporan)');
+          }
+          if (dari < 18) {
+            // v18 (FR-43/56/39): rumah tangga & tagihan bersama, izin
+            // sub-akses keluarga, hasil pemindaian SMS bank.
+            await _buatTabelV18(m);
+            debugPrint('migrasi v18 selesai (rumah tangga, sub-akses, '
+                'pemindai bank)');
           }
           if (dari < 17) {
             // v17 (FR-47/48/54/55): dana persiapan, setoran dana, jadwal obat,
@@ -607,6 +621,22 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   ///
   /// FR-54 tidak menambah tabel: pengingat obat memakai `obat`,
   /// `jadwal_obat`, `minum_obat` dari FR-106.
+  /// v18 (FR-43/56/39) — 5 tabel baru: rumah tangga & tagihan bersama,
+  /// bagian tagihan rumah, izin sub-akses keluarga, hasil pemindaian bank.
+  Future<void> _buatTabelV18(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> baru = {
+      'rumah_tangga': rumahTangga,
+      'tagihan_rumah_bersama': tagihanRumahBersama,
+      'bagian_tagihan_rumah': bagianTagihanRumah,
+      'izin_sub_akses_keluarga': izinSubAksesKeluarga,
+      'pemindaian_bank': pemindaianBank,
+    };
+    for (final masuk in baru.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
+  }
+
   Future<void> _buatTabelV17(Migrator m) async {
     final Map<String, TableInfo<Table, dynamic>> baru = {
       'dana_persiapan': danaPersiapan,

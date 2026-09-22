@@ -305,6 +305,38 @@ class LainnyaScreen extends ConsumerWidget {
                   onTap: () => context.push('/rumah-tangga'),
                 ),
                 ListTile(
+                  key: const Key('buka_mode_rumah_tangga'),
+                  leading: const Icon(Icons.home_work_outlined),
+                  title: const Text('Mode rumah tangga'),
+                  subtitle: const Text('Kode undangan tanpa akun, tagihan '
+                      'bersama, siapa bayar apa (FR-43)'),
+                  onTap: () => context.push('/rumah/mode-rumah-tangga'),
+                ),
+                ListTile(
+                  key: const Key('buka_sub_akses_keluarga'),
+                  leading: const Icon(Icons.vpn_key_outlined),
+                  title: const Text('Sub-akses keluarga'),
+                  subtitle: const Text('Pilih sendiri modul apa yang boleh '
+                      'dilihat anggota keluarga (FR-56)'),
+                  onTap: () => context.push('/keluarga/sub-akses'),
+                ),
+                ListTile(
+                  key: const Key('buka_pemindai_bank'),
+                  leading: const Icon(Icons.sms_outlined),
+                  title: const Text('Pemindai SMS bank'),
+                  subtitle: const Text('Deteksi pembayaran dari SMS bank di '
+                      'perangkat — opsional (FR-39)'),
+                  onTap: () => context.push('/uang/pemindai-bank'),
+                ),
+                ListTile(
+                  key: const Key('buka_suara'),
+                  leading: const Icon(Icons.mic_none_outlined),
+                  title: const Text('Ucapkan atau tulis'),
+                  subtitle: const Text('Satu kalimat jadi draf pengeluaran/'
+                      'tagihan (FR-58)'),
+                  onTap: () => context.push('/suara'),
+                ),
+                ListTile(
                   key: const Key('buka_dana_persiapan'),
                   leading: const Icon(Icons.savings_outlined),
                   title: const Text('Dana persiapan'),

@@ -55,14 +55,19 @@ void main() {
         'FR-98', 'FR-133', 'FR-134', 'FR-135', 'FR-152',
         // Batch 11: dana persiapan, pengingat obat, patungan, delegasi,
         // AI Copilot ber-konteks.
-        'FR-47', 'FR-48', 'FR-54', 'FR-55', 'FR-149']) {
+        'FR-47', 'FR-48', 'FR-54', 'FR-55', 'FR-149',
+        // Batch 12: mode rumah tangga, sub-akses keluarga, pemindai SMS bank,
+        // perawatan berkala (verifikasi), ucapkan-tulis.
+        'FR-39', 'FR-43', 'FR-56', 'FR-57', 'FR-58']) {
         expect(cari(id).status, StatusFitur.selesai, reason: '$id seharusnya Selesai');
       }
     });
 
     test('yang belum dikerjakan TIDAK diberi tanda Selesai', () {
       expect(cari('FR-38').status, StatusFitur.belum);   // impor tagihan dari foto (OCR)
-      expect(cari('FR-56').status, StatusFitur.belum);  // sub-akses keluarga
+      expect(cari('FR-50').status, StatusFitur.belum);   // perluas OCR (struk/nota)
+      expect(cari('FR-59').status, StatusFitur.belum);   // auto-catat dari notifikasi
+      expect(cari('FR-56').status, StatusFitur.selesai); // Batch 12
       expect(cari('FR-26').status, StatusFitur.selesai);  // kunci aplikasi (Batch 8)
     });
 

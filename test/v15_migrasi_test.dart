@@ -133,7 +133,7 @@ void main() {
     //    rencana haji/umrah (FR-97), v16 perjalanan & kas rumah tangga
     //    (FR-133/134/135)).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 17);
+    expect(versi.data.values.first, 18);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();
