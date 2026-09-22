@@ -1,6 +1,6 @@
 # STATUS FITUR PRD v3.1 — 152 butir
 
-Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 8: FR-22, FR-26, FR-31, FR-44, FR-151 selesai).
+Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 9: FR-84, FR-97, FR-142, FR-143, FR-146 selesai).
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
 **Hitungan: SELESAI 134 · SEBAGIAN 0 · BELUM 18** (total 152 butir)
