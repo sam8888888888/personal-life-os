@@ -199,6 +199,15 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
                       ),
                       const Divider(height: 1),
                       _pintu(
+                        kunci: 'buka_energi',
+                        ikon: Icons.bolt_outlined,
+                        judul: 'Energi & jam produktif',
+                        keterangan: 'Energi & fokus 1–5 harian, plus jam '
+                            'produktif pribadi setelah 14 hari (FR-84)',
+                        tujuan: '/kesehatan/energi',
+                      ),
+                      const Divider(height: 1),
+                      _pintu(
                         kunci: 'buka_ukuran_tubuh',
                         ikon: Icons.monitor_weight_outlined,
                         judul: 'Berat & ukuran tubuh',

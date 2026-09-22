@@ -772,8 +772,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Sleep & Energy OS',
     modul: '3 · Aksi & Tujuan',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Sleep & Energy OS — catat tidur, jam bangun, tingkat energi/fokus (1–5) + temuan pola waktu produktif',
+    catatan: 'Ron 22 Sep: \'Energi & jam produktif\' menempel pada catatan tidur yang sudah ada (energi 1-5, fokus 1-5, jam paling produktif diisi pengguna — bukan tebakan mesin); setelah 14 hari muncul pola (rata energi/fokus, jam produktif tersering) beserta dasar datanya; sebelum itu layar menjelaskan kenapa belum bisa. Uji: mesin + layar.',
+    rute: '/kesehatan/energi',
+
   ),
   ButirFitur(
     id: 'FR-85',
@@ -890,8 +893,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Rencana Haji & Umrah',
     modul: '4 · Ibadah (Islamic OS)',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Rencana Haji & Umrah — target dana (terhubung Goal & Finance), daftar persiapan dokumen',
+    catatan: 'Ron 22 Sep: \'Rencana haji & umrah\' menyimpan target dana + daftar persiapan dokumen; progres menampilkan persen tercapai, sisa, dan setoran per bulan sampai tanggal target, lengkap dengan peringatan bila target belum diisi / tanggal sudah lewat / setoran tidak realistis. Tabel baru rencana_ibadah & persiapan_ibadah ikut mesin sinkron FR-150. Uji: mesin + repositori + layar.',
+    rute: '/ibadah/rencana',
+
   ),
   ButirFitur(
     id: 'FR-98',
@@ -1316,16 +1322,22 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Smart Insights',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V3',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Smart Insights — temuan lintas modul: pengeluaran menyimpang, langganan jarang dipakai, titik saldo terendah, sebaran jatuh tempo ("73% tagihan jatuh pada minggu terakhir")',
+    catatan: 'Ron 22 Sep: \'Temuan pintar\' menyusun temuan dari data nyata (pengeluaran bulanan, sebaran jatuh tempo, langganan jarang dipakai, titik saldo terendah); SETIAP temuan menuliskan dasar data + periode yang dipakai, dan temuan hanya muncul bila datanya cukup — sisanya masuk daftar \'belum bisa\' beserta alasannya. Bila belum ada pergerakan uang sama sekali, temuan saldo tidak dibuat (tidak menyesatkan). Uji: mesin + layar.',
+    rute: '/temuan-pintar',
+
   ),
   ButirFitur(
     id: 'FR-143',
     nama: 'Forecast',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V4',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Forecast — proyeksi saldo beberapa bulan, perkiraan keterlambatan proyek, tabrakan tenggat',
+    catatan: 'Ron 22 Sep: \'Ramalan saldo\' memakai asumsi yang ditulis terbuka (laba bulanan rata-rata, simpangan harian aktual, tagihan tetap & langganan) dan menampilkan RENTANG tiga angka tiap bulan (pesimis/tengah/optimis) — bukan satu angka mutlak, sesuai PRD; bulan yang bisa minus ditandai + saran menggeser apa. Uji: mesin + layar.',
+    rute: '/ramalan-saldo',
+
   ),
   ButirFitur(
     id: 'FR-144',
@@ -1350,8 +1362,11 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     nama: 'Annual Life Review',
     modul: '11 · Platform & Kecerdasan',
     fase: 'V4',
-    status: StatusFitur.belum,
+    status: StatusFitur.selesai,
     rincian: 'Annual Life Review — "Your Year in Life": capaian, kebiasaan, keuangan, kesehatan, ibadah',
+    catatan: 'Ron 22 Sep: \'Tinjauan tahun\' merangkum tahun berjalan per pilar (uang, kesehatan, ibadah, hubungan, pengetahuan) dari data nyata; hanya tampil bila data mencakup minimal 6 bulan — kalau kurang, layar menyebut berapa bulan data yang ada dan tidak mengarang hasil. Uji: mesin + layar.',
+    rute: '/tinjauan-tahun',
+
   ),
   ButirFitur(
     id: 'FR-147',

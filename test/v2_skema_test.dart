@@ -84,8 +84,9 @@ void main() {
     test('versi skema terkini & seluruh tabel pilar dibuat', () async {
       // Skema 5 = rantai rencana (FR-82); 6 = sinkron antar HP (kolom
       // tagihan.uid + sinkron_kotor); 7 = lima tabel kesehatan/ibadah/kas;
-      // 8 = kolom sisa obat (FR-107).
-      expect(db.schemaVersion, 14);
+      // 8 = kolom sisa obat (FR-107); 15 = energi/fokus/jam produktif pada
+      // `tidur` (FR-84) + rencana haji/umrah (FR-97).
+      expect(db.schemaVersion, 15);
       final tabel = await _namaTabel(db);
       for (final nama in _tabelV2) {
         expect(tabel.contains(nama), isTrue, reason: 'tabel $nama belum dibuat');

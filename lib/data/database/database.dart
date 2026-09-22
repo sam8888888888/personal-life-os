@@ -92,6 +92,10 @@ part 'database.g.dart';
   CatatanMedis,
   TinjauanMingguan,
   ArsipLaporanBulanan,
+  // Skema v15 — energi harian (FR-84, kolom pada `tidur`) & rencana
+  // haji/umrah (FR-97), ditambahkan Aaron 22 Sep 2026.
+  RencanaIbadah,
+  PersiapanIbadah,
 ])
 class AppDatabase extends _$AppDatabase {
   /// [nama] = nama berkas basis data. FR-44 (multi-profil) memakai nama
@@ -101,7 +105,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -238,6 +242,11 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
             await _buatTabelV14(m);
             debugPrint('migrasi v14 selesai (tinjauan mingguan & arsip laporan)');
+          }
+          if (dari < 15) {
+            // v15 (FR-84/97): energi & fokus harian, serta rencana haji/umrah.
+            await _buatTabelV15(m);
+            debugPrint('migrasi v15 selesai (energi harian & rencana ibadah)');
           }
         },
       );
@@ -535,6 +544,29 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             .firstWhere((k) => k.$name == namaKolom);
         await m.addColumn(masuk.value, kolom);
       }
+    }
+  }
+
+  /// Skema v15 (FR-84/97): kolom energi/fokus/jam produktif pada `tidur`,
+  /// plus tabel `rencana_ibadah` & `persiapan_ibadah`.
+  ///
+  /// Aman dijalankan ulang: tabel lewat `_tabelAda`, kolom lewat `_kolomAda`
+  /// (PRAGMA) — sebagian basis data dibuat dari definisi tabel terbaru sehingga
+  /// `addColumn` tanpa pemeriksaan bisa meledak `duplicate column name`.
+  Future<void> _buatTabelV15(Migrator m) async {
+    final Map<String, TableInfo<Table, dynamic>> baru = {
+      'rencana_ibadah': rencanaIbadah,
+      'persiapan_ibadah': persiapanIbadah,
+    };
+    for (final masuk in baru.entries) {
+      if (await _tabelAda(masuk.key)) continue;
+      await m.createTable(masuk.value);
+    }
+    const kolomPerlu = ['energi', 'fokus', 'jam_produktif_menit'];
+    for (final namaKolom in kolomPerlu) {
+      if (await _kolomAda('tidur', namaKolom)) continue;
+      final kolom = tidur.$columns.firstWhere((k) => k.$name == namaKolom);
+      await m.addColumn(tidur, kolom);
     }
   }
 

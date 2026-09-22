@@ -382,4 +382,22 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomUid: db.arsipLaporanBulanan.uid,
         kolomKunci: db.arsipLaporanBulanan.id,
       ),
+
+      // ── pintar & ibadah (batch 9) ─────────────────────────────────────────
+      // Induk (rencana_ibadah) lebih dulu supaya butir persiapan bisa dipetakan
+      // ke uid rencananya di HP penerima.
+      JalurSinkron(
+        nama: 'rencana_ibadah',
+        tabel: db.rencanaIbadah,
+        kolomUid: db.rencanaIbadah.uid,
+        kolomKunci: db.rencanaIbadah.id,
+        kolomDiubah: db.rencanaIbadah.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'persiapan_ibadah',
+        tabel: db.persiapanIbadah,
+        kolomUid: db.persiapanIbadah.uid,
+        kolomKunci: db.persiapanIbadah.id,
+        kaitan: {'rencana_id': 'rencana_ibadah'},
+      ),
     ];

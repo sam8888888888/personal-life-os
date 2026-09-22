@@ -128,9 +128,11 @@ void main() {
     // 3. Versi skema di database naik ke versi terakhir aplikasi:
     //    v2 -> v3 -> v4 -> v5 -> v6 -> v7 -> v8 -> v9 (v4 menambah 23 tabel
     //    pilar kehidupan, v5 visi & area hidup + tujuan.area_id, v6-v8 tabel
-    //    kesehatan/dokumen/sinkron, v9 delapan tabel modul Pengetahuan).
+    //    kesehatan/dokumen/sinkron, v9 delapan tabel modul Pengetahuan,
+    //    v14 tinjauan mingguan & arsip laporan, v15 energi harian (FR-84) &
+    //    rencana haji/umrah (FR-97)).
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 14);
+    expect(versi.data.values.first, 15);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();

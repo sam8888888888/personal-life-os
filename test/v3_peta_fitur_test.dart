@@ -45,7 +45,11 @@ void main() {
 
     test('fitur yang Ron selesaikan bertanda Selesai', () {
       for (final id in ['FR-21', 'FR-64', 'FR-65', 'FR-66', 'FR-67', 'FR-69',
-        'FR-70', 'FR-81', 'FR-82', 'FR-85', 'FR-138']) {
+        'FR-70', 'FR-81', 'FR-82', 'FR-85', 'FR-138',
+        // Batch 8: kunci, lencana, widget, multi-profil, aksi cepat.
+        'FR-22', 'FR-26', 'FR-31', 'FR-44', 'FR-151',
+        // Batch 9: energi harian, rencana ibadah, temuan pintar, ramalan, tahun.
+        'FR-84', 'FR-97', 'FR-142', 'FR-143', 'FR-146']) {
         expect(cari(id).status, StatusFitur.selesai, reason: '$id seharusnya Selesai');
       }
     });

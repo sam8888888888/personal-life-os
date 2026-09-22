@@ -815,8 +815,10 @@ void main() {
 
     tearDown(() => db.close());
 
-    test('schemaVersion 14 dan dua tabel baru ada', () async {
-      expect(db.schemaVersion, 14);
+    test('schemaVersion 15 dan tabel batch 7 masih ada', () async {
+      // Batch 9 menaikkan skema ke 15 (energi harian FR-84 & rencana ibadah
+      // FR-97); dua tabel batch 7 tetap harus ada.
+      expect(db.schemaVersion, 15);
       final tinjauan = await db.select(db.tinjauanMingguan).get();
       final arsip = await db.select(db.arsipLaporanBulanan).get();
       expect(tinjauan, isEmpty);

@@ -665,6 +665,17 @@ class Tidur extends Table {
   TextColumn get catatan => text().nullable()();
   DateTimeColumn get dicatatPada => dateTime().withDefault(currentDateAndTime)();
 
+  // --- FR-84 (skema v15): energi & fokus harian + jam produktif ----------
+  // Semua nullable: malam yang tidak diisi tetap sah, dan data lama tidak
+  // tersentuh saat migrasi.
+  /// Tingkat energi hari itu (1–5); null = tidak diisi.
+  IntColumn get energi => integer().nullable()();
+  /// Tingkat fokus hari itu (1–5); null = tidak diisi.
+  IntColumn get fokus => integer().nullable()();
+  /// Jam paling produktif menurut pengguna, dalam MENIT dari tengah malam
+  /// (mis. 08.30 → 510). Dasar "jam produktif" di FR-84, bukan tebakan mesin.
+  IntColumn get jamProduktifMenit => integer().nullable()();
+
   // Unik (tanggal) lewat indeks SQL di `database.dart`.
 }
 
@@ -1397,5 +1408,43 @@ class ArsipLaporanBulanan extends Table {
   TextColumn get bulan => text()();
   TextColumn get ringkasTeks => text()();
   TextColumn get angkaJson => text().withDefault(const Constant('{}'))();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// Batch 9 — FR-97 Rencana Haji & Umrah (skema v15)
+// ══════════════════════════════════════════════════════════════════════════
+
+/// Rencana haji/umrah: target dana & tanggal keberangkatan (FR-97).
+///
+/// Aplikasi TIDAK menyarankan produk keuangan dan TIDAK menyimpan nomor
+/// dokumen — hanya nama butir persiapan & statusnya (di `persiapan_ibadah`).
+class RencanaIbadah extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  /// Pengenal stabil lintas HP (FR-150). Kosong = belum pernah disinkronkan.
+  TextColumn get uid => text().nullable()();
+  /// `haji` / `umrah`.
+  TextColumn get jenis => text().withDefault(const Constant('haji'))();
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+  /// Target dana dalam sen.
+  IntColumn get targetSen => integer().withDefault(const Constant(0))();
+  /// Dana yang sudah disisihkan (diisi manual oleh pengguna), satuan sen.
+  IntColumn get terkumpulSen => integer().withDefault(const Constant(0))();
+  DateTimeColumn get targetTanggal => dateTime()();
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// Butir persiapan (dokumen/berkas) milik satu rencana (FR-97).
+class PersiapanIbadah extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+  IntColumn get rencanaId => integer().references(RencanaIbadah, #id)();
+  TextColumn get nama => text().withLength(min: 1, max: 160)();
+  BoolColumn get selesai => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get tanggalTarget => dateTime().nullable()();
+  TextColumn get catatan => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
 }

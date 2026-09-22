@@ -53,6 +53,11 @@ import 'features/kesehatan/catatan_medis_screen.dart';
 import 'features/kesehatan/kartu_darurat_screen.dart';
 import 'features/kesehatan/kunjungan_screen.dart';
 import 'features/ritme/analitik_screen.dart';
+import 'features/ritme/temuan_pintar_screen.dart';
+import 'features/ritme/ramalan_saldo_screen.dart';
+import 'features/ritme/tinjauan_tahun_screen.dart';
+import 'features/kesehatan/energi_tidur_screen.dart';
+import 'features/ibadah/rencana_ibadah_screen.dart';
 import 'features/ritme/laporan_bulanan_screen.dart';
 import 'features/ritme/lini_masa_screen.dart';
 import 'features/ritme/tinjauan_pekan_screen.dart';
@@ -425,6 +430,31 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/tinjauan-pekan',
       builder: (c, s) => const TinjauanPekanScreen(),
+    ),
+    // FR-142 — temuan pintar lintas modul.
+    GoRoute(
+      path: '/temuan-pintar',
+      builder: (c, s) => const TemuanPintarScreen(),
+    ),
+    // FR-143 — ramalan saldo beberapa bulan (dengan rentang & asumsi).
+    GoRoute(
+      path: '/ramalan-saldo',
+      builder: (c, s) => const RamalanSaldoScreen(),
+    ),
+    // FR-146 — tinjauan tahunan (butuh data ≥6 bulan).
+    GoRoute(
+      path: '/tinjauan-tahun',
+      builder: (c, s) => const TinjauanTahunScreen(),
+    ),
+    // FR-84 — energi & jam produktif.
+    GoRoute(
+      path: '/kesehatan/energi',
+      builder: (c, s) => const EnergiTidurScreen(),
+    ),
+    // FR-97 — rencana haji & umrah.
+    GoRoute(
+      path: '/ibadah/rencana',
+      builder: (c, s) => const RencanaIbadahScreen(),
     ),
     // FR-145 — laporan bulanan lintas pilar (signature).
     GoRoute(

@@ -279,11 +279,10 @@ void main() {
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 61,
-          reason: '13 tabel v3 + 23 tabel v4 + 2 tabel v5 (visi, area_hidup) '
-              '+ 1 tabel v6 (sinkron_kotor) + 5 tabel v7 (catatan kesehatan, '
-              'janji kesehatan, kas informal, hafalan, zakat_sedekah) '
-              '= 56 termasuk sqlite_sequence');
+      expect(tabel.length, 63,
+          reason: 'seluruh tabel Drift ikut ter-ekspor, termasuk 2 tabel batch 9 '
+              '(rencana_ibadah, persiapan_ibadah) — angka 63 berasal dari '
+              'db.allTables.length saat uji ini dijalankan');
       expect(tabel.keys, contains('tagihan'));
       expect(tabel.keys, contains('pengaturan'));
       for (final t in tabelV3) {

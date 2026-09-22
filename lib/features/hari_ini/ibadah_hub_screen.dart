@@ -123,6 +123,16 @@ class IbadahHubScreen extends StatelessWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  key: const Key('buka_rencana_ibadah'),
+                  leading: const Icon(Icons.mosque_outlined),
+                  title: const Text('Rencana Haji & Umrah'),
+                  subtitle: const Text('Target dana + daftar persiapan '
+                      'dokumen (FR-97)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ibadah/rencana'),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   key: const Key('buka_dzikir'),
                   leading: const Icon(Icons.radio_button_checked),
                   title: const Text('Dzikir & doa'),

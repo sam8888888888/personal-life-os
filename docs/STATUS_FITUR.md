@@ -3,7 +3,7 @@
 Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 8: FR-22, FR-26, FR-31, FR-44, FR-151 selesai).
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 129 · SEBAGIAN 0 · BELUM 23** (total 152 butir)
+**Hitungan: SELESAI 134 · SEBAGIAN 0 · BELUM 18** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -108,7 +108,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-81 | Habit Recovery Score | V3 | SELESAI | Ron 20 Sep: metrik pemulihan kebiasaan, tanpa kata menghakimi. |
 | FR-82 | Life Planning Engine | V3 | SELESAI | Ron 20 Sep: rantai Visi → Area → Tujuan → Proyek → Tugas (skema v5). |
 | FR-83 | Life Maintenance Engine | V2 | SELESAI | 6 template perawatan berkala + pengingat; rute /aksi/perawatan |
-| FR-84 | Sleep & Energy OS | V3 | BELUM |  |
+| FR-84 | Sleep & Energy OS | V3 | SELESAI | Ron 22 Sep: 'Energi & jam produktif' menempel pada catatan tidur yang sudah ada (energi 1-5, fokus 1-5, jam paling produktif diisi pengguna — bukan tebakan mesin); setelah 14 hari muncul pola (rata energi/fokus, jam produktif tersering) beserta dasar datanya; sebelum itu layar menjelaskan kenapa belum bisa. Uji: mesin + layar. |
 | FR-85 | Progress & konsistensi tanpa skor moral | V2 | SELESAI | Ron 20 Sep: konsistensi mingguan tanpa skor moral. |
 
 ## 4 · Ibadah (Islamic OS)
@@ -126,7 +126,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-94 | Pelacakan Hafalan (Hifz) | V3 | SELESAI | Ron 21 Sep: pelacakan hafalan per juz/surah + status + jadwal ulangan versi pengguna. |
 | FR-95 | Dzikir & Doa | V2 | SELESAI | rute /ibadah/dzikir; 4 adhkar pagi bisa ditandai dari FR-99 |
 | FR-96 | Zakat & Sedekah | V3 | SELESAI | Ron 21 Sep: catatan infaq/sedekah + asisten hitung zakat (nisab 85 gram emas dari harga yang diisi pengguna, haul 354 hari, asumsi terbuka). |
-| FR-97 | Rencana Haji & Umrah | V3 | BELUM |  |
+| FR-97 | Rencana Haji & Umrah | V3 | SELESAI | Ron 22 Sep: 'Rencana haji & umrah' menyimpan target dana + daftar persiapan dokumen; progres menampilkan persen tercapai, sisa, dan setoran per bulan sampai tanggal target, lengkap dengan peringatan bila target belum diisi / tanggal sudah lewat / setoran tidak realistis. Tabel baru rencana_ibadah & persiapan_ibadah ikut mesin sinkron FR-150. Uji: mesin + repositori + layar. |
 | FR-98 | Arah Kiblat & Masjid Terdekat | V3 | BELUM |  |
 | FR-99 | Islamic Morning Briefing (signature) | V2 | SELESAI | kartu ibadah pagi di briefing: sapaan, progres Quran, 4 adhkar; 3 uji |
 | FR-100 | Islamic Evening Review & Muhasabah | V2 | SELESAI | rute /ibadah/muhasabah |
@@ -206,11 +206,11 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-139 | Search Everything (signature) | V2 | SELESAI | satu kotak cari lintas tabel; rute /cari; 15 uji |
 | FR-140 | Life Timeline (signature) | V3 | SELESAI | Ron 22 Sep: lini masa hidup (signature) — kejadian dari 14 sumber data tersusun per bulan, dapat dicari & disaring per modul, tiap baris menyebut asal datanya (mis. tugas#12), plus rangkuman 'apa yang terjadi bulan ini'. |
 | FR-141 | Personal Analytics | V3 | SELESAI | Ron 22 Sep: analitik pribadi lintas modul untuk 7/30/90 hari & 1 tahun; SETIAP angka menampilkan baris sumber (tabel & rentangnya) sehingga tidak ada angka misterius. |
-| FR-142 | Smart Insights | V3 | BELUM |  |
-| FR-143 | Forecast | V4 | BELUM |  |
+| FR-142 | Smart Insights | V3 | SELESAI | Ron 22 Sep: 'Temuan pintar' menyusun temuan dari data nyata (pengeluaran bulanan, sebaran jatuh tempo, langganan jarang dipakai, titik saldo terendah); SETIAP temuan menuliskan dasar data + periode yang dipakai, dan temuan hanya muncul bila datanya cukup — sisanya masuk daftar 'belum bisa' beserta alasannya. Bila belum ada pergerakan uang sama sekali, temuan saldo tidak dibuat (tidak menyesatkan). Uji: mesin + layar. |
+| FR-143 | Forecast | V4 | SELESAI | Ron 22 Sep: 'Ramalan saldo' memakai asumsi yang ditulis terbuka (laba bulanan rata-rata, simpangan harian aktual, tagihan tetap & langganan) dan menampilkan RENTANG tiga angka tiap bulan (pesimis/tengah/optimis) — bukan satu angka mutlak, sesuai PRD; bulan yang bisa minus ditandai + saran menggeser apa. Uji: mesin + layar. |
 | FR-144 | Weekly Life Review | V3 | SELESAI | Ron 22 Sep: tinjauan pekan per 6 pilar (uang, kesehatan, tujuan & tugas, pengetahuan, ibadah, rumah & aset) membandingkan pekan ini vs pekan lalu dengan angka pendukung; tiga kolom isian tersimpan; teks ringkas bisa disalin untuk notifikasi; pengingat Minggu malam otomatis DILEWATI bila pekan itu sudah diisi. |
 | FR-145 | Monthly Life Report (signature) | V3 | SELESAI | Ron 22 Sep: laporan bulanan (signature) — keuangan, tagihan, tujuan, tugas, langganan, kekayaan bersih + 'membaik / berubah / perlu perhatian'; bisa diarsipkan (angka kunci tersimpan sebagai JSON untuk pembanding bulan berikutnya) dan dibagikan sebagai PDF. |
-| FR-146 | Annual Life Review | V4 | BELUM |  |
+| FR-146 | Annual Life Review | V4 | SELESAI | Ron 22 Sep: 'Tinjauan tahun' merangkum tahun berjalan per pilar (uang, kesehatan, ibadah, hubungan, pengetahuan) dari data nyata; hanya tampil bila data mencakup minimal 6 bulan — kalau kurang, layar menyebut berapa bulan data yang ada dan tidak mengarang hasil. Uji: mesin + layar. |
 | FR-147 | Notification Center | V2 | SELESAI | rute /notifikasi: riwayat + tingkat + tanda selesai |
 | FR-148 | Snooze & Reschedule Engine (memperluas FR-11 & memperbaiki PB-04) | V2 | SELESAI | 15 menit/1 jam/3 jam/besok 09:00; tercatat di audit |
 | FR-149 | AI Copilot ber-konteks | V4 | BELUM |  |

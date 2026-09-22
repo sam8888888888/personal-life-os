@@ -269,6 +269,33 @@ class LainnyaScreen extends ConsumerWidget {
                   onTap: () => context.push('/tinjauan-pekan'),
                 ),
                 ListTile(
+                  key: const Key('buka_temuan_pintar'),
+                  leading: const Icon(Icons.lightbulb_outline),
+                  title: const Text('Temuan pintar'),
+                  subtitle: const Text('Hal yang menyimpang dari catatan — '
+                      'selalu disertai tabel & periode datanya'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/temuan-pintar'),
+                ),
+                ListTile(
+                  key: const Key('buka_ramalan_saldo'),
+                  leading: const Icon(Icons.trending_up),
+                  title: const Text('Ramalan saldo'),
+                  subtitle: const Text('Perkiraan 3–6 bulan ke depan '
+                      '(rentang pesimis–optimis + asumsinya)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/ramalan-saldo'),
+                ),
+                ListTile(
+                  key: const Key('buka_tinjauan_tahun'),
+                  leading: const Icon(Icons.event_note_outlined),
+                  title: const Text('Tinjauan tahun'),
+                  subtitle: const Text('"Your Year in Life" — muncul setelah '
+                      'ada data 6 bulan'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/tinjauan-tahun'),
+                ),
+                ListTile(
                   key: const Key('buka_laporan_hidup'),
                   leading: const Icon(Icons.summarize_outlined),
                   title: const Text('Laporan bulanan'),
