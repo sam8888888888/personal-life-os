@@ -348,3 +348,22 @@ Uji: berkas baru `test/v19_jaringan_ikat_test.dart` berisi **22 kasus** — skem
 migrasi v18 → v19 pada berkas nyata (termasuk dijalankan dua kali), perilaku empat
 repositori, dan dua uji layar. Angka suite penuh menyusul di bagian 14 setelah
 penjalanan terakhir gelombang ini.
+
+## 16 · Tempat kode disimpan (GitHub & cadangan)
+
+| Tempat | Isi | Catatan |
+|---|---|---|
+| GitHub `sam8888888888/personal-life-os` (publik) | commit `cc3a771` = v1.11.0+14 | naik dari `9ae0f16` (v1.9.2) |
+| Arsip sumber `lifeos-src-v1.11.0-build14_20260923_155859.tar.gz` (16 MB) | pohon kerja penuh | SHA-256 `a463d17b…f42ce` |
+| Bundel git `lifeos-git-cc3a771_20260923_155859.bundle` (34 MB) | riwayat git penuh | SHA-256 `2ec7d5bf…6e349`, sudah diuji bisa dipulihkan |
+
+Arsip & bundel disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
+`/opt/aaron-tools/lifeos-backups/` (Austria), `/home/aaron/lifeos-backups/` (Contabo).
+Berkas `SHA256_*.txt` ikut disalin, jadi keutuhan tiap salinan bisa diperiksa ulang
+dengan `sha256sum -c`.
+
+Satu berkas **tidak** bisa ikut ke GitHub: `.github/workflows/ci.yml` (gerbang
+analisis & uji otomatis). Kredensial yang dipakai untuk push tidak punya izin
+`workflow`, jadi GitHub menolak commit yang memuatnya. Berkas itu tetap ada di
+pohon kerja dan di dalam arsip cadangan; untuk memasukkannya ke GitHub perlu
+kredensial dengan izin `workflow` atau menambahkannya lewat web GitHub.
