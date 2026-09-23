@@ -1,5 +1,5 @@
 /// Uji Batch 12 — FR-43 (mode rumah tangga), FR-56 (sub-akses keluarga),
-/// FR-39 (+ dasar FR-59) pemindai SMS bank, FR-58 (voice & parsing cerdas),
+/// FR-58 (voice & parsing cerdas),
 /// dan verifikasi FR-57 (perawatan berkala memakai mesin yang sudah ada).
 ///
 /// Aturan yang dipegang: tiap harapan mengacu ke keluaran nyata. Bila harapan
@@ -7,17 +7,14 @@
 /// dilonggarkan.
 library;
 
-import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_life_os/core/keluarga/sub_akses.dart';
 import 'package:personal_life_os/core/parsing/parsing_cerdas.dart';
-import 'package:personal_life_os/core/parsing/pemindai_bank.dart';
 import 'package:personal_life_os/core/rumah/patungan.dart';
 import 'package:personal_life_os/core/rumah/rumah_tangga.dart';
 import 'package:personal_life_os/core/sinkron/registri_sinkron.dart';
 import 'package:personal_life_os/data/database/database.dart';
-import 'package:personal_life_os/data/repository/pemindai_bank_repository.dart';
 import 'package:personal_life_os/data/repository/perawatan_repository.dart';
 import 'package:personal_life_os/data/repository/rumah_tangga_repository.dart';
 import 'package:personal_life_os/data/repository/sub_akses_repository.dart';
@@ -487,232 +484,6 @@ void main() {
   });
 
   // ══════════════════════════════════════════════════════════════════════════
-  // FR-39 (+ FR-59) — Pemindai SMS bank
-  // ══════════════════════════════════════════════════════════════════════════
-  group('FR-39 mesin pemindai bank', () {
-    test('uraiNominalBank: berbagai gaya penulisan bank', () {
-      expect(uraiNominalBank('Rp1.234.567'), 123456700);
-      expect(uraiNominalBank('IDR 250.000'), 25000000);
-      expect(uraiNominalBank('Rp 20.000'), 2000000);
-      expect(uraiNominalBank('tidak ada nominal'), isNull);
-    });
-
-    test('pesan debit dikenali sebagai pembayaran + keterangan', () {
-      final hasil = pindaiPesanBank(PesanBank(
-        sumber: 'BCA',
-        teks: 'BCA: Transaksi DEBIT Rp250.000 ke TOKOPEDIA. Saldo Rp1.000.000',
-        waktu: DateTime(2026, 9, 22, 10, 0),
-      ));
-      expect(hasil.jenis, JenisPesanBank.pembayaran);
-      expect(hasil.nominalSen, 25000000);
-      expect(hasil.keterangan, isNotNull);
-      expect(hasil.saldoSen, 100000000);
-      expect(hasil.keyakinan, greaterThan(60));
-    });
-
-    test('pesan kredit dikenali sebagai uang masuk', () {
-      final hasil = pindaiPesanBank(PesanBank(
-        sumber: 'MANDIRI',
-        teks: 'Kredit Rp1.500.000 masuk ke rekening Anda',
-        waktu: DateTime(2026, 9, 22),
-      ));
-      expect(hasil.jenis, JenisPesanBank.pemasukan);
-      expect(hasil.nominalSen, 150000000);
-    });
-
-    test('info saldo tidak dicatat sebagai transaksi', () {
-      final hasil = pindaiPesanBank(PesanBank(
-        sumber: 'BRI',
-        teks: 'Info saldo Anda Rp 3.200.000',
-        waktu: DateTime(2026, 9, 22),
-      ));
-      expect(hasil.jenis, JenisPesanBank.saldo);
-      expect(hasil.alasan.first.contains('bukan transaksi'), isTrue);
-    });
-
-    test('pesan tanpa arah/nominal diakui belum bisa dikenali + alasannya', () {
-      final tanpaArah = pindaiPesanBank(PesanBank(
-        sumber: 'BNI',
-        teks: 'Rp250.000',
-        waktu: DateTime(2026, 9, 22),
-      ));
-      expect(tanpaArah.jenis, JenisPesanBank.tidakDikenali);
-      expect(tanpaArah.alasan.first.contains('Arah transaksi'), isTrue);
-
-      final tanpaNominal = pindaiPesanBank(PesanBank(
-        sumber: 'BNI',
-        teks: 'Pembayaran DEBIT berhasil',
-        waktu: DateTime(2026, 9, 22),
-      ));
-      expect(tanpaNominal.jenis, JenisPesanBank.tidakDikenali);
-      expect(tanpaNominal.alasan.first.contains('Nominal'), isTrue);
-    });
-
-    test('saringPesanBank: hanya pengirim dikenal, sejak kapan, belum diproses',
-        () {
-      final semua = [
-        PesanBank(
-            sumber: 'BCA',
-            teks: 'a',
-            waktu: DateTime(2026, 9, 22),
-            id: 1),
-        PesanBank(
-            sumber: '+628123',
-            teks: 'b',
-            waktu: DateTime(2026, 9, 22),
-            id: 2),
-        PesanBank(
-            sumber: 'DANA',
-            teks: 'c',
-            waktu: DateTime(2026, 8, 1),
-            id: 3),
-        PesanBank(
-            sumber: 'GOPAY',
-            teks: 'd',
-            waktu: DateTime(2026, 9, 22),
-            id: 4),
-      ];
-      final hasil = saringPesanBank(
-        semua,
-        sejak: DateTime(2026, 9, 1),
-        sudahDiproses: {4},
-      );
-      expect(hasil.map((p) => p.id).toList(), [1]);
-      expect(pengirimDikenal('BANK BCA'), isTrue);
-      expect(pengirimDikenal('08123'), isFalse);
-    });
-
-    test('cocokkanDenganTagihan: sama, beda ≤1%, atau jujur tidak cocok', () {
-      final hasil = pindaiPesanBank(PesanBank(
-        sumber: 'BCA',
-        teks: 'Pembayaran DEBIT Rp250.000 ke PLN',
-        waktu: DateTime(2026, 9, 22),
-      ));
-      expect(
-        cocokkanDenganTagihan(hasil, const [
-          KandidatTagihan(nama: 'Listrik', jumlahSen: 25000000),
-        ])?.nama,
-        'Listrik',
-      );
-      // beda 1% (biaya admin) masih dianggap cocok
-      expect(
-        cocokkanDenganTagihan(hasil, const [
-          KandidatTagihan(nama: 'Listrik', jumlahSen: 25250000),
-        ])?.nama,
-        'Listrik',
-      );
-      expect(
-        cocokkanDenganTagihan(hasil, const [
-          KandidatTagihan(nama: 'Sekolah', jumlahSen: 75000000),
-        ]),
-        isNull,
-      );
-      // pesan bukan pembayaran → tidak pernah dicocokkan
-      expect(
-        cocokkanDenganTagihan(
-          pindaiPesanBank(PesanBank(
-              sumber: 'BCA',
-              teks: 'Kredit Rp250.000',
-              waktu: DateTime(2026, 9, 22))),
-          const [KandidatTagihan(nama: 'Listrik', jumlahSen: 25000000)],
-        ),
-        isNull,
-      );
-    });
-
-    test('ringkasPindaiBank menjumlahkan pengeluaran & pemasukan terpisah', () {
-      final ringkas = ringkasPindaiBank([
-        pindaiPesanBank(PesanBank(
-            sumber: 'BCA',
-            teks: 'DEBIT Rp100.000 ke A',
-            waktu: DateTime(2026, 9, 22))),
-        pindaiPesanBank(PesanBank(
-            sumber: 'BCA',
-            teks: 'Kredit Rp300.000 dari B',
-            waktu: DateTime(2026, 9, 22))),
-      ]);
-      expect(ringkas.totalPengeluaranSen, 10000000);
-      expect(ringkas.totalPemasukanSen, 30000000);
-      expect(ringkas.dasar.contains('2 pesan dipindai'), isTrue);
-    });
-  });
-
-  group('FR-39 repositori pemindai bank', () {
-    test('izin bawaan mati; setelah dinyalakan terbaca menyala', () async {
-      final db = _db();
-      addTearDown(db.close);
-      final repo = PemindaiBankRepository(db);
-      expect(await repo.izinMenyala(), isFalse);
-      await repo.setIzin(true);
-      expect(await repo.izinMenyala(), isTrue);
-      await repo.setIzin(false);
-      expect(await repo.izinMenyala(), isFalse);
-    });
-
-    test('pesan yang sama tidak disimpan dua kali (idempoten)', () async {
-      final db = _db();
-      addTearDown(db.close);
-      final repo = PemindaiBankRepository(db);
-      final hasil = pindaiPesanBank(PesanBank(
-        sumber: 'BCA',
-        teks: 'DEBIT Rp100.000 ke A',
-        waktu: DateTime(2026, 9, 22),
-        id: 77,
-      ));
-      expect(await repo.simpanHasil([hasil]), 1);
-      expect(await repo.simpanHasil([hasil]), 0);
-      final daftar = await repo.daftar();
-      expect(daftar, hasLength(1));
-      expect(await repo.idSudahDiproses(), {77});
-    });
-
-    test('status pindai bisa ditandai & baris bisa dihapus', () async {
-      final db = _db();
-      addTearDown(db.close);
-      final repo = PemindaiBankRepository(db);
-      await repo.simpanHasil([
-        pindaiPesanBank(PesanBank(
-            sumber: 'BCA',
-            teks: 'DEBIT Rp100.000 ke A',
-            waktu: DateTime(2026, 9, 22),
-            id: 1)),
-      ]);
-      final baris = (await repo.daftar()).first;
-      expect(StatusPindai.dariKode(baris.status), StatusPindai.baru);
-      await repo.tandai(baris.id, StatusPindai.dicatat);
-      final sesudah = (await repo.daftar()).first;
-      expect(sesudah.status, StatusPindai.dicatat.kode);
-      await repo.hapus(baris.id);
-      expect(await repo.daftar(), isEmpty);
-    });
-
-    test('kandidat tagihan hanya yang belum lunas & jumlahnya masuk akal',
-        () async {
-      final db = _db();
-      addTearDown(db.close);
-      final repo = PemindaiBankRepository(db);
-      await db.into(db.tagihan).insert(TagihanCompanion.insert(
-            nama: 'Listrik',
-            jatuhTempo: DateTime(2026, 10, 1),
-            jumlahSen: const Value(25000000),
-          ));
-      await db.into(db.tagihan).insert(TagihanCompanion.insert(
-            nama: 'Sudah Dibayar',
-            jatuhTempo: DateTime(2026, 9, 1),
-            jumlahSen: const Value(10000000),
-            lunas: const Value(true),
-          ));
-      await db.into(db.tagihan).insert(TagihanCompanion.insert(
-            nama: 'Tanpa Nominal',
-            jatuhTempo: DateTime(2026, 10, 2),
-          ));
-      final kandidat = await repo.kandidatTagihan();
-      expect(kandidat.map((k) => k.nama).toList(), ['Listrik']);
-      expect(await repo.idTagihanDari(kandidat.first), isNotNull);
-    });
-  });
-
-  // ══════════════════════════════════════════════════════════════════════════
   // FR-58 — Voice & Parsing Cerdas
   // ══════════════════════════════════════════════════════════════════════════
   group('FR-58 parsing cerdas', () {
@@ -842,7 +613,7 @@ void main() {
     test('versi skema 18 dan tabel baru bisa ditulis', () async {
       final db = _db();
       addTearDown(db.close);
-      expect(db.schemaVersion, 18);
+      expect(db.schemaVersion, 19);
       await db.into(db.rumahTangga).insert(RumahTanggaCompanion.insert(
             nama: 'Rumah Uji',
           ));

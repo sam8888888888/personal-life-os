@@ -16,6 +16,8 @@ import 'core/providers/app_providers.dart';
 import 'features/hari_ini/ibadah_hub_screen.dart';
 import 'features/hari_ini/kerja_screen.dart';
 import 'features/hari_ini/lainnya_screen.dart';
+import 'features/catatan_harian/catatan_harian_screen.dart';
+import 'features/kotak_masuk/kotak_masuk_screen.dart';
 import 'features/ibadah/jadwal_sholat_screen.dart';
 import 'features/ibadah/hifz_screen.dart';
 import 'features/ibadah/kalender_hijriah_screen.dart';
@@ -66,7 +68,6 @@ import 'features/tagihan/delegasi_screen.dart';
 import 'features/ritme/copilot_screen.dart';
 import 'features/rumah/rumah_tangga_screen.dart';
 import 'features/keluarga/sub_akses_screen.dart';
-import 'features/uang/pemindai_bank_screen.dart';
 import 'features/suara/suara_screen.dart';
 import 'features/tagihan/impor_ocr_screen.dart';
 import 'features/perjalanan/perjalanan_screen.dart';
@@ -508,7 +509,7 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       builder: (c, s) => const CopilotScreen(),
     ),
     // Batch 12 — FR-43 mode rumah tangga, FR-56 sub-akses keluarga,
-    // FR-39 pemindai bank, FR-58 ucapkan/tulis.
+    // FR-58 ucapkan/tulis (pemindai SMS bank sudah DIBUANG).
     GoRoute(
       path: '/rumah/mode-rumah-tangga',
       builder: (c, s) => const RumahTanggaScreen(),
@@ -516,10 +517,6 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/keluarga/sub-akses',
       builder: (c, s) => const SubAksesScreen(),
-    ),
-    GoRoute(
-      path: '/uang/pemindai-bank',
-      builder: (c, s) => const PemindaiBankScreen(),
     ),
     GoRoute(
       path: '/suara',
@@ -615,6 +612,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
           builder: (c, s) => const CatatanMedisScreen(),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/kotak-masuk',
+      builder: (c, s) => const KotakMasukScreen(),
+    ),
+    GoRoute(
+      path: '/catatan-harian',
+      builder: (c, s) => const CatatanHarianScreen(),
     ),
     GoRoute(
       path: '/pengetahuan',

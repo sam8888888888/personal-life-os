@@ -5,7 +5,6 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/database.dart';
-import '../../data/repository/pemindai_bank_repository.dart';
 import '../../data/repository/rumah_tangga_repository.dart';
 import '../../data/repository/sub_akses_repository.dart';
 import 'app_providers.dart';
@@ -16,8 +15,6 @@ final repoRumahTanggaProvider = Provider<RumahTanggaRepository>(
 final repoSubAksesProvider = Provider<SubAksesRepository>(
     (ref) => SubAksesRepository(ref.watch(databaseProvider)));
 
-final repoPemindaiBankProvider = Provider<PemindaiBankRepository>(
-    (ref) => PemindaiBankRepository(ref.watch(databaseProvider)));
 
 /// Daftar anggota keluarga (FR-56) sebagai sumber nama anggota rumah tangga.
 ///

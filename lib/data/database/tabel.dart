@@ -1695,3 +1695,165 @@ class PemindaianBank extends Table {
   TextColumn get tagihanUid => text().nullable()();
   DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+// ───────────────────────────────────────────────────────────────────────────
+// v19 — Gelombang 1 SDD v19 (Aaron, 23 Sep 2026): empat tabel "jaringan ikat".
+// Kotak masuk (tangkap cepat < 3 detik), catatan harian (tulang punggung
+// kronologis), tautan (backlink lintas SEMUA entitas), sorotan (kutipan yang
+// ditinggikan). Pola polimorfik mengikuti `lampiran.induk_tabel` + `induk_uid`
+// yang sudah ada; pengenal antar HP memakai `uid`, bukan id angka.
+// ───────────────────────────────────────────────────────────────────────────
+
+/// SDD-B1 · Kotak Masuk — pintu masuk universal (tangkap cepat).
+///
+/// Satu tempat untuk menaruh APA SAJA tanpa memilih kategori lebih dulu;
+/// penyortiran dilakukan belakangan (triase). `jenisTebakan` +
+/// `tebakanKeyakinan` hanya **usulan mesin** — pengguna yang memutuskan.
+class KotakMasuk extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Isi mentah: diketik, ditempel, atau hasil transkripsi suara.
+  TextColumn get isi => text().withDefault(const Constant(''))();
+
+  /// teks · gambar · suara · berkas · tautan
+  TextColumn get jenisMedia => text().withDefault(const Constant('teks'))();
+
+  /// uid baris `lampiran` bila ada (pola `lampiran.induk_uid`).
+  TextColumn get lampiranUid => text().nullable()();
+
+  /// Alamat sumber bila [jenisMedia] = 'tautan'.
+  TextColumn get tautan => text().nullable()();
+
+  /// widget · bagikan · suara · pintasan · process_text · notifikasi · layar
+  TextColumn get sumber => text().withDefault(const Constant('layar'))();
+
+  /// Tebakan tujuan oleh pengurai cerdas (tagihan/transaksi/pengetahuan/…).
+  TextColumn get jenisTebakan => text().nullable()();
+
+  /// 0.0–1.0; 0 = tidak ada tebakan (usulan lemah disembunyikan).
+  RealColumn get tebakanKeyakinan => real().withDefault(const Constant(0.0))();
+
+  /// baru · diproses · diarsipkan · dibuang
+  TextColumn get status => text().withDefault(const Constant('baru'))();
+
+  /// Nama tabel tujuan setelah triase; null = belum dipindahkan.
+  TextColumn get tujuanTabel => text().nullable()();
+
+  /// uid baris tujuan (BUKAN id angka).
+  TextColumn get tujuanUid => text().nullable()();
+
+  /// Anggota keluarga pemilik catatan (opsional).
+  IntColumn get anggotaId =>
+      integer().nullable().references(AnggotaKeluarga, #id)();
+
+  /// Kapan triase selesai; null = belum.
+  DateTimeColumn get diprosesPada => dateTime().nullable()();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-B2 · Catatan Harian — tulang punggung kronologis (satu halaman/hari).
+///
+/// Ringkasan mesin disimpan TERPISAH dari [isi] supaya tulisan pengguna tidak
+/// pernah tertimpa proses otomatis. [tanggalKunci] ('YYYY-MM-DD') yang menjamin
+/// "satu halaman per hari", bukan kolom tanggal — bentuk penyimpanan DateTime
+/// di proyek ini bercampur (angka unix atau teks).
+class CatatanHarian extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Hari yang diwakili (tengah malam waktu lokal).
+  DateTimeColumn get tanggal => dateTime()();
+
+  /// 'YYYY-MM-DD' — kunci unik satu halaman per hari.
+  TextColumn get tanggalKunci => text()();
+
+  /// Tulisan bebas pengguna (markdown ringan).
+  TextColumn get isi => text().withDefault(const Constant(''))();
+
+  /// Ringkasan buatan mesin — TIDAK PERNAH menimpa [isi].
+  TextColumn get ringkasanMesin => text().nullable()();
+
+  /// Sorotan otomatis hari itu, JSON array (agenda, tagihan, sholat, tidur…).
+  TextColumn get sorotan => text().withDefault(const Constant('[]'))();
+
+  /// Salinan skor suasana 0–5 untuk grafik cepat; sumber tetap `suasana_hati`.
+  IntColumn get suasana => integer().nullable()();
+
+  /// Menit tidur (denormalisasi sengaja, untuk ringkasan cepat).
+  IntColumn get tidurMenit => integer().nullable()();
+
+  /// 1–5 tingkat energi (denormalisasi).
+  IntColumn get energi => integer().nullable()();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-B3 · Tautan — graf polimorfik antar SEMUA entitas (backlink).
+///
+/// Generalisasi `tautan_pengetahuan` dengan perbedaan penting: tabel lama
+/// memakai ID ANGKA, tabel ini memakai UID (stabil lintas HP). Tautan berarah
+/// (A→B); panel "Dirujuk oleh" membaca arah balik lewat `idx_tautan_balik`.
+class Tautan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Nama tabel SQL entitas A (mis. `tagihan`, `catatan_pengetahuan`).
+  TextColumn get entitasA => text()();
+
+  /// uid baris A.
+  TextColumn get uidA => text()();
+
+  /// Judul A saat tautan dibuat (panel backlink tampil tanpa join).
+  TextColumn get judulA => text().withDefault(const Constant(''))();
+
+  TextColumn get entitasB => text()();
+  TextColumn get uidB => text()();
+  TextColumn get judulB => text().withDefault(const Constant(''))();
+
+  /// manual · mesin · impor
+  TextColumn get sumber => text().withDefault(const Constant('manual'))();
+
+  /// Label relasi opsional: "dibayar ke", "dokter penangan", "dipakai di".
+  TextColumn get label => text().nullable()();
+
+  /// 0.0–1.0 untuk tautan mesin (unlinked mention).
+  RealColumn get kekuatan => real().nullable()();
+
+  /// true = usulan mesin yang belum diterima pengguna.
+  BoolColumn get usulan => boolean().withDefault(const Constant(false))();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-B4 · Sorotan — kutipan yang ditinggikan dari entitas apa pun.
+///
+/// Bahan baku ringkasan progresif: sorotan → ringkasan → artikel.
+class Sorotan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Nama tabel SQL pemilik (pola `lampiran.induk_tabel`).
+  TextColumn get entitas => text()();
+
+  /// uid baris pemilik.
+  TextColumn get entitasUid => text()();
+
+  /// Teks yang ditinggikan pengguna; tidak boleh kosong (dijaga repositori).
+  TextColumn get kutipan => text()();
+
+  /// Offset karakter di dalam isi sumber; null = tidak dilacak.
+  IntColumn get mulai => integer().nullable()();
+  IntColumn get akhir => integer().nullable()();
+
+  /// Penanda warna opsional (#RRGGBB), mengikuti pola kolom `warna` repo.
+  TextColumn get warna => text().nullable()();
+
+  /// Catatan pengguna atas sorotan ini.
+  TextColumn get catatan => text().nullable()();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}

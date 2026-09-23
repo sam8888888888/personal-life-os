@@ -1,9 +1,9 @@
 # STATUS FITUR PRD v3.1 — 152 butir
 
-Disusun ulang oleh Aaron (Ron) · 22 Sep 2026 (Batch 13: FR-38 & FR-50 selesai; FR-59 SEBAGIAN — baca notifikasi bank tidak dikerjakan atas keputusan pemilik).
+Disusun ulang · 23 Sep 2026. Pada tanggal yang sama seluruh temuan **audit kode eksternal** (P0-1…P3-10) ditindaklanjuti: penandatanganan rilis, cadangan awan Android dimatikan, cadangan & rahasia terenkripsi, kanal berkas medis disambungkan, izin SMS dibuang seluruhnya, versi skema cadangan disamakan dengan basis data, jalur integrasi berkelanjutan, dan pembersihan template/web. Ringkasan per temuan ada di bagian **13 · Perbaikan hasil audit 23 Sep 2026** di bawah.
 Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN** = ada tetapi belum lengkap; **BELUM** = belum ada jejaknya.
 
-**Hitungan: SELESAI 151 · SEBAGIAN 1 · BELUM 0** (total 152 butir)
+**Hitungan: SELESAI 150 · SEBAGIAN 1 · BELUM 1** (total 152 butir)
 
 
 ## 0 · Dasar & Tagihan (V1)
@@ -33,9 +33,9 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-21 | Mode gelap & terang, aksent warna, ukuran teks mengikuti sistem | - | SELESAI | Ron 20 Sep: mode terang/gelap/ikut sistem + saklar di Pengaturan. |
 | FR-22 | Badge/angka tagihan hari ini di ikon launcher (bila API | - | SELESAI | Ron 22 Sep: lencana angka di ikon aplikasi = jumlah tagihan yang jatuh tempo hari ini atau sudah lewat & belum lunas; dikirim ke peluncur lewat siaran khas Samsung/Sony/HTC/LG/Nova/ADW. Peluncur yang tidak mendukung lencana tidak menampilkannya — dinyatakan di layar, bukan dijanjikan. Uji: hitungan + kanal (kanal tiruan mencatat angka yang dikirim). |
 | FR-23 | Semua data lokal (SQLite), tanpa akun, tanpa telemetri wajib | - | SELESAI | Diperbarui 21 Sep: data tetap lokal; akun kini OPSIONAL untuk sinkron (FR-150). |
-| FR-24 | Ekspor cadangan JSON + impor restore (termasuk migrasi antar HP) | - | SELESAI | `lib/core/backup/ekspor_impor.dart`, `lib/features/pengaturan/backup_screen.dart`, uji 28/28. Batas: pemilihan berkas hanya dari folder dokumen aplikasi; berkas tidak dienkripsi. |
+| FR-24 | Ekspor cadangan JSON + impor restore (termasuk migrasi antar HP) | - | SELESAI | `lib/core/backup/ekspor_impor.dart`, `lib/features/pengaturan/backup_screen.dart`. Diperbarui 23 Sep 2026 (audit P0-3): berkas cadangan SELALU ditulis TERENKRIPSI (AES-256-GCM, kunci turunan PBKDF2-HMAC-SHA256 600.000 putaran). Dua cara buka: (a) tanpa frasa sandi -> kunci perangkat dari brankas Keystore, hanya bisa dibuka di HP itu sendiri; (b) dengan frasa sandi pengguna (paling sedikit 8 karakter) -> berkas bisa dipindah ke HP lain. Versi skema di dalam berkas diambil dari skema basis data yang benar-benar dipakai (dulu tertulis 4 padahal 18). Batas: pemilihan berkas impor hanya dari folder dokumen aplikasi. |
 | FR-25 | Ekspor CSV untuk dibuka di spreadsheet | - | SELESAI | Ron 21 Sep: ekspor CSV tagihan & riwayat pembayaran (menu Uang → Ekspor CSV), uji 8 kasus. |
-| FR-26 | Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif | - | SELESAI | Ron 22 Sep: PIN 4-12 angka disimpan sebagai turunan PBKDF2-HMAC-SHA256 (PIN mentah tidak pernah ditulis); salah 5 kali -> percobaan ditahan 30 detik; boleh dibuka dengan kunci perangkat HP (sidik jari/PIN HP lewat Android Keyguard); tirai kunci menahan ISI aplikasi sampai PIN benar; masa tenggang sebelum terkunci lagi bisa diatur (langsung/30 dtk/1 mnt/5 mnt). Uji: 11 kasus (logika + layar). |
+| FR-26 | Kunci aplikasi (PIN/pola/biometrik) untuk data sensitif | - | SELESAI | PIN 6-12 angka; PIN mentah tidak pernah ditulis, yang disimpan turunan PBKDF2-HMAC-SHA256 600.000 putaran + garam, lalu turunannya DIENKRIPSI kunci Android Keystore (hasil audit P1-2: menyalin basis data saja tidak cukup untuk menebak PIN). Salah 5 kali -> ditahan 30 detik; bisa dibuka dengan kunci perangkat HP (sidik jari/PIN HP lewat Android Keyguard); tirai kunci menahan ISI aplikasi sampai PIN benar; masa tenggang bisa diatur (langsung/30 dtk/1 mnt/5 mnt). Kalau basis data tidak bisa dibaca, aplikasi TIDAK terbuka (gagal-tertutup) dan menawarkan atur ulang PIN setelah pemilik membuktikan identitas lewat kunci perangkat. |
 | FR-27 | Sinkronisasi antar perangkat via file/cloud pilihan pengguna | - | SELESAI | Ron 22 Sep: pilihan kanal sinkron — server sendiri (akun) atau BERKAS (ekspor .json lalu dibagikan lewat WhatsApp/Drive/USB, impor dari pemilih berkas Android). Tanpa server pun jalan. |
 | FR-28 | Grafik sederhana beban tagihan per bulan (total & per kategori) | - | SELESAI | `lib/core/laporan/beban_tagihan.dart` + layar + rute `/laporan/beban-tagihan`, uji 24/24. |
 | FR-29 | Riwayat pembayaran & statistik: rata-rata nominal, jumlah | - | SELESAI | Ron 21 Sep: statistik pembayaran — total, rata-rata, terbesar/terkecil, % tepat waktu, tren 12 bulan. |
@@ -48,7 +48,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-36 | Skor Disiplin Tagihan lokal (0–100) + streak bebas denda + daftar capa | - | SELESAI | Ron 21 Sep: skor disiplin tagihan lokal 0–100 + rentetan & capaian, dengan penegasan bukan skor kredit. |
 | FR-37 | Rekap Tahunan ala "Wrapped": statistik tahunan + kartu berbagi gambar  | - | SELESAI | Ron 21 Sep: rekap tahunan (total, tepat waktu, bulan tersibuk) + kartu berbagi PNG. |
 | FR-38 | Impor tagihan dari foto/screenshot dengan OCR di perangkat | F08 | SELESAI | Ron 22 Sep: OCR ML Kit model terbundel (offline, tanpa Play Services, tidak dikirim keluar); nominal/jatuh tempo/nomor pelanggan jadi DRAF yang wajib diperiksa. Rute /tagihan/impor-foto. |
-| FR-39 | Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta | V2 | SELESAI | Ron 22 Sep: izin bawaan mati + dialog sistem; penguraian di perangkat; usulan saja (tagihan tidak pernah ditandai lunas sendiri). Rute /uang/pemindai-bank. |
+| FR-39 | Pemindai bank tanpa SMS (impor rekening PDF/CSV / notifikasi bank) | V2 | BELUM | Ron 23 Sep: jalur SMS DIBUANG seluruhnya (kanal Kotlin, kanal Dart, layar, repositori, mesin pengurai, rute) karena izin READ_SMS dilarang pemilik & memicu Play Protect memblokir pemasangan. Pengganti resmi belum dikerjakan — ditandai BELUM, bukan dinaikkan. |
 | FR-40 | Pembelajaran pola tanggal bayar dari riwayat; usul penyesuaian penging | - | SELESAI | Ron 21 Sep: pengingat pintar mengikuti pola bayar pengguna (layar Pola bayar). |
 | FR-41 | Ekspor tagihan mendatang ke Google Kalender; opsi impor .ics (F11) | - | SELESAI | Ron 21 Sep: ekspor jadwal tagihan ke .ics (Google Kalender), periode 3/6/12/24 bulan. |
 | FR-42 | Pusat Bayar: preferensi aplikasi bayar per tagihan, salin nomor VA/QRI | - | SELESAI | Ron 21 Sep: Pusat Bayar — VA/QRIS, salin nomor sekali tekan, catatan konfirmasi. |
@@ -68,7 +68,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-56 | Sub-Akses Keluarga (opsional sinkron): berbagi | F8 | SELESAI | Ron 22 Sep: izin per anggota × modul (bawaan MATI), penegakan di lapisan data; paket berbagi hanya izin + jumlah baris. Rute /keluarga/sub-akses. |
 | FR-57 | Perawatan berkala (memakai mesin FR-125) | F8 | SELESAI | Ron 22 Sep: sudah ada sejak FR-125 (intervalHari + berikutnya + leadHari, template bawaan, SumberPengingatPerawatan terdaftar); batch 12 memverifikasi & menguji — tanpa tabel/mesin kembar. Rute /aksi/perawatan. |
 | FR-58 | Voice & Parsing Cerdas | F8 | SELESAI | Ron 22 Sep: satu kalimat jadi draf (pengeluaran/tagihan/dana/perawatan); pengenalan suara bawaan Android, penguraian di perangkat, draf wajib dikonfirmasi. Rute /suara. |
-| FR-59 | Auto-catat pengeluaran (perluas FR-39) | F8 | SEBAGIAN | Ron 22 Sep: dari SMS bank sudah bisa (catat pengeluaran / tandai lunas, satu ketukan). Membaca NOTIFIKASI aplikasi bank SENGAJA TIDAK dikerjakan — keputusan pemilik, izin baca semua notifikasi terlalu berisiko. |
+| FR-59 | Auto-catat pengeluaran (perluas FR-39) | F8 | SEBAGIAN | Ron 23 Sep: jalur SMS sudah DIBUANG seluruhnya, jadi auto-catat dari SMS tidak lagi ada di aplikasi. Penggantinya (impor rekening PDF/CSV atau Notification Listener) belum dikerjakan — ditulis apa adanya. |
 
 ## 1 · Today / Pusat Harian
 
@@ -142,7 +142,7 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-105 | Jurnal Kesehatan (angka) | V2 | SELESAI | Ron 21 Sep: jurnal angka kesehatan — tekanan darah 2 angka, satuan per jenis, tren 30 hari. |
 | FR-106 | Manajer Obat & Vitamin | V2 | SELESAI | rute /kesehatan/obat + penanda minum |
 | FR-107 | Perkiraan Obat Habis & Pengingat Beli | V2 | SELESAI | Ron 21 Sep: perkiraan obat habis (sisa ÷ dosis per hari) + pengingat H-5/H-1. |
-| FR-108 | Brankas Catatan Medis | V3 | SELESAI | Ron 22 Sep: brankas catatan medis — jenis (lab, tahunan, resep, imunisasi, tagihan medis, dokter, pencitraan), pencarian kata menjangkau judul/hasil/ringkasan/tenaga kesehatan/fasilitas + lampiran berkas TERENKRIPSI (AES-256-GCM, kunci di Android Keystore, tidak diekspor). Bila perangkat tidak mendukung enkripsi, berkas TIDAK disimpan. |
+| FR-108 | Brankas Catatan Medis | V3 | SELESAI | Brankas catatan medis — jenis (lab, tahunan, resep, imunisasi, tagihan medis, dokter, pencitraan), pencarian kata menjangkau judul/hasil/ringkasan/tenaga kesehatan/fasilitas + lampiran berkas TERENKRIPSI (AES-256-GCM, kunci di Android Keystore, tidak diekspor). Bila perangkat tidak mendukung enkripsi, berkas TIDAK disimpan. Diperbaiki 23 Sep 2026 (audit P0-4): kanal brankas berkas medis dulu TIDAK PERNAH dipasang di MainActivity sehingga lampiran gagal dengan galat plugin tak terdaftar — sekarang dipasang, dan ada uji penjaga yang membaca kode Android vs pemanggilan Dart supaya tidak terulang. |
 | FR-109 | Janji Dokter di Kalender | V2 | SELESAI | Ron 21 Sep: janji dokter/lab/kontrol + pengingat 7 hari, 1 hari, dan 2 jam sebelum. |
 | FR-110 | Catatan Makan Ringkas (quick log) | V3 | SELESAI | Ron 22 Sep: catat cepat per waktu makan, porsi, dan penilaian sendiri (baik/cukup/kurang). |
 | FR-111 | Pencatat Air | V2 | SELESAI | tombol +250 ml / +500 ml |
@@ -217,3 +217,134 @@ Penandaan jujur: **SELESAI** = ada kode + uji dan sudah diverifikasi; **SEBAGIAN
 | FR-150 | Sinkron Antar Perangkat & Cloud (memperluas FR-27) | V4 | SELESAI | Ron 22 Sep: sinkron SEMUA MODUL (40 tabel: uang, aset, tujuan/tugas, kebiasaan, kesehatan, dokumen, pengetahuan, ibadah) — pengenal uid, kaitan antar tabel dipetakan ulang antar HP, bentrok versi-kalah disimpan, diuji dua basis data. Belum: berkas lampiran & catatan obat. |
 | FR-151 | Widget & Akses Cepat Lanjutan (memperluas FR-31) | V2 | SELESAI | Ron 22 Sep: tombol di widget LANGSUNG menjalankan aksi saat aplikasi terbuka dari widget (satu ketukan, bukan membuka formulir lagi) dan menulis ke basis data yang sama sehingga tersinkron; baris widget bisa ditandai lunas satu per satu; aksi cepat ikon bertambah: 'Catat pengeluaran' dan 'Widget tagihan'. Uji: aksi lunas benar-benar mengubah data. |
 | FR-152 | Multi-bahasa & Multi-mata Uang (memperluas FR-52) | V4 | SELESAI | Ron 22 Sep: multi-bahasa (Indonesia/Melayu/Inggris) untuk kerangka aplikasi, Pengaturan, dan tab; kurs selalu disimpan bersama SUMBER + WAKTU pembaruan, bisa diambil dari jaringan atau diisi manual, dan setiap nilai yang belum punya kurs disebut belum bisa dikonversi (tidak dikira-kira). Uji: mesin + repositori + layar. |
+
+
+## 13 · Perbaikan hasil audit 23 Sep 2026
+
+Audit kode eksternal atas snapshot publik menemukan 4 temuan kritis (P0), 5 tinggi (P1),
+6 menengah (P2), dan 10 kebersihan (P3). Keadaannya di kode sekarang — ditulis apa adanya,
+termasuk yang BELUM:
+
+| Temuan | Keadaan | Bukti / catatan |
+|---|---|---|
+| P0-1 APK rilis ditandatangani kunci debug | SELESAI | `android/app/build.gradle.kts` membaca `android/key.properties` (contoh ada di `android/key.properties.example`, berkas aslinya di-`.gitignore`). Bila berkas kunci tidak ada, build tetap jalan dengan kunci debug TETAPI mencetak peringatan di keluaran build. |
+| P0-2 Cadangan otomatis Android mengirim seluruh basis data ke Google Drive | SELESAI | `allowBackup="false"`, `dataExtractionRules`, `networkSecurityConfig`, `usesCleartextTraffic="false"` di manifest utama; layar Cadangan menyatakan terus terang bahwa cadangan awan Android dimatikan. |
+| P0-3 Rahasia & berkas cadangan tersimpan polos | SELESAI | `BrankasRahasia.kt` (AES-256-GCM, kunci Android Keystore tidak bisa diekspor) + `lib/core/platform/brankas_rahasia.dart`. Token akun, kunci API Copilot, dan turunan PIN tidak lagi polos di basis data. Cadangan ditulis TERENKRIPSI (amplop `plo-backup-terenkripsi`), kunci perangkat untuk cadangan otomatis/pengaman, atau frasa sandi pengguna untuk berkas yang dipindah HP. |
+| P0-4 Kanal brankas berkas medis tidak pernah dipasang | SELESAI | Dipasang di `MainActivity.kt`; ada uji penjaga yang membandingkan kanal di kode Dart vs kode Android. Uji di HP (lampirkan berkas medis nyata) tetap menjadi gerbang pemilik. |
+| P1-1 Izin INTERNET tidak ada di manifest utama | SELESAI | Ditambahkan; dibuktikan lewat `aapt2 dump permissions` pada APK hasil build. |
+| P1-2 PIN 4 angka + 60.000 putaran, dua jalur gagal-terbuka | SELESAI | PIN 6-12 angka, 600.000 putaran, turunan diikat rahasia Keystore, dan kegagalan membaca basis data menahan aplikasi (gagal-tertutup) dengan tawaran atur ulang PIN. |
+| P1-3 Versi skema cadangan 4 padahal skema 18; versi aplikasi basi | SELESAI | Versi skema dibaca dari `AppDatabase.schemaVersion`; versi aplikasi dari satu sumber `lib/core/versi.dart` yang dijaga uji agar sama dengan `pubspec.yaml`. |
+| P1-4 Tanpa minify/shrink/obfuscate | SELESAI | `isMinifyEnabled`, `isShrinkResources`, `proguard-rules.pro` (+ aturan keep ML Kit). Langkah AAB & `--obfuscate --split-debug-info` ada di `docs/PERSIAPAN_PLAY_STORE.md`. |
+| P1-5 Sisa kode SMS (KanalSms & kawan-kawan) | SELESAI | `KanalSms.kt`, `kanal_sms.dart`, `pemindai_bank.dart`, `pemindai_bank_repository.dart`, `pemindai_bank_screen.dart` DIHAPUS; ada uji penjaga yang memindai `lib/` dan `android/` untuk nama izin SMS. |
+| P2-1 FileProvider membuka akar folder berkas | SELESAI | `berkas_paths.xml` dipersempit ke subfolder `bagikan/`; berkas yang dibagikan disalin dulu ke `cache/bagikan/`. |
+| P2-2 Basis data belum terenkripsi (SQLCipher) | SELESAI | Basis data disimpan TERENKRIPSI memakai SQLCipher. Caranya lewat jalur resmi `package:sqlite3` (`hooks: user_defines: sqlite3: source: sqlcipher` di `pubspec.yaml`); biner unduhannya diverifikasi sha256 oleh paket itu sendiri. Kunci 256-bit dibuat sekali di Android Keystore (`lib/data/database/enkripsi_basisdata.dart`, nama rahasia `basisdata.kunci`) dan TIDAK BISA DIEKSPOR. Berkas lama berisi data pengguna dimigrasi otomatis sekali: disalin dulu ke titik pulih `.cadangan-polos`, hasilnya diverifikasi (jumlah tabel sama), dan salinan polos itu dihapus HANYA setelah verifikasi lolos; gagal di tahap mana pun → berkas polos dikembalikan utuh dan aplikasi tetap jalan. Bila perangkat tidak punya Keystore atau pustaka SQLCipher tidak ada, berkas TIDAK disentuh dan layar Cadangan mengatakan terus terang "BELUM terenkripsi" — tidak pernah mengaku aman. Uji gerbang di HP: pastikan data lama masih terbaca setelah pembaruan (migrasi) dan pengingat tetap jalan. |
+| P2-3 Endpoint AI bisa diarahkan ke http:// | SELESAI | Alamat wajib `https`, pesannya menjelaskan sebabnya; `network_security_config.xml` melarang lalu lintas tanpa enkripsi sebagai sabuk pengaman kedua. |
+| P2-4 IP server & nama pribadi di repo publik | SELESAI | Catatan internal (`AARON_NOTES.md`, `RENCANA_AARON_V3.md`, `docs/HANDOVER_*.md`, `docs/SERAHAN_TOTAL_*.md`) dikeluarkan dari repo dan di-`.gitignore`; alamat server lewat `--dart-define=LIFEOS_API`. |
+| P2-5 MainActivity menerima rute bebas dari aplikasi lain | SELESAI | Rute disaring dengan daftar putih; layar-di-atas-kunci hanya untuk paket sendiri. |
+| P2-6 96 `catch (_)` tanpa jejak | SELESAI | Setiap `catch` di lapisan data mencatat galat lewat `catatGalatTertelan` (tersimpan di memori + dialirkan ke layar yang mau menampilkannya). |
+| P3-1 Sisa template web | SELESAI | Folder `web/` dihapus, `.metadata` disesuaikan (aplikasi Android saja). |
+| P3-2 Deskripsi pubspec template | SELESAI | Diganti deskripsi produk. |
+| P3-3 `database.g.dart` ikut ter-commit | TETAP (disengaja) | Dipertahankan agar jalur uji tidak wajib `build_runner`; langkah CI membangun ulang dan menggagalkan build bila hasilnya berbeda. |
+| P3-4 Tidak ada CI | SELESAI | `.github/workflows/ci.yml`: `flutter analyze --fatal-infos`, pemeriksaan hasil generate drift, seluruh uji, dan uji tangkapan layar dijalankan ulang. |
+| P3-5 Berkas sangat besar (1000+ baris) | BELUM | Pemecahan berkas besar belum dikerjakan (tidak mengubah perilaku, jadi ditunda). |
+| P3-6 Dua paradigma state bercampur | BELUM | Penyatuan ke Riverpod dikerjakan bertahap, belum dimulai. |
+| P3-7 minSdk/targetSdk tidak dipatok | SELESAI | Dipatok `minSdk = 24`, `targetSdk = 36`. |
+| P3-8 analysis_options hanya flutter_lints | SEBAGIAN | Empat aturan tambahan dinyalakan (aman pada kode sekarang): `use_build_context_synchronously`, `unawaited_futures`, `cancel_subscriptions`, `close_sinks`. `very_good_analysis` belum dipakai karena memunculkan ratusan temuan gaya. |
+| P3-9 Gambar demo & golden ganda | BELUM | Belum dirapikan. |
+| P3-10 `SCHEDULE_EXACT_ALARM` tanpa justifikasi | SEBAGIAN | Alasan penggunaannya ditulis di `docs/PERSIAPAN_PLAY_STORE.md` untuk formulir Play; perpindahan ke alarm inexact belum dikerjakan (pengingat tepat waktu adalah inti fitur). |
+
+### Usulan audit yang BELUM dibangun (bukan bagian perbaikan temuan)
+
+Usulan "Fase 2-3" dari audit (Health Connect, impor rekening PDF/CSV, widget kedua & ketiga,
+sinkron E2EE, penampil konflik sinkron, AI on-device, audit aksesibilitas, dll.) **belum
+dikerjakan** — daftarnya dicatat sebagai rencana, bukan diklaim selesai. Enkripsi basis data
+(SQLCipher) yang semula ada di daftar ini sudah dikerjakan, lihat P2-2 di tabel atas.
+
+## 14 · Cara aplikasi ini diuji (supaya angka uji tidak menyesatkan)
+
+Hasil `flutter test` pada 23 Sep 2026 (setelah Gelombang 1 SDD v19): **1.392 lulus, 1 dilewati,
+6 gagal** dari 1.399 berkas kasus uji. Keenam kegagalan itu **bawaan repo, bukan akibat
+pekerjaan ini** — dibuktikan dengan menjalankan berkas uji yang sama pada salinan sebelum
+perubahan (`/opt/aaron-tools/baseline/lifeos`): hasilnya juga gagal, sama persis:
+
+| Uji yang gagal (warisan) | Sifat |
+|---|---|
+| `v2_dokumen_test` — (10) `segeraBerakhir`, (13) pengingat lead hari | hitungan hari bergantung tanggal berjalan |
+| `v2_dokumen_test` — hitungan murni `sisaHari` & status masa berlaku | batas hari |
+| `v2_aksi_test` — tukar jadwal perawatan berkala | selisih waktu (23:00 vs 00:00) |
+| `v3_langganan_pintar_test` — langganan jarang dipakai (257 vs 256 hari) | selisih satu hari |
+| `v2_ibadah_test` — `hitungRamadan` (36 vs 35 hari) | selisih satu hari |
+
+Keenamnya **belum diperbaiki** (bukan bagian temuan audit); keputusannya diserahkan ke pemilik.
+Sebelas kegagalan lain yang dulu ada (4 uji layar akun + uji tirai kunci) **sudah betul**: akarnya
+sama — kanal platform tidak pernah menjawab di dalam waktu tiruan uji widget. Perbaikannya:
+gudang rahasia **disuntik** (`PenyimpanRahasia(pengaturan, gudang: …)`, lihat
+`test/bantuan/gudang_memori.dart`), bukan lewat kanal. Uji tirai kunci yang dulu menggantung
+4 menit 55 detik kini selesai ~1 detik.
+
+Dua catatan penting soal menjalankan uji:
+
+1. **Host uji wajib glibc ≥ 2.38.** Biner SQLCipher yang diunduh hook mensyaratkan glibc 2.38;
+   di host lama seluruh uji gagal memuat pustaka (bukan karena kode). Dipakai Ubuntu 24.04
+   (`flutter test` di Austria).
+2. **Kanal platform ditirukan di uji** (`test/flutter_test_config.dart`). Di dalam uji widget,
+   panggilan kanal sungguhan tidak selesai di bawah waktu tiruan (`pumpAndSettle` menggantung),
+   jadi brankas Keystore dan enkripsi cadangan ditirukan: brankas = peta memori, enkripsi =
+   XOR + HMAC-SHA256 (**bukan** AES-256-GCM). Karena itu: **enkripsi sungguhan hanya bisa
+   dibuktikan di HP**, bukan oleh suite Dart. Uji tangkapan layar (golden) diperbarui dan
+   dijalankan ulang; font Roboto dicari lewat `FLUTTER_ROOT`, bukan path mati.
+
+## 15 · Jaringan ikat SDD v19 — Gelombang 1
+
+Pekerjaan ini mengikuti dokumen SDD v19 bagian "arsitektur lapisan". Gelombang 1 =
+**empat tabel batang** yang jadi jaringan ikat seluruh aplikasi, plus dua layar yang
+membuatnya langsung berguna. Skema basis data naik **18 → 19**.
+
+| Tabel | Gunanya | Kolom kunci |
+|---|---|---|
+| `kotak_masuk` | catat cepat: satu pintu, nol keputusan. Sortir belakangan. | `status` (baru/arsip/diproses/dibuang), `tujuan_tabel`, `tujuan_uid` |
+| `catatan_harian` | satu halaman per hari; tulisan pengguna dan ringkasan mesin dipisah kolom | `tanggal_kunci` (YYYY-MM-DD, unik), `isi`, `ringkasan_mesin` |
+| `tautan` | graf polimorfik antar semua entitas (pengganti bertahap `tautan_pengetahuan`) | `entitas_a`/`uid_a`/`entitas_b`/`uid_b`, `label`, `usulan` |
+| `sorotan` | kutipan yang ditinggikan — bahan baku ringkasan progresif | `entitas`, `entitas_uid`, `kutipan`, `mulai`/`akhir`, `warna` |
+
+Lima belas indeks v19 dipasang bersamaan (`idx_km_*`, `idx_ch_*`, `idx_tautan_*`,
+`idx_sorotan_*`), termasuk `idx_tautan_balik` untuk panel "Dirujuk oleh".
+
+Dua hal yang ikut dibetulkan di jalur migrasi:
+
+1. **Urutan blok migrasi dirapikan menaik** (semula 18 → 17 → 16 → 15, kini 2 → 19).
+   Urutan lama tidak menaik sehingga pembacaan jalur migrasi menyesatkan.
+2. **Perpindahan data tautan lama**: baris `tautan_pengetahuan` dipindahkan ke `tautan`
+   hanya bila kedua ujungnya punya `uid` yang nyata. Entitas tanpa `uid` **tidak
+   dikarang** — dilewati dan jumlahnya dilaporkan lewat `debugPrint`.
+
+Yang bisa dipakai sekarang:
+
+* **Catat Cepat** (menu Lainnya) — tulis/tempel apa saja, tersimpan ke kotak masuk;
+  tiga tindakan sortir: *Ke catatan hari ini* (teks masuk ke halaman hari ini **dan**
+  dibuat tautan jejak asal), *Arsipkan*, *Buang* (ditandai, tidak dihapus).
+* **Catatan Harian** (menu Lainnya) — halaman per hari, geser hari, simpan tulisan,
+  tambah sorotan, lihat ringkasan mesin (terpisah dari tulisan), dan panel
+  **Dirujuk oleh** yang membaca tabel `tautan`.
+* Aksi pengguna pada dua layar itu tercatat di catatan aktivitas (modul baru:
+  `kotak_masuk`, `catatan_harian`).
+
+Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
+
+* **Tebakan tujuan otomatis** untuk kotak masuk belum dipasang — jadi belum ada usulan
+  mesin di layar Catat Cepat.
+* **Sorotan belum bisa dibuat dari pilihan teks** di halaman catatan; masih berupa
+  masukan teks kutipan.
+* **Penegakan relasi antar-tabel tetap dimatikan** (tidak ada `REFERENCES`), sesuai
+  keputusan dokumen: ditunda ke v20.
+* **Gelombang 2** (lima tabel kesehatan) dan **Gelombang 3** (tabel orang + mesin pola)
+  belum dimulai.
+* APK v19 **sudah dibangun**: `personal-life-os-v1.11.0-build14.apk` (universal: arm64 + arm32
+  + x86_64, 94.733.766 byte, SHA-256 `b2a86100…4508`), tersedia di
+  `https://coder.sam.university/apk/personal-life-os-v1.11.0-build14.apk` (unduhan web).
+  Basis data di HP akan naik otomatis ke 19 saat aplikasi ini pertama dibuka.
+
+Uji: berkas baru `test/v19_jaringan_ikat_test.dart` berisi **22 kasus** — skema & indeks,
+migrasi v18 → v19 pada berkas nyata (termasuk dijalankan dua kali), perilaku empat
+repositori, dan dua uji layar. Angka suite penuh menyusul di bagian 14 setelah
+penjalanan terakhir gelombang ini.

@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Sinkron antar perangkat, AI Copilot (bila diizinkan pengguna), jadwal
+         sholat/kota, dan pemeriksaan versi membutuhkan jaringan. Rilis TIDAK
+         boleh mengandalkan izin "development only" dari src/debug &
+         src/profile — tanpa baris ini sinkron & Copilot mati di rilis. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- F3: pengingat tagihan (PRD FR-13). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -14,10 +19,19 @@
          Pemicu Play Protect memblokir pemasangan. Fitur baca bank via SMS tidak dipakai. -->
     <!-- Kamera tidak wajib ada: aplikasi tetap jalan tanpa kamera. -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <!-- Cadangan otomatis Android DIMATIKAN: tanpa ini seluruh basis data
+         (keuangan, kesehatan, dokumen keluarga) ikut terunggah ke Google Drive
+         pengguna, termasuk token akun & hash PIN. Penggantinya: cadangan
+         terenkripsi milik aplikasi sendiri (Pengaturan → Cadangan). -->
     <application
         android:label="Personal Life OS"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"

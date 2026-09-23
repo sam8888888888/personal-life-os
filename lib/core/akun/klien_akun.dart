@@ -8,8 +8,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-/// Alamat server akun (server Papi sendiri, lewat HTTPS).
-const String alamatServerBawaan = 'https://coder.sam.university/lifeos-api';
+/// Alamat server akun (server sendiri, lewat HTTPS).
+///
+/// Alamatnya TIDAK ditulis tetap di kode supaya snapshot publik tidak
+/// memuat alamat server pribadi (hasil audit 23 Sep 2026, P2-4). Saat
+/// membangun untuk perangkat, arahkan lewat:
+///
+/// ```
+/// flutter build apk --release \
+///   --dart-define=LIFEOS_API=https://server-anda.example/lifeos-api
+/// ```
+///
+/// Tanpa `--dart-define`, nilai bawaan di bawah yang dipakai.
+const String alamatServerBawaan = String.fromEnvironment(
+  'LIFEOS_API',
+  defaultValue: 'https://coder.sam.university/lifeos-api',
+);
 
 /// Sesi akun yang tersimpan di perangkat.
 class AkunSesi {

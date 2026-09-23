@@ -3,3 +3,11 @@ build/
 .idea/
 *.iml
 test/failures/
+
+# Catatan kerja internal — memuat nama orang & alamat server, tidak boleh ikut
+# ke repo publik (bisa dipakai untuk pengintaian). Simpan di luar repo.
+AARON_NOTES.md
+RENCANA_AARON_V3.md
+docs/HANDOVER_*.md
+docs/SERAHAN_TOTAL_*.md
+docs/AARON-CHANGES.diff

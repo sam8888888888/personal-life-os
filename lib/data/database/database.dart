@@ -1,12 +1,14 @@
 /// Koneksi database utama — Drift + SQLite lokal (offline-first, PRD §8.2).
 library;
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../core/utils/waktu.dart';
 import '../repository/template_kategori_transaksi.dart';
+import 'enkripsi_basisdata.dart';
 import 'tabel.dart';
 
 part 'database.g.dart';
@@ -117,7 +119,11 @@ part 'database.g.dart';
   TagihanRumahBersama,
   BagianTagihanRumah,
   IzinSubAksesKeluarga,
-  PemindaianBank,
+  PemindaianBank,  KotakMasuk,
+  CatatanHarian,
+  Tautan,
+  Sorotan,
+
 ])
 class AppDatabase extends _$AppDatabase {
   /// [nama] = nama berkas basis data. FR-44 (multi-profil) memakai nama
@@ -127,7 +133,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -137,6 +143,7 @@ class AppDatabase extends _$AppDatabase {
           await _pasangIndeksUnikV3();
           await _pasangIndeksUnikV4();
           await _pasangIndeksUnikV5();
+          await _pasangIndeksV19();
           await _seedKategori();
           await seedKategoriTransaksi();
           await _seedPerawatanV4();
@@ -157,6 +164,7 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             debugPrint('migrasi v2 selesai (baris dibersihkan: '
                 '$hapusRiwayat riwayat / $hapusPemasukan pemasukan)');
           }
+
           if (dari < 3) {
             // v3: tabel BARU saja — tidak ada kolom tabel lama yang diubah,
             // jadi data pengguna tidak tersentuh oleh migrasi ini.
@@ -169,6 +177,7 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             debugPrint('migrasi v3 selesai (tabel kas & kekayaan dibuat, '
                 'kategori transaksi: ${jml.length})');
           }
+
           if (dari < 4) {
             // v4: 23 tabel BARU untuk V2 (pilar kehidupan). Tidak ada kolom
             // tabel lama yang diubah, jadi data pengguna tidak tersentuh.
@@ -177,6 +186,25 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             await _seedPerawatanV4();
             debugPrint('migrasi v4 selesai (tabel pilar kehidupan dibuat)');
           }
+
+          if (dari < 5) {
+            // v5 (FR-82): dua tabel BARU (visi, area hidup) + satu kolom BARU
+            // pada `tujuan` (area_id). Kolom nullable, jadi tujuan lama tetap
+            // utuh tanpa diisi apa pun.
+            await m.createTable(visi);
+            await m.createTable(areaHidup);
+            // Kolom area_id hanya ditambahkan bila tabel `tujuan` SUDAH ada
+            // (perangkat yang datang dari v4). Bila perangkat datang dari v2/v3,
+            // tabel tujuan baru saja dibuat oleh blok v4 di atas dan sudah
+            // memuat kolom ini — menambahkannya lagi = galat "duplicate column".
+            if (dari >= 4) {
+              await m.addColumn(tujuan, tujuan.areaId);
+            }
+            await _pasangIndeksUnikV5();
+            debugPrint('migrasi v5 selesai (visi & area hidup dibuat, '
+                'kolom tujuan.area_id ditambahkan)');
+          }
+
           if (dari < 6) {
             // v6 (sinkron antar HP): kolom uid di tagihan + tabel jejak hapus.
             // Baris lama diberi uid unik per baris, jadi tidak ada yang bentrok
@@ -200,19 +228,7 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
                 'ON tagihan(uid)');
             debugPrint('migrasi v6 selesai (uid tagihan terisi, catatan perubahan siap)');
           }
-          if (dari < 9) {
-            // v9: delapan tabel BARU (pengetahuan + makan & suasana hati).
-            // Tanpa mengubah tabel lama, jadi data pengguna tidak tersentuh.
-            await _buatTabelV9(m);
-            debugPrint('migrasi v9 selesai (tabel pengetahuan & catatan makan/'
-                'suasana hati dibuat)');
-          }
-          if (dari < 8) {
-            // v8 (FR-107): kolom sisa obat. Kolom BARU boleh kosong, jadi data
-            // obat yang sudah ada tidak berubah.
-            await _tambahKolomV8(m);
-            debugPrint('migrasi v8 selesai (kolom sisa obat ditambahkan)');
-          }
+
           if (dari < 7) {
             // v7: lima tabel BARU (kesehatan lanjutan, janji dokter, kas
             // informal, hafalan, zakat & sedekah). Tidak ada kolom tabel lama
@@ -221,23 +237,22 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             debugPrint('migrasi v7 selesai (catatan kesehatan, janji dokter, '
                 'kas informal, hafalan, zakat & sedekah dibuat)');
           }
-          if (dari < 5) {
-            // v5 (FR-82): dua tabel BARU (visi, area hidup) + satu kolom BARU
-            // pada `tujuan` (area_id). Kolom nullable, jadi tujuan lama tetap
-            // utuh tanpa diisi apa pun.
-            await m.createTable(visi);
-            await m.createTable(areaHidup);
-            // Kolom area_id hanya ditambahkan bila tabel `tujuan` SUDAH ada
-            // (perangkat yang datang dari v4). Bila perangkat datang dari v2/v3,
-            // tabel tujuan baru saja dibuat oleh blok v4 di atas dan sudah
-            // memuat kolom ini — menambahkannya lagi = galat "duplicate column".
-            if (dari >= 4) {
-              await m.addColumn(tujuan, tujuan.areaId);
-            }
-            await _pasangIndeksUnikV5();
-            debugPrint('migrasi v5 selesai (visi & area hidup dibuat, '
-                'kolom tujuan.area_id ditambahkan)');
+
+          if (dari < 8) {
+            // v8 (FR-107): kolom sisa obat. Kolom BARU boleh kosong, jadi data
+            // obat yang sudah ada tidak berubah.
+            await _tambahKolomV8(m);
+            debugPrint('migrasi v8 selesai (kolom sisa obat ditambahkan)');
           }
+
+          if (dari < 9) {
+            // v9: delapan tabel BARU (pengetahuan + makan & suasana hati).
+            // Tanpa mengubah tabel lama, jadi data pengguna tidak tersentuh.
+            await _buatTabelV9(m);
+            debugPrint('migrasi v9 selesai (tabel pengetahuan & catatan makan/'
+                'suasana hati dibuat)');
+          }
+
           if (dari < 10) {
             // v10 (FR-150): pengenal `uid` untuk tabel lama + dua tabel
             // pendukung sinkron. Kolom baru bersifat nullable, jadi data
@@ -245,33 +260,44 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             await _buatTabelV10(m);
             debugPrint('migrasi v10 selesai (uid sinkron + tabel pendukung)');
           }
+
           if (dari < 11) {
             // v11 (FR-118): lampiran foto & rekaman suara pada catatan.
             if (!await _tabelAda('lampiran')) await m.createTable(lampiran);
             debugPrint('migrasi v11 selesai (tabel lampiran dibuat)');
           }
+
           if (dari < 12) {
             // v12 (FR-124…FR-127): aset fisik + perawatan aset.
             await _buatTabelV12(m);
             debugPrint('migrasi v12 selesai (aset fisik & riwayat perawatan)');
           }
+
           if (dari < 13) {
             // v13 (FR-108/117/131): keluarga, profil kesehatan, catatan medis.
             await _buatTabelV13(m);
             debugPrint('migrasi v13 selesai (keluarga, profil & catatan medis)');
           }
+
           if (dari < 14) {
             // v14 (FR-144/145): tinjauan mingguan & arsip laporan bulanan.
             await _buatTabelV14(m);
             debugPrint('migrasi v14 selesai (tinjauan mingguan & arsip laporan)');
           }
-          if (dari < 18) {
-            // v18 (FR-43/56/39): rumah tangga & tagihan bersama, izin
-            // sub-akses keluarga, hasil pemindaian SMS bank.
-            await _buatTabelV18(m);
-            debugPrint('migrasi v18 selesai (rumah tangga, sub-akses, '
-                'pemindai bank)');
+
+          if (dari < 15) {
+            // v15 (FR-84/97): energi & fokus harian, serta rencana haji/umrah.
+            await _buatTabelV15(m);
+            debugPrint('migrasi v15 selesai (energi harian & rencana ibadah)');
           }
+
+          if (dari < 16) {
+            // v16 (FR-133/134/135): perjalanan, jurnal perjalanan, kas rumah
+            // tangga, dan kolom transaksi.perjalanan_uid.
+            await _buatTabelV16(m);
+            debugPrint('migrasi v16 selesai (perjalanan, jurnal, rumah tangga)');
+          }
+
           if (dari < 17) {
             // v17 (FR-47/48/54/55): dana persiapan, setoran dana, jadwal obat,
             // catatan minum, grup/anggota/belanja/bagian patungan, delegasi.
@@ -279,19 +305,167 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             debugPrint('migrasi v17 selesai (dana persiapan, obat, patungan, '
                 'delegasi)');
           }
-          if (dari < 16) {
-            // v16 (FR-133/134/135): perjalanan, jurnal perjalanan, kas rumah
-            // tangga, dan kolom transaksi.perjalanan_uid.
-            await _buatTabelV16(m);
-            debugPrint('migrasi v16 selesai (perjalanan, jurnal, rumah tangga)');
+
+          if (dari < 18) {
+            // v18 (FR-43/56/39): rumah tangga & tagihan bersama, izin
+            // sub-akses keluarga, hasil pemindaian SMS bank.
+            await _buatTabelV18(m);
+            debugPrint('migrasi v18 selesai (rumah tangga, sub-akses, '
+                'pemindai bank)');
           }
-          if (dari < 15) {
-            // v15 (FR-84/97): energi & fokus harian, serta rencana haji/umrah.
-            await _buatTabelV15(m);
-            debugPrint('migrasi v15 selesai (energi harian & rencana ibadah)');
+          if (dari < 19) {
+            // v19 (SDD v19 Gelombang 1): kotak masuk, catatan harian, tautan,
+            // sorotan — tabel "jaringan ikat" + pindahkan tautan pengetahuan
+            // lama ke graf baru (uid, bukan id angka).
+            await _buatTabelV19(m);
+            await _pasangIndeksV19();
+            await _backfillTautanV19();
+            debugPrint('migrasi v19 selesai (kotak masuk, catatan harian, '
+                'tautan, sorotan)');
           }
         },
       );
+
+  // ── v19 (SDD v19 Gelombang 1) ────────────────────────────────────────────
+
+  /// Buat empat tabel v19. Diperiksa satu per satu (`_tabelAda`) karena
+  /// sebagian basis data lama dibuat dari definisi tabel TERBARU — tanpa
+  /// pemeriksaan ini migrasi bisa gagal `table already exists`.
+  Future<void> _buatTabelV19(Migrator m) async {
+    if (!await _tabelAda('kotak_masuk')) await m.createTable(kotakMasuk);
+    if (!await _tabelAda('catatan_harian')) await m.createTable(catatanHarian);
+    if (!await _tabelAda('tautan')) await m.createTable(tautan);
+    if (!await _tabelAda('sorotan')) await m.createTable(sorotan);
+  }
+
+  /// Indeks v19 lewat SQL mentah + `IF NOT EXISTS` (aturan PB-05/PB-07):
+  /// jaminan unik tidak boleh bergantung pada hasil regenerasi `build_runner`.
+  Future<void> _pasangIndeksV19() async {
+    const List<String> daftar = <String>[
+      // Kotak masuk
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_km_uid ON kotak_masuk(uid)',
+      'CREATE INDEX IF NOT EXISTS idx_km_status ON kotak_masuk(status)',
+      'CREATE INDEX IF NOT EXISTS idx_km_dibuat ON kotak_masuk(dibuat_pada)',
+      'CREATE INDEX IF NOT EXISTS idx_km_antre '
+          'ON kotak_masuk(status, dibuat_pada)',
+      'CREATE INDEX IF NOT EXISTS idx_km_tujuan '
+          'ON kotak_masuk(tujuan_tabel, tujuan_uid)',
+      // Catatan harian
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_ch_uid ON catatan_harian(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_ch_tanggal '
+          'ON catatan_harian(tanggal_kunci)',
+      'CREATE INDEX IF NOT EXISTS idx_ch_isi_ada '
+          "ON catatan_harian(tanggal_kunci) WHERE isi <> ''",
+      // Tautan (idx_tautan_balik = panel "Dirujuk oleh")
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_tautan_uid ON tautan(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_tautan_pasangan '
+          "ON tautan(entitas_a, uid_a, entitas_b, uid_b, COALESCE(label, ''))",
+      'CREATE INDEX IF NOT EXISTS idx_tautan_maju ON tautan(entitas_a, uid_a)',
+      'CREATE INDEX IF NOT EXISTS idx_tautan_balik ON tautan(entitas_b, uid_b)',
+      'CREATE INDEX IF NOT EXISTS idx_tautan_usulan '
+          'ON tautan(usulan) WHERE usulan = 1',
+      // Sorotan
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_sorotan_uid ON sorotan(uid)',
+      'CREATE INDEX IF NOT EXISTS idx_sorotan_pemilik '
+          'ON sorotan(entitas, entitas_uid)',
+    ];
+    for (final String sql in daftar) {
+      await customStatement(sql);
+    }
+  }
+
+  /// Pindahkan `tautan_pengetahuan` (id angka) ke `tautan` (uid).
+  ///
+  /// Tahan dijalankan dua kali (indeks unik pasangan + `NOT EXISTS`); jenis
+  /// entitas yang tidak dikenal DILEWATI — uid tidak pernah dikarang. Tabel
+  /// lama dipertahankan apa adanya sebagai jalur mundur.
+  Future<void> _backfillTautanV19() async {
+    if (!await _tabelAda('tautan_pengetahuan')) return;
+    const Map<String, String> petaTabel = <String, String>{
+      'catatan': 'catatan_pengetahuan',
+      'pengetahuan': 'catatan_pengetahuan',
+      'keputusan': 'keputusan',
+      'bacaan': 'bacaan',
+      'kartu': 'kartu_ulangan',
+      'pembelajaran': 'catatan_pengetahuan',
+    };
+    const Map<String, String> petaKolomId = <String, String>{
+      'catatan_pengetahuan': 'id',
+      'keputusan': 'id',
+      'bacaan': 'id',
+      'kartu_ulangan': 'id',
+    };
+    final List<QueryRow> baris = await customSelect(
+      'SELECT jenis_a, id_a, judul_a, jenis_b, id_b, judul_b, label, uid '
+      'FROM tautan_pengetahuan',
+    ).get();
+    int dipindah = 0;
+    int dilewati = 0;
+    for (final QueryRow r in baris) {
+      final String? tabelA = petaTabel[r.read<String?>('jenis_a') ?? ''];
+      final String? tabelB = petaTabel[r.read<String?>('jenis_b') ?? ''];
+      if (tabelA == null || tabelB == null) {
+        dilewati++;
+        continue;
+      }
+      final String? uidA =
+          await _uidDari(tabelA, petaKolomId[tabelA], r.read<int>('id_a'));
+      final String? uidB =
+          await _uidDari(tabelB, petaKolomId[tabelB], r.read<int>('id_b'));
+      if (uidA == null || uidB == null) {
+        dilewati++;
+        continue;
+      }
+      if (uidA == uidB && tabelA == tabelB) {
+        dilewati++;
+        continue;
+      }
+      await customInsert(
+        'INSERT OR IGNORE INTO tautan '
+        '(uid, entitas_a, uid_a, judul_a, entitas_b, uid_b, judul_b, sumber, '
+        'label, usulan, dibuat_pada) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)',
+        variables: <Variable>[
+          Variable<String>(r.read<String?>('uid') ?? 'tautan-lama-${r.read<int>('id')}'),
+          Variable<String>(tabelA),
+          Variable<String>(uidA),
+          Variable<String>(r.read<String?>('judul_a') ?? ''),
+          Variable<String>(tabelB),
+          Variable<String>(uidB),
+          Variable<String>(r.read<String?>('judul_b') ?? ''),
+          const Variable<String>('impor'),
+          Variable<String>(r.read<String?>('label')),
+          Variable<int>(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+        ],
+      );
+      dipindah++;
+    }
+    if (dipindah > 0 || dilewati > 0) {
+      debugPrint('backfill v19: $dipindah tautan dipindahkan, $dilewati '
+          'dilewati (entitas tanpa uid nyata tidak dikarang)');
+    }
+  }
+
+  /// Ambil `uid` sebuah baris dari tabel sumber lewat id angkanya.
+  ///
+  /// `null` bila tabelnya TIDAK punya kolom `uid` (mis. `catatan_pengetahuan`,
+  /// `keputusan`, `bacaan`, `kartu_ulangan` hari ini) atau barisnya tidak ada.
+  /// Nilai uid **tidak pernah dikarang** — tautan tanpa uid nyata dilewati dan
+  /// jumlahnya dilaporkan.
+  Future<String?> _uidDari(String tabel, String? kolomId, int id) async {
+    if (kolomId == null) return null;
+    if (!await _tabelAda(tabel)) return null;
+    if (!await _kolomAda(tabel, 'uid')) return null;
+    try {
+      final QueryRow r = await customSelect(
+        'SELECT uid FROM $tabel WHERE $kolomId = ? LIMIT 1',
+        variables: <Variable>[Variable<int>(id)],
+      ).getSingle();
+      return r.read<String?>('uid');
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// PB-05 & PB-07: indeks unik penjaga integritas.
   ///
@@ -828,6 +1002,19 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
     }
   }
 
-  static QueryExecutor _buka(String nama) =>
-      driftDatabase(name: nama, native: const DriftNativeOptions());
+  /// Buka basis data — TERENKRIPSI bila mungkin (temuan audit 23 Sep 2026, P2-2).
+  ///
+  /// Kunci 256-bit diambil dari brankas Android Keystore; berkas polos dari
+  /// versi sebelumnya dimigrasi sekali dengan titik pulih (lihat
+  /// `enkripsi_basisdata.dart`). Bila perangkat tidak mendukung, basis data
+  /// tetap dibuka polos dan keadaannya dilaporkan apa adanya — tidak pernah
+  /// mengaku terenkripsi padahal tidak.
+  ///
+  /// Memakai [LazyDatabase] karena kunci & migrasi butuh langkah tak sinkron,
+  /// sedangkan pembuatan executor dipanggil dari konstruktor.
+  static QueryExecutor _buka(String nama) => LazyDatabase(() async {
+        final File berkas = await berkasBasisData(nama);
+        final String? kunci = await siapkanKunciBasisData(berkas);
+        return executorBasisData(nama, kunci);
+      });
 }

@@ -375,18 +375,16 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
   ),
   ButirFitur(
     id: 'FR-39',
- nama: 'Pemindai SMS/notifikasi bank on-device (opt-in): deteksi pembayaran ta',
+    nama: 'Pemindai bank tanpa SMS: impor rekening (PDF/CSV) atau notifikasi bank',
     modul: '0 · Dasar & Tagihan (V1)',
     fase: '-',
-    status: StatusFitur.selesai,
- rincian: 'Pemindai SMS/notifikasi bank on-device (opt-in): deteksi '
-        'pembayaran tagihan & saldo; tanpa cloud; alur izin berlapis',
- catatan: 'izin MATI secara bawaan & diminta lewat dialog '
-        'sistem; penguraian berjalan di perangkat (kanal lifeos/sms); hasil '
-        'hanya USULAN — tagihan tidak pernah ditandai lunas sendiri. Yang '
-        'tidak dikenali disebut alasannya, bukan ditebak. Notifikasi aplikasi '
-        'bank lewat notifikasi belum dibuat (sengaja tidak dikerjakan).',
-    rute: '/uang/pemindai-bank',
+    status: StatusFitur.belum,
+    rincian: 'Deteksi pembayaran & saldo dari data bank tanpa memakai izin SMS.',
+    catatan: 'Jalur SMS DIBUANG seluruhnya atas perintah pemilik — izin baca '
+        'SMS membuat Play Protect memblokir pemasangan dan ditolak kebijakan '
+        'Play Store. Penggantinya (impor rekening PDF/CSV resmi dari bank) '
+        'belum dikerjakan, jadi butir ini ditandai belum selesai — bukan '
+        'dinaikkan supaya kelihatan beres.',
   ),
   ButirFitur(
     id: 'FR-40',

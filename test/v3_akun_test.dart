@@ -15,6 +15,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_life_os/core/akun/klien_akun.dart';
+import 'package:personal_life_os/core/platform/brankas_rahasia.dart';
+import 'bantuan/gudang_memori.dart';
 import 'package:personal_life_os/core/providers/akun_providers.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
 import 'package:personal_life_os/data/database/database.dart';
@@ -26,6 +28,8 @@ import 'package:personal_life_os/features/akun/masuk_screen.dart';
 late AppDatabase db;
 late PengaturanRepository pengaturan;
 late AkunRepository repo;
+
+late GudangMemori gudang;
 
 /// Pengiriman palsu: mencatat panggilan, menjawab sesuai skenario.
 class PengirimanUji {
@@ -53,7 +57,9 @@ void main() {
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     pengaturan = PengaturanRepository(db);
-    repo = AkunRepository(pengaturan);
+    gudang = GudangMemori();
+    repo = AkunRepository(pengaturan,
+        rahasia: PenyimpanRahasia(pengaturan, gudang: gudang));
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
@@ -149,13 +155,20 @@ void main() {
           reason: 'pilihan pengguna lain tidak boleh ikut terhapus');
     });
 
-    test('data akun tidak tersimpan dalam bentuk terbaca di kolom lain', () async {
+    test('token akun TIDAK tertinggal polos di tabel pengaturan', () async {
       await repo.simpanSesi(
           const AkunSesi(token: 'tok-c', email: 'papi@uji.id', nama: 'Papi'));
       final semua = await db.select(db.pengaturan).get();
-      final kunciAkun =
-          semua.where((p) => p.kunci.startsWith('akun_')).map((p) => p.kunci).toSet();
-      expect(kunciAkun, {kunciTokenAkun, kunciEmailAkun, kunciNamaAkun, kunciMasukPada});
+      final kunciAkun = semua
+          .where((p) => p.kunci.startsWith('akun_'))
+          .map((p) => p.kunci)
+          .toSet();
+      expect(kunciAkun, {kunciEmailAkun, kunciNamaAkun, kunciMasukPada},
+          reason: 'TOKEN disimpan di brankas (Keystore), bukan di basis data');
+      expect(gudang.isi[kunciTokenAkun], 'tok-c',
+          reason: 'token harus benar-benar ada di brankas');
+      expect(await repo.token(), 'tok-c',
+          reason: 'token tetap bisa dibaca lewat brankas');
     });
   });
 
@@ -164,6 +177,7 @@ void main() {
   Widget bungkus(Widget child, {KlienAkun? klien}) => ProviderScope(
         overrides: [
           databaseProvider.overrideWithValue(db),
+          akunRepoProvider.overrideWithValue(repo),
           if (klien != null) klienAkunProvider.overrideWithValue(klien),
         ],
         child: MaterialApp(

@@ -177,7 +177,7 @@ class AuditRepository {
     final baris = await daftar(modul: modul, batas: maksBarisEksporAudit);
     final isi = <String, Object?>{
       'format': 'plo-audit',
-      'versiSkema': 4,
+      'versiSkema': db.schemaVersion,
       'dibuatPada': waktu.toIso8601String(),
       'catatan':
           'Catatan aktivitas ini tersimpan di perangkat pengguna saja, tidak '

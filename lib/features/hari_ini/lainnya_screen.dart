@@ -35,6 +35,33 @@ class LainnyaScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           Card(
             margin: EdgeInsets.zero,
+            child: Column(
+              children: <Widget>[
+                ListTile(
+                  key: const Key('buka_kotak_masuk'),
+                  leading: const Icon(Icons.inbox_outlined),
+                  title: const Text('Catat Cepat'),
+                  subtitle:
+                      const Text('Simpan dulu, sortir nanti — satu pintu masuk'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/kotak-masuk'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_catatan_harian'),
+                  leading: const Icon(Icons.event_note_outlined),
+                  title: const Text('Catatan Harian'),
+                  subtitle: const Text(
+                      'Satu halaman per hari, plus apa yang merujuknya'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/catatan-harian'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            margin: EdgeInsets.zero,
             child: Consumer(
               builder: (context, ref, _) {
                 final sesi = ref.watch(sesiAkunProvider).value;

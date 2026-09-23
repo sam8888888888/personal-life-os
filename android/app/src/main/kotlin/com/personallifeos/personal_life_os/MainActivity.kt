@@ -9,27 +9,70 @@ import io.flutter.plugin.common.MethodChannel
 /// membuka halaman tertentu lewat extra "rute". Niat itu diteruskan ke Dart
 /// agar aplikasi melompat langsung ke halaman yang dituju — termasuk saat
 /// aplikasi sudah berjalan (onNewIntent).
+///
+/// CATATAN KEAMANAN (hasil audit 23 Sep 2026):
+/// 1. MainActivity memang WAJIB diekspor (launcher), tetapi extra `rute`
+///    TIDAK lagi diteruskan apa adanya: hanya rute yang ada di [RUTE_DIIZINKAN]
+///    yang diterima — aplikasi lain tidak bisa menyuruh aplikasi ini membuka
+///    halaman sembarangan lewat string bebas.
+/// 2. `setShowWhenLocked`/`setTurnScreenOn` (kartu darurat tampil di atas layar
+///    kunci) hanya berlaku bila niat datang dari pintasan milik aplikasi ini
+///    sendiri — ditandai extra `plo_darurat=1` yang hanya ada di
+///    `res/xml/shortcuts.xml` DAN komponen niat menunjuk paket kita.
+/// 3. Izin READ_SMS sudah dibuang dari manifest; kanal SMS juga DIHAPUS dari
+///    aplikasi ini supaya tidak ada kode SMS tersisa di dalam APK.
 class MainActivity : FlutterActivity() {
     private val kanal = "lifeos/rute"
-    private val RUTE_KARTU_DARURAT = "/kesehatan/kartu-darurat"
     private val kanalBagikan = "lifeos/bagikan"
     private val kanalBuka = "lifeos/buka"
+
     private var saluranRute: MethodChannel? = null
     private val kanalMedia = KanalMedia(this)
     // FR-26 / FR-22 / FR-31 & FR-151
     private val kanalKunci = KanalKunci(this)
     private val kanalLencana = KanalLencana(this)
     private val kanalWidget = KanalWidget(this)
-    // FR-58 (suara) & FR-39 (SMS bank)
+    // FR-58 (suara)
     private val kanalSuara = KanalSuara(this)
-    private val kanalSms = KanalSms(this)
+    // FR-108 — brankas catatan medis (berkas terenkripsi + kunci di Keystore).
+    // Sebelumnya kelas ini ADA tetapi tidak pernah dipasang, sehingga setiap
+    // panggilan Dart berakhir MissingPluginException (lampiran medis mati).
+    private val kanalBerkasMedis = BerkasMedis(this)
+    // CATATAN: brankas rahasia (token akun, kunci AI, turunan PIN, kunci
+    // basis data) TIDAK didaftarkan di sini lagi. Kelasnya kini paket plugin
+    // `packages/lifeos_brankas`, supaya kanalnya juga tersedia di mesin
+    // Flutter milik pekerja latar (Workmanager) — di sana MainActivity tidak
+    // pernah dipanggil, sehingga kanal gaya lama akan gagal.
     // FR-38/FR-50 — OCR di perangkat (tagihan dari foto, struk, nota).
     private val kanalOcr = KanalOcr(this)
+
+    companion object {
+        /// Rute yang boleh datang dari luar aplikasi (pintasan ikon & widget).
+        /// Halaman lain tidak dapat dibuka dari luar — ini daftar putih, bukan
+        /// penyaring pola.
+        private val RUTE_DIIZINKAN = setOf(
+            "/",
+            "/tambah",
+            "/pengingat",
+            "/pengaturan/ikon-widget",
+            "/tagihan",
+            "/uang/transaksi",
+            "/kesehatan/kartu-darurat",
+        )
+
+        /// Aksi yang boleh datang dari widget/pintasan.
+        private val AKSI_DIIZINKAN = setOf("lunas", "tambah-pengeluaran", "tagihan")
+
+        private const val RUTE_KARTU_DARURAT = "/kesehatan/kartu-darurat"
+
+        /// Penanda bahwa niat datang dari pintasan milik aplikasi ini.
+        private const val EXTRA_DARURAT = "plo_darurat"
+    }
 
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
         // FR-117: pintasan kartu darurat boleh tampil tanpa membuka kunci.
-        tampilkanDiAtasKunci(ruteDari(intent))
+        tampilkanDiAtasKunci(intent)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
@@ -56,9 +99,9 @@ class MainActivity : FlutterActivity() {
         KanalKompas.pasang(flutterEngine, this)
         // FR-58 — pengenalan suara bawaan Android.
         kanalSuara.pasang(flutterEngine)
-        // FR-39 — baca SMS bank (hanya bila izin diberikan).
-        kanalSms.pasang(flutterEngine)
         kanalOcr.pasang(flutterEngine)
+        // FR-108 — brankas berkas medis.
+        kanalBerkasMedis.pasang(flutterEngine)
     }
 
     /// FR-49: buka tautan ke aplikasi lain (WhatsApp / SMS / Telegram).
@@ -76,8 +119,17 @@ class MainActivity : FlutterActivity() {
                 hasil.error("tautan_kosong", "Tautan kosong", null)
                 return@setMethodCallHandler
             }
+            // Hanya tautan biasa yang boleh dibuka (wa.me, mailto:, tel:,
+            // https:). Skema lain tidak diteruskan supaya aplikasi ini tidak
+            // bisa dipakai memicu aksi sistem yang tidak diinginkan.
+            val alamat = android.net.Uri.parse(tautan)
+            val skema = alamat.scheme?.lowercase()
+            if (skema == null || skema !in setOf("http", "https", "mailto", "tel", "whatsapp", "sms")) {
+                hasil.success(false)
+                return@setMethodCallHandler
+            }
             try {
-                startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(tautan)))
+                startActivity(Intent(Intent.ACTION_VIEW, alamat))
                 hasil.success(true)
             } catch (e: android.content.ActivityNotFoundException) {
                 hasil.success(false)
@@ -88,6 +140,12 @@ class MainActivity : FlutterActivity() {
     }
 
     /// FR-45: bagikan berkas laporan (PDF/CSV) lewat lembar berbagi Android.
+    ///
+    /// Berkas yang diteruskan WAJIB berada di folder `cache/bagikan/` — itu
+    /// satu-satunya folder yang diizinkan `res/xml/berkas_paths.xml`. Salinan
+    /// itu dibuat oleh `bagikanBerkas()` (Dart), sehingga berkas asli (cadangan,
+    /// lampiran medis, dokumen) tidak pernah punya URI yang bisa diminta
+    /// aplikasi lain.
     private fun pasangKanalBagikan(flutterEngine: FlutterEngine) {
         val saluran = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, kanalBagikan)
         saluran.setMethodCallHandler { panggilan, hasil ->
@@ -105,6 +163,15 @@ class MainActivity : FlutterActivity() {
             val berkas = java.io.File(jalur)
             if (!berkas.exists()) {
                 hasil.error("tidak_ada", "Berkas tidak ditemukan", null)
+                return@setMethodCallHandler
+            }
+            val folderBagikan = java.io.File(cacheDir, "bagikan").canonicalFile
+            if (!berkas.canonicalFile.path.startsWith(folderBagikan.path + java.io.File.separator)) {
+                hasil.error(
+                    "di_luar_folder",
+                    "Berkas tidak berada di folder bagikan",
+                    null
+                )
                 return@setMethodCallHandler
             }
             try {
@@ -140,14 +207,13 @@ class MainActivity : FlutterActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         kanalMedia.onRequestPermissionsResult(requestCode, grantResults)
         kanalSuara.onRequestPermissionsResult(requestCode, grantResults)
-        kanalSms.onRequestPermissionsResult(requestCode, grantResults)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         val rute = ruteDari(intent)
-        tampilkanDiAtasKunci(rute)
+        tampilkanDiAtasKunci(intent)
         val aksi = aksiDari(intent)
         when {
             // FR-151: aksi lebih diutamakan daripada sekadar membuka halaman.
@@ -161,8 +227,8 @@ class MainActivity : FlutterActivity() {
      * (`aksi` wajib, `id` opsional). Dijalankan Dart saat aplikasi terbuka.
      */
     private fun aksiDari(intent: Intent?): Map<String, String>? {
-        val aksi = intent?.getStringExtra("aksi")
-        if (aksi.isNullOrBlank()) return null
+        val aksi = intent?.getStringExtra("aksi")?.trim()
+        if (aksi.isNullOrBlank() || aksi !in AKSI_DIIZINKAN) return null
         val peta = HashMap<String, String>()
         peta["aksi"] = aksi
         intent.getStringExtra("id")?.let { if (it.isNotBlank()) peta["id"] = it }
@@ -170,15 +236,22 @@ class MainActivity : FlutterActivity() {
         return peta
     }
 
-    /// Kartu darurat (FR-117) diizinkan tampil di atas layar kunci.
-    private fun tampilkanDiAtasKunci(rute: String?) {
-        val darurat = rute == RUTE_KARTU_DARURAT
+    /// Kartu darurat (FR-117) diizinkan tampil di atas layar kunci — HANYA
+    /// bila niat itu datang dari pintasan milik aplikasi ini.
+    private fun tampilkanDiAtasKunci(intent: Intent?) {
+        val darurat = intent != null &&
+            intent.getStringExtra(EXTRA_DARURAT) == "1" &&
+            intent.component?.packageName == packageName &&
+            ruteDari(intent) == RUTE_KARTU_DARURAT
         setShowWhenLocked(darurat)
         setTurnScreenOn(darurat)
     }
 
+    /// Rute yang diminta niat — `null` bila kosong ATAU tidak ada di daftar
+    /// putih (halaman lain tidak dapat dibuka dari luar aplikasi).
     private fun ruteDari(intent: Intent?): String? {
-        val rute = intent?.getStringExtra("rute")
-        return if (rute.isNullOrBlank()) null else rute
+        val rute = intent?.getStringExtra("rute")?.trim()
+        if (rute.isNullOrBlank()) return null
+        return if (rute in RUTE_DIIZINKAN) rute else null
     }
 }

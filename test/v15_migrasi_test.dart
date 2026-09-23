@@ -131,9 +131,9 @@ void main() {
     //    kesehatan/dokumen/sinkron, v9 delapan tabel modul Pengetahuan,
     //    v14 tinjauan mingguan & arsip laporan, v15 energi harian (FR-84) &
     //    rencana haji/umrah (FR-97), v16 perjalanan & kas rumah tangga
-    //    (FR-133/134/135)).
+    //    (FR-133/134/135)), v19 kotak masuk, catatan harian, tautan & sorotan.
     final versi = await db.customSelect('PRAGMA user_version').getSingle();
-    expect(versi.data.values.first, 18);
+    expect(versi.data.values.first, 19);
     final tabel = await db
         .customSelect("SELECT name FROM sqlite_master WHERE type='table'")
         .get();

@@ -29,7 +29,9 @@ import 'package:personal_life_os/core/lencana/lencana_ikon.dart';
 import 'package:personal_life_os/core/platform/kanal_lencana.dart';
 import 'package:personal_life_os/core/platform/kanal_widget.dart';
 import 'package:personal_life_os/core/profil/profil.dart';
+import 'package:personal_life_os/core/platform/brankas_rahasia.dart';
 import 'package:personal_life_os/core/profil/profil_providers.dart';
+import 'bantuan/gudang_memori.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
 import 'package:personal_life_os/core/widget_utama/aksi_widget.dart';
 import 'package:personal_life_os/core/widget_utama/widget_hari_ini.dart';
@@ -131,7 +133,10 @@ void main() {
           throwsA(isA<ArgumenPinTidakSah>()));
       expect(() => kunci.pasangPin('abcd'),
           throwsA(isA<ArgumenPinTidakSah>()));
-      expect(KunciAplikasi.keluhanPin('1234'), isNull);
+      // Sejak perbaikan audit: PIN paling sedikit 6 angka (PIN 4 angka hanya
+      // punya 10.000 kemungkinan — bisa ditebak habis dari salinan basis data).
+      expect(KunciAplikasi.keluhanPin('1234'), isNotNull);
+      expect(KunciAplikasi.keluhanPin('123456'), isNull);
     });
 
     test('matikan kunci menghapus turunan & mematikan saklar', () async {
@@ -169,11 +174,27 @@ void main() {
     testWidgets('isi aplikasi tersembunyi sampai PIN benar', (t) async {
       final db = _db();
       addTearDown(db.close);
-      final kunci = KunciAplikasi(PengaturanRepository(db), iterasi: 1000);
+      // SATU gudang dipakai bersama: KunciAplikasi di uji ini dan yang dipakai
+      // layar harus melihat isi yang sama, kalau tidak PIN benar pun ditolak.
+      final gudang = GudangMemori();
+      final kunci = KunciAplikasi(PengaturanRepository(db),
+          iterasi: 1000,
+          rahasia: PenyimpanRahasia(PengaturanRepository(db), gudang: gudang));
       await kunci.pasangPin('246813');
 
       await t.pumpWidget(ProviderScope(
-        overrides: [databaseProvider.overrideWithValue(db)],
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          // Kunci disuntik gudang memori: kanal `lifeos/rahasia` tidak pernah
+          // menjawab di dalam waktu tiruan uji widget (lihat
+          // test/bantuan/gudang_memori.dart).
+          kunciAplikasiProvider.overrideWith((ref) => KunciAplikasi(
+                PengaturanRepository(db),
+                iterasi: 1000,
+                rahasia: PenyimpanRahasia(PengaturanRepository(db),
+                    gudang: gudang),
+              )),
+        ],
         child: const MaterialApp(
           home: PenjagaKunci(child: Text('RAHASIA-BASIS-DATA')),
         ),
@@ -201,7 +222,15 @@ void main() {
       final db = _db();
       addTearDown(db.close);
       await t.pumpWidget(ProviderScope(
-        overrides: [databaseProvider.overrideWithValue(db)],
+        overrides: [
+          databaseProvider.overrideWithValue(db),
+          kunciAplikasiProvider.overrideWith((ref) => KunciAplikasi(
+                PengaturanRepository(db),
+                iterasi: 1000,
+                rahasia: PenyimpanRahasia(PengaturanRepository(db),
+                    gudang: GudangMemori()),
+              )),
+        ],
         child: const MaterialApp(
           home: PenjagaKunci(child: Text('LANGSUNG-TERBUKA')),
         ),

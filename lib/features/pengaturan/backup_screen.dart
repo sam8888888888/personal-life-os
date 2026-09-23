@@ -21,6 +21,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/audit/audit_log.dart';
 import '../../core/backup/cadangan_otomatis.dart';
 import '../../core/backup/ekspor_impor.dart';
+import '../../data/database/enkripsi_basisdata.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/waktu.dart';
@@ -70,6 +71,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   PratinjauCadangan? _pratinjau;
   String? _pesanPratinjau;
   HasilImpor? _hasilImpor;
+
+  /// Frasa sandi untuk cadangan terenkripsi.
+  ///
+  /// Di sisi ekspor sifatnya opsional (kosong = pakai kunci perangkat ini);
+  /// di sisi impor dipakai untuk membuka berkas yang dibuat di HP lain.
+  final TextEditingController _sandi = TextEditingController();
+  String? _sandiImpor;
+
+  @override
+  void dispose() {
+    _sandi.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -192,7 +206,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     String? pesan;
     HasilEkspor? hasil;
     try {
-      hasil = await _layanan.ekspor();
+      final String sandi = _sandi.text.trim();
+      hasil = await _layanan.ekspor(sandi: sandi.isEmpty ? null : sandi);
     } on GalatCadangan catch (e) {
       pesan = e.pesan;
     } catch (e) {
@@ -220,7 +235,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     await _muatBerkas();
   }
 
-  Future<void> _pilihBerkas(BerkasCadangan berkas) async {
+  Future<void> _pilihBerkas(BerkasCadangan berkas, {String? sandi}) async {
     setState(() {
       _sibuk = true;
       _pesan = null;
@@ -229,8 +244,30 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     });
     PratinjauCadangan? lihat;
     String? pesan;
+    final String? sandiDipakai = sandi ?? _sandiImpor;
     try {
-      lihat = await _layanan.pratinjau(berkas.path);
+      lihat = await _layanan.pratinjau(berkas.path, sandi: sandiDipakai);
+    } on GalatCadanganButuhSandi catch (e) {
+      // Berkas terenkripsi (mis. dibuat di HP lain): minta frasa sandi.
+      if (!mounted) return;
+      setState(() => _sibuk = false);
+      final String? frasa = await _mintaSandi(pesan: e.pesan);
+      if (!mounted) return;
+      if (frasa == null) {
+        setState(() => _pesanPratinjau = e.pesan);
+        return;
+      }
+      return _pilihBerkas(berkas, sandi: frasa);
+    } on GalatCadanganSandiSalah catch (e) {
+      if (!mounted) return;
+      setState(() => _sibuk = false);
+      final String? frasa = await _mintaSandi(pesan: e.pesan);
+      if (!mounted) return;
+      if (frasa == null) {
+        setState(() => _pesanPratinjau = e.pesan);
+        return;
+      }
+      return _pilihBerkas(berkas, sandi: frasa);
     } on GalatCadangan catch (e) {
       pesan = e.pesan;
     } catch (e) {
@@ -241,7 +278,56 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       _sibuk = false;
       _pratinjau = lihat;
       _pesanPratinjau = pesan;
+      if (lihat != null) _sandiImpor = sandiDipakai;
     });
+  }
+
+  /// Tanya frasa sandi untuk berkas cadangan terenkripsi.
+  ///
+  /// Mengembalikan null bila pengguna membatalkan (atau mengosongkan kolom) —
+  /// pemanggil wajib menjelaskan apa adanya, bukan menganggap berhasil.
+  Future<String?> _mintaSandi({required String pesan}) async {
+    final pengendali = TextEditingController();
+    if (!mounted) return null;
+    final hasil = await showDialog<String>(
+      context: context,
+      builder: (BuildContext c) => AlertDialog(
+        title: const Text('Berkas cadangan terenkripsi'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(pesan),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('sandi_impor'),
+              controller: pengendali,
+              obscureText: true,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Frasa sandi',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            key: const Key('batal_sandi'),
+            onPressed: () => Navigator.of(c).pop(),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            key: const Key('pakai_sandi'),
+            onPressed: () => Navigator.of(c).pop(pengendali.text.trim()),
+            child: const Text('Buka berkas'),
+          ),
+        ],
+      ),
+    );
+    pengendali.dispose();
+    if (hasil == null || hasil.isEmpty) return null;
+    return hasil;
   }
 
   void _tutupPratinjau() {
@@ -294,7 +380,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     });
     HasilImpor hasil;
     try {
-      hasil = await _layanan.impor(lihat.path, sudahDikonfirmasi: true);
+      hasil = await _layanan.impor(lihat.path,
+          sudahDikonfirmasi: true, sandi: _sandiImpor);
     } on GalatCadangan catch (e) {
       hasil = HasilImpor(berhasil: false, pesan: e.pesan);
     } catch (e) {
@@ -360,9 +447,50 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       Text('Cadangan data', style: tema.textTheme.titleMedium),
       const SizedBox(height: 6),
       const Text('Cadangan berisi seluruh data aplikasi dalam satu berkas '
-          'JSON di folder dokumen: tagihan, riwayat pembayaran, transaksi, '
+          'di folder dokumen: tagihan, riwayat pembayaran, transaksi, '
           'anggaran, langganan, aset, kewajiban, dan pengaturan. Berkas itu '
           'bisa Anda salin ke HP baru.'),
+      const SizedBox(height: 12),
+      TextField(
+        key: const Key('sandi_cadangan'),
+        controller: _sandi,
+        obscureText: true,
+        enabled: !_sibuk,
+        decoration: const InputDecoration(
+          labelText: 'Frasa sandi cadangan (opsional)',
+          helperText: 'Paling sedikit 8 karakter. Isi bila berkas akan '
+              'dibuka di HP lain.',
+          border: OutlineInputBorder(),
+        ),
+      ),
+      const SizedBox(height: 8),
+      const Text(
+        'Cadangan selalu ditulis TERENKRIPSI. Tanpa frasa sandi, berkas hanya '
+        'bisa dibuka di HP ini (kuncinya disimpan di keamanan perangkat). '
+        'Isi frasa sandi kalau berkasnya mau dipindah ke HP lain.',
+        key: Key('catatan_sandi_cadangan'),
+        style: TextStyle(fontSize: 12),
+      ),
+      const SizedBox(height: 6),
+      const Text(
+        'Cadangan otomatis Android (Google Drive) DIMATIKAN: data Anda tidak '
+        'diunggah ke mana pun tanpa sepengetahuan Anda. Gunakan berkas cadangan '
+        'dari layar ini bila ingin menyimpan salinan di luar HP.',
+        key: Key('catatan_cadangan_android'),
+        style: TextStyle(fontSize: 12),
+      ),
+      const SizedBox(height: 6),
+      // Keadaan basis data di perangkat ini, apa adanya — termasuk bila
+      // enkripsinya TIDAK bisa dipasang (jangan pernah diklaim aman).
+      Text(
+        keadaanBasisDataSaatIni == KeadaanBasisData.terenkripsi
+            ? 'Basis data di HP ini TERENKRIPSI (kunci disimpan di keamanan '
+                'perangkat).'
+            : 'Basis data di HP ini BELUM terenkripsi. '
+                '${pesanBasisDataSaatIni ?? ''}',
+        key: const Key('keadaan_basis_data'),
+        style: const TextStyle(fontSize: 12),
+      ),
       const SizedBox(height: 12),
       FilledButton.icon(
         key: const Key('ekspor_sekarang'),

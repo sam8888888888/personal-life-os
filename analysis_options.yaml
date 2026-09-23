@@ -27,8 +27,24 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # avoid_print: false  # Uncomment to disable the `avoid_print` rule
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    # ── Tambahan hasil audit 23 Sep 2026 (P3-8) ──────────────────────────
+    # Aturan di bawah adalah yang pada kode saat ini sudah bersih, jadi
+    # langsung menjaga mutu tanpa menyembunyikan temuan baru. Paket
+    # `very_good_analysis` belum dipakai: menggantinya sekaligus
+    # memunculkan ratusan temuan gaya pada kode yang sudah jalan —
+    # dikerjakan bertahap, bukan satu tembakan.
+    #
+    # Kesalahan yang paling sering lolos: memakai context setelah await.
+    use_build_context_synchronously: true
+    # Future yang tidak ditunggu (penyebab "pekerjaan berkas tidak selesai").
+    unawaited_futures: true
+    cancel_subscriptions: true
+    close_sinks: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
+#
+# ── Tambahan hasil audit 23 Sep 2026 (P3-8) ────────────────────────────────
+# Gerbang: `flutter analyze` WAJIB "No issues found!", dan di jalur integrasi
+# berkelanjutan dijalankan dengan `--fatal-infos --fatal-warnings`
+# (lihat .github/workflows/ci.yml).

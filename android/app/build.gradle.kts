@@ -1,7 +1,34 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Kunci rilis dibaca dari android/key.properties (TIDAK pernah ikut di-commit:
+// sudah ada di .gitignore). Isinya:
+//   storePassword=... keyPassword=... keyAlias=upload
+//   storeFile=/opt/aaron-tools/lifeos/keystore/lifeos-release.jks
+// Bila berkas itu tidak ada (mis. build di mesin lain), build masih berjalan
+// dengan kunci debug supaya tidak menghambat pengembangan — dan itu DITULIS
+// jelas di keluaran build, bukan diam-diam.
+val berkasKunci = rootProject.file("key.properties")
+val propertiKunci = Properties().apply {
+    if (berkasKunci.exists()) berkasKunci.inputStream().use { load(it) }
+}
+val adaKunciRilis = propertiKunci.getProperty("storeFile")?.isNotBlank() == true &&
+    propertiKunci.getProperty("storePassword")?.isNotBlank() == true &&
+    propertiKunci.getProperty("keyAlias")?.isNotBlank() == true
+
+if (!adaKunciRilis) {
+    // Jujur di keluaran build: jangan sampai ada yang mengira APK-nya sudah
+    // bertanda tangan kunci rilis padahal belum.
+    println(
+        "PERINGATAN: android/key.properties tidak ada / tidak lengkap — build " +
+            "rilis memakai KUNCI DEBUG. Jangan kirim ke Play Store. Salin " +
+            "android/key.properties.example menjadi android/key.properties."
+    )
 }
 
 android {
@@ -16,33 +43,51 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    defaultConfig {
+    // Keystore rilis (Play App Signing / sideload jangka panjang). Kunci debug
+    // bawaan template adalah kunci PUBLIK yang sama di seluruh dunia: siapa pun
+    // bisa membuat APK bertanda tangan identik, sehingga update berbahaya bisa
+    // dipasang menimpa aplikasi ini tanpa peringatan sistem.
+    if (adaKunciRilis) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(propertiKunci.getProperty("storeFile"))
+                storePassword = propertiKunci.getProperty("storePassword")
+                keyAlias = propertiKunci.getProperty("keyAlias")
+                keyPassword = propertiKunci.getProperty("keyPassword")
+                    ?: propertiKunci.getProperty("storePassword")
+            }
+        }
+    }
 
-        // Hanya CPU arm64 (HP Android modern). ML Kit membawa pustaka untuk
-        // 3 CPU sekaligus; x86_64 (emulator/PC) dan armeabi-v7a (HP 32-bit
-        // lama) tidak terpakai dan memakan ±18 MB. OCR tetap jalan offline.
-        // semua pustaka CPU dipertahankan (perintah Papi)
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+    defaultConfig {
         applicationId = "com.personallifeos.personal_life_os"
         // F3: notifikasi terjadwal (flutter_local_notifications) butuh multidex.
         multiDexEnabled = true
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
-        // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
-        // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
-        // flag during build.
+        // Versi SDK DIPATOK (bukan `flutter.minSdkVersion`) supaya build dapat
+        // direproduksi: nilai ini yang terbukti dipakai APK rilis (minSdk 24 =
+        // Android 7, targetSdk 36 = Android 16). Semua pustaka CPU tetap
+        // dipertahankan (perintah pemilik).
+        minSdk = 24
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (adaKunciRilis) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
+            // P1-4: rilis sebelumnya tanpa minify/shrink sama sekali sehingga APK
+            // membengkak dan mudah dibaca. Aturan keep ada di proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

@@ -1,7 +1,5 @@
 name: personal_life_os
-description: "A new Flutter project."
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
+description: "Personal Life OS — asisten kehidupan pribadi (tagihan, keuangan, kesehatan, keluarga) yang menyimpan data di perangkat pengguna."
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
@@ -16,7 +14,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.9.2+12
+version: 1.11.0+14
 
 environment:
   sdk: ^3.13.2
@@ -53,6 +51,14 @@ dependencies:
   pdf: ^3.13.0
   # FR-26: PBKDF2-HMAC-SHA256 untuk PIN kunci aplikasi.
   crypto: ^3.0.7
+  # Brankas Keystore sebagai PAKET PLUGIN: kanalnya harus ada juga di mesin
+  # Flutter milik pekerja latar (Workmanager), bukan hanya di MainActivity.
+  lifeos_brankas:
+    path: packages/lifeos_brankas
+  # Pustaka basis data berenkripsi. Sisi Dart memilih SQLCipher lewat
+  # `hooks: user_defines` di bawah; bila tidak tersedia, aplikasi memakai
+  # SQLite biasa dan MENYATAKAN basis datanya belum terenkripsi (tidak mengaku).
+  sqlite3: ^3.5.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -107,3 +113,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Konfigurasi hook pustaka native: pakai biner SQLCipher (bukan SQLite biasa)
+# supaya basis data bisa dienkripsi saat disimpan (temuan audit P2-2). Unduhan
+# binernya diverifikasi sha256 oleh package:sqlite3 sendiri.
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher

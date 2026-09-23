@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sabuk pengaman kedua di samping android:usesCleartextTraffic="false":
+
+     (1) SEMUA lalu lintas wajib HTTPS/TLS — data keuangan, kesehatan, dan
+         kunci API pengguna tidak boleh pernah lewat jaringan dalam teks polos,
+         termasuk bila pengguna menempelkan alamat layanan AI yang berawalan
+         http:// di layar Copilot.
+     (2) Sertifikat pengguna (CA yang dipasang di perangkat) TIDAK dipercaya
+         untuk aplikasi ini, supaya penyadapan lewat proxy tidak bisa
+         menyamar sebagai server kita.
+     (3) Pengecualian hanya untuk localhost (jalur pengujian di perangkat
+         sendiri), tidak pernah untuk domain publik. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+    </domain-config>
+</network-security-config>

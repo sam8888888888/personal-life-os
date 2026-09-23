@@ -148,7 +148,7 @@ void main() {
       final HasilPeriksaKeutuhan? periksa = hasil.keutuhan;
       expect(periksa == null, isFalse);
       expect(periksa!.utuh, isTrue);
-      expect(periksa.versiSkema, 4);
+      expect(periksa.versiSkema, db.schemaVersion);
       expect(await otomatis.periksaTersimpan() == null, isFalse);
 
       // Isi berkas benar-benar cadangan JSON yang bisa dibaca.
@@ -156,7 +156,7 @@ void main() {
           jsonDecode(File('${dir.path}/${hasil.namaBerkas}').readAsStringSync())
               as Map<String, Object?>;
       expect(isi['format'], 'plo-backup');
-      expect(isi['versiSkema'], 4);
+      expect(isi['versiSkema'], db.schemaVersion);
 
       // Belum waktunya: jalan kedua tidak membuat berkas baru.
       final HasilCadanganOtomatis kedua = await otomatis.jalankan();
@@ -218,6 +218,13 @@ void main() {
         jam: () => jam,
       );
 
+      // Layar memakai ListView (item dibangun malas) dan kartu "Cadangan
+      // otomatis" ada di bawah kartu ekspor. Layar diperpanjang (lebar tetap
+      // 420 = ukuran HP) supaya seluruh kartu benar-benar terpasang. Cara ini
+      // dipakai berkas ini sejak awal (setSurfaceSize) — menulis langsung ke
+      // t.view.physicalSize TIDAK berpengaruh karena tertimpa di baris atas.
+      await t.binding.setSurfaceSize(const Size(420, 2400));
+
       await t.pumpWidget(ProviderScope(
         overrides: [databaseProvider.overrideWithValue(db)],
         child: MaterialApp(
@@ -255,6 +262,15 @@ void main() {
       await t.ensureVisible(tombol);
       await t.pump(const Duration(milliseconds: 50));
       await t.tap(tombol);
+      // Kanal platform (brankas Keystore + enkripsi berkas cadangan) tidak
+      // selesai di dalam waktu TIRUAN: jawabannya baru sampai saat uji
+      // menyerahkan kendali ke gelung peristiwa asli. `runAsync` melakukan itu,
+      // jadi beri waktu nyata sesaat sebelum memeriksa hasilnya.
+      await t.runAsync(() async {
+        for (int i = 0; i < 40; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        }
+      });
       for (int i = 0; i < 20; i++) {
         await t.pump(const Duration(milliseconds: 100));
       }

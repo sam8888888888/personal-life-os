@@ -13,6 +13,7 @@ import 'dart:io';
 import '../../core/utils/kurs.dart';
 import '../database/database.dart';
 import 'pengaturan_repository.dart';
+import '../../core/notifikasi/jejak.dart';
 
 class KursRepository {
   KursRepository(this.db, {DateTime Function()? jamSekarang, this.klien})
@@ -97,7 +98,8 @@ Kurs kursDariErApi(String teks, {DateTime? sekarang}) {
   final Map<String, dynamic> map;
   try {
     map = jsonDecode(teks) as Map<String, dynamic>;
-  } catch (_) {
+  } catch (e) {
+    catatGalatTertelan('kurs.jawabanServerRusak', e);
     throw KursGagal('Jawaban server kurs tidak bisa dibaca.');
   }
   final rates = map['rates'];

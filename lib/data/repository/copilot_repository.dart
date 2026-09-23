@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 
 import '../../core/analitik/copilot.dart';
+import '../../core/platform/brankas_rahasia.dart';
 import '../../data/repository/obat_repository.dart';
 import '../database/database.dart';
 import 'pengaturan_repository.dart';
@@ -37,12 +38,19 @@ class CopilotRepository {
 
   PengaturanRepository get _pengaturan => PengaturanRepository(db);
 
+  /// Penyimpan kunci API: brankas Keystore bila tersedia (audit P0-3 — kunci
+  /// berbayar milik pengguna tidak boleh tersimpan polos di basis data).
+  late final PenyimpanRahasia _rahasia = PenyimpanRahasia(_pengaturan);
+
+  /// Apakah kunci API tersimpan TERENKRIPSI di perangkat ini.
+  Future<bool> kunciTerlindungi() => _rahasia.tersedia();
+
   // ── Konfigurasi ───────────────────────────────────────────────────────────
   Future<KonfigCopilot> konfig() async {
     final endpoint =
         await _pengaturan.bacaTeks(kunciCopilotEndpoint, 'https://api.deepseek.com/chat/completions');
     final model = await _pengaturan.bacaTeks(kunciCopilotModel, 'deepseek-chat');
-    final kunci = await _pengaturan.bacaTeks(kunciCopilotKunci, '');
+    final kunci = (await _rahasia.baca(kunciCopilotKunci)) ?? '';
     final izin = await _pengaturan.bacaSaklar(kunciCopilotIzin);
     return KonfigCopilot(
       endpoint: endpoint,
@@ -65,14 +73,14 @@ class CopilotRepository {
       await _pengaturan.simpan(kunciCopilotModel, model.trim());
     }
     if (kunci != null) {
-      await _pengaturan.simpan(kunciCopilotKunci, kunci.trim());
+      await _rahasia.simpan(kunciCopilotKunci, kunci.trim());
     }
     if (izin != null) {
       await _pengaturan.simpan(kunciCopilotIzin, izin ? '1' : '0');
     }
   }
 
-  Future<void> hapusKunci() => _pengaturan.hapusPengaturan(kunciCopilotKunci);
+  Future<void> hapusKunci() => _rahasia.hapus(kunciCopilotKunci);
 
   // ── Konteks dari data pengguna ────────────────────────────────────────────
   Future<BahanKonteksCopilot> bahanKonteks() async {

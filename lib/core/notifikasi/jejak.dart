@@ -21,6 +21,40 @@ void kabarkanJejak(Map<String, dynamic> data) {
 /// Nama berkas jejak di direktori dokumen aplikasi.
 const String namaBerkasJejak = 'jejak_pengingat.jsonl';
 
+// ---------------------------------------------------------------------------
+// Galat yang SENGAJA ditelan di lapisan data (temuan audit 23 Sep 2026, P2-6).
+//
+// Dulu `catch (_)` membuat kegagalan tak terlihat sampai pengguna melapor.
+// Sekarang setiap galat yang ditelan tetap DICATAT: disimpan di memori (tanpa
+// I/O, supaya pencatatan tidak pernah menggagalkan alur yang sedang
+// menyelamatkan data) dan dikabarkan lewat [aliranJejak] untuk layar yang mau
+// menampilkannya.
+// ---------------------------------------------------------------------------
+
+/// Berapa galat tertelan terakhir yang disimpan di memori.
+const int batasGalatTertelan = 200;
+
+final List<Map<String, dynamic>> _galatTertelan = <Map<String, dynamic>>[];
+
+/// Daftar galat tertelan terakhir (paling lama di depan).
+List<Map<String, dynamic>> get galatTertelan =>
+    List<Map<String, dynamic>>.unmodifiable(_galatTertelan);
+
+/// Catat satu galat yang ditelan. [jenis] = penanda tempat kejadian.
+void catatGalatTertelan(String jenis, Object galat) {
+  final data = <String, dynamic>{
+    'jenis': 'galat_tertelan:$jenis',
+    'galat': '$galat',
+    'waktu': DateTime.now().toIso8601String(),
+  };
+  _galatTertelan.add(data);
+  if (_galatTertelan.length > batasGalatTertelan) _galatTertelan.removeAt(0);
+  kabarkanJejak(data);
+}
+
+/// Kosongkan daftar galat tertelan (dipakai pengujian).
+void bersihkanGalatTertelan() => _galatTertelan.clear();
+
 /// Batas waktu pencarian folder dokumen.
 ///
 /// Pengingat dipasang dari UI dan dari isolate latar. Bila plugin path_provider

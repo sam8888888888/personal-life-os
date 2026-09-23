@@ -10,6 +10,7 @@ import 'package:drift/drift.dart';
 
 import '../../core/utils/waktu.dart';
 import '../database/database.dart';
+import '../../core/notifikasi/jejak.dart';
 
 class TinjauanRepository {
   TinjauanRepository(this.db, {DateTime Function()? jamSekarang})
@@ -124,8 +125,10 @@ class TinjauanRepository {
     try {
       final isi = jsonDecode(a.angkaJson);
       if (isi is Map) return isi.cast<String, Object?>();
-    } catch (_) {
-      // arsip lama/rusak: layar tetap menampilkan teksnya, angka dilewati
+    } catch (e) {
+      // arsip lama/rusak: layar tetap menampilkan teksnya, angka dilewati —
+      // tetapi kegagalannya DICATAT supaya tidak hilang tanpa jejak.
+      catatGalatTertelan('tinjauan.angkaArsipRusak', e);
     }
     return const <String, Object?>{};
   }

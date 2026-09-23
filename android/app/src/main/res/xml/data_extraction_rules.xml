@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ (API 31): aturan pengambilan data untuk cadangan cloud dan
+     pemindahan antar perangkat. Isi aplikasi ini TIDAK BOLEH keluar dari
+     perangkat lewat jalur sistem — semua data (keuangan, kesehatan, dokumen
+     keluarga, token akun, hash PIN) hanya boleh dipindahkan lewat cadangan
+     terenkripsi milik aplikasi sendiri.
+
+     Berpasangan dengan android:allowBackup="false" di AndroidManifest.xml
+     (yang berlaku untuk Android 11 ke bawah). -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

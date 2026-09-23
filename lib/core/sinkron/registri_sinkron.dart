@@ -333,6 +333,41 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomKunci: db.tautanPengetahuan.id,
       ),
 
+      // ── jaringan ikat v19 (SDD v19 Gelombang 1) ───────────────────────────
+      // Kotak masuk & catatan harian datang lebih dulu: keduanya bisa menjadi
+      // SASARAN tautan (`entitas_a`/`entitas_b`), jadi harus ada di HP penerima
+      // sebelum tautannya turun.
+      JalurSinkron(
+        nama: 'kotak_masuk',
+        tabel: db.kotakMasuk,
+        kolomUid: db.kotakMasuk.uid,
+        kolomKunci: db.kotakMasuk.id,
+        kolomDiubah: db.kotakMasuk.diubahPada,
+        kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
+      ),
+      JalurSinkron(
+        nama: 'catatan_harian',
+        tabel: db.catatanHarian,
+        kolomUid: db.catatanHarian.uid,
+        kolomKunci: db.catatanHarian.id,
+        kolomDiubah: db.catatanHarian.diubahPada,
+      ),
+      JalurSinkron(
+        nama: 'sorotan',
+        tabel: db.sorotan,
+        kolomUid: db.sorotan.uid,
+        kolomKunci: db.sorotan.id,
+      ),
+      // Tautan TIDAK memakai kaitan foreign key: sisi A dan sisi B-nya
+      // polimorfik (nama tabel + uid), jadi tidak ada satu kolom induk yang
+      // bisa dipetakan. Karena itu tautan dikirim PALING AKHIR.
+      JalurSinkron(
+        nama: 'tautan',
+        tabel: db.tautan,
+        kolomUid: db.tautan.uid,
+        kolomKunci: db.tautan.id,
+      ),
+
       // ── ibadah ────────────────────────────────────────────────────────────
       JalurSinkron(
         nama: 'hafalan',

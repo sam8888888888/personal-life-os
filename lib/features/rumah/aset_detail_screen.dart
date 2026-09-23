@@ -93,7 +93,7 @@ class _AsetDetailScreenState extends ConsumerState<AsetDetailScreen> {
             tooltip: 'Ubah aset',
             onPressed: () async {
               await context.push<bool>('/rumah/aset/form?id=${a.id}');
-              _muat();
+              await _muat();
             },
             icon: const Icon(Icons.edit_outlined),
           ),
@@ -236,7 +236,7 @@ class _AsetDetailScreenState extends ConsumerState<AsetDetailScreen> {
               tooltip: 'Tandai selesai',
               onPressed: () async {
                 await ref.read(repoRumahProvider).tandaiJadwalSelesai(p.id);
-                _muat();
+                await _muat();
               },
               icon: const Icon(Icons.check_circle_outline),
             ),
@@ -245,7 +245,7 @@ class _AsetDetailScreenState extends ConsumerState<AsetDetailScreen> {
               tooltip: 'Hapus jadwal',
               onPressed: () async {
                 await ref.read(repoRumahProvider).hapusJadwal(p.id);
-                _muat();
+                await _muat();
               },
               icon: const Icon(Icons.delete_outline),
             ),
@@ -268,7 +268,7 @@ class _AsetDetailScreenState extends ConsumerState<AsetDetailScreen> {
             tooltip: 'Hapus catatan',
             onPressed: () async {
               await ref.read(repoRumahProvider).hapusRiwayat(r.id);
-              _muat();
+              await _muat();
             },
             icon: const Icon(Icons.delete_outline),
           ),
@@ -329,7 +329,7 @@ class _AsetDetailScreenState extends ConsumerState<AsetDetailScreen> {
             intervalHari: hari <= 0 ? 365 : hari,
             kategori: _aset?.jenis ?? 'lain',
           );
-      _muat();
+      await _muat();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
@@ -382,7 +382,7 @@ class _AsetDetailScreenState extends ConsumerState<AsetDetailScreen> {
             tanggal: DateTime.now(),
             biayaSen: rupiah == null ? 0 : rupiahKeSen(rupiah),
           );
-      _muat();
+      await _muat();
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)

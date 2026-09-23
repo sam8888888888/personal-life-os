@@ -11,6 +11,7 @@ library;
 import 'dart:convert';
 
 import 'pengaturan_repository.dart';
+import '../../core/notifikasi/jejak.dart';
 
 /// Satu template pribadi.
 class TemplatePribadi {
@@ -81,7 +82,8 @@ List<TemplatePribadi> jsonKeTemplatePribadi(String? teks) {
       }
     }
     return hasil;
-  } catch (_) {
+  } catch (e) {
+    catatGalatTertelan('templatePribadi.bacaRusak', e);
     return const [];
   }
 }

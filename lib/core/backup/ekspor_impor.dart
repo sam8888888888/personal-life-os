@@ -4,12 +4,16 @@
 /// ```json
 /// {
 ///   "format": "plo-backup",
-///   "versiSkema": 4,
-///   "versiAplikasi": "1.0.0+1",
+///   "versiSkema": 19,
+///   "versiAplikasi": "1.11.0+14",
 ///   "dibuatPada": "2026-09-15T08:00:00.000",
 ///   "tabel": { "<namaTabel>": [ { "<kolom>": nilai } ] }
 /// }
 /// ```
+///
+/// Nilai `versiSkema` & `versiAplikasi` TIDAK lagi berupa konstanta sendiri di
+/// berkas ini: keduanya dibaca dari sumber tunggalnya (`db.schemaVersion` dan
+/// `lib/core/versi.dart`), supaya tidak bisa tertinggal dari kenyataan.
 ///
 /// ATURAN YANG DIPEGANG BERKAS INI
 /// 1. Daftar tabel TIDAK ditulis satu per satu: dibaca dari `db.allTables`,
@@ -32,21 +36,33 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../platform/brankas_rahasia.dart';
 import '../utils/waktu.dart';
+import '../versi.dart' as versi;
 import '../../data/database/database.dart';
+import 'kunci_cadangan.dart';
 
 /// Penanda format berkas cadangan.
 const String formatCadangan = 'plo-backup';
 
-/// Versi skema database yang dikenal aplikasi ini.
+/// Penanda berkas cadangan yang **TERENKRIPSI** (amplop AES-256-GCM).
 ///
-/// Samakan dengan `schemaVersion` di `lib/data/database/database.dart`.
-const int versiSkemaAplikasi = 4;
+/// Berkas jenis ini hanya memuat metadata ringan (waktu, versi) di bagian luar
+/// dan isi data di dalam amplop — sehingga berkas boleh dibagikan lewat
+/// WhatsApp/Drive tanpa membocorkan keuangan, kesehatan, dan dokumen keluarga.
+const String formatCadanganTerenkripsi = 'plo-backup-terenkripsi';
+
+/// Panjang frasa sandi cadangan paling pendek.
+const int panjangSandiCadanganMin = 8;
 
 /// Versi aplikasi yang ditulis ke berkas cadangan.
 ///
-/// Samakan dengan `version:` di `pubspec.yaml`.
-const String versiAplikasiCadangan = '1.0.0+1';
+/// Diambil dari SATU sumber kebenaran (`lib/core/versi.dart`), bukan dari
+/// konstanta kedua di berkas ini: versi kedua itu dulu tertinggal ('1.0.0+1'
+/// padahal pubspec sudah jauh di atasnya) sehingga berkas cadangan menulis
+/// versi yang salah. Uji `test/versi_konsisten_test.dart` menjaga pubspec &
+/// berkas ini tetap sinkron.
+String get versiAplikasiCadangan => '${versi.versiAplikasi}+${versi.nomorBuild}';
 
 /// Awalan nama berkas cadangan (dipakai juga saat mendaftar berkas).
 const String awalanBerkasCadangan = 'plo_backup';
@@ -63,6 +79,24 @@ class GalatCadangan implements Exception {
 
   @override
   String toString() => pesan;
+}
+
+/// Berkas cadangan terenkripsi meminta frasa sandi (belum diberikan).
+///
+/// Dipisah dari [GalatCadangan] supaya layar tahu bahwa yang dibutuhkan adalah
+/// frasa sandi — bukan berkasnya yang rusak.
+class GalatCadanganButuhSandi extends GalatCadangan {
+  const GalatCadanganButuhSandi()
+      : super('Berkas cadangan ini terenkripsi. Masukkan frasa sandi yang '
+            'dipakai saat membuatnya. Data di perangkat Anda tidak diubah.');
+}
+
+/// Frasa sandi tidak cocok, atau isi amplop rusak.
+class GalatCadanganSandiSalah extends GalatCadangan {
+  const GalatCadanganSandiSalah()
+      : super('Frasa sandi tidak cocok dengan berkas cadangan ini (atau '
+            'berkasnya rusak). Data di perangkat Anda tidak diubah — silakan '
+            'coba lagi dengan frasa sandi yang benar.');
 }
 
 /// Keterangan singkat satu berkas cadangan di folder dokumen aplikasi.
@@ -92,6 +126,7 @@ class HasilEkspor {
     required this.dibuatPada,
     required this.jumlahBaris,
     required this.totalBaris,
+    this.terenkripsi = false,
   });
 
   final String path;
@@ -105,6 +140,9 @@ class HasilEkspor {
 
   /// Jumlah seluruh baris pada semua tabel.
   final int totalBaris;
+
+  /// Apakah berkas ditulis TERENKRIPSI (amplop AES-256-GCM).
+  final bool terenkripsi;
 }
 
 /// Hasil pemeriksaan berkas SEBELUM ada data yang diubah.
@@ -204,9 +242,13 @@ class LayananCadangan {
     required this.db,
     this.penentuFolder,
     this.jam,
-    this.versiAplikasi = versiAplikasiCadangan,
-    this.versiSkema = versiSkemaAplikasi,
-  });
+    String? versiAplikasi,
+    int? versiSkema,
+  })  : versiAplikasi = versiAplikasi ?? versiAplikasiCadangan,
+        _versiSkemaMinta = versiSkema;
+
+  /// Nilai yang diminta saat pengujian (null = ikuti skema database).
+  final int? _versiSkemaMinta;
 
   final AppDatabase db;
 
@@ -217,7 +259,15 @@ class LayananCadangan {
   final DateTime Function()? jam;
 
   final String versiAplikasi;
-  final int versiSkema;
+
+  /// Versi skema yang ditulis ke berkas cadangan.
+  ///
+  /// SELALU diambil dari skema database yang benar-benar dipakai
+  /// (`AppDatabase.schemaVersion`) — bukan konstanta terpisah yang bisa
+  /// tertinggal. Sebelumnya berkas ini menulis `versiSkema: 4` padahal skema
+  /// sebenarnya sudah 18, sehingga logika "cadangan ini dari versi lama" di
+  /// jalur impor mengambil keputusan yang salah.
+  int get versiSkema => _versiSkemaMinta ?? db.schemaVersion;
 
   DateTime _sekarang() => (jam ?? waktuSekarang)();
 
@@ -246,7 +296,15 @@ class LayananCadangan {
   // -------------------------------------------------------------------
 
   /// Baca seluruh tabel lewat `db.allTables` dan tulis satu berkas JSON.
-  Future<HasilEkspor> ekspor({DateTime? pada}) async {
+  ///
+  /// Bila [sandi] diisi, isi cadangan ditulis TERENKRIPSI (AES-256-GCM dengan
+  /// kunci turunan PBKDF2 600.000 putaran) sehingga berkasnya aman dibagikan.
+  /// Bila tidak diisi, dipakai **kunci acak perangkat** dari brankas Keystore
+  /// (cadangan otomatis/pekerja latar): berkas tetap tidak pernah berupa teks
+  /// polos, tetapi hanya bisa dibuka di perangkat yang sama. Hanya bila
+  /// perangkat tidak mendukung brankas, berkas ditulis polos — dan pemanggil
+  /// melihatnya lewat [HasilEkspor.terenkripsi] = false.
+  Future<HasilEkspor> ekspor({DateTime? pada, String? sandi}) async {
     final DateTime waktu = pada ?? _sekarang();
     late final Map<String, List<Map<String, Object?>>> isiTabel;
     try {
@@ -270,12 +328,35 @@ class LayananCadangan {
       'tabel': isiTabel,
     };
 
+    final String? sandiEfektif = await _sandiEfektif(sandi);
+    final bool terenkripsi = sandiEfektif != null;
+    Object? isiBerkas = isi;
+    if (terenkripsi) {
+      final amplop = await enkripsiDenganSandi(
+        teks: const JsonEncoder.withIndent('  ').convert(isi),
+        sandi: sandiEfektif,
+      );
+      if (amplop == null) {
+        throw const GalatCadangan(
+            'Cadangan terenkripsi tidak bisa dibuat di perangkat ini, jadi '
+            'tidak ada berkas yang ditulis (data Anda tidak diubah).');
+      }
+      isiBerkas = <String, Object?>{
+        'format': formatCadanganTerenkripsi,
+        'versiAmplop': 1,
+        'versiSkema': versiSkema,
+        'versiAplikasi': versiAplikasi,
+        'dibuatPada': waktu.toIso8601String(),
+        'amplop': amplop,
+      };
+    }
+
     final Directory folder = await _folder();
     final String nama = namaBerkasEkspor(waktu);
     final File berkas = File('${folder.path}${Platform.pathSeparator}$nama');
     try {
       await berkas.writeAsString(
-        const JsonEncoder.withIndent('  ').convert(isi),
+        const JsonEncoder.withIndent('  ').convert(isiBerkas),
         flush: true,
       );
     } catch (e) {
@@ -288,7 +369,23 @@ class LayananCadangan {
       dibuatPada: waktu,
       jumlahBaris: jumlahBaris,
       totalBaris: jumlahBaris.values.fold<int>(0, (a, b) => a + b),
+      terenkripsi: terenkripsi,
     );
+  }
+
+  /// Frasa sandi yang benar-benar dipakai: pilihan pengguna, kalau tidak ada
+  /// dipakai kunci perangkat (brankas Keystore), kalau itu pun tidak tersedia
+  /// → null (berkas polos, disebutkan apa adanya ke pemanggil).
+  Future<String?> _sandiEfektif(String? sandi) async {
+    if (sandi != null && sandi.isNotEmpty) {
+      if (sandi.length < panjangSandiCadanganMin) {
+        throw GalatCadangan(
+            'Frasa sandi cadangan paling sedikit $panjangSandiCadanganMin '
+            'karakter — supaya cadangan tidak mudah dibuka orang lain.');
+      }
+      return sandi;
+    }
+    return kunciCadanganPerangkatUntuk(db);
   }
 
   /// Seluruh baris semua tabel, sudah berbentuk nilai yang bisa di-JSON-kan.
@@ -388,8 +485,11 @@ class LayananCadangan {
   ///
   /// Melempar [GalatCadangan] bila berkas tidak sah; pesannya sudah jelas dan
   /// menegaskan bahwa data di perangkat belum diubah.
-  Future<PratinjauCadangan> pratinjau(String path) async {
-    final _IsiCadangan isi = await _bacaBerkas(path);
+  ///
+  /// [sandi] = frasa sandi untuk berkas cadangan terenkripsi (kalau berkasnya
+  /// dibuat di perangkat ini, kunci perangkat dipakai otomatis).
+  Future<PratinjauCadangan> pratinjau(String path, {String? sandi}) async {
+    final _IsiCadangan isi = await _bacaBerkas(path, sandi: sandi);
     final Map<String, List<Map<String, Object?>>> tabelFile = isi.tabel;
 
     final Set<String> namaDiAplikasi = <String>{
@@ -444,6 +544,7 @@ class LayananCadangan {
     String path, {
     bool sudahDikonfirmasi = false,
     bool buatCadanganPengaman = true,
+    String? sandi,
   }) async {
     if (!sudahDikonfirmasi) {
       return HasilImpor(
@@ -456,8 +557,8 @@ class LayananCadangan {
     late final _IsiCadangan isi;
     late final PratinjauCadangan lihat;
     try {
-      lihat = await pratinjau(path);
-      isi = await _bacaBerkas(path);
+      lihat = await pratinjau(path, sandi: sandi);
+      isi = await _bacaBerkas(path, sandi: sandi);
     } on GalatCadangan catch (e) {
       return HasilImpor(
         berhasil: false,
@@ -467,11 +568,13 @@ class LayananCadangan {
     }
 
     // (5) Cadangan pengaman lebih dulu — data sekarang diamankan sebelum
-    //     apa pun ditimpa.
+    //     apa pun ditimpa. Ditulis TERENKRIPSI (frasa sandi pengguna atau kunci
+    //     perangkat) supaya berkas penyelamat pun tidak berupa teks polos.
     String? pathAman;
     if (buatCadanganPengaman) {
       final DateTime waktu = _sekarang();
-      final File berkasAman = await _tulisKeFolder(namaBerkasPengaman(waktu), waktu);
+      final File berkasAman =
+          await _tulisKeFolder(namaBerkasPengaman(waktu), waktu, sandi: sandi);
       pathAman = berkasAman.path;
     }
 
@@ -647,26 +750,52 @@ class LayananCadangan {
     }
   }
 
-  Future<File> _tulisKeFolder(String nama, DateTime waktu) async {
+  Future<File> _tulisKeFolder(String nama, DateTime waktu,
+      {String? sandi}) async {
     final Directory folder = await _folder();
     final Map<String, List<Map<String, Object?>>> isiTabel =
         await bacaSemuaTabel();
+    final isi = <String, Object?>{
+      'format': formatCadangan,
+      'versiSkema': versiSkema,
+      'versiAplikasi': versiAplikasi,
+      'dibuatPada': waktu.toIso8601String(),
+      'tabel': isiTabel,
+    };
+    final String? sandiEfektif = await _sandiEfektif(sandi);
+    Object? isiBerkas = isi;
+    if (sandiEfektif != null) {
+      final amplop = await enkripsiDenganSandi(
+        teks: const JsonEncoder.withIndent('  ').convert(isi),
+        sandi: sandiEfektif,
+      );
+      if (amplop != null) {
+        isiBerkas = <String, Object?>{
+          'format': formatCadanganTerenkripsi,
+          'versiAmplop': 1,
+          'versiSkema': versiSkema,
+          'versiAplikasi': versiAplikasi,
+          'dibuatPada': waktu.toIso8601String(),
+          'amplop': amplop,
+        };
+      }
+    }
     final File berkas = File('${folder.path}${Platform.pathSeparator}$nama');
     await berkas.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(<String, Object?>{
-        'format': formatCadangan,
-        'versiSkema': versiSkema,
-        'versiAplikasi': versiAplikasi,
-        'dibuatPada': waktu.toIso8601String(),
-        'tabel': isiTabel,
-      }),
+      const JsonEncoder.withIndent('  ').convert(isiBerkas),
       flush: true,
     );
     return berkas;
   }
 
   /// Baca + periksa berkas. Semua berkas tidak sah ditolak di sini.
-  Future<_IsiCadangan> _bacaBerkas(String path) async {
+  ///
+  /// [sandi] = frasa sandi untuk berkas TERENKRIPSI. Bila tidak diberikan,
+  /// dicoba kunci perangkat (brankas Keystore) — berkas yang dibuat di
+  /// perangkat ini bisa dibuka tanpa mengetik apa pun. Bila keduanya gagal,
+  /// yang dilempar [GalatCadanganButuhSandi]/[GalatCadanganSandiSalah] —
+  /// bukan dianggap berkas rusak.
+  Future<_IsiCadangan> _bacaBerkas(String path, {String? sandi}) async {
     final File berkas = File(path);
     if (!berkas.existsSync()) {
       throw const GalatCadangan(
@@ -700,7 +829,44 @@ class LayananCadangan {
           'Isi berkas bukan objek JSON, jadi bukan berkas cadangan. '
           'Data di perangkat Anda tidak diubah.');
     }
-    final Map<Object?, Object?> akar = mentah;
+    final Map<Object?, Object?> akarAwal = mentah;
+
+    Map<Object?, Object?> akar = akarAwal;
+
+    // Berkas TERENKRIPSI: buka dulu amplopnya, baru diperiksa seperti biasa.
+    if (akarAwal['format'] == formatCadanganTerenkripsi) {
+      final Object? amplop = akarAwal['amplop'];
+      if (amplop is! String || amplop.isEmpty) {
+        throw const GalatCadangan(
+            'Berkas cadangan terenkripsi tidak lengkap (bagian amplop tidak '
+            'ada). Data di perangkat Anda tidak diubah.');
+      }
+      final bool pakaiSandiPengguna = sandi != null && sandi.isNotEmpty;
+      final String? frasa =
+          pakaiSandiPengguna ? sandi : await kunciCadanganPerangkatUntuk(db);
+      if (frasa == null) throw const GalatCadanganButuhSandi();
+      final String? teksPolos =
+          await dekripsiDenganSandi(amplop: amplop, sandi: frasa);
+      if (teksPolos == null) {
+        throw pakaiSandiPengguna
+            ? const GalatCadanganSandiSalah()
+            : const GalatCadanganButuhSandi();
+      }
+      Object? dalam;
+      try {
+        dalam = jsonDecode(teksPolos);
+      } on FormatException {
+        throw const GalatCadangan(
+            'Isi cadangan terenkripsi tidak bisa dibaca. Data di perangkat '
+            'Anda tidak diubah.');
+      }
+      if (dalam is! Map) {
+        throw const GalatCadangan(
+            'Isi cadangan terenkripsi bukan objek JSON. Data di perangkat '
+            'Anda tidak diubah.');
+      }
+      akar = Map<Object?, Object?>.from(dalam);
+    }
 
     if (akar['format'] != formatCadangan) {
       throw const GalatCadangan(

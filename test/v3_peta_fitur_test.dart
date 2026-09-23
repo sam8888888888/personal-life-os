@@ -58,7 +58,7 @@ void main() {
         'FR-47', 'FR-48', 'FR-54', 'FR-55', 'FR-149',
         // Batch 12: mode rumah tangga, sub-akses keluarga, pemindai SMS bank,
         // perawatan berkala (verifikasi), ucapkan-tulis.
-        'FR-39', 'FR-43', 'FR-56', 'FR-57', 'FR-58',
+        'FR-43', 'FR-56', 'FR-57', 'FR-58',
         // Batch 13: impor tagihan dari foto (OCR) & perluasan ke struk/nota.
         'FR-38', 'FR-50']) {
         expect(cari(id).status, StatusFitur.selesai, reason: '$id seharusnya Selesai');
@@ -72,6 +72,10 @@ void main() {
       // (keputusan pemilik — baca semua notifikasi terlalu berisiko).
       expect(cari('FR-59').status, StatusFitur.sebagian);
       expect(cari('FR-26').status, StatusFitur.selesai);  // kunci aplikasi (Batch 8)
+      // FR-39 dibuang (izin SMS dilarang pemilik) → wajib Belum, bukan Selesai.
+      expect(cari('FR-39').status, StatusFitur.belum);
+      expect(cari('FR-39').rute, isNull,
+          reason: 'layarnya sudah dihapus, jadi tanpa rute');
     });
 
     test('sinkron ditandai Selesai TAPI cacatnya ditulis apa adanya', () {
@@ -126,9 +130,11 @@ void main() {
           reason: 'FR-26 sudah selesai → tidak muncul di saringan Belum');
       expect(find.byKey(const Key('peta_FR-21')), findsNothing,
           reason: 'FR-21 sudah selesai → tidak muncul di saringan Belum');
-      // Batch 13: seluruh 152 butir kini selesai ATAU sebagian → saringan
-      // "belum" memang kosong, dan layar mengatakannya.
-      expect(find.text('Tidak ada butir yang cocok.'), findsOneWidget);
+      // FR-39 (pemindai SMS bank) DIBUANG: jalan SMS-nya sudah tidak ada dan
+      // penggantinya belum dikerjakan → butir itu memang muncul di saringan
+      // "Belum". Ini tanda kejujuran peta, bukan regresi.
+      expect(find.byKey(const Key('peta_FR-39')), findsOneWidget,
+          reason: 'FR-39 belum selesai → wajib muncul di saringan Belum');
       await tutup(t);
     });
 

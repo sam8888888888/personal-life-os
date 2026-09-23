@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../database/database.dart';
+import '../../core/notifikasi/jejak.dart';
 
 class LampiranGagal implements Exception {
   LampiranGagal(this.pesan);
@@ -105,8 +106,10 @@ class LampiranRepository {
     if (await berkas.exists()) {
       try {
         await berkas.delete();
-      } catch (_) {
-        // Berkas terkunci sistem → baris tetap dihapus, berkas ditinggal.
+      } catch (e) {
+        // Berkas terkunci sistem → baris tetap dihapus, berkas ditinggal,
+        // tetapi kegagalannya dicatat (bukan dilewatkan tanpa jejak).
+        catatGalatTertelan('lampiran.hapusBerkasGagal', e);
       }
     }
     await (_db.delete(_db.lampiran)..where((t) => t.id.equals(id))).go();

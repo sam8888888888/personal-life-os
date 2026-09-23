@@ -1,0 +1,26 @@
+# Contoh isi android/key.properties — JANGAN pakai berkas ini apa adanya.
+#
+# Salin menjadi `android/key.properties` (nama itu sudah masuk .gitignore,
+# jadi tidak akan pernah ikut ter-commit), lalu isi nilai sebenarnya.
+#
+# Membuat keystore rilis SEKALI (simpan + cadangkan di dua tempat berbeda —
+# kalau hilang, aplikasi tidak bisa di-update lagi di Play Store):
+#
+#   keytool -genkeypair -v \
+#     -keystore lifeos-release.jks -alias upload \
+#     -keyalg RSA -keysize 4096 -validity 10000 \
+#     -storetype JKS \
+#     -dname "CN=Personal Life OS, O=<nama organisasi>, C=ID"
+#
+# Lalu bangun rilis:
+#
+#   flutter build appbundle --release \
+#     --obfuscate --split-debug-info=build/symbols
+#
+# Simpan folder `build/symbols/` (bukan di repo) supaya jejak galat produksi
+# masih bisa dibaca.
+
+storePassword=GANTI_SANDI_KEYSTORE
+keyPassword=GANTI_SANDI_KUNCI
+keyAlias=upload
+storeFile=/jalur/mutlak/ke/keystore/lifeos-release.jks

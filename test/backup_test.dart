@@ -272,15 +272,17 @@ void main() {
       final Map<String, dynamic> isi =
           jsonDecode(File(hasil.path).readAsStringSync()) as Map<String, dynamic>;
       expect(isi['format'], 'plo-backup');
-      expect(isi['versiSkema'], 4);
+      expect(isi['versiSkema'], db.schemaVersion);
       expect(isi['versiAplikasi'], versiAplikasiCadangan);
       expect(DateTime.tryParse(isi['dibuatPada'] as String), jamUji);
 
       final Map<String, dynamic> tabel = isi['tabel'] as Map<String, dynamic>;
       expect(tabel.length, db.allTables.length,
           reason: 'SEMUA tabel Drift ikut ter-ekspor (v3 maupun v4)');
-      expect(tabel.length, 79,
-          reason: 'seluruh tabel Drift ikut ter-ekspor, termasuk 5 tabel batch 12 '
+      expect(tabel.length, 83,
+          reason: 'seluruh tabel Drift ikut ter-ekspor, termasuk 4 tabel '
+              'jaringan ikat v19 (kotak_masuk, catatan_harian, tautan, '
+              'sorotan), 5 tabel batch 12 '
               '(rumah_tangga, tagihan_rumah_bersama, bagian_tagihan_rumah, '
               'izin_sub_akses_keluarga, pemindaian_bank) serta 4 tabel batch 10 '
               '(perjalanan, item_perjalanan, catatan_perjalanan, '
@@ -480,7 +482,7 @@ void main() {
 
       final lihat = await cadangan.pratinjau(hasil.path);
       expect(lihat.namaBerkas, hasil.namaBerkas);
-      expect(lihat.versiSkema, 4);
+      expect(lihat.versiSkema, db.schemaVersion);
       expect(lihat.versiAplikasi, versiAplikasiCadangan);
       expect(lihat.dibuatPada, jamUji);
       expect(lihat.diubahBerkasPada, isA<DateTime>());
@@ -601,16 +603,19 @@ void main() {
           label: 'format salah');
     });
 
-    test('versi skema 5 (lebih baru dari aplikasi)', () async {
-      await tolakBerkas('plo_backup_v5.json',
+    test('versi skema lebih baru dari aplikasi ditolak', () async {
+      // Versi "lebih baru" dihitung dari skema aplikasi sekarang — bukan angka
+      // mati — supaya uji ini tidak basi setiap skema naik (dulu: 5, kini 19).
+      final int lebihBaru = db.schemaVersion + 1;
+      await tolakBerkas('plo_backup_lebihbaru.json',
           jsonEncode(<String, Object?>{
             'format': 'plo-backup',
-            'versiSkema': 5,
+            'versiSkema': lebihBaru,
             'versiAplikasi': '9.9.9',
             'tabel': <String, Object?>{},
           }),
-          <String>['versi 5', 'Perbarui aplikasi', 'tidak diubah'],
-          label: 'versiSkema 5');
+          <String>['versi $lebihBaru', 'Perbarui aplikasi', 'tidak diubah'],
+          label: 'versiSkema $lebihBaru');
     });
 
     test('versi skema hilang', () async {
@@ -744,7 +749,7 @@ void main() {
       final tabel = isiPengaman['tabel'] as Map<String, dynamic>;
       expect((tabel['tagihan'] as List<dynamic>), isEmpty);
       expect((tabel['kategori'] as List<dynamic>).length, 10);
-      expect(isiPengaman['versiSkema'], 4);
+      expect(isiPengaman['versiSkema'], db.schemaVersion);
 
       // Daftar berkas: terbaru lebih dahulu.
       expect(daftar.first.diubahPada.isAfter(daftar.last.diubahPada) ||
@@ -933,7 +938,7 @@ void main() {
       final Map<String, dynamic> isi =
           jsonDecode(berkas.readAsStringSync()) as Map<String, dynamic>;
       expect(isi['format'], 'plo-backup');
-      expect(isi['versiSkema'], 4);
+      expect(isi['versiSkema'], db.schemaVersion);
       expect((isi['tabel'] as Map<String, dynamic>)['tagihan'], hasLength(1));
 
       await gulirKe(t, find.byKey(const Key('jumlah_baris_tagihan')));
@@ -964,7 +969,7 @@ void main() {
       await ketukNyata(t, kunciBerkas);
       await gulirKe(t, find.byKey(const Key('pratinjau_impor')));
       expect(find.byKey(const Key('pratinjau_impor')), findsOneWidget);
-      expect(find.textContaining('Versi skema: 4'), findsOneWidget);
+      expect(find.textContaining('Versi skema: ${db.schemaVersion}'), findsOneWidget);
       expect(find.textContaining('Dibuat: 15 September 2026'), findsOneWidget);
       expect(find.byKey(const Key('pratinjau_baris_tagihan')), findsOneWidget);
       expect(find.text('tagihan: 1 baris'), findsOneWidget);

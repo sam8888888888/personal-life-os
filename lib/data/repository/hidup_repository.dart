@@ -19,6 +19,7 @@ import '../database/database.dart';
 import '../model/enums.dart';
 import 'aset_repository.dart';
 import 'langganan_repository.dart';
+import '../../core/notifikasi/jejak.dart';
 
 class HidupRepository {
   HidupRepository(this.db, {DateTime Function()? jamSekarang})
@@ -531,9 +532,11 @@ class HidupRepository {
       asetSen = nilai.totalAsetSen;
       kewajibanSen = nilai.totalKewajibanSen;
       bersihSen = nilai.bersihSen;
-    } catch (_) {
+    } catch (e) {
       // Bila modul aset belum dipakai, biarkan kosong (layar menulis
-      // "belum ada data") — bukan angka 0 yang menyesatkan.
+      // "belum ada data") — bukan angka 0 yang menyesatkan. Kegagalannya
+      // tetap dicatat supaya tidak hilang tanpa jejak.
+      catatGalatTertelan('hidup.nilaiBersihGagal', e);
     }
 
     return BahanAnalitik(

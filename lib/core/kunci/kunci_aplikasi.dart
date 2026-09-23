@@ -1,10 +1,20 @@
 /// FR-26 — Kunci aplikasi (PIN / kunci perangkat) untuk data sensitif.
 ///
-/// Aturan yang dipegang di sini:
+/// Aturan yang dipegang di sini (diperketat 23 Sep 2026 setelah audit):
 /// * PIN **tidak pernah disimpan apa adanya** — hanya turunan PBKDF2-HMAC-SHA256
-///   (garam acak + banyak putaran) yang ditulis ke basis data.
+///   (garam acak + banyak putaran) yang disimpan.
+/// * Garam & turunan disimpan lewat **brankas Keystore** (`lifeos/rahasia`),
+///   bukan di tabel `pengaturan` polos. Akibatnya salinan basis data saja
+///   (cadangan/Google Drive/HP yang di-root) **tidak cukup** untuk menebak PIN
+///   secara luring: kuncinya ada di Android Keystore yang tidak bisa diekspor.
+/// * PIN paling sedikit **6 angka** (10^6 kemungkinan) dan PBKDF2 memakai
+///   **600.000 putaran** (selaras rekomendasi OWASP 2023). PIN 4 angka dengan
+///   60.000 putaran bisa dibobol di bawah satu menit dengan GPU konsumen.
 /// * Salah PIN berkali-kali → percobaan ditahan sementara (bukan dikunci
 ///   selamanya, bukan pula dibiarkan bebas).
+/// * Bila bahan kunci HILANG padahal kunci sedang aktif → aplikasi **TIDAK
+///   terbuka diam-diam** (fail-closed). Pengguna diberi tahu dan bisa mengatur
+///   ulang PIN; data tidak dihapus.
 /// * Kunci ini menahan **tampilan**, bukan menyandikan basis data.
 library;
 
@@ -14,6 +24,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 
 import '../../data/repository/pengaturan_repository.dart';
+import '../platform/brankas_rahasia.dart';
 
 // ---------------------------------------------------------------------------
 // Nama pengaturan (k-v) — satu tempat, dipakai layar & uji.
@@ -28,14 +39,14 @@ const String kunciKunciTungguSampai = 'kunci_tunggu_sampai';
 const String kunciKunciBukaPerangkat = 'kunci_buka_perangkat';
 const String kunciKunciTenggangDetik = 'kunci_tenggang_detik';
 
-/// Panjang PIN paling pendek yang diterima.
-const int kunciPanjangMin = 4;
+/// Panjang PIN paling pendek yang diterima (audit P1-2: 4 angka terlalu mudah).
+const int kunciPanjangMin = 6;
 
 /// Panjang PIN paling panjang (menjaga agar tidak jadi sandi).
 const int kunciPanjangMaks = 12;
 
 /// Putaran PBKDF2 bawaan. Uji memakai angka kecil supaya cepat.
-const int kunciIterasiBawaan = 60000;
+const int kunciIterasiBawaan = 600000;
 
 /// Berapa kali salah sebelum ditahan sementara.
 const int kunciPercobaanMaks = 5;
@@ -54,6 +65,7 @@ class HasilBukaKunci {
     this.sisaPercobaan = kunciPercobaanMaks,
     this.tungguSampai,
     this.pesan,
+    this.rusak = false,
   });
 
   /// Benar bila PIN diterima.
@@ -68,24 +80,36 @@ class HasilBukaKunci {
   /// Keterangan apa adanya untuk pengguna.
   final String? pesan;
 
+  /// Bahan kunci hilang/tidak terbaca padahal kunci sedang aktif: aplikasi
+  /// TIDAK terbuka, dan pengguna ditawari mengatur ulang PIN.
+  final bool rusak;
+
   bool get tertahan => tungguSampai != null;
 }
 
 /// Kunci aplikasi (FR-26).
 class KunciAplikasi {
-  KunciAplikasi(this.repo, {Random? acak, int? iterasi})
+  KunciAplikasi(this.repo, {Random? acak, int? iterasi, PenyimpanRahasia? rahasia})
       : _acak = acak ?? Random.secure(),
-        _iterasi = iterasi ?? kunciIterasiBawaan;
+        _iterasi = iterasi ?? kunciIterasiBawaan {
+    _rahasia = rahasia ?? PenyimpanRahasia(repo);
+  }
 
   final PengaturanRepository repo;
   final Random _acak;
   final int _iterasi;
 
+  /// Penyimpan garam & turunan PIN (brankas Keystore bila tersedia).
+  late final PenyimpanRahasia _rahasia;
+
+  /// Apakah bahan kunci benar-benar tersimpan terenkripsi di perangkat ini.
+  Future<bool> rahasiaTerlindungi() => _rahasia.tersedia();
+
   /// Apakah kunci sedang dipakai.
   Future<bool> aktif() async {
     final ada = await repo.bacaSaklar(kunciKunciAktif);
     if (!ada) return false;
-    final turunan = await repo.baca(kunciKunciTurunan);
+    final turunan = await _rahasia.baca(kunciKunciTurunan);
     return turunan != null && turunan.isNotEmpty;
   }
 
@@ -102,15 +126,15 @@ class KunciAplikasi {
 
   /// Pasang PIN (sekaligus menyalakan kunci).
   ///
-  /// [bukaPerangkat] = izinkan membuka dengan kunci perangkat HP.
+  /// [bukaPerangkat] = izin membuka dengan kunci perangkat HP.
   Future<void> pasangPin(String pin,
       {bool bukaPerangkat = false}) async {
     final keluhan = keluhanPin(pin);
     if (keluhan != null) throw ArgumenPinTidakSah(keluhan);
     final garam = _buatGaram();
     final turunan = _hitung(pin, garam, _iterasi);
-    await repo.simpan(kunciKunciGaram, base64Encode(garam));
-    await repo.simpan(kunciKunciTurunan, base64Encode(turunan));
+    await _rahasia.simpan(kunciKunciGaram, base64Encode(garam));
+    await _rahasia.simpan(kunciKunciTurunan, base64Encode(turunan));
     await repo.simpan(kunciKunciIterasi, _iterasi.toString());
     await repo.simpan(kunciKunciBukaPerangkat, bukaPerangkat ? 'ya' : 'tidak');
     await _bersihkanHitung();
@@ -124,6 +148,8 @@ class KunciAplikasi {
   /// Matikan kunci (PIN dihapus).
   Future<void> matikan() async {
     await repo.simpan(kunciKunciAktif, 'tidak');
+    await _rahasia.hapus(kunciKunciTurunan);
+    await _rahasia.hapus(kunciKunciGaram);
     await repo.hapusPengaturan(kunciKunciTurunan);
     await repo.hapusPengaturan(kunciKunciGaram);
     await _bersihkanHitung();
@@ -170,9 +196,22 @@ class KunciAplikasi {
       );
     }
 
-    final garamTeks = await repo.baca(kunciKunciGaram);
-    final turunanTeks = await repo.baca(kunciKunciTurunan);
+    final garamTeks = await _rahasia.baca(kunciKunciGaram);
+    final turunanTeks = await _rahasia.baca(kunciKunciTurunan);
     if (garamTeks == null || turunanTeks == null) {
+      // FAIL-CLOSED: kalau kunci sebenarnya aktif tetapi bahan kuncinya tidak
+      // ada, aplikasi TIDAK terbuka diam-diam (dulu: `berhasil: true`, sehingga
+      // menghapus baris `kunci_turunan` langsung membuka aplikasi).
+      final sedangAktif = await repo.bacaSaklar(kunciKunciAktif);
+      if (sedangAktif) {
+        return const HasilBukaKunci(
+          berhasil: false,
+          rusak: true,
+          pesan: 'Kunci aplikasi aktif, tetapi bahan kuncinya tidak bisa '
+              'dibaca di perangkat ini. Aplikasi tidak dibuka otomatis. '
+              'Atur ulang PIN untuk masuk kembali — data Anda tidak dihapus.',
+        );
+      }
       return const HasilBukaKunci(
         berhasil: true,
         pesan: 'Kunci belum dipasang.',
@@ -185,6 +224,7 @@ class KunciAplikasi {
     final turunanCoba = _hitung(pin, garam, iterasi);
 
     if (_sama(turunanBenar, turunanCoba)) {
+      await _pindahkanKeBrankas();
       await _bersihkanHitung();
       return const HasilBukaKunci(berhasil: true, pesan: 'Terbuka.');
     }
@@ -210,6 +250,17 @@ class KunciAplikasi {
       sisaPercobaan: kunciPercobaanMaks - gagal,
       pesan: 'PIN salah. Sisa kesempatan ${kunciPercobaanMaks - gagal}.',
     );
+  }
+
+  /// Pindahkan bahan kunci lama yang masih tersimpan polos di tabel
+  /// `pengaturan` ke brankas Keystore (dijalankan setelah PIN benar).
+  Future<void> _pindahkanKeBrankas() async {
+    if (!await _rahasia.tersedia()) return;
+    for (final nama in const [kunciKunciTurunan, kunciKunciGaram]) {
+      if (await _rahasia.baca(nama) == null) {
+        await _rahasia.pindahkanKeBrankas(nama);
+      }
+    }
   }
 
   Future<void> _bersihkanHitung() async {

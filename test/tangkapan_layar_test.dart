@@ -48,9 +48,17 @@ import 'package:personal_life_os/features/ibadah/pelacakan_sholat_screen.dart';
 /// Font Roboto dari Flutter SDK. Dicari di beberapa lokasi agar uji
 /// tangkapan layar tetap bisa jalan di mesin build mana pun.
 String _cariFontDasar() {
-  const kandidat = [
-    '/workspace/tools/flutter/bin/cache/artifacts/material_fonts/',
-    '/opt/tools/flutter/bin/cache/artifacts/material_fonts/',
+  // FLUTTER_ROOT diisi oleh `flutter test` — jadi lokasi SDK tidak lagi
+  // ditulis mati (dulu '/workspace/tools/flutter', yang tidak ada di Austria
+  // sehingga seluruh uji tangkapan layar gugur di setUpAll).
+  final String? akar = Platform.environment['FLUTTER_ROOT'];
+  final String relatif = '/bin/cache/artifacts/material_fonts/';
+  final List<String> kandidat = <String>[
+    if (akar != null && akar.isNotEmpty) '$akar$relatif',
+    '/opt/flutter$relatif',
+    '/opt/tools/flutter$relatif',
+    '/workspace/tools/flutter$relatif',
+    '/usr/local/flutter$relatif',
   ];
   for (final p in kandidat) {
     if (Directory(p).existsSync()) return p;
@@ -640,7 +648,9 @@ Future<void> potretCadangan(WidgetTester tester, String nama) async {
   File('${dir.path}${Platform.pathSeparator}plo_backup_20260910_0900.json')
       .setLastModifiedSync(DateTime(2026, 9, 10, 9, 0));
 
-  await tester.binding.setSurfaceSize(const Size(420, 900));
+  // 420x1500: layar Cadangan kini memuat baris keadaan enkripsi basis data,
+  // jadi seluruh kartu (ekspor - otomatis - impor) perlu ikut tertangkap.
+  await tester.binding.setSurfaceSize(const Size(420, 1500));
   await tester.pumpWidget(ProviderScope(
     overrides: [databaseProvider.overrideWithValue(_db)],
     child: MaterialApp(

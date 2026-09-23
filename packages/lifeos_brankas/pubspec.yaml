@@ -1,0 +1,19 @@
+name: lifeos_brankas
+description: Brankas rahasia Android (Keystore) Personal Life OS — kanal "lifeos/rahasia" tersedia di SEMUA mesin Flutter, termasuk pekerja latar.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+  flutter: ">=3.29.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.personallifeos.lifeos_brankas
+        pluginClass: BrankasRahasiaPlugin

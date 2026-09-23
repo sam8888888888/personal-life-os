@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- FR-45: folder yang boleh dibagikan lewat FileProvider. -->
+<!-- Berkas yang boleh dibagikan lewat FileProvider (kanal `lifeos/bagikan`).
+
+     SEBELUMNYA isinya `path="."` untuk folder dokumen, cache, dan berkas
+     eksternal — artinya SELURUH berkas aplikasi (cadangan JSON, lampiran medis,
+     foto, salinan basis data) bisa diminta URI-nya oleh aplikasi mana pun yang
+     menerima izin sekali pakai. Sekarang yang boleh dibagikan HANYA SALINAN
+     yang sengaja ditaruh di cache/bagikan/ oleh `bagikanBerkas()` di Dart;
+     berkas aslinya tidak pernah punya URI.
+
+     Salinan lama dibersihkan otomatis (hanya beberapa berkas terakhir). -->
 <paths>
-    <files-path name="dokumen" path="." />
-    <cache-path name="cache" path="." />
-    <external-files-path name="eksternal" path="." />
+    <cache-path name="bagikan" path="bagikan/" />
 </paths>

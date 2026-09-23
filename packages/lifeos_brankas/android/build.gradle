@@ -1,0 +1,46 @@
+// URUTAN PENTING: Gradle 9 hanya mengizinkan blok `buildscript`, `plugins`, dan
+// `pluginManagement` SEBELUM blok `plugins`. Menaruh `group`/`version` atau
+// `rootProject.allprojects` di atasnya membuat berkas ini gagal dikompilasi
+// ("only buildscript {}, pluginManagement {} and other plugins {} script blocks
+// are allowed before plugins {} blocks") — itu yang pernah menggagalkan build
+// rilis. Jangan diubah urutannya.
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+group = 'com.personallifeos.lifeos_brankas'
+version = '1.0.0'
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+android {
+    namespace = 'com.personallifeos.lifeos_brankas'
+    compileSdk = 36
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}

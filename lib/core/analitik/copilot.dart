@@ -47,9 +47,20 @@ class KonfigCopilot {
     return '••••${k.substring(k.length - 4)}';
   }
 
+  /// Endpoint hanya boleh **HTTPS** (hasil audit 23 Sep 2026, P2-3).
+  ///
+  /// Alamat ini menerima kunci API pengguna dan ringkasan data pribadinya.
+  /// Sebelumnya `http://` juga diterima — artinya kunci & data bisa terkirim
+  /// dalam teks polos bila pengguna menempelkan alamat tanpa TLS.
   bool get endpointMasukAkal {
     final u = Uri.tryParse(endpoint.trim());
-    return u != null && (u.scheme == 'https' || u.scheme == 'http') && u.host.isNotEmpty;
+    return u != null && u.scheme == 'https' && u.host.isNotEmpty;
+  }
+
+  /// Benar bila alamatnya sah tetapi TIDAK memakai HTTPS (untuk pesan jelas).
+  bool get endpointTanpaHttps {
+    final u = Uri.tryParse(endpoint.trim());
+    return u != null && u.scheme == 'http' && u.host.isNotEmpty;
   }
 
   String get dasar => '$model · ${endpointMasukAkal ? Uri.parse(endpoint.trim()).host : 'alamat belum benar'} '
@@ -167,8 +178,12 @@ List<String> bolehTanyaCopilot(
         'perangkat).');
   }
   if (!konfig.endpointMasukAkal) {
-    hasil.add('Alamat layanan AI belum benar (contoh: '
-        'https://api.deepseek.com/chat/completions).');
+    hasil.add(konfig.endpointTanpaHttps
+        ? 'Alamat layanan AI harus diawali https:// (koneksi terenkripsi). '
+            'Alamat http:// tidak dipakai karena kunci API dan ringkasan data '
+            'Anda akan terkirim tanpa enkripsi.'
+        : 'Alamat layanan AI belum benar (contoh: '
+            'https://api.deepseek.com/chat/completions).');
   }
   if (!adaJaringan) {
     hasil.add('Sedang offline. Copilot butuh jaringan — data Anda tetap di '

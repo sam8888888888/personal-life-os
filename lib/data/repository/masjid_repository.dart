@@ -13,6 +13,7 @@ import 'dart:io';
 import '../../core/ibadah/kiblat.dart';
 import '../database/database.dart';
 import 'pengaturan_repository.dart';
+import '../../core/notifikasi/jejak.dart';
 
 class Masjid {
   const Masjid({
@@ -136,7 +137,8 @@ class MasjidRepository {
             ? 'Simpanan kosong.'
             : 'Menampilkan daftar tersimpan — belum diperbarui.',
       );
-    } catch (_) {
+    } catch (e) {
+      catatGalatTertelan('masjid.simpananRusak', e);
       return const HasilMasjid(
         daftar: [],
         dariSimpanan: true,
@@ -229,7 +231,8 @@ List<Masjid> uraiOverpass(
   final Map<String, dynamic> map;
   try {
     map = jsonDecode(teks) as Map<String, dynamic>;
-  } catch (_) {
+  } catch (e) {
+    catatGalatTertelan('masjid.jawabanPetaRusak', e);
     return const [];
   }
   final unsur = (map['elements'] as List?) ?? const [];

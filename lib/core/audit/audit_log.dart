@@ -37,6 +37,8 @@ abstract final class ModulAudit {
   static const String dokumen = 'dokumen';
   static const String pengaturan = 'pengaturan';
   static const String notifikasi = 'notifikasi';
+  static const String kotakMasuk = 'kotak_masuk';
+  static const String catatanHarian = 'catatan_harian';
   static const String lain = 'lain';
 
   /// Seluruh modul yang dikenal (dipakai untuk menyusun saringan di layar).
@@ -56,6 +58,8 @@ abstract final class ModulAudit {
     dokumen,
     pengaturan,
     notifikasi,
+    kotakMasuk,
+    catatanHarian,
     lain,
   ];
 }
