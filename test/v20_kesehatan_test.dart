@@ -95,7 +95,7 @@ void main() {
   // ─────────────────────────────────────────────────────────────── skema
   group('skema v20', () {
     test('versi skema = 20', () {
-      expect(db.schemaVersion, 20);
+      expect(db.schemaVersion, 21);
     });
 
     test('lima tabel kesehatan ada', () async {

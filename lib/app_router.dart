@@ -62,6 +62,8 @@ import 'features/kesehatan/energi_tidur_screen.dart';
 import 'features/kesehatan/gejala_screen.dart';
 import 'features/kesehatan/imunisasi_tumbuh_screen.dart';
 import 'features/kesehatan/lab_screen.dart';
+import 'features/orang/orang_screen.dart';
+import 'features/pola/temuan_korelasi_screen.dart';
 import 'features/ibadah/rencana_ibadah_screen.dart';
 import 'features/ibadah/kiblat_screen.dart';
 import 'features/laporan/dana_persiapan_screen.dart';
@@ -544,6 +546,23 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
     GoRoute(
       path: '/keluarga',
       builder: (c, s) => const AnggotaScreen(),
+    ),
+    // SDD v19 Gelombang 3 — orang (CRM pribadi) & temuan pola.
+    GoRoute(
+      path: '/orang',
+      builder: (c, s) => const OrangScreen(),
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (c, s) => OrangDetailScreen(
+            id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0,
+          ),
+        ),
+      ],
+    ),
+    GoRoute(
+      path: '/temuan',
+      builder: (c, s) => const TemuanKorelasiScreen(),
     ),
     // Modul kesehatan V2 (FR-101/102/103/106/111).
     GoRoute(

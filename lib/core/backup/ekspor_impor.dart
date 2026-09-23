@@ -5,7 +5,7 @@
 /// {
 ///   "format": "plo-backup",
 ///   "versiSkema": 20,
-///   "versiAplikasi": "1.12.0+15",
+///   "versiAplikasi": "1.13.0+16",
 ///   "dibuatPada": "2026-09-15T08:00:00.000",
 ///   "tabel": { "<namaTabel>": [ { "<kolom>": nilai } ] }
 /// }

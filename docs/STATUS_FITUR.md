@@ -455,3 +455,48 @@ dibandingkan SHA-256-nya dan **identik**). Cadangan jalur:
 `https://coder.sam.university/apk/personal-life-os-v1.12.0-build15.apk`.
 Basis data di HP naik otomatis **19 → 20** saat aplikasi pertama dibuka; tabel
 kesehatan baru dibuat di tempat, data lama tidak disentuh.
+
+## 18 · Orang dan mesin pola SDD v19 — Gelombang 3
+
+Skema **20 → 21**. Dua tabel penutup dari sebelas tabel SDD v19:
+
+| Tabel | Isi | Indeks | Aturan yang dijaga kode |
+|---|---|---|---|
+| `orang` | CRM pribadi: dokter, guru, tetangga, atasan, montir (di luar keluarga inti) | 5 (`uid` dan `id_orang` unik; nama; hubungan+nama; ulang tahun parsial) | Nama wajib (1–120); hubungan tak dikenal jatuh ke `lain`; **satu anggota keluarga maksimal satu baris**; `terakhir_dihubungi` hanya diisi pengguna |
+| `temuan` | Hasil korelasi lintas domain yang **disimpan** (bisa menjawab "apakah pola ini masih benar bulan lalu?") | 4 (`uid` unik; `kode+rentang` unik; waktu hitung; tampil parsial) | **n kurang dari 14 DITOLAK**; bahasa terlarang DITOLAK; `n` selalu tersimpan; umpan balik "bukan begitu" **tidak dihidupkan lagi** oleh hitung ulang |
+
+**Mesin pola** (`lib/core/pola/`):
+
+* `mesin_pola.dart` — murni hitungan, bisa diuji tanpa HP: peringkat dengan nilai
+  kembar, **Spearman** (bukan Pearson), **nilai-p uji permutasi** (benih tetap,
+  jadi bisa diulang), koreksi **Bonferroni** dan **Benjamini–Hochberg**, penjaga
+  bahasa, dan penyusun kalimat pola yang selalu memuat `n`.
+* `pasangan_pola.dart` — pasangan yang **bisa** diuji sekarang (4): `tidur~suasana_hati`,
+  `aktivitas~energi`, `air~gejala`, `gejala~tidur`; dan pasangan yang **belum bisa**,
+  lengkap dengan alasannya (6) — ditampilkan di layar, bukan disembunyikan.
+* `penjalankan_pola.dart` — ambil data, hitung, simpan, plus alasan jujur untuk
+  pasangan yang datanya belum cukup.
+
+**Layar:** `/orang`, `/orang/:id`, `/temuan`; dua pintu baru di tab Lainnya
+("Orang dan Kontak", "Pola di Catatan"). Saklar **"Ingatkan ulang tahun orang"
+bawaan MATI** — sesuai aturan etika dokumen: aplikasi tidak memantau hubungan
+sosial siapa pun tanpa diminta.
+
+Satu kesalahan nyata yang ditemukan dan dibetulkan di gelombang ini: penjaga
+bahasa versi pertama **menuduh kalimat jujur aplikasi sendiri**, karena kalimat
+"...bukan diagnosis" memuat kata "diagnosis". Akibatnya semua temuan ditolak.
+Penjaga sekarang memakai daftar larangan dokumen apa adanya
+("anda mengalami", "anda menderita", "penyebab", "karena anda", "menyebabkan",
+"penyakit anda") dan membuang sanggahan yang ditulis aplikasi sebelum memeriksa.
+
+**Sengaja belum dikerjakan** (jujur): enam pasangan pola dari dokumen belum bisa
+diuji karena datanya belum ada di aplikasi (belum ada catatan waktu sholat
+harian, belum ada catatan siklus haid, transaksi belum ditandai "impulsif",
+catatan makan belum dibedakan di rumah vs di luar); grafik pengukuran anak masih
+daftar angka; penegakan kunci asing antar-tabel tetap ditunda ke v20 sesuai
+keputusan dokumen.
+
+Uji gelombang ini: `test/v21_pola_orang_test.dart` — **39 kasus**, termasuk contoh
+Spearman yang bisa diperiksa tangan (X=[1,2,3], Y=[1,3,2] → 0,5), koreksi BH
+(p=[0,01; 0,02; 0,03] → 0,03 semuanya), penolakan n kurang dari 14, dan
+pembuktian bahwa temuan yang dibungkam tidak dihidupkan kembali oleh hitung ulang.

@@ -410,6 +410,24 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
       ),
 
+      // ── gelombang 3 (SDD v19: orang + temuan) ─────────────────────────────
+      // `orang` ikut sinkron supaya daftar kontak Papi sama di kedua HP; yang
+      // TIDAK pernah dikirim ke AI mana pun adalah isi catatannya (aturan §4.10).
+      JalurSinkron(
+        nama: 'orang',
+        tabel: db.orang,
+        kolomUid: db.orang.uid,
+        kolomKunci: db.orang.id,
+        kolomDiubah: db.orang.diubahPada,
+        kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
+      ),
+      JalurSinkron(
+        nama: 'temuan',
+        tabel: db.temuan,
+        kolomUid: db.temuan.uid,
+        kolomKunci: db.temuan.id,
+      ),
+
       // ── ibadah ────────────────────────────────────────────────────────────
       JalurSinkron(
         nama: 'hafalan',

@@ -56,6 +56,27 @@ class LainnyaScreen extends ConsumerWidget {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/catatan-harian'),
                 ),
+                const Divider(height: 1),
+                // SDD v19 Gelombang 3.
+                ListTile(
+                  key: const Key('buka_orang'),
+                  leading: const Icon(Icons.people_outline),
+                  title: const Text('Orang & Kontak'),
+                  subtitle: const Text(
+                      'Dokter, guru, tetangga, montir — di luar keluarga inti'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/orang'),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  key: const Key('buka_temuan'),
+                  leading: const Icon(Icons.timeline_outlined),
+                  title: const Text('Pola di Catatan'),
+                  subtitle: const Text(
+                      'Hubungan antar catatan (minimal 14 hari berpasangan)'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/temuan'),
+                ),
               ],
             ),
           ),

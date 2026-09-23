@@ -124,6 +124,8 @@ part 'database.g.dart';
   CatatanHarian,
   Tautan,
   Sorotan,
+  Orang,
+  Temuan,
   HasilLab,
   AnalitLab,
   Gejala,
@@ -139,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -151,6 +153,7 @@ class AppDatabase extends _$AppDatabase {
           await _pasangIndeksUnikV5();
           await _pasangIndeksV19();
           await _pasangIndeksV20();
+          await _pasangIndeksV21();
           await _seedKategori();
           await seedKategoriTransaksi();
           await _seedPerawatanV4();
@@ -336,6 +339,10 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             // (+ analitnya), gejala, imunisasi, tumbuh kembang.
             await _buatTabelV20(m);
             await _pasangIndeksV20();
+          }
+          if (dari < 21) {
+            await _buatTabelV21(m);
+            await _pasangIndeksV21();
           }
         },
       );
@@ -1063,6 +1070,36 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_tk_uid ON tumbuh_kembang(uid)',
       'CREATE UNIQUE INDEX IF NOT EXISTS idx_tk_hari ON tumbuh_kembang(anggota_id, tanggal)',
       'CREATE INDEX IF NOT EXISTS idx_tk_umur ON tumbuh_kembang(anggota_id, umur_bulan)',
+    ];
+    for (final String sql in daftar) {
+      await customStatement(sql);
+    }
+  }
+
+  /// Buat tabel gelombang 3 (orang, temuan). Diperiksa satu per satu
+  /// (`_tabelAda`) karena sebagian basis data lama dibuat dari definisi tabel
+  /// TERBARU — tanpa pemeriksaan ini migrasi bisa gagal `table already exists`.
+  Future<void> _buatTabelV21(Migrator m) async {
+    if (!await _tabelAda('orang')) {
+      await m.createTable(orang);
+    }
+    if (!await _tabelAda('temuan')) {
+      await m.createTable(temuan);
+    }
+  }
+
+  /// Sembilan indeks v21 (SDD §4.10–§4.11).
+  Future<void> _pasangIndeksV21() async {
+    const List<String> daftar = <String>[
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_orang_uid ON orang(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_orang_idorang ON orang(id_orang)',
+      'CREATE INDEX IF NOT EXISTS idx_orang_nama ON orang(nama)',
+      'CREATE INDEX IF NOT EXISTS idx_orang_hubungan ON orang(hubungan, nama)',
+      'CREATE INDEX IF NOT EXISTS idx_orang_ultah ON orang(ulang_tahun) WHERE ulang_tahun IS NOT NULL',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_temuan_uid ON temuan(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_temuan_kode ON temuan(kode, rentang_mulai, rentang_selesai)',
+      'CREATE INDEX IF NOT EXISTS idx_temuan_hitung ON temuan(dihitung_pada)',
+      'CREATE INDEX IF NOT EXISTS idx_temuan_tampil ON temuan(diabaikan, kekuatan) WHERE diabaikan = 0',
     ];
     for (final String sql in daftar) {
       await customStatement(sql);

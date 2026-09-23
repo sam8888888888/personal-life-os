@@ -2044,3 +2044,84 @@ class TumbuhKembang extends Table {
   TextColumn get catatan => text().nullable()();
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+
+/// SDD-R1 — Orang (CRM pribadi).
+///
+/// Anggota keluarga inti ada di `anggota_keluarga`; tabel ini untuk manusia
+/// di LUAR lingkaran itu: dokter, guru anak, tetangga, atasan, montir, pemilik
+/// kontrakan. Bila orang yang sama juga anggota keluarga, isi [anggotaId] —
+/// dan hanya boleh ada SATU baris `orang` per anggota keluarga.
+class Orang extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Pengenal stabil lintas HP (pola id_anggota / id_dokumen).
+  TextColumn get idOrang => text()();
+
+  TextColumn get nama => text().withLength(min: 1, max: 120)();
+
+  /// keluarga · teman · rekan · dokter · guru · vendor · tetangga · lain
+  TextColumn get hubungan => text().withDefault(const Constant('lain'))();
+
+  /// Peran bebas (mis. "dokter gigi anak", "montir langganan").
+  TextColumn get peran => text().nullable()();
+
+  TextColumn get telepon => text().nullable()();
+  TextColumn get email => text().nullable()();
+  DateTimeColumn get ulangTahun => dateTime().nullable()();
+
+  /// Bila orang ini juga anggota keluarga inti — memakai pola FK yang sama.
+  IntColumn get anggotaId =>
+      integer().nullable().references(AnggotaKeluarga, #id)();
+
+  /// Terakhir dihubungi — DIISI PENGGUNA, bukan dilacak otomatis.
+  DateTimeColumn get terakhirDihubungi => dateTime().nullable()();
+
+  TextColumn get catatan => text().nullable()();
+  BoolColumn get arsip => boolean().withDefault(const Constant(false))();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-A1 — Temuan korelasi lintas domain.
+///
+/// Disiplin statistik yang WAJIB dipegang `temuan_repository.dart`:
+///   * minimal n = 14 pasangan sebelum temuan boleh ditampilkan;
+///   * n SELALU ditampilkan ke pengguna;
+///   * bahasa selalu "pola terlihat di catatan Anda", TIDAK PERNAH diagnosis.
+///
+/// Catatan penamaan: kelas ini bernama `Temuan` (tabel drift). Ada kelas lain
+/// bernama `Temuan` di `lib/core/analitik/temuan_pintar.dart` (temuan sesaat,
+/// FR-142). Berkas yang butuh keduanya wajib memakai `hide`/`as`.
+class Temuan extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Kode stabil pasangan yang diuji, mis. `tidur~suasana_hati`.
+  TextColumn get kode => text()();
+
+  TextColumn get judul => text()();
+  TextColumn get uraian => text()();
+
+  /// Koefisien korelasi Spearman — tandanya menentukan arah.
+  RealColumn get kekuatan => real()();
+
+  /// Jumlah pasangan (n). WAJIB >= 14 untuk ditampilkan.
+  IntColumn get ukuranSampel => integer()();
+
+  /// Nilai-p. Null bila tidak dihitung.
+  RealColumn get nilaiP => real().nullable()();
+
+  DateTimeColumn get rentangMulai => dateTime()();
+  DateTimeColumn get rentangSelesai => dateTime()();
+
+  /// Kapan mesin terakhir menghitung ulang temuan ini.
+  DateTimeColumn get dihitungPada => dateTime().withDefault(currentDateAndTime)();
+
+  /// Reaksi pengguna: null = belum, true = "ya, saya sadar", false = "bukan begitu".
+  BoolColumn get dikonfirmasiPengguna => boolean().nullable()();
+
+  BoolColumn get diabaikan => boolean().withDefault(const Constant(false))();
+}
