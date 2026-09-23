@@ -10,8 +10,8 @@
     <!-- FR-118: lampiran foto & rekaman suara pada catatan. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <!-- FR-39 — baca SMS bank (diminta lewat dialog sistem, opt-in). -->
-    <uses-permission android:name="android.permission.READ_SMS"/>
+    <!-- Izin READ_SMS DIBUANG (perintah Papi 23 Sep 2026: SMS bahaya).
+         Pemicu Play Protect memblokir pemasangan. Fitur baca bank via SMS tidak dipakai. -->
     <!-- Kamera tidak wajib ada: aplikasi tetap jalan tanpa kamera. -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application

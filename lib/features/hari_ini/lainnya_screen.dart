@@ -329,14 +329,6 @@ class LainnyaScreen extends ConsumerWidget {
                   onTap: () => context.push('/keluarga/sub-akses'),
                 ),
                 ListTile(
-                  key: const Key('buka_pemindai_bank'),
-                  leading: const Icon(Icons.sms_outlined),
-                  title: const Text('Pemindai SMS bank'),
-                  subtitle: const Text('Deteksi pembayaran dari SMS bank di '
-                      'perangkat — opsional'),
-                  onTap: () => context.push('/uang/pemindai-bank'),
-                ),
-                ListTile(
                   key: const Key('buka_suara'),
                   leading: const Icon(Icons.mic_none_outlined),
                   title: const Text('Ucapkan atau tulis'),

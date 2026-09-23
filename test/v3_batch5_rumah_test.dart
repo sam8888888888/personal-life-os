@@ -456,7 +456,8 @@ void main() {
         nama: 'Honda Vario',
         jenis: JenisAsetFisik.kendaraan,
         hargaBeliSen: 2500000000,
-        garansiSampai: DateTime(2026, 10, 2),
+        // tanggal relatif supaya uji tidak rusak saat hari berganti
+        garansiSampai: DateTime.now().add(const Duration(days: 10)),
       );
       await t.pumpWidget(bungkus(const RumahAsetScreen()));
       await t.pumpAndSettle();
@@ -475,7 +476,7 @@ void main() {
         tanggalBeli: DateTime(2023, 1, 10),
         masaPakaiBulan: 60,
         hargaBeliSen: 150000000,
-        garansiSampai: DateTime(2026, 10, 1),
+        garansiSampai: DateTime.now().add(const Duration(days: 9)),
       );
       await t.pumpWidget(bungkus(AsetDetailScreen(id: aset.id)));
       await t.pumpAndSettle();
