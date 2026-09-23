@@ -83,7 +83,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ListTile(
                   leading: const Icon(Icons.swap_vert_outlined),
                   title: const Text('Arus kas'),
-                  subtitle: const Text('Catat pengeluaran & pemasukan (FR-71)'),
+                  subtitle: const Text('Catat pengeluaran & pemasukan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/transaksi'),
                 ),
@@ -91,7 +91,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ListTile(
                   leading: const Icon(Icons.pie_chart_outline),
                   title: const Text('Anggaran bulanan'),
-                  subtitle: const Text('Batas belanja per kategori (FR-72)'),
+                  subtitle: const Text('Batas belanja per kategori'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/anggaran'),
                 ),
@@ -99,7 +99,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ListTile(
                   leading: const Icon(Icons.autorenew_outlined),
                   title: const Text('Langganan'),
-                  subtitle: const Text('Layanan berulang & masa berhenti (FR-68)'),
+                  subtitle: const Text('Layanan berulang & masa berhenti'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/langganan'),
                 ),
@@ -107,7 +107,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                 ListTile(
                   leading: const Icon(Icons.savings_outlined),
                   title: const Text('Kekayaan bersih'),
-                  subtitle: const Text('Aset, utang & tren bulanan (FR-76)'),
+                  subtitle: const Text('Aset, utang & tren bulanan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/kekayaan'),
                 ),
@@ -117,7 +117,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.event_available_outlined),
                   title: const Text('Uang aman sampai gajian'),
                   subtitle: const Text(
-                      'Tagihan sampai tanggal gajian + sisa saldo (FR-33)'),
+                      'Tagihan sampai tanggal gajian + sisa saldo'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/aman-sampai-gajian'),
                 ),
@@ -127,7 +127,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.savings_outlined),
                   title: const Text('Denda terhindarkan'),
                   subtitle: const Text(
-                      'Perkiraan denda yang tidak jadi keluar (FR-34)'),
+                      'Perkiraan denda yang tidak jadi keluar'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/denda-terhindarkan'),
                 ),
@@ -137,7 +137,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.trending_up_outlined),
                   title: const Text('Kenaikan tagihan'),
                   subtitle: const Text(
-                      'Bandingkan nominal dengan 3 pembayaran sebelumnya (FR-35)'),
+                      'Bandingkan nominal dengan 3 pembayaran sebelumnya'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/kenaikan-tagihan'),
                 ),
@@ -147,7 +147,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.emoji_events_outlined),
                   title: const Text('Skor disiplin tagihan'),
                   subtitle: const Text(
-                      'Skor lokal 0–100 & capaian (FR-36)'),
+                      'Skor lokal 0–100 & capaian'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/skor-disiplin'),
                 ),
@@ -157,7 +157,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.insights_outlined),
                   title: const Text('Statistik pembayaran'),
                   subtitle: const Text(
-                      'Total, rata-rata & tren 12 bulan (FR-29)'),
+                      'Total, rata-rata & tren 12 bulan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/statistik-pembayaran'),
                 ),
@@ -167,7 +167,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.stacked_line_chart_outlined),
                   title: const Text('Proyeksi 3 bulan'),
                   subtitle: const Text(
-                      'Perkiraan tagihan & langganan 3 bulan ke depan (FR-30)'),
+                      'Perkiraan tagihan & langganan 3 bulan ke depan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/proyeksi-arus-kas'),
                 ),
@@ -177,7 +177,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.insights_outlined),
                   title: const Text('Pola bayar & pengingat pintar'),
                   subtitle: const Text(
-                      'Kebiasaan membayar yang terbaca + usul pengingat (FR-40/17)'),
+                      'Kebiasaan membayar yang terbaca + usul pengingat'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/tagihan/pola-bayar'),
                 ),
@@ -187,7 +187,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.forum_outlined),
                   title: const Text('Pengingat multi-kanal'),
                   subtitle: const Text(
-                      'Teruskan pengingat ke WhatsApp / SMS / Telegram (FR-49)'),
+                      'Teruskan pengingat ke WhatsApp / SMS / Telegram'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/tagihan/pengingat-multi-kanal'),
                 ),
@@ -197,7 +197,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.currency_exchange_outlined),
                   title: const Text('Multi-mata uang & kurs'),
                   subtitle: const Text(
-                      'Mata uang per tagihan + konversi ke Rupiah (FR-52)'),
+                      'Mata uang per tagihan + konversi ke Rupiah'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/mata-uang'),
                 ),
@@ -207,7 +207,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.auto_awesome_outlined),
                   title: const Text('Rekap tahunan'),
                   subtitle: const Text(
-                      'Statistik setahun + kartu berbagi gambar (FR-37)'),
+                      'Statistik setahun + kartu berbagi gambar'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/rekap-tahunan'),
                 ),
@@ -217,7 +217,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.storefront_outlined),
                   title: const Text('Kas & utang informal'),
                   subtitle: const Text(
-                      'Utang warung/kontrakan & piutang, saldo per pihak (FR-51)'),
+                      'Utang warung/kontrakan & piutang, saldo per pihak'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/kas-informal'),
                 ),
@@ -227,7 +227,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.account_balance_outlined),
                   title: const Text('Pusat Bayar'),
                   subtitle: const Text(
-                      'Aplikasi bayar, nomor VA/QRIS & catatan konfirmasi (FR-42)'),
+                      'Aplikasi bayar, nomor VA/QRIS & catatan konfirmasi'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/tagihan/pusat-bayar'),
                 ),
@@ -237,7 +237,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.calendar_month_outlined),
                   title: const Text('Ekspor kalender (.ics)'),
                   subtitle: const Text(
-                      'Tagihan mendatang ke Google Kalender (FR-41)'),
+                      'Tagihan mendatang ke Google Kalender'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/tagihan/ekspor-kalender'),
                 ),
@@ -247,7 +247,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.table_view_outlined),
                   title: const Text('Ekspor CSV'),
                   subtitle: const Text(
-                      'Tagihan & riwayat pembayaran untuk spreadsheet (FR-25)'),
+                      'Tagihan & riwayat pembayaran untuk spreadsheet'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/tagihan/ekspor-csv'),
                 ),
@@ -256,7 +256,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   key: const Key('buka_kewajiban'),
                   leading: const Icon(Icons.account_balance_outlined),
                   title: const Text('Kewajiban & cicilan'),
-                  subtitle: const Text('Utang, cicilan & catatan pembayaran (FR-74)'),
+                  subtitle: const Text('Utang, cicilan & catatan pembayaran'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/kewajiban'),
                 ),
@@ -274,7 +274,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   key: const Key('buka_strategi_pelunasan'),
                   leading: const Icon(Icons.trending_down_outlined),
                   title: const Text('Strategi pelunasan'),
-                  subtitle: const Text('Urutan & simulasi bayar utang (FR-75)'),
+                  subtitle: const Text('Urutan & simulasi bayar utang'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/uang/strategi-pelunasan'),
                 ),
@@ -283,7 +283,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   key: const Key('buka_beban_tagihan'),
                   leading: const Icon(Icons.bar_chart_outlined),
                   title: const Text('Beban tagihan per bulan'),
-                  subtitle: const Text('Grafik 6 bulan, total & per kategori (FR-28)'),
+                  subtitle: const Text('Grafik 6 bulan, total & per kategori'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/beban-tagihan'),
                 ),
@@ -293,7 +293,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   leading: const Icon(Icons.calendar_view_month_outlined),
                   title: const Text('Kalender keuangan'),
                   subtitle: const Text(
-                      'Semua kewajiban uang per tanggal (FR-73)'),
+                      'Semua kewajiban uang per tanggal'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/kalender-keuangan'),
                 ),
@@ -302,7 +302,7 @@ class _UangHubScreenState extends ConsumerState<UangHubScreen> {
                   key: const Key('buka_laporan_bulanan'),
                   leading: const Icon(Icons.picture_as_pdf_outlined),
                   title: const Text('Laporan bulanan'),
-                  subtitle: const Text('Rekap sebulan, unduh PDF & CSV (FR-77)'),
+                  subtitle: const Text('Rekap sebulan, unduh PDF & CSV'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/laporan/bulanan'),
                 ),

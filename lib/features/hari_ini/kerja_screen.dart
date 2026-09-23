@@ -123,7 +123,7 @@ class _KerjaScreenState extends ConsumerState<KerjaScreen> {
               key: const Key('buka_aksi_kerja'),
               leading: const Icon(Icons.checklist_outlined),
               title: const Text('Buka Aksi & Tujuan'),
-              subtitle: const Text('Tugas, tujuan, kebiasaan & perawatan (FR-78/79)'),
+              subtitle: const Text('Tugas, tujuan, kebiasaan & perawatan'),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push('/aksi'),
             ),

@@ -345,7 +345,7 @@ class _StateRamadan extends ConsumerState<RamadanScreen> {
             ikon: Icons.event_available_outlined,
             isi: ringkas.kosong
                 ? const BarisKosong(
-                    keterangan: 'Catat lewat layar Puasa (FR-92).')
+                    keterangan: 'Catat lewat layar Puasa.')
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[

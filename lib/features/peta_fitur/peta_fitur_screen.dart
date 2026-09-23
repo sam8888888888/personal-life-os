@@ -70,7 +70,7 @@ class _PetaFiturScreenState extends State<PetaFiturScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${b.id} · ${_label[b.status]}',
+              Text(_label[b.status]!,
                   style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: _warna(c, b.status))),
@@ -158,7 +158,7 @@ class _PetaFiturScreenState extends State<PetaFiturScreen> {
               decoration: const InputDecoration(
                 isDense: true,
                 prefixIcon: Icon(Icons.search),
-                hintText: 'Cari fitur atau nomor (mis. FR-150, langganan)',
+                hintText: 'Cari fitur (mis. listrik, langganan, tidur)',
                 border: OutlineInputBorder(),
               ),
               onChanged: (v) => setState(() => _cari = v),
@@ -219,8 +219,7 @@ class _PetaFiturScreenState extends State<PetaFiturScreen> {
                                     key: Key('peta_${butir[j].id}'),
                                     leading: Icon(_ikon[butir[j].status],
                                         color: _warna(c, butir[j].status)),
-                                    title: Text('${butir[j].id} · '
-                                        '${butir[j].nama}'),
+                                    title: Text(butir[j].nama),
                                     subtitle: Text(
                                       butir[j].catatan.isNotEmpty
                                           ? butir[j].catatan

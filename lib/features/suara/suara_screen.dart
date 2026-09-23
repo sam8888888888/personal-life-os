@@ -263,7 +263,7 @@ class _SuaraScreenState extends ConsumerState<SuaraScreen> {
           nama: d.judul.trim().isEmpty ? d.mentah : d.judul.trim(),
           jatuhTempo: d.tanggal!,
           jumlahSen: Value(d.nominalSen),
-          catatan: const Value('Dibuat dari kalimat suara (FR-58)'),
+          catatan: const Value('Dibuat dari kalimat suara'),
         ));
     _kabar('Tagihan disimpan dengan jatuh tempo '
         '${d.tanggal!.day}/${d.tanggal!.month}/${d.tanggal!.year}.');

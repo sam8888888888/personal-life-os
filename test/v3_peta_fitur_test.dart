@@ -154,7 +154,7 @@ void main() {
       await t.pumpAndSettle();
       // Di dialog muncul sebagai "Catatan: ..." (baris daftar memakai versi
       // pendek 2 baris), jadi tuntutannya diarahkan ke teks dialog.
-      expect(find.textContaining('Catatan: Ron 22 Sep'), findsOneWidget,
+      expect(find.textContaining('Catatan: dari SMS bank'), findsOneWidget,
           reason: 'alasan tidak dikerjakannya harus dikatakan terus terang');
       expect(find.text('Layarnya belum ada — butir ini belum dikerjakan.'),
           findsOneWidget);

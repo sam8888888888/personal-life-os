@@ -24,7 +24,7 @@ class LainnyaScreen extends ConsumerWidget {
             child: ListTile(
               key: const Key('buka_peta_fitur'),
               leading: const Icon(Icons.map_outlined),
-              title: const Text('Semua Fitur (PRD v3.1)'),
+              title: const Text('Semua Fitur'),
               subtitle: Text(
                   '${ringkasanPetaFitur()[StatusFitur.selesai]} dari '
                   '${petaFitur.length} butir sudah selesai — lihat tandanya'),
@@ -132,7 +132,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.notifications_active_outlined),
                   title: const Text('Pusat notifikasi'),
                   subtitle: const Text(
-                      'Riwayat pengingat, tandai dibaca, tunda (FR-147 & FR-148)'),
+                      'Riwayat pengingat, tandai dibaca, tunda'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/notifikasi'),
                 ),
@@ -142,7 +142,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.history_outlined),
                   title: const Text('Catatan aktivitas'),
                   subtitle: const Text(
-                      'Jejak perubahan data di perangkat Anda (FR-138)'),
+                      'Jejak perubahan data di perangkat Anda'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/audit'),
                 ),
@@ -152,7 +152,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.folder_outlined),
                   title: const Text('Dokumen'),
                   subtitle: const Text(
-                      'Masa berlaku berkas & pengingat sebelum kedaluwarsa (FR-128)'),
+                      'Masa berlaku berkas & pengingat sebelum kedaluwarsa'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/dokumen'),
                 ),
@@ -162,7 +162,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.family_restroom_outlined),
                   title: const Text('Keluarga & tanggung jawab'),
                   subtitle: const Text(
-                      'Anggota keluarga, pemilik & penanggung jawab item (FR-131)'),
+                      'Anggota keluarga, pemilik & penanggung jawab item'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/keluarga'),
                 ),
@@ -172,7 +172,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.medical_information_outlined),
                   title: const Text('Brankas catatan medis'),
                   subtitle: const Text(
-                      'Lab, resep, imunisasi, tagihan medis + cari kata (FR-108)'),
+                      'Lab, resep, imunisasi, tagihan medis + cari kata'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/kesehatan/catatan-medis'),
                 ),
@@ -182,7 +182,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.notifications_active_outlined),
                   title: const Text('Peringatan dini'),
                   subtitle: const Text(
-                      'Pantauan pola dari catatan sendiri, ambang bisa diatur (FR-114)'),
+                      'Pantauan pola dari catatan sendiri, ambang bisa diatur'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/kesehatan/peringatan-dini'),
                 ),
@@ -192,7 +192,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.description_outlined),
                   title: const Text('Mode kunjungan dokter'),
                   subtitle: const Text(
-                      'Ringkasan 30 hari jadi 1 halaman PDF (FR-115)'),
+                      'Ringkasan 30 hari jadi 1 halaman PDF'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/kesehatan/kunjungan'),
                 ),
@@ -202,7 +202,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.emergency_outlined),
                   title: const Text('Profil kesehatan & kartu darurat'),
                   subtitle: const Text(
-                      'Golongan darah, alergi, kontak darurat — offline (FR-117)'),
+                      'Golongan darah, alergi, kontak darurat — offline'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/kesehatan/profil-kesehatan'),
                 ),
@@ -291,7 +291,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.flight_takeoff_outlined),
                   title: const Text('Perjalanan'),
                   subtitle: const Text('Itinerary, tiket, hotel, anggaran, '
-                      'daftar bawaan, dokumen + jurnal perjalanan (FR-134/135)'),
+                      'daftar bawaan, dokumen + jurnal perjalanan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/perjalanan'),
                 ),
@@ -300,7 +300,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.family_restroom_outlined),
                   title: const Text('Tanggung jawab rumah'),
                   subtitle: const Text('Siapa bayar apa, pengingat halus satu '
-                      'ketukan, catatan pelunasan (FR-133)'),
+                      'ketukan, catatan pelunasan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/rumah-tangga'),
                 ),
@@ -309,7 +309,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.document_scanner_outlined),
                   title: const Text('Impor dari foto'),
                   subtitle: const Text('Foto tagihan, struk, atau nota — dibaca '
-                      'di perangkat, diperiksa dulu (FR-38 & FR-50)'),
+                      'di perangkat, diperiksa dulu'),
                   onTap: () => context.push('/tagihan/impor-foto'),
                 ),
                 ListTile(
@@ -317,7 +317,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.home_work_outlined),
                   title: const Text('Mode rumah tangga'),
                   subtitle: const Text('Kode undangan tanpa akun, tagihan '
-                      'bersama, siapa bayar apa (FR-43)'),
+                      'bersama, siapa bayar apa'),
                   onTap: () => context.push('/rumah/mode-rumah-tangga'),
                 ),
                 ListTile(
@@ -325,7 +325,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.vpn_key_outlined),
                   title: const Text('Sub-akses keluarga'),
                   subtitle: const Text('Pilih sendiri modul apa yang boleh '
-                      'dilihat anggota keluarga (FR-56)'),
+                      'dilihat anggota keluarga'),
                   onTap: () => context.push('/keluarga/sub-akses'),
                 ),
                 ListTile(
@@ -333,7 +333,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.sms_outlined),
                   title: const Text('Pemindai SMS bank'),
                   subtitle: const Text('Deteksi pembayaran dari SMS bank di '
-                      'perangkat — opsional (FR-39)'),
+                      'perangkat — opsional'),
                   onTap: () => context.push('/uang/pemindai-bank'),
                 ),
                 ListTile(
@@ -341,7 +341,7 @@ class LainnyaScreen extends ConsumerWidget {
                   leading: const Icon(Icons.mic_none_outlined),
                   title: const Text('Ucapkan atau tulis'),
                   subtitle: const Text('Satu kalimat jadi draf pengeluaran/'
-                      'tagihan (FR-58)'),
+                      'tagihan'),
                   onTap: () => context.push('/suara'),
                 ),
                 ListTile(

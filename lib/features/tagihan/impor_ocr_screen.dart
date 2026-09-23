@@ -394,13 +394,13 @@ class _ImporOcrScreenState extends ConsumerState<ImporOcrScreen> {
               nama: nama,
               jatuhTempo: _jatuhTempo!,
               jumlahSen: Value(nominal),
-              catatan: const Value('Diimpor dari foto (FR-38, OCR di perangkat)'),
+              catatan: const Value('Diimpor dari foto'),
             ));
         _selesai('Tagihan "$nama" disimpan.');
       } else {
         final waktu = DateTime.now();
         final item = _draf?.item ?? const <ItemOcr>[];
-        final catatan = StringBuffer('Dari foto (FR-50, OCR di perangkat)');
+        final catatan = StringBuffer('Dari foto');
         if (item.isNotEmpty) catatan.write(': ${item.length} barang terbaca');
         await TransaksiRepository(db).simpan(TransaksiCompanion.insert(
               idTransaksi: 'ocr-${waktu.millisecondsSinceEpoch}-$nominal',

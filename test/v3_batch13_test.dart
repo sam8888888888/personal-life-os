@@ -181,7 +181,7 @@ TOTAL 30.000
       expect(tagihan, hasLength(1));
       expect(tagihan.first.jumlahSen, 25000000);
       expect(tagihan.first.jatuhTempo, DateTime(2026, 10, 25));
-      expect(tagihan.first.catatan, contains('FR-38'));
+      expect(tagihan.first.catatan, contains('Diimpor dari foto'));
     });
 
     testWidgets('mode struk/nota menyimpan sebagai pengeluaran (sumber ocr)',

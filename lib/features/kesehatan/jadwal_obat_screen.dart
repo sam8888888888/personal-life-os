@@ -121,8 +121,7 @@ class _JadwalObatScreenState extends ConsumerState<JadwalObatScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.medication_liquid_outlined),
                     title: const Text('Kelola obat & jam minum'),
-                    subtitle: const Text('Tambah obat, dosis, dan jam minum '
-                        '(modul obat FR-106)'),
+                    subtitle: const Text('Tambah obat, dosis, dan jam minum'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/kesehatan/obat'),
                   ),

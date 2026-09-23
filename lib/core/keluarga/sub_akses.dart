@@ -234,6 +234,6 @@ bool kodeBerbagiSah(String? kode) {
 /// Kalimat jujur tentang batas fitur (ditampilkan di layar).
 const String catatanSubAkses =
     'Sub-akses ini opsional dan bekerja antar perangkat lewat berkas/kode '
-    'berbagi yang Anda kirim sendiri (atau lewat sinkron FR-150). Aplikasi '
+    'berbagi yang Anda kirim sendiri. Aplikasi '
     'tidak mengunggah data keluarga ke server pihak ketiga, dan tidak ada '
     'modul yang terbuka tanpa Anda centang.';

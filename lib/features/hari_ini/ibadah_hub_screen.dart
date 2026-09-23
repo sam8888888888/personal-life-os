@@ -60,7 +60,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.notifications_active_outlined),
                   title: const Text('Ringkasan pagi & pengingat sholat'),
                   subtitle: const Text(
-                      'Satu ringkasan sehari · pengingat 5 waktu (FR-63 & FR-87)'),
+                      'Satu ringkasan sehari · pengingat 5 waktu'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/pengingat'),
                 ),
@@ -77,7 +77,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.nightlight_outlined),
                   title: const Text('Ramadan'),
                   subtitle: const Text(
-                      'Imsak, iftar, hitungan hari · menurut hitungan aplikasi (FR-91)'),
+                      'Imsak, iftar, hitungan hari · menurut hitungan aplikasi'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/ramadan'),
                 ),
@@ -87,7 +87,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.event_available_outlined),
                   title: const Text('Puasa'),
                   subtitle: const Text(
-                      'Ramadan, Senin-Kamis, Ayyamul Bidh, qadha · tanpa penilaian (FR-92)'),
+                      'Ramadan, Senin-Kamis, Ayyamul Bidh, qadha · tanpa penilaian'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/puasa'),
                 ),
@@ -97,7 +97,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.menu_book_outlined),
                   title: const Text('Quran'),
                   subtitle: const Text(
-                      'Baca, dengar, hafal, murajaah · target harian & mingguan (FR-93)'),
+                      'Baca, dengar, hafal, murajaah · target harian & mingguan'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/quran'),
                 ),
@@ -107,7 +107,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.menu_book_outlined),
                   title: const Text('Hafalan (hifz)'),
                   subtitle: const Text(
-                      'Per juz/surah · baru, murajaah, perlu diulang (FR-94)'),
+                      'Per juz/surah · baru, murajaah, perlu diulang'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/hifz'),
                 ),
@@ -117,7 +117,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.volunteer_activism_outlined),
                   title: const Text('Zakat & sedekah'),
                   subtitle: const Text(
-                      'Catatan infaq + asisten hitung zakat (FR-96)'),
+                      'Catatan infaq + asisten hitung zakat'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/zakat'),
                 ),
@@ -127,7 +127,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.mosque_outlined),
                   title: const Text('Rencana Haji & Umrah'),
                   subtitle: const Text('Target dana + daftar persiapan '
-                      'dokumen (FR-97)'),
+                      'dokumen'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/rencana'),
                 ),
@@ -137,7 +137,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.explore_outlined),
                   title: const Text('Arah kiblat & masjid terdekat'),
                   subtitle: const Text('Kompas + cadangan arah mata angin, '
-                      'daftar masjid sekitar (FR-98)'),
+                      'daftar masjid sekitar'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/kiblat'),
                 ),
@@ -147,7 +147,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.radio_button_checked),
                   title: const Text('Dzikir & doa'),
                   subtitle: const Text(
-                      'Penghitung per sesi · target diatur sendiri (FR-95)'),
+                      'Penghitung per sesi · target diatur sendiri'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/dzikir'),
                 ),
@@ -157,7 +157,7 @@ class IbadahHubScreen extends StatelessWidget {
                   leading: const Icon(Icons.self_improvement_outlined),
                   title: const Text('Muhasabah malam'),
                   subtitle: const Text(
-                      'Enam daftar refleksi + tulisan bebas · tanpa penilaian (FR-100)'),
+                      'Enam daftar refleksi + tulisan bebas · tanpa penilaian'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => context.push('/ibadah/muhasabah'),
                 ),
