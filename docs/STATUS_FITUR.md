@@ -362,10 +362,20 @@ penjalanan terakhir gelombang ini.
 | Bundel git `lifeos-git-60d772f_20260923_164714.bundle` (34 MB) | riwayat git penuh | SHA-256 `8f1ffb85…93ac`, sudah diuji bisa dipulihkan (603 berkas) |
 | APK `personal-life-os-v1.12.0-build15.apk` (95.159.750 byte) | rilis gelombang 2 | SHA-256 `56ca567a…dbbf`, sertifikat sama dengan versi sebelumnya |
 
-Arsip & bundel disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
+**Arsip sumber** disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
 `/opt/aaron-tools/lifeos-backups/` (Austria), `/home/aaron/lifeos-backups/` (Contabo).
+**Bundel git** disimpan di dua tempat: OVH dan Austria (jalur ke Contabo hanya
+±1,3 MB/menit, jadi yang dikirim ke sana arsip sumbernya saja — riwayat penuh tetap
+aman di GitHub, OVH, dan Austria).
 Berkas `SHA256_*.txt` ikut disalin, jadi keutuhan tiap salinan bisa diperiksa ulang
-dengan `sha256sum -c`.
+dengan `sha256sum -c`. Sidik jari set berlaku:
+
+| Salinan | Arsip sumber | Bundel git |
+|---|---|---|
+| OVH `/opt/data/lifeos/backups/` | ada | ada |
+| Austria `/opt/aaron-tools/lifeos-backups/` | ada (`sha256sum -c` **OK**) | ada (`sha256sum -c` **OK**) |
+| Contabo `/home/aaron/lifeos-backups/` | ada (`sha256sum` **sama**: `89a89d33…9031`) | tidak dikirim (jalur lambat) |
+| GitHub `sam8888888888/personal-life-os` | — | seluruh riwayat (`main` = `0e0b6a8`) |
 
 Satu berkas **tidak** bisa ikut ke GitHub: `.github/workflows/ci.yml` (gerbang
 analisis & uji otomatis). Kredensial yang dipakai untuk push tidak punya izin
