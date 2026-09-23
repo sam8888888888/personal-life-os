@@ -357,10 +357,10 @@ penjalanan terakhir gelombang ini.
 
 | Tempat | Isi | Catatan |
 |---|---|---|
-| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `60d772f` (kode v1.12.0+15, gelombang 2) | naik dari `9ae0f16` (v1.9.2) lewat `cc3a771` (v1.11.0+14) → `e24592b` → `3e4ae26` → `60d772f` |
-| Arsip sumber `lifeos-src-v1.12.0-build15_20260923_164714.tar.gz` (16 MB) | pohon kerja penuh v1.12.0+15 | SHA-256 `89a89d33…9031` |
-| Bundel git `lifeos-git-60d772f_20260923_164714.bundle` (34 MB) | riwayat git penuh | SHA-256 `8f1ffb85…93ac`, sudah diuji bisa dipulihkan (603 berkas) |
-| APK `personal-life-os-v1.12.0-build15.apk` (95.159.750 byte) | rilis gelombang 2 | SHA-256 `56ca567a…dbbf`, sertifikat sama dengan versi sebelumnya |
+| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `ac5d50c` (kode v1.13.0+16, gelombang 3) | naik dari `9ae0f16` (v1.9.2) lewat `cc3a771` → `e24592b` → `3e4ae26` → `60d772f` → `0e0b6a8` → `e320ab9` → `ac5d50c` |
+| Arsip sumber `lifeos-src-v1.13.0-build16_20260923_172241.tar.gz` (16 MB) | pohon kerja penuh v1.13.0+16 | SHA-256 tercatat di `SHA256_20260923_172241.txt` |
+| Bundel git `lifeos-git-ac5d50c_20260923_172241.bundle` (34 MB) | riwayat git penuh | diuji bisa dipulihkan dengan `git clone` |
+| APK `personal-life-os-v1.13.0-build16.apk` (95.438.278 byte) | rilis gelombang 3 | SHA-256 `749fadd1…980e`, sertifikat sama dengan versi sebelumnya |
 
 **Arsip sumber** disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
 `/opt/aaron-tools/lifeos-backups/` (Austria), `/home/aaron/lifeos-backups/` (Contabo).
@@ -500,3 +500,25 @@ Uji gelombang ini: `test/v21_pola_orang_test.dart` — **39 kasus**, termasuk co
 Spearman yang bisa diperiksa tangan (X=[1,2,3], Y=[1,3,2] → 0,5), koreksi BH
 (p=[0,01; 0,02; 0,03] → 0,03 semuanya), penolakan n kurang dari 14, dan
 pembuktian bahwa temuan yang dibungkam tidak dihidupkan kembali oleh hitung ulang.
+
+Suite penuh setelah gelombang ini: **1.464 lulus / 1 dilewati / 6 gagal** (gelombang
+1: 1.392; gelombang 2: 1.425; selisih 39 tepat sebanyak kasus baru). Keenam
+kegagalan tetap uji peka tanggal/Ramadan bawaan yang sudah dibuktikan gagal pada
+salinan kode lama. Dua potret layar ikut diperbarui: `f5_lainnya.png` (dua menu
+baru) dan `f10_cadangan.png` (nomor versi). Satu potret lagi, `f5_briefing.png`,
+berubah karena layar itu menampilkan **hitung mundur waktu** — jadi memang bisa
+berubah sendiri tanpa perubahan kode (bukan akibat gelombang ini).
+
+### APK gelombang ini
+
+`personal-life-os-v1.13.0-build16.apk` — **universal** (arm64-v8a + armeabi-v7a + x86_64),
+**95.438.278 byte**, `versionCode 16`, `versionName 1.13.0`,
+SHA-256 **`749fadd140bdcdb9e63184d707bd3356ff35cebf65515c27bd232bd50fcc980e`**.
+Sertifikat penanda tangan SHA-256 `7a56a135…506b` — **sama** dengan dua rilis
+sebelumnya, jadi bisa dipasang sebagai pembaruan tanpa menghapus data.
+**12 izin, nol izin SMS.**
+
+Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.13.0-build16.apk`**
+(satu-satunya jalur resmi; `coder.sam.university/apk/...` hanya cadangan server).
+Basis data di HP naik otomatis **20 → 21** saat aplikasi pertama dibuka.
+
