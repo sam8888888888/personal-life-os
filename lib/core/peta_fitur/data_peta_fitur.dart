@@ -364,7 +364,7 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     fase: 'F08',
     status: StatusFitur.selesai,
  rincian: 'Impor tagihan dari foto/screenshot dengan OCR di perangkat; isi '
-        'kolom otomatis + konfirmasi pengguna (F08).',
+        'kolom otomatis + konfirmasi pengguna.',
  catatan: 'OCR ML Kit dengan model TERBUNDEL (jalan tanpa '
         'internet, tanpa Play Services); foto diproses di HP dan tidak dikirim '
         'ke mana pun. Nomor pelanggan, nominal (dari baris TOTAL), dan jatuh '
@@ -601,7 +601,7 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
  catatan: 'sudah ada sejak dulu (tabel `perawatan` dengan '
         'intervalHari/berikutnya/leadHari, template bawaan, layar, dan '
         '`SumberPengingatPerawatan` yang terdaftar di isolate utama+latarbelakang). '
-        'Batch 12 MEMVERIFIKASI dan mengujinya — sengaja TIDAK membuat tabel '
+        'Sudah diverifikasi dan diuji — sengaja TIDAK membuat tabel '
         'atau mesin perawatan kedua.',
     rute: '/aksi/perawatan',
   ),
@@ -1314,7 +1314,7 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     modul: '9 · Keluarga',
     fase: 'V3',
     status: StatusFitur.selesai,
- catatan: 'anggota keluarga + pemilik & penanggung jawab per item (contoh PRD: tagihan sekolah milik anak, ditanggung pasangan); saringan per anggota bekerja; anggota bertanda pribadi hanya tampil setelah perangkat dibuka.',
+ catatan: 'anggota keluarga + pemilik & penanggung jawab per item (contoh: tagihan sekolah milik anak, ditanggung pasangan); saringan per anggota bekerja; anggota bertanda pribadi hanya tampil setelah perangkat dibuka.',
  rincian: 'Anggota Keluarga & Tanggung Jawab — tiap item punya pemilik & penanggung jawab (mis. tagihan sekolah: pemilik anak, penanggung jawab pasangan)',
     rute: '/keluarga',
   ),
@@ -1433,7 +1433,7 @@ const List<ButirFitur> petaFitur = <ButirFitur>[
     fase: 'V4',
     status: StatusFitur.selesai,
  rincian: 'Forecast — proyeksi saldo beberapa bulan, perkiraan keterlambatan proyek, tabrakan tenggat',
- catatan: '\'Ramalan saldo\' memakai asumsi yang ditulis terbuka (laba bulanan rata-rata, simpangan harian aktual, tagihan tetap & langganan) dan menampilkan RENTANG tiga angka tiap bulan (pesimis/tengah/optimis) — bukan satu angka mutlak, sesuai PRD; bulan yang bisa minus ditandai + saran menggeser apa. Uji: mesin + layar.',
+ catatan: '\'Ramalan saldo\' memakai asumsi yang ditulis terbuka (laba bulanan rata-rata, simpangan harian aktual, tagihan tetap & langganan) dan menampilkan RENTANG tiga angka tiap bulan (pesimis/tengah/optimis) — bukan satu angka mutlak; bulan yang bisa minus ditandai + saran menggeser apa. Uji: mesin + layar.',
     rute: '/ramalan-saldo',
 
   ),

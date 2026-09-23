@@ -118,7 +118,7 @@ class _PetaFiturScreenState extends State<PetaFiturScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Semua Fitur (PRD v3.1)')),
+      appBar: AppBar(title: const Text('Semua Fitur')),
       body: Column(
         children: [
           Padding(
