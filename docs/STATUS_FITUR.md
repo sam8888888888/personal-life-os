@@ -353,9 +353,9 @@ penjalanan terakhir gelombang ini.
 
 | Tempat | Isi | Catatan |
 |---|---|---|
-| GitHub `sam8888888888/personal-life-os` (publik) | commit `cc3a771` = v1.11.0+14 | naik dari `9ae0f16` (v1.9.2) |
-| Arsip sumber `lifeos-src-v1.11.0-build14_20260923_155859.tar.gz` (16 MB) | pohon kerja penuh | SHA-256 `a463d17b…f42ce` |
-| Bundel git `lifeos-git-cc3a771_20260923_155859.bundle` (34 MB) | riwayat git penuh | SHA-256 `2ec7d5bf…6e349`, sudah diuji bisa dipulihkan |
+| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `e24592b` (kode v1.11.0+14: `cc3a771`) | naik dari `9ae0f16` (v1.9.2) |
+| Arsip sumber `lifeos-src-v1.11.0-build14_20260923_160956.tar.gz` (16 MB) | pohon kerja penuh | SHA-256 `6ed068d2…6b13e` |
+| Bundel git `lifeos-git-e24592b_20260923_160956.bundle` (34 MB) | riwayat git penuh | SHA-256 `6c3a157f…d48150`, sudah diuji bisa dipulihkan |
 
 Arsip & bundel disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
 `/opt/aaron-tools/lifeos-backups/` (Austria), `/home/aaron/lifeos-backups/` (Contabo).
