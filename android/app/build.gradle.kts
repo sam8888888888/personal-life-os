@@ -21,10 +21,7 @@ android {
         // Hanya CPU arm64 (HP Android modern). ML Kit membawa pustaka untuk
         // 3 CPU sekaligus; x86_64 (emulator/PC) dan armeabi-v7a (HP 32-bit
         // lama) tidak terpakai dan memakan ±18 MB. OCR tetap jalan offline.
-        ndk {
-            abiFilters.clear()
-            abiFilters += listOf("arm64-v8a")
-        }
+        // semua pustaka CPU dipertahankan (perintah Papi)
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.personallifeos.personal_life_os"
         // F3: notifikasi terjadwal (flutter_local_notifications) butuh multidex.
