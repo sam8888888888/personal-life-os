@@ -1857,3 +1857,190 @@ class Sorotan extends Table {
 
   DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SDD v19 Gelombang 2 — lima tabel kesehatan (skema v20)
+//
+// Aturan yang dipegang seluruh tabel di bawah:
+//   * aplikasi MENYAJIKAN, tidak mendiagnosis;
+//   * rentang rujukan/ambang berasal dari laboratorium atau tenaga kesehatan
+//     PENGGUNA, bukan dari aplikasi;
+//   * nilai yang tidak bisa dihitung dengan jujur dibiarkan kosong (null),
+//     tidak ditebak.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// SDD-H1 — Hasil laboratorium (kepala panel).
+///
+/// Satu lembar hasil lab = satu induk + banyak [AnalitLab]. Sebelumnya
+/// `CatatanKesehatan` menyimpan satu nilai per baris sehingga satu lembar
+/// laporan darah lengkap memaksa pengguna membuat belasan baris terpisah.
+class HasilLab extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// Pengenal stabil lintas HP (pola id_dokumen / id_anggota / id_transaksi).
+  TextColumn get idHasil => text()();
+
+  /// Tanggal pengambilan sampel.
+  DateTimeColumn get tanggal => dateTime()();
+
+  /// Darah Lengkap · Lipid · Fungsi Hati · Fungsi Ginjal · HbA1c ·
+  /// Urinalisis · Tiroid · lain.
+  TextColumn get namaPanel => text()();
+
+  TextColumn get laboratorium => text().nullable()();
+  TextColumn get dokter => text().nullable()();
+
+  /// Anggota keluarga pemilik hasil.
+  IntColumn get anggotaId =>
+      integer().nullable().references(AnggotaKeluarga, #id)();
+
+  /// uid baris `lampiran` (foto/PDF hasil) — pola lampiran.induk_uid.
+  TextColumn get lampiranUid => text().nullable()();
+
+  TextColumn get catatan => text().nullable()();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-H2 — Satu baris per analit di dalam satu panel hasil lab.
+///
+/// Rentang rujukan berasal dari LABORATORIUM PENGGUNA (diisi manual atau dari
+/// pembacaan laporan), BUKAN dari aplikasi. Aplikasi hanya menyatakan "di luar
+/// rentang yang Anda catat" — tidak pernah "Anda sakit".
+class AnalitLab extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  IntColumn get hasilLabId => integer().references(HasilLab, #id)();
+
+  /// Hemoglobin · Leukosit · Hematokrit · Trombosit · Kolesterol Total ·
+  /// LDL · HDL · Trigliserida · SGOT · SGPT · Kreatinin · Ureum · HbA1c · TSH.
+  TextColumn get nama => text()();
+
+  /// Nilai angka. Kosong bila hasilnya non-numerik (mis. "negatif").
+  RealColumn get nilai => real().nullable()();
+
+  /// Nilai non-numerik apa adanya dari laporan lab (mis. "negatif", "<0,5").
+  TextColumn get nilaiTeks => text().nullable()();
+
+  /// Satuan dari laporan pengguna (mis. g/dL, mg/dL, mmol/L).
+  TextColumn get satuan => text().withDefault(const Constant(''))();
+
+  /// Rentang RUJUKAN DARI LABORATORIUM PENGGUNA — bukan dari aplikasi.
+  RealColumn get rujukanBawah => real().nullable()();
+  RealColumn get rujukanAtas => real().nullable()();
+
+  /// normal · rendah · tinggi · kritis · tidak_dinilai.
+  ///
+  /// Diisi dari bendera laporan lab, atau dihitung HANYA bila rentang rujukan
+  /// diisi. Bila rentang kosong → wajib 'tidak_dinilai', tidak menebak.
+  TextColumn get bendera =>
+      text().withDefault(const Constant('tidak_dinilai'))();
+
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-H3 — Log gejala terstruktur.
+///
+/// `berat` adalah PERSEPSI PENGGUNA (1–5), bukan penilaian aplikasi —
+/// mengikuti disiplin kolom `tidur.kualitas` yang sudah ada.
+class Gejala extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  /// sakit kepala · pusing · mual · nyeri perut · lemas · batuk ·
+  /// nyeri sendi · sesak · demam · lain.
+  TextColumn get nama => text()();
+
+  /// 1–5 (persepsi pengguna). Kosong = tidak diisi. Bukan penilaian aplikasi.
+  IntColumn get berat => integer().nullable()();
+
+  DateTimeColumn get mulai => dateTime()();
+
+  /// Kosong = masih berlangsung.
+  DateTimeColumn get selesai => dateTime().nullable()();
+
+  IntColumn get durasiMenit => integer().nullable()();
+
+  /// kepala · perut · punggung · sendi · dada · tenggorokan · lain.
+  TextColumn get lokasiTubuh => text().nullable()();
+
+  IntColumn get anggotaId =>
+      integer().nullable().references(AnggotaKeluarga, #id)();
+
+  TextColumn get catatan => text().nullable()();
+
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-H4 — Register imunisasi (rekaman, bukan janji).
+///
+/// `janji_kesehatan` mencatat JANJI vaksinasi; tabel ini mencatat REKAMANNYA.
+/// Ini satu-satunya tabel v19 dengan kaitan anggota yang WAJIB terisi —
+/// imunisasi selalu milik seseorang.
+class Imunisasi extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  IntColumn get anggotaId => integer().references(AnggotaKeluarga, #id)();
+
+  /// BCG, Hepatitis B, Polio, DPT, Campak, dan seterusnya.
+  TextColumn get namaVaksin => text()();
+
+  IntColumn get dosisKe => integer().withDefault(const Constant(1))();
+
+  DateTimeColumn get tanggal => dateTime()();
+
+  /// Untuk penelusuran batch.
+  TextColumn get nomorBatch => text().nullable()();
+
+  /// Posyandu / puskesmas / klinik.
+  TextColumn get tempat => text().nullable()();
+
+  /// Nama petugas.
+  TextColumn get pemberi => text().nullable()();
+
+  /// Reaksi yang dicatat pengguna (mis. "demam ringan 1 hari").
+  TextColumn get reaksi => text().nullable()();
+
+  /// Perkiraan dosis berikutnya — DIISI pengguna/bidan, BUKAN dihitung
+  /// aplikasi. Jadwal imunisasi adalah keputusan klinis.
+  DateTimeColumn get berikutnyaPada => dateTime().nullable()();
+
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get diubahPada => dateTime().withDefault(currentDateAndTime)();
+}
+
+/// SDD-H5 — Tumbuh kembang anak.
+///
+/// `persentilBmi` dihitung dari tabel referensi yang DIBUNDEL di aplikasi
+/// (data publik, tanpa internet). Aplikasi MENYAJIKAN posisi anak pada kurva
+/// referensi — tidak pernah menyatakan anak "normal" atau "bermasalah".
+class TumbuhKembang extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uid => text().nullable()();
+
+  IntColumn get anggotaId => integer().references(AnggotaKeluarga, #id)();
+
+  DateTimeColumn get tanggal => dateTime()();
+
+  /// Dihitung dari tanggal lahir anggota.
+  IntColumn get umurBulan => integer()();
+
+  RealColumn get beratKg => real().nullable()();
+  RealColumn get tinggiCm => real().nullable()();
+  RealColumn get lingkarKepalaCm => real().nullable()();
+
+  /// Persentil BMI dari kurva referensi; kosong bila data kurang (mis. tinggi
+  /// belum diisi). Aplikasi tidak menebak.
+  RealColumn get persentilBmi => real().nullable()();
+
+  TextColumn get catatan => text().nullable()();
+  DateTimeColumn get dibuatPada => dateTime().withDefault(currentDateAndTime)();
+}

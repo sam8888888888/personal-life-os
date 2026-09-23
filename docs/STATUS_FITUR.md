@@ -337,8 +337,8 @@ Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
   masukan teks kutipan.
 * **Penegakan relasi antar-tabel tetap dimatikan** (tidak ada `REFERENCES`), sesuai
   keputusan dokumen: ditunda ke v20.
-* **Gelombang 2** (lima tabel kesehatan) dan **Gelombang 3** (tabel orang + mesin pola)
-  belum dimulai.
+* **Gelombang 2 (lima tabel kesehatan) sudah selesai** — lihat bagian 17.
+  **Gelombang 3** (tabel orang + mesin pola) belum dimulai.
 * APK v19 **sudah dibangun**: `personal-life-os-v1.11.0-build14.apk` (universal: arm64 + arm32
   + x86_64, 94.733.766 byte, SHA-256 `b2a86100…4508`), tersedia di
   `https://coder.sam.university/apk/personal-life-os-v1.11.0-build14.apk` (unduhan web).
@@ -367,3 +367,60 @@ analisis & uji otomatis). Kredensial yang dipakai untuk push tidak punya izin
 `workflow`, jadi GitHub menolak commit yang memuatnya. Berkas itu tetap ada di
 pohon kerja dan di dalam arsip cadangan; untuk memasukkannya ke GitHub perlu
 kredensial dengan izin `workflow` atau menambahkannya lewat web GitHub.
+
+## 17 · Kesehatan SDD v19 — Gelombang 2 (lima tabel kesehatan)
+
+Skema **19 → 20**. Lima tabel baru (SDD §4.5–4.9) beserta 20 indeks, layar, dan
+repositorinya:
+
+| Tabel | Isi | Indeks | Aturan yang dijaga kode |
+|---|---|---|---|
+| `hasil_lab` | Kepala panel lab (tanggal, panel, laboratorium, anggota) | 5 (`uid`, `id_hasil` unik; tanggal, panel, anggota) | Nama panel wajib; `uid` + `idHasil` stabil lintas HP |
+| `analit_lab` | Satu nilai di dalam panel (nilai/teks, satuan, rujukan bawah–atas, bendera) | 4 (`uid` unik; induk, nama; **parsial** bendera) | Minimal satu dari angka/teks wajib; rentang terbalik ditolak; **tanpa rentang rujukan → `tidak_dinilai`** (tidak menebak) |
+| `gejala` | Gejala + mulai/selesai/durasi + berat persepsi 1–5 | 4 (`uid` unik; mulai; nama+mulai; anggota+mulai) | Nama wajib; selesai < mulai ditolak; berat di luar 1–5 **dijepit** agar catatan tidak hilang |
+| `imunisasi` | Rekaman vaksin (anggota wajib, dosis, tanggal, batch, berikutnya) | 4 (`uid` unik; (anggota,vaksin,dosis) unik; anggota+tanggal; **parsial** berikutnya) | Ganda ditolak; jadwal berikutnya **tidak pernah dihitung** aplikasi |
+| `tumbuh_kembang` | Berat, tinggi, lingkar kepala, umur bulan | 3 (`uid` unik; (anggota,tanggal) unik; umur) | Minimal satu ukuran; angka di luar akal ditolak; **satu anak = satu baris per hari** (simpan ulang menimpa) |
+
+Yang **ditambahkan**:
+
+* `lib/data/repository/{hasil_lab,gejala,imunisasi,tumbuh_kembang}_repository.dart`
+  — aturan integritas di atas hidup di sini, bukan di layar.
+* `lib/features/kesehatan/lab_screen.dart` — daftar panel, detail analit, dan
+  **tren analit** (`Hb: 11,2 → 11,8 → 12,4`).
+* `lib/features/kesehatan/gejala_screen.dart` — catat gejala + ringkasan
+  **frekuensi** (bahan mentah mesin pola di Gelombang 3).
+* `lib/features/kesehatan/imunisasi_tumbuh_screen.dart` — register imunisasi per
+  anggota + deret pengukuran anak.
+* `lib/core/providers/kesehatan_providers.dart` — 4 provider repo + pemilih anggota.
+* Registri sinkron: **5 jalur baru** (`hasil_lab` sebelum `analit_lab`, karena
+  analit menunjuk induknya lewat `hasil_lab_id`).
+* Modul audit baru: `hasil_lab`, `gejala`, `imunisasi`, `tumbuh_kembang`.
+* Empat pintu baru di hub kesehatan: Hasil laboratorium, Catatan gejala,
+  Imunisasi, Tumbuh kembang.
+
+Yang **sengaja belum dikerjakan** (jujur, bukan disamarkan):
+
+* **Persentil & kurva tumbuh kembang belum ditampilkan.** Menghitungnya butuh
+  tabel rujukan kurva yang dibundel di aplikasi; selama belum dipasang,
+  `persentil_bmi` dibiarkan **kosong** dan layar menyatakan alasannya —
+  angkanya tidak ditebak.
+* Grafik pengukuran masih berupa daftar angka (belum grafik).
+* Nyalakan penegakan kunci asing (FK) antar-tabel tetap ditunda ke v20 sesuai
+  keputusan dokumen; kolomnya sudah ada dan sudah diuji.
+* Gelombang 3 (tabel orang + mesin pola) belum dimulai.
+
+Uji gelombang ini: berkas baru `test/v20_kesehatan_test.dart` berisi **33 kasus**
+(skema v20 & 20 indeks, migrasi v19 → v20 pada berkas nyata **beserta bukti data
+v19 tidak hilang**, aturan hasil lab/analit, gejala, imunisasi, tumbuh kembang,
+registri sinkron, dan modul audit). Hasilnya **33/33 lulus**.
+
+Suite penuh: **1.425 lulus / 1 dilewati / 6 gagal** (naik dari 1.392 lulus di
+Gelombang 1 — selisih 33 tepat sebanyak kasus baru). Keenam kegagalan adalah uji
+peka tanggal/Ramadan bawaan, **bukan** akibat perubahan ini: keenamnya dijalankan
+ulang pada salinan lama (`/opt/aaron-tools/baseline/lifeos`, kode sebelum
+perubahan) dan hasilnya **gagal pada 6 uji yang sama** (`v2_aksi` FR-83,
+`v2_dokumen` FR-128/FR-129/hitungan murni, `v2_ibadah` hitungRamadan,
+`v3_langganan_pintar` FR-70). `flutter analyze lib` → **No issues found**.
+
+Versi aplikasi naik ke **1.12.0+15** (`versi.dart`, `pubspec.yaml`, dan dokumentasi
+ekspor cadangan ikut disamakan).

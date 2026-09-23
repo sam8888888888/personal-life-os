@@ -4,8 +4,8 @@
 /// ```json
 /// {
 ///   "format": "plo-backup",
-///   "versiSkema": 19,
-///   "versiAplikasi": "1.11.0+14",
+///   "versiSkema": 20,
+///   "versiAplikasi": "1.12.0+15",
 ///   "dibuatPada": "2026-09-15T08:00:00.000",
 ///   "tabel": { "<namaTabel>": [ { "<kolom>": nilai } ] }
 /// }

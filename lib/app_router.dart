@@ -59,6 +59,9 @@ import 'features/ritme/temuan_pintar_screen.dart';
 import 'features/ritme/ramalan_saldo_screen.dart';
 import 'features/ritme/tinjauan_tahun_screen.dart';
 import 'features/kesehatan/energi_tidur_screen.dart';
+import 'features/kesehatan/gejala_screen.dart';
+import 'features/kesehatan/imunisasi_tumbuh_screen.dart';
+import 'features/kesehatan/lab_screen.dart';
 import 'features/ibadah/rencana_ibadah_screen.dart';
 import 'features/ibadah/kiblat_screen.dart';
 import 'features/laporan/dana_persiapan_screen.dart';
@@ -547,6 +550,38 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
       path: '/kesehatan',
       builder: (c, s) => const KesehatanHubScreen(),
       routes: [
+        // SDD v19 Gelombang 2 — empat pintu kesehatan baru.
+        GoRoute(
+          path: 'lab',
+          builder: (c, s) => const LabScreen(),
+          routes: [
+            GoRoute(
+              path: ':id/tren/:nama',
+              builder: (c, s) => TrenAnalitScreen(
+                id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0,
+                nama: Uri.decodeComponent(s.pathParameters['nama'] ?? ''),
+              ),
+            ),
+            GoRoute(
+              path: ':id',
+              builder: (c, s) => LabDetailScreen(
+                id: int.tryParse(s.pathParameters['id'] ?? '') ?? 0,
+              ),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'gejala',
+          builder: (c, s) => const GejalaScreen(),
+        ),
+        GoRoute(
+          path: 'imunisasi',
+          builder: (c, s) => const ImunisasiScreen(),
+        ),
+        GoRoute(
+          path: 'tumbuh-kembang',
+          builder: (c, s) => const TumbuhKembangScreen(),
+        ),
         GoRoute(
           path: 'aktivitas',
           builder: (c, s) => const AktivitasScreen(),

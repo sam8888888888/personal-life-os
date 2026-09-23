@@ -613,7 +613,7 @@ void main() {
     test('versi skema 18 dan tabel baru bisa ditulis', () async {
       final db = _db();
       addTearDown(db.close);
-      expect(db.schemaVersion, 19);
+      expect(db.schemaVersion, 20);
       await db.into(db.rumahTangga).insert(RumahTanggaCompanion.insert(
             nama: 'Rumah Uji',
           ));

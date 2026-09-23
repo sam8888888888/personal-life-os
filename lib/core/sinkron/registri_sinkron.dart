@@ -368,6 +368,48 @@ List<JalurSinkron> daftarJalurSinkron(AppDatabase db) => <JalurSinkron>[
         kolomKunci: db.tautan.id,
       ),
 
+      // ── kesehatan v20 (SDD v19 Gelombang 2) ───────────────────────────────
+      // Urutan penting: `hasil_lab` (induk) mendahului `analit_lab` (anak),
+      // karena analit membawa `hasil_lab_id` yang menunjuk ke induknya.
+      JalurSinkron(
+        nama: 'hasil_lab',
+        tabel: db.hasilLab,
+        kolomUid: db.hasilLab.uid,
+        kolomKunci: db.hasilLab.id,
+        kolomDiubah: db.hasilLab.diubahPada,
+        kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
+      ),
+      JalurSinkron(
+        nama: 'analit_lab',
+        tabel: db.analitLab,
+        kolomUid: db.analitLab.uid,
+        kolomKunci: db.analitLab.id,
+        kaitan: <String, String>{'hasil_lab_id': 'hasil_lab'},
+      ),
+      JalurSinkron(
+        nama: 'gejala',
+        tabel: db.gejala,
+        kolomUid: db.gejala.uid,
+        kolomKunci: db.gejala.id,
+        kolomDiubah: db.gejala.diubahPada,
+        kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
+      ),
+      JalurSinkron(
+        nama: 'imunisasi',
+        tabel: db.imunisasi,
+        kolomUid: db.imunisasi.uid,
+        kolomKunci: db.imunisasi.id,
+        kolomDiubah: db.imunisasi.diubahPada,
+        kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
+      ),
+      JalurSinkron(
+        nama: 'tumbuh_kembang',
+        tabel: db.tumbuhKembang,
+        kolomUid: db.tumbuhKembang.uid,
+        kolomKunci: db.tumbuhKembang.id,
+        kaitan: <String, String>{'anggota_id': 'anggota_keluarga'},
+      ),
+
       // ── ibadah ────────────────────────────────────────────────────────────
       JalurSinkron(
         nama: 'hafalan',

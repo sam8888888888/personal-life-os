@@ -994,7 +994,7 @@ void main() {
     test('schemaVersion 17 dan 7 tabel batch 11 bisa ditulis', () async {
       final db = _db();
       addTearDown(db.close);
-      expect(db.schemaVersion, 19);
+      expect(db.schemaVersion, 20);
 
       final danaId = await DanaPersiapanRepository(db)
           .tambah(nama: 'Servis', targetSen: 100, tersediaSen: 10);

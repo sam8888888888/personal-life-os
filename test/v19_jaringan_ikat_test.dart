@@ -92,7 +92,7 @@ void main() {
   // ─────────────────────────────────────────────────────────────── skema
   group('skema v19', () {
     test('versi skema = 19', () {
-      expect(db.schemaVersion, 19);
+      expect(db.schemaVersion, 20);
     });
 
     test('empat tabel jaringan ikat ada', () async {

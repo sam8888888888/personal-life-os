@@ -119,10 +119,16 @@ part 'database.g.dart';
   TagihanRumahBersama,
   BagianTagihanRumah,
   IzinSubAksesKeluarga,
-  PemindaianBank,  KotakMasuk,
+  PemindaianBank,
+  KotakMasuk,
   CatatanHarian,
   Tautan,
   Sorotan,
+  HasilLab,
+  AnalitLab,
+  Gejala,
+  Imunisasi,
+  TumbuhKembang,
 
 ])
 class AppDatabase extends _$AppDatabase {
@@ -133,7 +139,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -144,6 +150,7 @@ class AppDatabase extends _$AppDatabase {
           await _pasangIndeksUnikV4();
           await _pasangIndeksUnikV5();
           await _pasangIndeksV19();
+          await _pasangIndeksV20();
           await _seedKategori();
           await seedKategoriTransaksi();
           await _seedPerawatanV4();
@@ -322,6 +329,13 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
             await _backfillTautanV19();
             debugPrint('migrasi v19 selesai (kotak masuk, catatan harian, '
                 'tautan, sorotan)');
+          }
+
+          if (dari < 20) {
+            // v20 (SDD v19 Gelombang 2): lima tabel kesehatan — hasil lab
+            // (+ analitnya), gejala, imunisasi, tumbuh kembang.
+            await _buatTabelV20(m);
+            await _pasangIndeksV20();
           }
         },
       );
@@ -1012,6 +1026,49 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   ///
   /// Memakai [LazyDatabase] karena kunci & migrasi butuh langkah tak sinkron,
   /// sedangkan pembuatan executor dipanggil dari konstruktor.
+  /// Buat lima tabel kesehatan v20. Sama seperti v19: diperiksa satu per satu
+  /// (`_tabelAda`) karena sebagian basis data lama dibuat dari definisi tabel
+  /// TERBARU — tanpa pemeriksaan ini migrasi bisa gagal `table already exists`.
+  Future<void> _buatTabelV20(Migrator m) async {
+    if (!await _tabelAda('hasil_lab')) await m.createTable(hasilLab);
+    if (!await _tabelAda('analit_lab')) await m.createTable(analitLab);
+    if (!await _tabelAda('gejala')) await m.createTable(gejala);
+    if (!await _tabelAda('imunisasi')) await m.createTable(imunisasi);
+    if (!await _tabelAda('tumbuh_kembang')) await m.createTable(tumbuhKembang);
+  }
+
+  /// Indeks v20 lewat SQL mentah + `IF NOT EXISTS` (aturan PB-05/PB-07):
+  /// jaminan unik tidak boleh bergantung pada hasil regenerasi `build_runner`.
+  /// Tiga di antaranya indeks PARSIAL (mempercepat kueri yang paling sering
+  /// dipakai di layar kesehatan).
+  Future<void> _pasangIndeksV20() async {
+    const List<String> daftar = <String>[
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_hl_uid ON hasil_lab(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_hl_idhasil ON hasil_lab(id_hasil)',
+      'CREATE INDEX IF NOT EXISTS idx_hl_tanggal ON hasil_lab(tanggal)',
+      'CREATE INDEX IF NOT EXISTS idx_hl_panel ON hasil_lab(nama_panel, tanggal)',
+      'CREATE INDEX IF NOT EXISTS idx_hl_anggota ON hasil_lab(anggota_id, tanggal)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_al_uid ON analit_lab(uid)',
+      'CREATE INDEX IF NOT EXISTS idx_al_induk ON analit_lab(hasil_lab_id)',
+      'CREATE INDEX IF NOT EXISTS idx_al_nama ON analit_lab(nama)',
+      "CREATE INDEX IF NOT EXISTS idx_al_bendera ON analit_lab(bendera) WHERE bendera <> 'normal' AND bendera <> 'tidak_dinilai'",
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_gejala_uid ON gejala(uid)',
+      'CREATE INDEX IF NOT EXISTS idx_gejala_mulai ON gejala(mulai)',
+      'CREATE INDEX IF NOT EXISTS idx_gejala_nama ON gejala(nama, mulai)',
+      'CREATE INDEX IF NOT EXISTS idx_gejala_anggota ON gejala(anggota_id, mulai)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_imun_uid ON imunisasi(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_imun_dosis ON imunisasi(anggota_id, nama_vaksin, dosis_ke)',
+      'CREATE INDEX IF NOT EXISTS idx_imun_anggota ON imunisasi(anggota_id, tanggal)',
+      'CREATE INDEX IF NOT EXISTS idx_imun_berikut ON imunisasi(berikutnya_pada) WHERE berikutnya_pada IS NOT NULL',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_tk_uid ON tumbuh_kembang(uid)',
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_tk_hari ON tumbuh_kembang(anggota_id, tanggal)',
+      'CREATE INDEX IF NOT EXISTS idx_tk_umur ON tumbuh_kembang(anggota_id, umur_bulan)',
+    ];
+    for (final String sql in daftar) {
+      await customStatement(sql);
+    }
+  }
+
   static QueryExecutor _buka(String nama) => LazyDatabase(() async {
         final File berkas = await berkasBasisData(nama);
         final String? kunci = await siapkanKunciBasisData(berkas);
