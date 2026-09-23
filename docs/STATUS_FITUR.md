@@ -339,10 +339,14 @@ Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
   keputusan dokumen: ditunda ke v20.
 * **Gelombang 2 (lima tabel kesehatan) sudah selesai** — lihat bagian 17.
   **Gelombang 3** (tabel orang + mesin pola) belum dimulai.
-* APK v19 **sudah dibangun**: `personal-life-os-v1.11.0-build14.apk` (universal: arm64 + arm32
-  + x86_64, 94.733.766 byte, SHA-256 `b2a86100…4508`), tersedia di
-  `https://coder.sam.university/apk/personal-life-os-v1.11.0-build14.apk` (unduhan web).
-  Basis data di HP akan naik otomatis ke 19 saat aplikasi ini pertama dibuka.
+* APK yang berlaku sekarang adalah **v1.12.0-build15** (gelombang 2) — lihat bagian 17.
+  APK gelombang 1 (`personal-life-os-v1.11.0-build14.apk`, 94.733.766 byte,
+  SHA-256 `b2a86100…4508`) sudah digantikan; keduanya masih bisa diunduh dari
+  `aaron.my.id/unduh/`.
+  **Catatan jalur unduh:** pakai `https://aaron.my.id/unduh/personal-life-os-<versi>.apk`.
+  Jalur `coder.sam.university/apk/...` tetap hidup sebagai cadangan, tetapi di HP Papi
+  tautan itu membuka **aplikasi Coder** (app-link), bukan mengunduh berkas — jadi
+  jangan dipakai untuk membagikan APK.
 
 Uji: berkas baru `test/v19_jaringan_ikat_test.dart` berisi **22 kasus** — skema & indeks,
 migrasi v18 → v19 pada berkas nyata (termasuk dijalankan dua kali), perilaku empat
@@ -353,9 +357,10 @@ penjalanan terakhir gelombang ini.
 
 | Tempat | Isi | Catatan |
 |---|---|---|
-| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `e24592b` (kode v1.11.0+14: `cc3a771`) | naik dari `9ae0f16` (v1.9.2) |
-| Arsip sumber `lifeos-src-v1.11.0-build14_20260923_160956.tar.gz` (16 MB) | pohon kerja penuh | SHA-256 `6ed068d2…6b13e` |
-| Bundel git `lifeos-git-e24592b_20260923_160956.bundle` (34 MB) | riwayat git penuh | SHA-256 `6c3a157f…d48150`, sudah diuji bisa dipulihkan |
+| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `60d772f` (kode v1.12.0+15, gelombang 2) | naik dari `9ae0f16` (v1.9.2) lewat `cc3a771` (v1.11.0+14) → `e24592b` → `3e4ae26` → `60d772f` |
+| Arsip sumber `lifeos-src-v1.12.0-build15_20260923_164714.tar.gz` (16 MB) | pohon kerja penuh v1.12.0+15 | SHA-256 `89a89d33…9031` |
+| Bundel git `lifeos-git-60d772f_20260923_164714.bundle` (34 MB) | riwayat git penuh | SHA-256 `8f1ffb85…93ac`, sudah diuji bisa dipulihkan (603 berkas) |
+| APK `personal-life-os-v1.12.0-build15.apk` (95.159.750 byte) | rilis gelombang 2 | SHA-256 `56ca567a…dbbf`, sertifikat sama dengan versi sebelumnya |
 
 Arsip & bundel disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
 `/opt/aaron-tools/lifeos-backups/` (Austria), `/home/aaron/lifeos-backups/` (Contabo).
@@ -424,3 +429,19 @@ perubahan) dan hasilnya **gagal pada 6 uji yang sama** (`v2_aksi` FR-83,
 
 Versi aplikasi naik ke **1.12.0+15** (`versi.dart`, `pubspec.yaml`, dan dokumentasi
 ekspor cadangan ikut disamakan).
+
+### APK gelombang ini
+
+`personal-life-os-v1.12.0-build15.apk` — **universal** (arm64-v8a + armeabi-v7a + x86_64),
+**95.159.750 byte**, `versionCode 15`, `versionName 1.12.0`,
+SHA-256 **`56ca567aa0d3335321ccfdb911ead341aac7ea272b3e44be8efa13501683dbbf`**.
+Sertifikat penanda tangan SHA-256 `7a56a135…506b` — **sama** dengan v1.11.0, jadi
+aplikasi lama bisa diperbarui tanpa menghapus data. **12 izin, nol izin SMS**
+(sesuai keputusan menghapus pemindai SMS bahaya).
+
+Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.12.0-build15.apk`**
+(HTTP 200, `content-type: application/octet-stream`; berkas yang diunduh sudah
+dibandingkan SHA-256-nya dan **identik**). Cadangan jalur:
+`https://coder.sam.university/apk/personal-life-os-v1.12.0-build15.apk`.
+Basis data di HP naik otomatis **19 → 20** saat aplikasi pertama dibuka; tabel
+kesehatan baru dibuat di tempat, data lama tidak disentuh.
