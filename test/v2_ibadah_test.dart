@@ -362,7 +362,7 @@ void main() {
     expect(sebelum.hariMenujuRamadan, 6);
     expect(sebelum.sedangRamadan, isFalse);
     expect(sebelum.hariMenujuSyawal,
-        syawal1445.difference(enamHariSebelum).inDays,
+        selisihHari(enamHariSebelum, syawal1445),
         reason: '6 hari sebelum Ramadan + panjang Ramadan');
 
     final RencanaRamadan idulFitri = hitungRamadan(syawal1445);

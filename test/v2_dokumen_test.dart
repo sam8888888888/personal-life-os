@@ -36,6 +36,8 @@ import 'package:personal_life_os/core/notifikasi/perencana_pengingat.dart'
 import 'package:personal_life_os/core/notifikasi/sumber_pengingat_tambahan.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
 import 'package:personal_life_os/core/theme/app_tema.dart';
+import 'package:personal_life_os/core/utils/tanggal_utils.dart'
+    show selisihHari, tanggalPengingat;
 import 'package:personal_life_os/core/utils/waktu.dart';
 import 'package:personal_life_os/data/database/database.dart';
 import 'package:personal_life_os/data/repository/dokumen_repository.dart';
@@ -52,7 +54,7 @@ late DokumenRepository repo;
 final jamUji = DateTime(2026, 9, 15, 8);
 
 /// Tanggal relatif terhadap hari uji (0 = hari ini).
-DateTime hari(int selisih) => DateTime(2026, 9, 15).add(Duration(days: selisih));
+DateTime hari(int selisih) => DateTime(2026, 9, 15 + selisih);
 
 /// Kata yang dilarang PRD §III-11.
 const List<String> kataTerlarang = [
@@ -182,6 +184,8 @@ void main() {
           DateTime(2026, 9, 15, 6));
       expect(DokumenRepository.waktuPengingat(hari(1), -5),
           DateTime(2026, 9, 16, 8));
+      expect(selisihHari(DateTime(2026, 1, 1), DateTime(2026, 9, 15)), 257);
+      expect(tanggalPengingat(DateTime(2026, 12, 14), 90), DateTime(2026, 9, 15));
     });
 
     test('(4) ID pengingat dokumen stabil, unik, & di atas batasIdKhusus', () {

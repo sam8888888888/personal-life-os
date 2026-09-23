@@ -152,9 +152,8 @@ class RumahRepository {
     if (intervalHari <= 0) {
       throw ArgumentError('Interval perawatan harus lebih dari 0 hari.');
     }
-    final jadwal = berikutnya ??
-        DateTime(_jam().year, _jam().month, _jam().day)
-            .add(Duration(days: intervalHari));
+    final awal = _jam();
+    final jadwal = berikutnya ?? DateTime(awal.year, awal.month, awal.day + intervalHari);
     return db.into(db.perawatan).insertReturning(PerawatanCompanion.insert(
           nama: bersih,
           berikutnya: jadwal,
@@ -179,8 +178,7 @@ class RumahRepository {
     if (baris == null) return;
     final kapan = tanggal ?? _jam();
     final berikut = berikutnyaBaru ??
-        DateTime(kapan.year, kapan.month, kapan.day)
-            .add(Duration(days: baris.intervalHari));
+        DateTime(kapan.year, kapan.month, kapan.day + baris.intervalHari);
     await (db.update(db.perawatan)..where((p) => p.id.equals(id))).write(
       PerawatanCompanion(
         terakhirDilakukan: Value(DateTime(kapan.year, kapan.month, kapan.day)),

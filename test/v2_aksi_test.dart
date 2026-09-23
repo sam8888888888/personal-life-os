@@ -54,7 +54,7 @@ late PerawatanRepository perawatan;
 final jamUji = DateTime(2026, 9, 15, 8, 0);
 
 /// Tanggal relatif terhadap hari uji (0 = hari ini).
-DateTime hari(int selisih) => DateTime(2026, 9, 15).add(Duration(days: selisih));
+DateTime hari(int selisih) => DateTime(2026, 9, 15 + selisih);
 
 /// Kata yang dilarang pasal III-11 (plus kata menghakimi sejenis).
 const List<String> kataTerlarang = <String>[

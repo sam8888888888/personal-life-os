@@ -15,6 +15,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/platform/kanal_media.dart';
 import '../../core/akun/klien_akun.dart';
 import '../../core/providers/akun_providers.dart';
+import '../../core/sinkron/sinkron_semua.dart';
 
 class AkunScreen extends ConsumerStatefulWidget {
   const AkunScreen({super.key});
@@ -29,12 +30,88 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
   String? _hasilSinkron;
   bool _menyinkron = false;
 
-  /// Sinkron tagihan antar HP (tahap 2). Hasilnya ditulis apa adanya —
-  /// termasuk kalau gagal.
-  /// FR-27 — ekspor seluruh data ke satu berkas, lalu tawarkan dibagikan
-  /// (WhatsApp/Drive/USB pilihan Papi). Tidak butuh server.
+  Future<String?> _mintaSandiBerkas({required bool ekspor}) async {
+    final controller = TextEditingController();
+    String? pesan;
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (dialogContext) => StatefulBuilder(
+          builder: (dialogContext, setDialogState) => AlertDialog(
+            title: Text(ekspor ? 'Enkripsi berkas sinkron' : 'Buka berkas sinkron'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(ekspor
+                    ? 'Frasa sandi minimal 8 karakter. Gunakan frasa yang sama '
+                        'saat impor di HP tujuan.'
+                    : 'Masukkan frasa sandi yang digunakan saat ekspor.'),
+                const SizedBox(height: 12),
+                TextField(
+                  key: Key(ekspor ? 'sandi_ekspor_sinkron' : 'sandi_impor_sinkron'),
+                  controller: controller,
+                  autofocus: true,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Frasa sandi',
+                    errorText: pesan,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Batal'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (controller.text.length <
+                      SinkronSemua.panjangSandiBerkasMinimum) {
+                    setDialogState(() => pesan = 'Minimal 8 karakter.');
+                    return;
+                  }
+                  Navigator.of(dialogContext).pop(controller.text);
+                },
+                child: Text(ekspor ? 'Enkripsi dan ekspor' : 'Buka berkas'),
+              ),
+            ],
+          ),
+        ),
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
+
+  Future<bool> _konfirmasiBerkasLamaPolos() async =>
+      await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Berkas lama tidak terenkripsi'),
+          content: const Text(
+            'Isi berkas ini bisa dibaca siapa pun yang mendapatkannya. '
+            'Lanjutkan impor hanya jika berkas memang milik Papi.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Tetap impor'),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+
+  /// Ekspor hanya dalam bentuk terenkripsi; frasa sandi harus disampaikan
+  /// terpisah dari berkas.
   Future<void> _eksporBerkas() async {
-    if (!mounted) return;
+    final sandi = await _mintaSandiBerkas(ekspor: true);
+    if (sandi == null || !mounted) return;
     setState(() {
       _menyinkron = true;
       _hasilSinkron = null;
@@ -47,7 +124,9 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
           .split('.')
           .first;
       final berkas = File('${folder.path}/sinkron-lifeos-$stempel.json');
-      final jumlah = await ref.read(sinkronSemuaProvider).eksporBerkas(berkas);
+      final jumlah = await ref
+          .read(sinkronSemuaProvider)
+          .eksporBerkas(berkas, sandi: sandi);
       try {
         await const MethodChannel('lifeos/bagikan').invokeMethod<bool>('bagikan', {
           'jalur': berkas.path,
@@ -59,7 +138,8 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
       }
       if (mounted) {
         setState(() => _hasilSinkron =
-            'Berkas sinkron dibuat ($jumlah baris):\n${berkas.path}');
+            'Berkas terenkripsi dibuat ($jumlah baris):\n${berkas.path}. '
+            'Gunakan frasa sandi yang sama saat impor di HP tujuan.');
       }
     } catch (e) {
       if (mounted) setState(() => _hasilSinkron = 'Gagal mengekspor: $e');
@@ -68,7 +148,7 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
     }
   }
 
-  /// FR-27 — masukkan berkas sinkron (dari HP lain) ke HP ini.
+  /// FR-27 — impor terenkripsi; berkas polos lama memerlukan persetujuan.
   Future<void> _imporBerkas() async {
     if (!mounted) return;
     setState(() {
@@ -81,8 +161,23 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
         if (mounted) setState(() => _hasilSinkron = 'Batal memilih berkas.');
         return;
       }
-      final jumlah =
-          await ref.read(sinkronSemuaProvider).imporBerkas(File(jalur));
+      final berkas = File(jalur);
+      final terenkripsi = await SinkronSemua.berkasSinkronTerenkripsi(berkas);
+      if (!mounted) return;
+      String? sandi;
+      var izinkanBerkasLamaPolos = false;
+      if (terenkripsi) {
+        sandi = await _mintaSandiBerkas(ekspor: false);
+        if (sandi == null || !mounted) return;
+      } else {
+        izinkanBerkasLamaPolos = await _konfirmasiBerkasLamaPolos();
+        if (!izinkanBerkasLamaPolos || !mounted) return;
+      }
+      final jumlah = await ref.read(sinkronSemuaProvider).imporBerkas(
+            berkas,
+            sandi: sandi,
+            izinkanBerkasLamaPolos: izinkanBerkasLamaPolos,
+          );
       if (mounted) {
         setState(() => _hasilSinkron = 'Berkas dimasukkan: $jumlah baris.');
       }
@@ -279,9 +374,10 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
                             fontSize: 15, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
                     const Text(
-                      'Tanpa server: seluruh data ditulis ke satu berkas, lalu '
-                      'bisa Papi kirim sendiri (WhatsApp/Drive/USB) ke HP lain '
-                      'dan dimasukkan lewat tombol Impor.',
+                      'Tanpa server: seluruh data diekspor ke satu berkas '
+                      'terenkripsi. Papi perlu memasukkan frasa sandi yang sama '
+                      'di HP tujuan; berkas lama yang polos hanya diimpor setelah '
+                      'peringatan dan persetujuan.',
                     ),
                     const SizedBox(height: 10),
                     Wrap(

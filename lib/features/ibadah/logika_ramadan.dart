@@ -15,6 +15,7 @@
 library;
 
 import '../../core/ibadah/kalender_hijriah.dart';
+import '../../core/utils/tanggal_utils.dart' as tanggal;
 import '../../core/ibadah/model_sholat.dart';
 import '../../core/ibadah/penghitung_sholat.dart';
 
@@ -99,9 +100,7 @@ String labelAcuan(AcuanHijriah acuan) => acuan.label;
 
 /// Berapa hari lagi menuju tanggal sipil [target] dari [hariIni] (0 = hari ini).
 int selisihHari(DateTime hariIni, DateTime target) =>
-    DateTime(target.year, target.month, target.day)
-        .difference(DateTime(hariIni.year, hariIni.month, hariIni.day))
-        .inDays;
+    tanggal.selisihHari(hariIni, target);
 
 /// Cari kemunculan berikutnya (termasuk hari ini) tanggal Hijriah
 /// [bulan]/[hari] menurut [acuan] & [koreksiHari].

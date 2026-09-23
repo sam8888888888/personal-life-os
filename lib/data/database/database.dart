@@ -1015,7 +1015,7 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
         nama: t.$2,
         kategori: Value(t.$3),
         intervalHari: Value(t.$4),
-        berikutnya: awalHari.add(Duration(days: t.$4)),
+        berikutnya: DateTime(awalHari.year, awalHari.month, awalHari.day + t.$4),
         templateKode: Value(t.$1),
         leadHari: const Value('7,1'),
         urutan: Value(i),

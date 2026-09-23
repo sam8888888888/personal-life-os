@@ -19,15 +19,25 @@ DateTime tambahBulan(DateTime tgl, int n) {
   return DateTime(tahun, bulan, hari);
 }
 
+/// Tambah n hari kalender, menjaga jam lokal dan menghindari pergeseran DST.
+DateTime _tambahHariKalender(DateTime tgl, int n) {
+  if (tgl.isUtc) {
+    return DateTime.utc(tgl.year, tgl.month, tgl.day + n, tgl.hour,
+        tgl.minute, tgl.second, tgl.millisecond, tgl.microsecond);
+  }
+  return DateTime(tgl.year, tgl.month, tgl.day + n, tgl.hour, tgl.minute,
+      tgl.second, tgl.millisecond, tgl.microsecond);
+}
+
 /// Periode berikutnya dari [tgl] menurut frekuensi.
 DateTime periodeBerikutnya(DateTime tgl, Frekuensi f, {int? kustomHariN}) {
   switch (f) {
     case Frekuensi.sekali:
       return tgl; // tidak berulang
     case Frekuensi.mingguan:
-      return tgl.add(const Duration(days: 7));
+      return _tambahHariKalender(tgl, 7);
     case Frekuensi.duaMingguan:
-      return tgl.add(const Duration(days: 14));
+      return _tambahHariKalender(tgl, 14);
     case Frekuensi.bulanan:
       return tambahBulan(tgl, 1);
     case Frekuensi.duaBulanan:
@@ -39,20 +49,19 @@ DateTime periodeBerikutnya(DateTime tgl, Frekuensi f, {int? kustomHariN}) {
     case Frekuensi.tahunan:
       return tambahBulan(tgl, 12);
     case Frekuensi.kustomHari:
-      return tgl.add(Duration(days: (kustomHariN ?? 30).clamp(1, 9999)));
+      return _tambahHariKalender(tgl, (kustomHariN ?? 30).clamp(1, 9999).toInt());
   }
 }
 
-/// Tanggal notifikasi: jatuhTempo dikurangi lead (hari).
-/// lead 0 berarti hari-H. Lead dihitung sebagai selisih hari kalender.
-DateTime tanggalPengingat(DateTime jatuhTempo, int leadHari) {
-  return jatuhTempo.subtract(Duration(days: leadHari < 0 ? 0 : leadHari));
-}
+/// Tanggal notifikasi: jatuhTempo dikurangi lead (hari kalender).
+/// lead 0 berarti hari-H.
+DateTime tanggalPengingat(DateTime jatuhTempo, int leadHari) =>
+    _tambahHariKalender(jatuhTempo, -(leadHari < 0 ? 0 : leadHari));
 
-/// Selisih hari dari [dari] ke [ke] (ke - dari), dibulatkan ke hari.
+/// Selisih hari dari [dari] ke [ke], tanpa efek DST zona lokal.
 int selisihHari(DateTime dari, DateTime ke) {
-  final a = DateTime(dari.year, dari.month, dari.day);
-  final b = DateTime(ke.year, ke.month, ke.day);
+  final a = DateTime.utc(dari.year, dari.month, dari.day);
+  final b = DateTime.utc(ke.year, ke.month, ke.day);
   return b.difference(a).inDays;
 }
 

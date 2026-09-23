@@ -393,7 +393,7 @@ void main() {
 
   // ──────────────────────────────────────────────────────────── imunisasi
   group('imunisasi', () {
-    Future<int> _anggota() async {
+    Future<int> buatAnggota() async {
       final int id = await db.into(db.anggotaKeluarga).insert(
             AnggotaKeluargaCompanion.insert(
               idAnggota: 'A-1',
@@ -405,7 +405,7 @@ void main() {
     }
 
     test('dosis yang sama tidak boleh tercatat dua kali', () async {
-      final int a = await _anggota();
+      final int a = await buatAnggota();
       await imunisasi.tambah(
         anggotaId: a,
         namaVaksin: 'Campak',
@@ -424,7 +424,7 @@ void main() {
     });
 
     test('dosis berbeda untuk vaksin sama diterima', () async {
-      final int a = await _anggota();
+      final int a = await buatAnggota();
       await imunisasi.tambah(
           anggotaId: a, namaVaksin: 'DPT', tanggal: DateTime(2021, 5, 1));
       await imunisasi.tambah(
@@ -439,7 +439,7 @@ void main() {
 
     test('jatuh tempo & akan datang memisahkan tanggal lampau dan nanti',
         () async {
-      final int a = await _anggota();
+      final int a = await buatAnggota();
       await imunisasi.tambah(
         anggotaId: a,
         namaVaksin: 'Campak',
@@ -461,7 +461,7 @@ void main() {
     });
 
     test('anggota tanpa dosis berikutnya tidak muncul di pengingat', () async {
-      final int a = await _anggota();
+      final int a = await buatAnggota();
       await imunisasi.tambah(
           anggotaId: a, namaVaksin: 'BCG', tanggal: DateTime(2021, 3, 11));
       expect(await imunisasi.jatuhTempo(pada: DateTime(2027, 1, 1)), isEmpty);
@@ -471,7 +471,7 @@ void main() {
 
   // ─────────────────────────────────────────────────────── tumbuh kembang
   group('tumbuh kembang', () {
-    Future<int> _anak() async {
+    Future<int> buatAnak() async {
       final int id = await db.into(db.anggotaKeluarga).insert(
             AnggotaKeluargaCompanion.insert(
               idAnggota: 'A-2',
@@ -483,7 +483,7 @@ void main() {
     }
 
     test('tanpa satu pun ukuran ditolak', () async {
-      final int a = await _anak();
+      final int a = await buatAnak();
       expect(
         () => tumbuh.simpan(
             anggotaId: a, tanggal: DateTime(2026, 9, 1), umurBulan: 28),
@@ -492,7 +492,7 @@ void main() {
     });
 
     test('angka tidak masuk akal ditolak', () async {
-      final int a = await _anak();
+      final int a = await buatAnak();
       expect(
         () => tumbuh.simpan(
           anggotaId: a,
@@ -505,7 +505,7 @@ void main() {
     });
 
     test('satu anak satu baris per hari — simpan ulang menimpa', () async {
-      final int a = await _anak();
+      final int a = await buatAnak();
       await tumbuh.simpan(
         anggotaId: a,
         tanggal: DateTime(2026, 9, 1, 7),
@@ -570,7 +570,7 @@ void main() {
 
     test('pengukuran tersimpan kosong persentil (bukan angka karangan)',
         () async {
-      final int a = await _anak();
+      final int a = await buatAnak();
       await tumbuh.simpan(
         anggotaId: a,
         tanggal: DateTime(2026, 9, 1),

@@ -15,7 +15,11 @@
 /// 6. Versi yang kalah pada bentrok disimpan di server (tidak hilang).
 library;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_life_os/core/akun/klien_akun.dart';
 import 'package:personal_life_os/core/sinkron/sinkron_semua.dart';
@@ -201,6 +205,85 @@ void main() {
     expect(terima.diterapkan, 0,
         reason: 'kategori bawaan tidak boleh disalin (sudah ada di tiap HP)');
     expect((await b.select(b.kategoriTransaksi).get()).length, jmlA);
+  });
+
+  test('FR-27 ekspor berkas terenkripsi, impor sandi dan autentikasi benar',
+      () async {
+    const kanal = MethodChannel('lifeos/rahasia');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(kanal, (call) async {
+      final args = (call.arguments as Map).cast<String, dynamic>();
+      if (call.method == 'enkripsiSandi') {
+        return '${args['sandi']}|'
+            '${base64Encode(utf8.encode(args['teks'] as String))}';
+      }
+      if (call.method == 'dekripsiSandi') {
+        final parts = (args['amplop'] as String).split('|');
+        if (parts.length != 2 || parts.first != args['sandi']) {
+          return null;
+        }
+        return utf8.decode(base64Decode(parts.last));
+      }
+      return null;
+    });
+    addTearDown(() => TestDefaultBinaryMessengerBinding
+        .instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(kanal, null));
+
+    final folder = await Directory.systemTemp.createTemp('lifeos-sync-test-');
+    addTearDown(() => folder.delete(recursive: true));
+    final berkas = File('${folder.path}/sinkron.json');
+    await a.into(a.tagihan).insert(TagihanCompanion.insert(
+      nama: 'AUDIT-ONLY-DATA',
+      jatuhTempo: DateTime(2026, 9, 27),
+    ));
+
+    await sa.eksporBerkas(berkas, sandi: 'frasa-uji-aman');
+    final teks = await berkas.readAsString();
+    expect(teks, contains(SinkronSemua.formatBerkasSinkronTerenkripsi));
+    expect(teks, isNot(contains('AUDIT-ONLY-DATA')));
+    expect(await SinkronSemua.berkasSinkronTerenkripsi(berkas), isTrue);
+    await expectLater(sb.imporBerkas(berkas), throwsA(isA<FormatException>()));
+    await expectLater(
+      sb.imporBerkas(berkas, sandi: 'sandi-salah'),
+      throwsA(isA<FormatException>()),
+    );
+    expect(await b.select(b.tagihan).get(), isEmpty);
+
+    await sb.imporBerkas(berkas, sandi: 'frasa-uji-aman');
+    expect((await b.select(b.tagihan).get()).single.nama, 'AUDIT-ONLY-DATA');
+  });
+
+  test('FR-27 impor berkas lama yang rusak rollback seluruh baris', () async {
+    await a.into(a.tagihan).insert(TagihanCompanion.insert(
+      nama: 'BARIS-VALID-SEBELUM-RUSAK',
+      jatuhTempo: DateTime(2026, 9, 27),
+    ));
+    final butirValid = Map<String, dynamic>.from(
+      (await sa.semuaButirLokal()).firstWhere((b) => b['tabel'] == 'tagihan'),
+    );
+    final butirRusak = Map<String, dynamic>.from(butirValid)
+      ..['id_lokal'] = 'audit-invalid-uid';
+    final isiRusak = Map<String, Object?>.from(
+      (butirValid['isi'] as Map).cast<String, Object?>(),
+    )..['kolom_tidak_ada_audit'] = 'x';
+    butirRusak['isi'] = isiRusak;
+    final folder = await Directory.systemTemp.createTemp('lifeos-sync-test-');
+    addTearDown(() => folder.delete(recursive: true));
+    final berkas = File('${folder.path}/lama.json');
+    await berkas.writeAsString(jsonEncode({
+      'versi': 1,
+      'butir': [butirValid, butirRusak],
+    }));
+
+    expect(await SinkronSemua.berkasSinkronTerenkripsi(berkas), isFalse);
+    await expectLater(sb.imporBerkas(berkas), throwsA(isA<FormatException>()));
+    await expectLater(
+      sb.imporBerkas(berkas, izinkanBerkasLamaPolos: true),
+      throwsA(anything),
+    );
+    expect(await b.select(b.tagihan).get(), isEmpty,
+        reason: 'baris pertama tidak boleh tertinggal saat impor gagal');
   });
 
   test('FR-150 versi yang kalah saat bentrok disimpan di server', () async {

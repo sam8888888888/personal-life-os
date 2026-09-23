@@ -23,6 +23,7 @@ import 'dart:math';
 import 'package:drift/drift.dart';
 
 import '../../data/database/database.dart';
+import '../platform/brankas_rahasia.dart';
 import '../../data/repository/pengaturan_repository.dart';
 import '../akun/klien_akun.dart';
 import 'registri_sinkron.dart';
@@ -213,43 +214,116 @@ class SinkronSemua {
     return keluar;
   }
 
-  /// FR-27 — sinkron lewat BERKAS (pilihan Papi: USB, WhatsApp, Drive, dsb.).
-  /// Tidak butuh server sama sekali.
-  Future<int> eksporBerkas(File berkas) async {
+  /// Berkas lintas-perangkat memakai passphrase; jangan menaruh data sensitif
+  /// dalam JSON polos yang dibagikan lewat Drive/WhatsApp/USB.
+  static const String formatBerkasSinkronTerenkripsi = 'plo-sync-terenkripsi';
+  static const int panjangSandiBerkasMinimum = 8;
+
+  /// Kenali format terenkripsi saat ini atau format polos lama (versi 1).
+  static Future<bool> berkasSinkronTerenkripsi(File berkas) async {
+    final data = jsonDecode(await berkas.readAsString());
+    if (data is Map && data['format'] == formatBerkasSinkronTerenkripsi) {
+      return true;
+    }
+    if (data is Map && data['versi'] == 1 && data['butir'] is List) {
+      return false;
+    }
+    throw const FormatException('Berkas sinkron tidak dikenali.');
+  }
+
+  /// FR-27 — ekspor data dalam amplop AES-GCM dengan passphrase pengguna.
+  Future<int> eksporBerkas(File berkas, {required String sandi}) async {
+    if (sandi.length < panjangSandiBerkasMinimum) {
+      throw ArgumentError('Frasa sandi minimal 8 karakter.');
+    }
     final butir = await semuaButirLokal();
     final isi = jsonEncode(<String, dynamic>{
       'versi': 1,
       'dibuat': DateTime.now().toUtc().toIso8601String(),
       'butir': butir,
     });
-    await berkas.writeAsString(isi, flush: true);
+    final amplop = await enkripsiDenganSandi(teks: isi, sandi: sandi);
+    if (amplop == null) {
+      throw StateError('Perangkat gagal mengenkripsi berkas sinkron.');
+    }
+    await berkas.writeAsString(
+      jsonEncode(<String, dynamic>{
+        'format': formatBerkasSinkronTerenkripsi,
+        'versi': 1,
+        'amplop': amplop,
+      }),
+      flush: true,
+    );
     return butir.length;
   }
 
-  /// Memasukkan isi berkas sinkron ke HP ini. Kaitan antar tabel tetap dipetakan
-  /// ke id lokal (lewat uid), jadi tidak ada baris yang salah induk.
-  Future<int> imporBerkas(File berkas) async {
-    final mentah = await berkas.readAsString();
-    final data = jsonDecode(mentah);
-    if (data is! Map || data['butir'] is! List) {
+  /// Impor atomik: semua baris diterapkan atau seluruh perubahan dibatalkan.
+  /// Berkas versi lama polos hanya diterima bila pemanggil sudah memberi
+  /// peringatan dan memperoleh persetujuan pengguna.
+  Future<int> imporBerkas(
+    File berkas, {
+    String? sandi,
+    bool izinkanBerkasLamaPolos = false,
+  }) async {
+    final dibaca = jsonDecode(await berkas.readAsString());
+    if (dibaca is! Map) {
       throw const FormatException('Berkas sinkron tidak dikenali.');
     }
-    var masuk = 0;
-    for (final b in (data['butir'] as List)) {
-      final butir = (b as Map).cast<String, dynamic>();
-      final nama = _teks(butir['tabel']);
-      final uid = _teks(butir['id_lokal']);
-      if (nama == null || uid == null) continue;
-      final j = _cari(nama);
-      if (j == null) continue;
-      final isiMasuk = (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
-      if (j.saring != null && !j.saring!(isiMasuk)) continue;
-      butir['dihapus'] = butir['dihapus'] == true;
-      await _terapkan(j, uid, butir);
-      masuk++;
+
+    Map<String, dynamic> data;
+    if (dibaca['format'] == formatBerkasSinkronTerenkripsi) {
+      if (sandi == null || sandi.isEmpty) {
+        throw const FormatException('Masukkan frasa sandi berkas sinkron.');
+      }
+      final teks = await dekripsiDenganSandi(
+        amplop: _teks(dibaca['amplop']) ?? '',
+        sandi: sandi,
+      );
+      if (teks == null) {
+        throw const FormatException('Sandi salah atau berkas rusak.');
+      }
+      final isi = jsonDecode(teks);
+      if (isi is! Map || isi['butir'] is! List) {
+        throw const FormatException('Isi berkas sinkron tidak dikenali.');
+      }
+      data = isi.cast<String, dynamic>();
+    } else if (dibaca['versi'] == 1 && dibaca['butir'] is List) {
+      if (!izinkanBerkasLamaPolos) {
+        throw const FormatException(
+          'Berkas lama tidak terenkripsi; persetujuan eksplisit diperlukan.',
+        );
+      }
+      data = dibaca.cast<String, dynamic>();
+    } else {
+      throw const FormatException('Berkas sinkron tidak dikenali.');
     }
-    await _pulihkanTautan();
-    return masuk;
+
+    final butirMasuk = data['butir'];
+    if (butirMasuk is! List) {
+      throw const FormatException('Daftar isi berkas sinkron tidak sah.');
+    }
+    return db.transaction(() async {
+      var masuk = 0;
+      for (final b in butirMasuk) {
+        if (b is! Map) {
+          throw const FormatException('Baris berkas sinkron tidak sah.');
+        }
+        final butir = b.cast<String, dynamic>();
+        final nama = _teks(butir['tabel']);
+        final uid = _teks(butir['id_lokal']);
+        if (nama == null || uid == null) continue;
+        final j = _cari(nama);
+        if (j == null) continue;
+        final isiMasuk =
+            (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
+        if (j.saring != null && !j.saring!(isiMasuk)) continue;
+        butir['dihapus'] = butir['dihapus'] == true;
+        await _terapkan(j, uid, butir);
+        masuk++;
+      }
+      await _pulihkanTautan();
+      return masuk;
+    });
   }
 
   // ── baca & sidik ──────────────────────────────────────────────────────────
