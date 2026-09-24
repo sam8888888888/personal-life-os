@@ -357,9 +357,9 @@ penjalanan terakhir gelombang ini.
 | Tempat | Isi | Catatan |
 |---|---|---|
 | GitHub `sam8888888888/personal-life-os` (publik) | rilis kode v1.14.1+18 = commit `96b5699`; commit dokumen & uji menyusul sesudahnya (`ed6ddf5`) | naik dari `9ae0f16` (v1.9.2) lewat `cc3a771` → `e24592b` → `3e4ae26` → `60d772f` → `0e0b6a8` → `e320ab9` → `ac5d50c` → `d8daa72` (v1.14.0+17) → `96b5699` |
-| Arsip sumber `lifeos-src-v1.14.1-build18_20260924_131847.tar.gz` (13,8 MB) | pohon kerja penuh v1.14.1+18, diambil pada commit `ed6ddf5` | SHA-256 `aa727f501179278e40b1daa517211d22d86adc961f2a3df8162918887f207a16` |
-| Bundel git `lifeos-main-ed6ddf5_20260924_131847.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `1d0814776b41822228f9133b0554011679cf38f3f7aab0e83a72209610b25560`; diuji bisa dipulihkan dengan `git clone` (612 berkas, commit `ed6ddf5`) |
-| Arsip berkas di luar git `untracked-20260924_130302.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
+| Arsip sumber `lifeos-src-v1.14.1-build18_20260924_142455.tar.gz` (12,1 MB) | pohon kerja penuh v1.14.1+18 (termasuk perbaikan kerapian 24 Sep) | SHA-256 `2fb3064ecacc01ee6508a93c8e76675dbcc58ff6054b6342c347bf109001d55b` |
+| Bundel git `lifeos-main-72ecde2_20260924_142455.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `f55992ed6c3a64e3c341552194bef680b7a479fb364ef7dff7dcba288243c6bc`; diuji bisa dipulihkan dengan `git clone` (613 berkas, commit `72ecde2`) |
+| Arsip berkas di luar git `lifeos-untracked-20260924_142455.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
 | APK `personal-life-os-v1.14.1-build18.apk` (65.684.711 byte) | rilis perbaikan 24 Sep 2026 | SHA-256 `9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`, sertifikat sama dengan versi sebelumnya |
 
 **Arsip sumber** disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
@@ -373,10 +373,13 @@ set gelombang 3 tetap tersimpan sebagai riwayat di OVH & Austria):
 
 | Salinan | Arsip sumber | Bundel git |
 |---|---|---|
-| OVH `/opt/data/lifeos/backups/` | ada (`aa727f50…7a16`) | ada (`1d081477…5560`) |
+| OVH `/opt/data/lifeos/backups/` | ada (`2fb3064e…d55b`) | ada (`f55992ed…c6bc`) |
 | Austria `/opt/aaron-tools/lifeos-backups/` | ada (`sha256sum -c` **OK**) | ada (`sha256sum -c` **OK**) |
 | Contabo `/home/aaron/lifeos-backups/` | set lama (v1.13.0+16) | tidak dikirim (jalur lambat) |
-| GitHub `sam8888888888/personal-life-os` | — | seluruh riwayat (rilis kode `96b5699`) |
+| GitHub `sam8888888888/personal-life-os` | — | seluruh riwayat |
+
+Cadangan dibuat ulang tiap rilis/perubahan; angka di tabel ini berlaku untuk set
+**24 Sep 2026 (v1.14.1+18)** dan ketiganya sudah diuji `sha256sum -c` di Austria.
 
 Satu berkas **tidak** bisa ikut ke GitHub: `.github/workflows/ci.yml` (gerbang
 analisis & uji otomatis). Kredensial yang dipakai untuk push tidak punya izin
