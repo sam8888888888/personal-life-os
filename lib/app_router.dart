@@ -421,14 +421,14 @@ GoRouter buatRouter({String awal = '/'}) => GoRouter(
             path: 'perawatan', builder: (c, s) => const PerawatanScreen()),
         // FR-82 — puncak rantai rencana.
         GoRoute(path: 'visi', builder: (c, s) => const VisiScreen()),
-      GoRoute(path: '/akun', builder: (c, s) => const AkunScreen()),
-      GoRoute(path: '/peta-fitur', builder: (c, s) => const PetaFiturScreen()),
-      GoRoute(
-        path: '/akun/masuk',
-        builder: (c, s) =>
-            MasukScreen(mulaiDaftar: s.uri.queryParameters['daftar'] == '1'),
-      ),
       ],
+    ),
+    GoRoute(path: '/akun', builder: (c, s) => const AkunScreen()),
+    GoRoute(path: '/peta-fitur', builder: (c, s) => const PetaFiturScreen()),
+    GoRoute(
+      path: '/akun/masuk',
+      builder: (c, s) =>
+          MasukScreen(mulaiDaftar: s.uri.queryParameters['daftar'] == '1'),
     ),
     // ── Batch 7: ritme hidup (FR-132/140/141/144/145) ───────────────────────
     // FR-132 — kalender keluarga (agenda semua anggota, warna per anggota).

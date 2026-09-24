@@ -196,7 +196,9 @@ class _OrangScreenState extends ConsumerState<OrangScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
                     children: <Widget>[
                       OutlinedButton.icon(
                         key: const Key('orang_ultah'),
@@ -206,7 +208,6 @@ class _OrangScreenState extends ConsumerState<OrangScreen> {
                             ? 'Ulang tahun (boleh kosong)'
                             : fmtTanggalAman(_ulangTahun!)),
                       ),
-                      const SizedBox(width: 8),
                       FilledButton.icon(
                         key: const Key('orang_simpan'),
                         onPressed: _simpan,

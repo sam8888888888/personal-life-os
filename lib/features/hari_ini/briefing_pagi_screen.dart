@@ -112,9 +112,11 @@ class _BriefingPagiScreenState extends ConsumerState<BriefingPagiScreen> {
             ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
-        children: [
+      body: Scrollbar(
+        thumbVisibility: true,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 112),
+          children: [
           Text(isi.sapaan, style: tema.textTheme.titleMedium),
           Text(
             '${fmtTanggalSingkatAman(isi.tanggal)} · ${isi.hijriah}',
@@ -184,6 +186,7 @@ class _BriefingPagiScreenState extends ConsumerState<BriefingPagiScreen> {
             ],
           ),
         ],
+        ),
       ),
     );
   }
