@@ -338,11 +338,10 @@ Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
 * **Penegakan relasi antar-tabel tetap dimatikan** (tidak ada `REFERENCES`), sesuai
   keputusan dokumen: ditunda ke v20.
 * **Gelombang 2 (lima tabel kesehatan) sudah selesai** — lihat bagian 17.
-  **Gelombang 3** (tabel orang + mesin pola) belum dimulai.
-* APK yang berlaku sekarang adalah **v1.12.0-build15** (gelombang 2) — lihat bagian 17.
-  APK gelombang 1 (`personal-life-os-v1.11.0-build14.apk`, 94.733.766 byte,
-  SHA-256 `b2a86100…4508`) sudah digantikan; keduanya masih bisa diunduh dari
-  `aaron.my.id/unduh/`.
+  **Gelombang 3** (orang + mesin pola) juga sudah selesai — lihat bagian 18.
+* APK yang berlaku sekarang adalah **v1.14.1-build18** (perbaikan 24 Sep 2026) — lihat bagian 19.
+  APK versi lama (`v1.13.0-build16`, `v1.12.0-build15`, `v1.11.0-build14`) sudah digantikan;
+  semuanya masih bisa diunduh dari `aaron.my.id/unduh/`.
   **Catatan jalur unduh:** pakai `https://aaron.my.id/unduh/personal-life-os-<versi>.apk`.
   Jalur `coder.sam.university/apk/...` tetap hidup sebagai cadangan, tetapi di HP Papi
   tautan itu membuka **aplikasi Coder** (app-link), bukan mengunduh berkas — jadi
@@ -357,10 +356,11 @@ penjalanan terakhir gelombang ini.
 
 | Tempat | Isi | Catatan |
 |---|---|---|
-| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `ac5d50c` (kode v1.13.0+16, gelombang 3) | naik dari `9ae0f16` (v1.9.2) lewat `cc3a771` → `e24592b` → `3e4ae26` → `60d772f` → `0e0b6a8` → `e320ab9` → `ac5d50c` |
-| Arsip sumber `lifeos-src-v1.13.0-build16_20260923_172241.tar.gz` (16 MB) | pohon kerja penuh v1.13.0+16 | SHA-256 tercatat di `SHA256_20260923_172241.txt` |
-| Bundel git `lifeos-git-ac5d50c_20260923_172241.bundle` (34 MB) | riwayat git penuh | diuji bisa dipulihkan dengan `git clone` |
-| APK `personal-life-os-v1.13.0-build16.apk` (95.438.278 byte) | rilis gelombang 3 | SHA-256 `749fadd1…980e`, sertifikat sama dengan versi sebelumnya |
+| GitHub `sam8888888888/personal-life-os` (publik) | `main` = `96b5699` (kode v1.14.1+18, perbaikan 24 Sep 2026) | naik dari `9ae0f16` (v1.9.2) lewat `cc3a771` → `e24592b` → `3e4ae26` → `60d772f` → `0e0b6a8` → `e320ab9` → `ac5d50c` → `d8daa72` (v1.14.0+17) → `96b5699` |
+| Arsip sumber `lifeos-src-v1.14.1-build18_20260924_111128.tar.gz` (13,8 MB) | pohon kerja penuh v1.14.1+18 | SHA-256 `d77069926fd536cebac60294d98a6e7c216643af4334b3a6f09dccb5177b8797` |
+| Bundel git `lifeos-main-96b5699_20260924_111128.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `bf8b68b39659eeaca5e1c659cea709e0982f75549ed84d4e1a44a7408fa7a2df`; diuji bisa dipulihkan dengan `git clone` (611 berkas, commit `96b5699`) |
+| Arsip berkas di luar git `untracked-20260924_130302.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
+| APK `personal-life-os-v1.14.1-build18.apk` (65.684.711 byte) | rilis perbaikan 24 Sep 2026 | SHA-256 `9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`, sertifikat sama dengan versi sebelumnya |
 
 **Arsip sumber** disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
 `/opt/aaron-tools/lifeos-backups/` (Austria), `/home/aaron/lifeos-backups/` (Contabo).
@@ -368,14 +368,15 @@ penjalanan terakhir gelombang ini.
 ±1,3 MB/menit, jadi yang dikirim ke sana arsip sumbernya saja — riwayat penuh tetap
 aman di GitHub, OVH, dan Austria).
 Berkas `SHA256_*.txt` ikut disalin, jadi keutuhan tiap salinan bisa diperiksa ulang
-dengan `sha256sum -c`. Sidik jari set berlaku:
+dengan `sha256sum -c`. Sidik jari set berlaku (set rilis **24 Sep 2026 · v1.14.1+18**;
+set gelombang 3 tetap tersimpan sebagai riwayat di OVH & Austria):
 
 | Salinan | Arsip sumber | Bundel git |
 |---|---|---|
-| OVH `/opt/data/lifeos/backups/` | ada | ada |
+| OVH `/opt/data/lifeos/backups/` | ada (`d7706992…b8797`) | ada (`bf8b68b3…a2df`) |
 | Austria `/opt/aaron-tools/lifeos-backups/` | ada (`sha256sum -c` **OK**) | ada (`sha256sum -c` **OK**) |
-| Contabo `/home/aaron/lifeos-backups/` | ada (`sha256sum` **sama**: `89a89d33…9031`) | tidak dikirim (jalur lambat) |
-| GitHub `sam8888888888/personal-life-os` | — | seluruh riwayat (`main` = `0e0b6a8`) |
+| Contabo `/home/aaron/lifeos-backups/` | set lama (v1.13.0+16) | tidak dikirim (jalur lambat) |
+| GitHub `sam8888888888/personal-life-os` | — | seluruh riwayat (`main` = `96b5699`) |
 
 Satu berkas **tidak** bisa ikut ke GitHub: `.github/workflows/ci.yml` (gerbang
 analisis & uji otomatis). Kredensial yang dipakai untuk push tidak punya izin
@@ -521,4 +522,49 @@ sebelumnya, jadi bisa dipasang sebagai pembaruan tanpa menghapus data.
 Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.13.0-build16.apk`**
 (satu-satunya jalur resmi; `coder.sam.university/apk/...` hanya cadangan server).
 Basis data di HP naik otomatis **20 → 21** saat aplikasi pertama dibuka.
+
+## 19 · Rilis desain + perbaikan laporan pengguna — v1.14.1 build 18 (24 Sep 2026)
+
+Dua rilis berurutan di atas gelombang 3:
+
+* **v1.14.0 build 17** (commit `d8daa72`) — rilis desain "Editorial Modern": latar seperti
+  kertas, arang lembut untuk mode gelap, satu aksen hijau sage, kartu tanpa bayangan +
+  garis tipis, hierarki "fokus dulu, detail menyusul" (`lib/core/theme/app_tema.dart`,
+  komponen bersama `lib/core/theme/editorial.dart`).
+* **v1.14.1 build 18** (commit `96b5699`) — perbaikan tujuh temuan dari uji di HP.
+  Tidak ada perubahan skema basis data, jadi data di HP tidak disentuh.
+
+Tujuh temuan pengguna, sebabnya, dan buktinya:
+
+| Temuan | Sebab nyata | Perbaikan | Bukti |
+|---|---|---|---|
+| 1. "Semua Fitur" dibuka → layar kosong | Rute `/peta-fitur` salah tempat: berada di dalam blok rute bersarang sehingga tidak pernah terdaftar sebagai rute akar | Dipindah ke tingkat akar bersama `/akun` | `test/v3_regresi_menu_tampilan_test.dart`, `test/v3_regresi_jalur_menu_test.dart` |
+| 2. "Catat Cepat" tidak bisa menyimpan | Basis data **tidak** rusak; yang salah adalah tata letak: tombol Simpan terdorong keluar layar pada lebar HP | Tombol disusun ulang (bukan lagi satu baris kaku) sehingga selalu terlihat & bisa ditekan | `test/v3_regresi_jalur_menu_test.dart` (mengetuk tombol → baris benar-benar masuk SQLite) |
+| 3. "Catatan Harian" sama | Idem, satu jalur dengan Catat Cepat | Terselesaikan bersama perbaikan di atas | `test/v3_regresi_jalur_menu_test.dart` (tulisan pengguna tersimpan) |
+| 4. "Orang & Kontak" → galat SQL | Bukan galat SQL: `Wrap` vs `Row` tombol ulang tahun + Simpan meluber 276 piksel pada lebar 360 px | `Row` → `Wrap` + spasi | `test/v3_regresi_orang_layar_test.dart` (layar 360×600, kontak tersimpan) |
+| 5. Ketebalan kotak menu tidak sama | Subjudul dua baris membuat tinggi baris menu berbeda-beda | Subjudul dibatasi satu baris (`_MenuSubtitle`) | uji tinggi tile menu yang harus sama di `test/v3_regresi_menu_tampilan_test.dart` |
+| 6. "Akun & Sinkron" kosong | Rute `/akun` dan `/akun/masuk` berada di dalam blok bersarang | Dipindah ke tingkat akar | `test/v3_regresi_jalur_menu_test.dart` |
+| 7. "Ringkasan pagi" dan layar lain terpotong | Isi layar tidak dapat digulir + tidak ada ruang bawah untuk bilah navigasi | `Scrollbar` + `ListView` dengan ruang bawah 112 px | `test/v3_regresi_menu_tampilan_test.dart` (layar 360×600, tanpa luapan) |
+
+Jujur soal batasnya: laporan pengguna menyebut "galat SQL", tetapi **tidak ada jejak galat
+SQLite** yang bisa direproduksi di sini — seluruh jalur simpan (kotak masuk, catatan harian,
+orang) lolos di basis data nyata, termasuk migrasi v2 → v21. Karena itu **jangan hapus data
+aplikasi** kalau masih muncul galat: kirimkan teks galatnya supaya bisa ditelusuri.
+
+Angka uji rilis ini: `flutter analyze` **bersih** · suite penuh **1.484 lulus / 1 dilewati /
+0 gagal** (67 detik). Sebelumnya, gelombang 3 mencatat 6 kegagalan uji peka tanggal; pada
+rilis ini angkanya **nol gagal**.
+
+### APK rilis perbaikan
+
+`personal-life-os-v1.14.1-build18.apk` — **universal** (arm64-v8a + armeabi-v7a + x86_64),
+**65.684.711 byte**, `versionCode 18`, `versionName 1.14.1`,
+SHA-256 **`9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`**.
+Tanda tangan v2 **dan** v3 terverifikasi, sertifikat SHA-256 `7a56a135…506b` — sama dengan
+rilis sebelumnya, jadi bisa dipasang sebagai pembaruan tanpa menghapus data.
+Izin `READ_SMS` **tidak ada** (diperiksa dengan `aapt2 dump permissions`).
+
+Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.14.1-build18.apk`**
+(diuji: HTTP 200, `content-type: application/octet-stream`, berkas 65.684.711 byte, dan
+SHA-256 hasil unduhan **sama** dengan berkas rilis).
 
