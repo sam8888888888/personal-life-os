@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/uang_utils.dart';
+import '../../core/theme/editorial.dart';
 import '../../widgets/kartu_tagihan.dart';
 
 class RingkasanScreen extends ConsumerWidget {
@@ -44,7 +45,9 @@ class RingkasanScreen extends ConsumerWidget {
             ..sort((a, b) => a.jatuhTempo.compareTo(b.jatuhTempo));
 
           return ListView(
-            padding: const EdgeInsets.only(bottom: 24),
+            // ponytail: sisa 96 di bawah supaya kartu terakhir tidak tertutup
+            // tombol tambah (FAB) — sama seperti layar Hari Ini & Kesehatan.
+            padding: const EdgeInsets.only(bottom: 96),
             children: [
               _kartuUangTersisa(context, skema, masuk, totalBelumBayar, sisa),
               Padding(
@@ -66,7 +69,7 @@ class RingkasanScreen extends ConsumerWidget {
               _barisInfo(context, 'Total tagihan bulan ini', fmtRpDariSen(totalBulanIni)),
               _barisInfo(context, 'Sudah dibayar',
                   fmtRpDariSen(dataBulan?.dibayarSen ?? 0),
-                  warna: const Color(0xFF2E7D32)),
+                  warna: WarnaEditorial.dari(context).positif),
               if ((dataBulan?.dibayarSen ?? 0) > 0)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 2, 16, 6),
@@ -78,7 +81,7 @@ class RingkasanScreen extends ConsumerWidget {
                 ),
               _barisInfo(context, 'Belum dibayar ($jumlahBelum tagihan)',
                   fmtRpDariSen(totalBelumBayar),
-                  warna: const Color(0xFFC62828)),
+                  warna: WarnaEditorial.dari(context).urgensi),
               const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -115,33 +118,53 @@ class RingkasanScreen extends ConsumerWidget {
   Widget _kartuUangTersisa(BuildContext c, ColorScheme skema, int masuk,
       int belumBayar, int sisa) {
     final positif = sisa >= 0;
+    final tema = Theme.of(c);
+    final diDepan = positif ? skema.onPrimaryContainer : skema.onErrorContainer;
+    final warnaBar = positif ? skema.primary : skema.error;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: positif
-              ? [skema.primary, skema.primary.withValues(alpha: 0.78)]
-              : [const Color(0xFFC62828), const Color(0xFF8E1F1F)],
-        ),
+        color: positif ? skema.primaryContainer : skema.errorContainer,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: skema.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(positif ? 'Uang tersisa bulan ini' : 'Uang bulan ini kurang',
-              style: const TextStyle(color: Colors.white70, fontSize: 13)),
-          const SizedBox(height: 6),
-          Text(fmtRp(sisa / 100),
-              style: const TextStyle(
-                  color: Colors.white, fontSize: 28, fontWeight: FontWeight.w700)),
+              style: tema.textTheme.labelMedium
+                  ?.copyWith(color: diDepan.withValues(alpha: 0.85))),
+          const SizedBox(height: 8),
+          Text(
+            fmtRp(sisa / 100),
+            style: tema.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: diDepan,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
           const SizedBox(height: 10),
           Text(
             masuk == 0
                 ? 'Isi pemasukan bulan ini di menu Pengaturan agar hitungannya akurat.'
                 : 'Pemasukan ${fmtRpDariSen(masuk)} − tagihan belum dibayar ${fmtRpDariSen(belumBayar)}',
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: tema.textTheme.bodySmall?.copyWith(
+              color: diDepan.withValues(alpha: 0.82),
+            ),
           ),
+          if (masuk > 0) ...[
+            const SizedBox(height: 14),
+            BilahProgres(belumBayar / masuk, warna: warnaBar, tinggi: 6),
+            const SizedBox(height: 7),
+            Text(
+              '${((belumBayar / masuk) * 100).round()}% pemasukan bulan ini '
+              'masih tersambung ke tagihan yang belum dibayar',
+              style: tema.textTheme.bodySmall?.copyWith(
+                color: diDepan.withValues(alpha: 0.82),
+              ),
+            ),
+          ],
         ],
       ),
     );

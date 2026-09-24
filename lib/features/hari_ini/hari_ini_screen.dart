@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/audit/audit_log.dart';
+import '../../core/theme/editorial.dart';
 import '../../core/hari_ini/hari_berat.dart';
 import '../../core/hari_ini/model_hari_ini.dart';
 import '../../core/hari_ini/penyusun_hari_ini.dart';
@@ -199,6 +200,8 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
             nama: widget.namaPanggilan,
             tanggal: _sekarang,
             hijriah: hijri?.label ?? 'Belum ada data Hijriah',
+            jumlahPerhatian: ringkas.perhatian.length,
+            jumlahAgenda: ringkas.jumlahAgenda,
           ),
           const SizedBox(height: 12),
           if (_sekarang.hour < 12) ...[
@@ -275,11 +278,29 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
 }
 
 class _Kepala extends StatelessWidget {
-  const _Kepala({required this.nama, required this.tanggal, required this.hijriah});
+  const _Kepala({
+    required this.nama,
+    required this.tanggal,
+    required this.hijriah,
+    this.jumlahPerhatian = 0,
+    this.jumlahAgenda = 0,
+  });
 
   final String nama;
   final DateTime tanggal;
   final String hijriah;
+  final int jumlahPerhatian;
+  final int jumlahAgenda;
+
+  /// Satu kalimat yang menjawab "hari ini saya harus lihat apa?" sebelum
+  /// pengguna menggulir. Hanya menghitung butir yang sudah disusun layar ini.
+  String get _kalimatUtama => jumlahPerhatian > 0
+      ? 'Ada $jumlahPerhatian hal yang perlu diperhatikan'
+      : 'Tidak ada yang mendesak hari ini';
+
+  String get _kalimatAgenda => jumlahAgenda > 0
+      ? '$jumlahAgenda acara hari ini'
+      : 'Belum ada acara terjadwal';
 
   @override
   Widget build(BuildContext context) {
@@ -287,12 +308,36 @@ class _Kepala extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Assalamualaikum, $nama', style: tema.textTheme.titleMedium),
-        const SizedBox(height: 2),
-        Text(fmtTanggalAman(tanggal), style: tema.textTheme.bodyMedium),
-        Text(
-          '$hijriah · perhitungan, bukan penetapan resmi',
-          style: tema.textTheme.bodySmall?.copyWith(color: tema.colorScheme.outline),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Assalamualaikum, $nama',
+                  style: tema.textTheme.headlineSmall),
+              const SizedBox(height: 6),
+              Text(
+                fmtTanggalAman(tanggal),
+                style: tema.textTheme.titleSmall
+                    ?.copyWith(color: tema.colorScheme.onSurfaceVariant),
+              ),
+              Text(
+                '$hijriah · perhitungan, bukan penetapan resmi',
+                style: tema.textTheme.bodySmall,
+              ),
+              const SizedBox(height: 14),
+            ],
+          ),
+        ),
+        KartuUtama(
+          label: 'Hari ini',
+          judul: _kalimatUtama,
+          anak: Text(
+            _kalimatAgenda,
+            style: tema.textTheme.bodySmall?.copyWith(
+              color: tema.colorScheme.onPrimaryContainer.withValues(alpha: 0.82),
+            ),
+          ),
         ),
       ],
     );
@@ -323,10 +368,17 @@ class _JudulBlok extends StatelessWidget {
   final String teks;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(teks, style: Theme.of(context).textTheme.titleSmall),
-      );
+  Widget build(BuildContext context) {
+    final tema = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 10, 4, 8),
+      child: Text(
+        teks,
+        style: tema.textTheme.labelSmall
+            ?.copyWith(color: tema.colorScheme.onSurfaceVariant),
+      ),
+    );
+  }
 }
 
 class _Kosong extends StatelessWidget {
@@ -349,31 +401,51 @@ class _Kosong extends StatelessWidget {
   }
 }
 
-/// Dua kolom, tinggi mengikuti isi (Wrap dipilih agar tidak ada pemotongan).
+/// Dua kolom, tinggi baris disamakan supaya sisi kiri & kanan rata.
+///
+/// Sebelumnya memakai Wrap: tinggi kartu mengikuti isi masing-masing sehingga
+/// baris tampak bergerigi. Sekarang tiap pasangan dibungkus IntrinsicHeight.
 class _GridPilar extends StatelessWidget {
   const _GridPilar({required this.pilar, required this.onTap});
+
+  static const _jarak = 8.0;
 
   final List<NilaiPilar> pilar;
   final void Function(NilaiPilar) onTap;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, kendala) {
-          const jarak = 8.0;
-          final lebar = (kendala.maxWidth - jarak) / 2;
-          return Wrap(
-            spacing: jarak,
-            runSpacing: jarak,
-            children: [
-              for (final p in pilar)
-                SizedBox(
-                  width: lebar,
-                  child: KartuPilar(nilai: p, onTap: () => onTap(p)),
+  Widget build(BuildContext context) {
+    final baris = <Widget>[];
+    for (var i = 0; i < pilar.length; i += 2) {
+      final kiri = pilar[i];
+      final kanan = i + 1 < pilar.length ? pilar[i + 1] : null;
+      baris.add(
+        Padding(
+          padding: EdgeInsets.only(bottom: i + 2 < pilar.length ? _jarak : 0),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: KartuPilar(nilai: kiri, onTap: () => onTap(kiri)),
                 ),
-            ],
-          );
-        },
+                const SizedBox(width: _jarak),
+                Expanded(
+                  child: kanan == null
+                      ? const SizedBox.shrink()
+                      : KartuPilar(nilai: kanan, onTap: () => onTap(kanan)),
+                ),
+              ],
+            ),
+          ),
+        ),
       );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: baris,
+    );
+  }
 }
 
 class _BarisAgenda extends StatelessWidget {

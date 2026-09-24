@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/theme/app_tema.dart';
+import '../../core/theme/editorial.dart';
 import '../../core/utils/waktu.dart';
 import '../../data/database/database.dart';
 import '../../data/repository/kesehatan_repository.dart';
@@ -112,6 +112,17 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
                       ),
                     ),
                   ),
+                KartuUtama(
+                  label: 'Hari ini',
+                  judul: _kalimatRingkas(),
+                  anak: _anakRingkas(),
+                ),
+                const SizedBox(height: 18),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(2, 0, 2, 8),
+                  child: Text('Angka terakhir',
+                      style: tema.textTheme.labelSmall),
+                ),
                 _kartu(
                   kunci: 'kartu_berat',
                   ikon: Icons.monitor_weight_outlined,
@@ -378,6 +389,45 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
     );
   }
 
+  /// Berapa dari enam angka terpantau yang punya catatan terbaru. Dipakai
+  /// sebagai kalimat pembuka supaya pengguna tahu keadaan sebelum menggulir.
+  static const _jumlahBagian = 6;
+
+  String _kalimatRingkas() {
+    var ada = 0;
+    if (_berat != null) ada++;
+    if (_tekanan != null) ada++;
+    if (_aktivitas?.adaCatatan ?? false) ada++;
+    if (_tidur?.rataRata7HariMenit != null) ada++;
+    if (_air?.adaCatatan ?? false) ada++;
+    if (_obat?.adaJadwal ?? false) ada++;
+    if (ada == 0) {
+      return 'Belum ada catatan yang bisa diringkas';
+    }
+    return '$ada dari $_jumlahBagian angka terpantau sudah punya catatan terbaru';
+  }
+
+  /// Bilah air hari ini — hanya muncul kalau target air memang diisi.
+  Widget? _anakRingkas() {
+    final air = _air;
+    if (air == null || !air.adaCatatan || air.targetMl <= 0) return null;
+    final tema = Theme.of(context);
+    final rasio = air.totalMl / air.targetMl;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BilahProgres(rasio, tinggi: 6),
+        const SizedBox(height: 7),
+        Text(
+          '${(rasio * 100).round()}% target air hari ini',
+          style: tema.textTheme.bodySmall?.copyWith(
+            color: tema.colorScheme.onPrimaryContainer.withValues(alpha: 0.82),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _kartu({
     required String kunci,
     required IconData ikon,
@@ -386,27 +436,31 @@ class _KesehatanHubScreenState extends ConsumerState<KesehatanHubScreen> {
     Widget? tambahan,
   }) {
     final tema = Theme.of(context);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: KartuEditorial(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(ikon, size: 20, color: AppTema.seed),
+                Icon(ikon, size: 20, color: tema.colorScheme.primary),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(judul, style: tema.textTheme.titleSmall),
+                  child: Text(
+                    judul,
+                    style: tema.textTheme.labelMedium
+                        ?.copyWith(color: tema.colorScheme.onSurfaceVariant),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               isi,
               key: Key(kunci),
-              style: tema.textTheme.bodyLarge,
+              style: tema.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
             ),
             ?tambahan,
           ],

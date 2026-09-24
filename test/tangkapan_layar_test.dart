@@ -428,6 +428,10 @@ void main() {
   testWidgets('tangkapan layar tab lainnya',
       (t) => potret(t, 'lainnya', '/lainnya', prefiks: 'f5'),
       skip: !_fontTersedia);
+  // FR-101: dasbor kesehatan — kalimat pembuka, angka terakhir, pintu pencatat.
+  testWidgets('tangkapan layar tab kesehatan',
+      (t) => potret(t, 'kesehatan', '/kesehatan', prefiks: 'f6'),
+      skip: !_fontTersedia);
   // Ringkasan pagi memuat hitung mundur waktu sholat, jadi jamnya DIPATOK;
   // kalau memakai rute biasa isinya berubah setiap menit dan uji emas gagal.
   Future<void> potretBriefing(WidgetTester tester, String nama) async {
