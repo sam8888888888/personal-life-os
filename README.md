@@ -54,7 +54,8 @@ flutter test test/tangkapan_layar_test.dart --update-goldens
 - `lib/features/` — layar per fitur: `ringkasan/`, `tagihan/`, `kalender/`, `pengaturan/`, `pengingat/`
 - `lib/widgets/` — widget bersama (kartu tagihan)
 - `lib/app_router.dart` — rute go_router + navigasi bawah 4 tab
-- `demo/` — tangkapan layar demo (F1, F2)
+- `demo/` — tangkapan layar untuk README: salinan otomatis dari `test/goldens/`
+  (diperbarui sendiri setiap `flutter test test/tangkapan_layar_test.dart --update-goldens`)
 - `test/` — uji unit + uji UI + pembuat tangkapan layar
 
 ## Aturan emas

@@ -40,6 +40,37 @@ linter:
     unawaited_futures: true
     cancel_subscriptions: true
     close_sinks: true
+    #
+    # ── Lanjutan P3-8 (24 Sep 2026) — diuji dulu, baru dinyalakan ────────
+    # 28 aturan kandidat dicoba sekaligus di kode yang sekarang: 19 aturan
+    # TIDAK menemukan satu pun temuan → langsung dipakai sebagai gerbang mutu,
+    # tanpa menyentuh satu baris kode pun. Sembilan sisanya sengaja BELUM
+    # dinyalakan karena menuntut perubahan besar-besaran pada kode yang sudah
+    # terbukti jalan (jumlah temuan saat diuji: directives_ordering 164,
+    # prefer_const_constructors 76, unnecessary_lambdas 29, prefer_single_quotes 27,
+    # avoid_slow_async_io 16, prefer_final_locals 9, prefer_const_declarations 7,
+    # sort_constructors_first 6, prefer_const_literals_to_create_immutables 4).
+    # Menyalakannya sekarang = riwayat perubahan raksasa tanpa manfaat bagi
+    # pengguna; dikerjakan bertahap bila memang dibutuhkan.
+    always_declare_return_types: true
+    avoid_empty_else: true
+    avoid_function_literals_in_foreach_calls: true
+    avoid_print: true
+    avoid_relative_lib_imports: true
+    avoid_unnecessary_containers: true
+    no_duplicate_case_values: true
+    prefer_is_empty: true
+    prefer_typing_uninitialized_variables: true
+    require_trailing_commas: true
+    sized_box_for_whitespace: true
+    test_types_in_equals: true
+    throw_in_finally: true
+    unnecessary_brace_in_string_interps: true
+    unnecessary_const: true
+    unnecessary_statements: true
+    use_key_in_widget_constructors: true
+    use_string_buffers: true
+    use_super_parameters: true
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

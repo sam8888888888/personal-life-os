@@ -2,7 +2,9 @@
 /// ponsel 420x900 dengan font Roboto asli dari Flutter SDK.
 ///
 /// Jalankan:  flutter test test/tangkapan_layar_test.dart --update-goldens
-/// Hasil PNG muncul di test/goldens/, lalu disalin ke folder demo/.
+/// Hasil PNG muncul di test/goldens/ dan **otomatis disalin** ke folder demo/
+/// pada akhir penjalanan (lihat `tearDownAll`), jadi gambar README tidak bisa
+/// lagi tertinggal dari render terakhir.
 library;
 
 import 'dart:convert';
@@ -112,6 +114,21 @@ void main() {
         .write(const TagihanCompanion(lunas: Value(true)));
     // dikunci lewat variabel global agar dipakai pengujian berikutnya
     _db = db;
+  });
+
+  tearDownAll(() {
+    // P3-9: gambar di folder demo/ (dipakai README) adalah SALINAN potret uji.
+    // Dulu penyalinannya dilakukan manual, jadi 24 dari 28 gambar tertinggal
+    // jauh dari render terakhir. Sekarang penyalinan terjadi sendiri setiap
+    // potret diperbarui (`--update-goldens`), jadi tidak bisa lagi basi.
+    if (!autoUpdateGoldenFiles) return;
+    final Directory sumber = Directory('test/goldens');
+    if (!sumber.existsSync()) return;
+    final Directory tujuan = Directory('demo')..createSync(recursive: true);
+    for (final FileSystemEntity f in sumber.listSync()) {
+      if (f is! File || !f.path.endsWith('.png')) continue;
+      f.copySync('${tujuan.path}/${f.uri.pathSegments.last}');
+    }
   });
 
   tearDown(() async {
