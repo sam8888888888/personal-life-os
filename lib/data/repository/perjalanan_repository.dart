@@ -17,7 +17,7 @@ class PerjalananRepository {
 
   final AppDatabase db;
   final DateTime Function() _jam;
-  static final _acak = Random();
+  static final _acak = Random.secure();
 
   static String _uidBaru() => List<int>.generate(16, (_) => _acak.nextInt(256))
       .map((b) => b.toRadixString(16).padLeft(2, '0'))

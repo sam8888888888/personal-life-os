@@ -318,7 +318,7 @@ class SinkronSemua {
             (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
         if (j.saring != null && !j.saring!(isiMasuk)) continue;
         butir['dihapus'] = butir['dihapus'] == true;
-        await _terapkan(j, uid, butir);
+        await _terapkan(j, uid, butir, dariBerkas: true);
         masuk++;
       }
       await _pulihkanTautan();
@@ -410,17 +410,56 @@ class SinkronSemua {
   }
 
   // ── terapkan perubahan dari server ────────────────────────────────────────
+
+  /// Nama kolom yang benar-benar ada pada sebuah tabel, dibaca dari SKEMA
+  /// Drift — bukan dari data yang masuk. Dipakai sebagai daftar putih sebelum
+  /// nama kolom dari luar dipakai menyusun perintah SQL, supaya nama kolom
+  /// palsu tidak pernah bisa menjadi perintah.
+  final Map<String, Set<String>> _kolomSah = <String, Set<String>>{};
+
+  Set<String> kolomSahTabel(String namaTabel) =>
+      _kolomSah.putIfAbsent(namaTabel, () {
+        for (final TableInfo t in db.allTables) {
+          if (t.actualTableName == namaTabel) {
+            return t.columnsByName.keys.toSet();
+          }
+        }
+        return const <String>{};
+      });
+
+  /// Bentuk nama kolom yang SAH (huruf kecil, angka, garis bawah).
+  static final RegExp _polaNamaKolom = RegExp(r'^[a-z_][a-z0-9_]*$');
+
+  /// [dariBerkas] = true untuk jalur impor berkas sinkron. Di jalur itu berkas
+  /// yang memuat nama kolom tidak dikenal DITOLAK (impor dibatalkan seluruhnya,
+  /// tidak ada data masuk setengah) — sedangkan di jalur server kolom yang tidak
+  /// dikenal cukup dilewati supaya versi aplikasi berbeda tetap bisa sinkron.
   Future<void> _terapkan(
-      JalurSinkron j, String uid, Map<String, dynamic> butir) async {
+      JalurSinkron j, String uid, Map<String, dynamic> butir,
+      {bool dariBerkas = false}) async {
     if (butir['dihapus'] == true) {
       await db.customStatement('DELETE FROM ${j.nama} WHERE ${j.kolomUid.$name} = ?', [uid]);
       await _hapusSidik(j.nama, uid);
       return;
     }
     final isi = (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
+    // KEAMANAN: nama kolom dari luar (server atau berkas sinkron kiriman orang
+    // lain) DIBUANG bila tidak ada di skema tabel ini. Tanpa saringan ini,
+    // nama kolom palsu bisa ikut menjadi perintah SQL (suntikan lewat
+    // pengenal/identifier). Nilai tetap selalu lewat parameter `?`.
+    final sah = kolomSahTabel(j.nama);
     final kolom = <String>[];
     final nilai = <Object?>[];
     for (final e in isi.entries) {
+      if (!sah.contains(e.key)) {
+        if (dariBerkas && _polaNamaKolom.hasMatch(e.key)) {
+          throw FormatException(
+              'Berkas sinkron memuat kolom "${e.key}" yang tidak dikenal pada '
+              'tabel ${j.nama}. Impor dibatalkan supaya tidak ada data yang '
+              'masuk setengah.');
+        }
+        continue;
+      }
       if (e.key == 'uid') continue;
       if (e.key == j.kolomKunci?.$name) continue;
       final induk = j.kaitan[e.key];

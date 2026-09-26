@@ -21,7 +21,7 @@ class TanggungJawabRepository {
   final AppDatabase db;
   final DateTime Function() _jam;
   final PengaturanRepository _pengaturan;
-  static final _acak = Random();
+  static final _acak = Random.secure();
 
   /// Kunci saklar persetujuan di tabel `pengaturan`.
   static const String kunciPersetujuan = 'rumah.izinkan_pengingat';

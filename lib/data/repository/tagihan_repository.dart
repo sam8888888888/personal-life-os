@@ -37,7 +37,7 @@ class TagihanRepository {
   /// Sengaja tidak memakai paket uuid: cukup unik dan tidak bergantung waktu
   /// perangkat yang bisa berbeda antar HP.
   static String uidBaru([Random? acak]) {
-    final r = acak ?? Random();
+    final r = acak ?? Random.secure();
     final bagian = List.generate(4, (_) => r.nextInt(1 << 32).toRadixString(16).padLeft(8, '0'));
     return bagian.join();
   }

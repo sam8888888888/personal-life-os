@@ -20,7 +20,7 @@ class JurnalPerjalananRepository {
 
   final AppDatabase db;
   final DateTime Function() _jam;
-  static final _acak = Random();
+  static final _acak = Random.secure();
 
   /// Kode kategori khusus perjalanan (dibuat sekali, tidak menumpuk).
   static const String kodeKategoriPerjalanan = 'kel_perjalanan';
