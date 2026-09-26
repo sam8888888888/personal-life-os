@@ -22,6 +22,7 @@ import '../../core/audit/audit_log.dart';
 import '../../core/backup/cadangan_otomatis.dart';
 import '../../core/backup/ekspor_impor.dart';
 import '../../data/database/enkripsi_basisdata.dart';
+import '../../data/database/executor_pulih.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../core/utils/waktu.dart';
@@ -492,6 +493,19 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         style: const TextStyle(fontSize: 12),
       ),
       const SizedBox(height: 12),
+      // Temuan pengguna 26 Sep 2026: bila koneksi basis data pernah dipulihkan
+      // otomatis (berkasnya sempat berpindah/hilang di luar aplikasi), itu
+      // dikatakan apa adanya di sini — bukan disembunyikan.
+      if (jumlahPemulihanBasisData > 0 || catatanPemulihanBasisData != null)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Text(
+            'Pemulihan penyimpanan: ${catatanPemulihanBasisData ?? ''} '
+            '(terjadi $jumlahPemulihanBasisData× pada penjalanan ini).',
+            key: const Key('catatan_pemulihan_basisdata'),
+            style: const TextStyle(fontSize: 12),
+          ),
+        ),
       FilledButton.icon(
         key: const Key('ekspor_sekarang'),
         onPressed: _sibuk ? null : _eksporSekarang,

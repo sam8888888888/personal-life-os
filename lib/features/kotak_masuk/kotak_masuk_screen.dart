@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/audit/audit_log.dart';
+import '../../core/galat/pesan_galat.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/providers/v19_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
@@ -58,7 +59,7 @@ class _KotakMasukScreenState extends ConsumerState<KotakMasukScreen> {
       if (!mounted) return;
       setState(() {
         _memuat = false;
-        _pesan = 'Antrean tidak bisa dibaca: $e';
+        _pesan = pesanGalatMuat(e);
       });
     }
   }
@@ -88,7 +89,12 @@ class _KotakMasukScreenState extends ConsumerState<KotakMasukScreen> {
       setState(() => _pesan = 'Tersimpan. Sortir kapan saja.');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _pesan = 'Tidak bisa menyimpan: $e');
+      // Temuan pengguna 26 Sep 2026: sebelumnya yang tampil adalah galat SQLite
+      // mentah (`SqliteException(1032): attempt to write a readonly
+      // database` lengkap dengan perintah INSERT-nya). Sekarang: bahasa
+      // manusia, dan teks yang sudah diketik TIDAK dibuang supaya bisa
+      // dicoba simpan lagi.
+      setState(() => _pesan = pesanGalatSimpan(e));
     }
   }
 
@@ -132,7 +138,7 @@ class _KotakMasukScreenState extends ConsumerState<KotakMasukScreen> {
       setState(() => _pesan = 'Dipindahkan ke catatan hari ini.');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _pesan = 'Tidak bisa memindahkan: $e');
+      setState(() => _pesan = 'Tidak bisa memindahkan. Rincian: ${ringkasGalat(e)}');
     }
   }
 
@@ -160,7 +166,7 @@ class _KotakMasukScreenState extends ConsumerState<KotakMasukScreen> {
       await _muat();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _pesan = 'Tidak bisa mengubah: $e');
+      setState(() => _pesan = 'Tidak bisa mengubah. Rincian: ${ringkasGalat(e)}');
     }
   }
 
@@ -183,7 +189,7 @@ class _KotakMasukScreenState extends ConsumerState<KotakMasukScreen> {
           : '$jumlah tangkapan lama diarsipkan.');
     } catch (e) {
       if (!mounted) return;
-      setState(() => _pesan = 'Tidak bisa mengarsipkan: $e');
+      setState(() => _pesan = 'Tidak bisa mengarsipkan. Rincian: ${ringkasGalat(e)}');
     }
   }
 

@@ -9,6 +9,7 @@ import 'package:drift/drift.dart';
 import '../../core/utils/waktu.dart';
 import '../repository/template_kategori_transaksi.dart';
 import 'enkripsi_basisdata.dart';
+import 'executor_pulih.dart';
 import 'tabel.dart';
 
 part 'database.g.dart';
@@ -1109,6 +1110,15 @@ DELETE FROM pemasukan_bulanan WHERE id NOT IN (
   static QueryExecutor _buka(String nama) => LazyDatabase(() async {
         final File berkas = await berkasBasisData(nama);
         final String? kunci = await siapkanKunciBasisData(berkas);
-        return executorBasisData(nama, kunci);
+        // Temuan pengguna 26 Sep 2026: koneksi panjang bisa jadi "tidak sah"
+        // ketika berkas basis datanya berpindah di luar aplikasi
+        // (`SqliteException(1032): attempt to write a readonly database`), dan
+        // setelah itu SEMUA penyimpanan gagal sampai aplikasi ditutup. Lapisan
+        // ini menutup koneksi lama, membuka koneksi baru, lalu mengulang
+        // perintah yang gagal — lihat `executor_pulih.dart`.
+        return ExecutorPulih(
+          () => executorBasisData(nama, kunci),
+          jalur: berkas.path,
+        );
       });
 }
