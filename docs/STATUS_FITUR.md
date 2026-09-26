@@ -339,9 +339,9 @@ Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
   keputusan dokumen: ditunda ke v20.
 * **Gelombang 2 (lima tabel kesehatan) sudah selesai** — lihat bagian 17.
   **Gelombang 3** (orang + mesin pola) juga sudah selesai — lihat bagian 18.
-* APK yang berlaku sekarang adalah **v1.14.2-build19** (perbaikan galat basis data 26 Sep 2026)
-  — lihat bagian 20. Sebelumnya `v1.14.1-build18` (perbaikan laporan pengguna 24 Sep 2026) —
-  lihat bagian 19.
+* APK yang berlaku sekarang adalah **v1.14.3-build20** (perbaikan keamanan hasil audit 26 Sep
+  2026) — lihat bagian 21. Sebelumnya `v1.14.2-build19` (perbaikan galat basis data) — bagian 20;
+  `v1.14.1-build18` (perbaikan laporan pengguna 24 Sep 2026) — lihat bagian 19.
   APK versi lama (`v1.13.0-build16`, `v1.12.0-build15`, `v1.11.0-build14`) sudah digantikan;
   semuanya masih bisa diunduh dari `aaron.my.id/unduh/`.
   **Catatan jalur unduh:** pakai `https://aaron.my.id/unduh/personal-life-os-<versi>.apk`.
@@ -362,6 +362,7 @@ penjalanan terakhir gelombang ini.
 | Arsip sumber `lifeos-src-v1.14.1-build18_20260924_142455.tar.gz` (12,1 MB) | pohon kerja penuh v1.14.1+18 (termasuk perbaikan kerapian 24 Sep) | SHA-256 `2fb3064ecacc01ee6508a93c8e76675dbcc58ff6054b6342c347bf109001d55b` |
 | Bundel git `lifeos-main-72ecde2_20260924_142455.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `f55992ed6c3a64e3c341552194bef680b7a479fb364ef7dff7dcba288243c6bc`; diuji bisa dipulihkan dengan `git clone` (613 berkas, commit `72ecde2`) |
 | Arsip berkas di luar git `lifeos-untracked-20260924_142455.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
+| APK `personal-life-os-v1.14.3-build20.apk` (65.684.711 byte) | rilis perbaikan keamanan hasil audit 26 Sep 2026 | SHA-256 `671d56689343c8f872e3aa3aa53dbe78092613502dcfd3ad09d8da03abd57ebd`, sertifikat `7a56a135...20506b` sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.2-build19.apk` (65.684.711 byte) | rilis perbaikan galat basis data 26 Sep 2026 | SHA-256 `cac66e27558ca782d6d157517875320023f66bfa904c426e78275a9ce7b15095`, sertifikat sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.1-build18.apk` (65.684.711 byte) | rilis perbaikan 24 Sep 2026 | SHA-256 `9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`, sertifikat sama dengan versi sebelumnya |
 
@@ -654,4 +655,74 @@ Apa **pemicu** berkas berpindah di HP Papi (pemulihan data Android, aplikasi pem
 sebab lain) belum bisa dipastikan — tidak ada akses ke perangkat. Yang sudah pasti: mekanisme
 kerusakannya ditangani, data lama diselamatkan otomatis, dan kejadiannya dicatat di layar
 Cadangan supaya bisa dilaporkan bila terulang.
+
+---
+
+## 21 · Audit keamanan menyeluruh — aplikasi + server (26 Sep 2026, v1.14.3 build 20)
+
+Permintaan Papi: *"audit semua kode Personal Life OS ini, baik yang kode APK maupun kode di Web
+server."* Audit memakai SOP keamanan Aaron (telaah kode, pencarian rahasia, uji langsung ke
+layanan hidup, uji-pakai, verifikasi ulang). Laporan PDF:
+`/opt/data/lifeos/laporan/Laporan_Audit_Keamanan_Personal_Life_OS_20260926.pdf` (7 halaman).
+
+**Hasil: 18 temuan — 14 sudah diperbaiki & diverifikasi, 4 catatan/pekerjaan lanjutan.**
+
+### Temuan berat (sudah ditutup)
+
+| ID | Tingkat | Temuan | Perbaikan | Bukti |
+|---|---|---|---|---|
+| A-01 | **TINGGI** | Mesin sinkron memakai **nama kolom dari luar** (payload server / berkas sinkron kiriman orang lain) untuk menyusun SQL → suntikan lewat pengenal | Daftar-putih kolom dari skema (`kolomSahTabel`); jalur impor berkas tetap menolak berkas rusak (atomic) | `test/v3_uji_suntik_sinkron_test.dart` — 4 uji lulus, termasuk daftar putih terisi untuk **75 jalur** sinkron |
+| S-01 | SEDANG | Kebocoran lewat waktu di `/masuk` (email ada vs tidak ada: scrypt 36,2 ms vs ~0,5 ms) → enumerasi email | `samakan_waktu_sandi()` + `secrets.compare_digest` | uji API 18/18 lulus |
+| S-02 | SEDANG | `waktu_klien` dari klien dipakai mentah & dibandingkan sebagai teks → jam ngawur selalu menang | `waktu_klien_baku()`: validasi, baku UTC milidetik, batasi 1 hari ke depan | waktu 2099 disimpan sebagai 2026-09-27 |
+| S-03 | SEDANG | Tanpa batas ukuran catatan & kuota per akun | 64 KB/catatan (413) + kuota 200.000 catatan (429) + maksimal 500 perubahan/kiriman | catatan 70 KB → 413; 600 perubahan → 422 |
+| S-04 | SEDANG | Peta pembatas percobaan tumbuh tanpa batas (memory DoS) | pembersihan menyeluruh tiap 30 detik + batas 20.000 alamat | telaah kode + uji hidup |
+| S-05 | SEDANG | Parameter scrypt tidak tersimpan (tak ada jalur naikkan) & pembandingan bukan waktu-tetap | format `scrypt$n$r$p$hash` + naikkan otomatis saat masuk | uji API 18/18 |
+
+### Temuan ketahanan (sudah ditutup)
+
+- **S-06** Dokumentasi API (`/docs`, `/redoc`, `/openapi.json`) terbuka → kini tertutup (404),
+  hanya terbuka bila `LIFEOS_DOKUMEN=1`.
+- **S-07** Galat validasi memantulkan isi kiriman (4 MB kembali ke pengirim) → kini 36 byte
+  tanpa isi.
+- **S-08** Berkas basis data mode 644 & proses root → kini 600 dan berjalan sebagai uid 10001.
+- **S-09** Container berjalan dengan nama variabel usang (`LIFEOS_UMUR_TOKEN`) sementara kode
+  membaca `LIFEOS_UMUR_TOKEN_HARI` → container dibuat ulang dari compose yang benar (config drift).
+- **S-10** Tanpa healthcheck & rotasi log → HEALTHCHECK + log 10m×3 (status `healthy`).
+- **S-11** Tanpa pembatas laju di nginx → zona 20 permintaan/detik (lonjakan 40); diuji 49
+  permintaan/detik → 328 ditahan.
+- **S-12** Tanpa catatan peristiwa keamanan → `data/keamanan.log` (masuk gagal/berhasil, daftar,
+  sandi diganti, akun dihapus, batas tercapai, kuota penuh).
+- **A-02** Empat pembangkit uid memakai `Random()` → `Random.secure()`.
+
+### Yang masih terbuka (butuh keputusan Papi)
+
+- **S-13 (SEDANG)** Data sinkron disimpan **tanpa enkripsi** di server (SQLite polos) padahal
+  berisi keuangan & kesehatan. Usul: enkripsi di sisi aplikasi (kunci turunan sandi akun) sehingga
+  server hanya menyimpan teks terenkripsi.
+- **A-03** Puluhan salinan `uidBaru()` — sebaiknya satu penolong bersama.
+- **S-14** Belum ada verifikasi email & pemeriksaan daftar sandi umum (ambang sekarang 8 karakter).
+- **S-15** Token berlaku 90 hari tanpa penyegaran; belum ada daftar perangkat aktif.
+
+### Bukti verifikasi rilis
+
+| Pengujian | Hasil |
+|---|---|
+| Uji API akun & sinkron (server) | 18/18 lulus |
+| Uji nyata kode APLIKASI ke server (jalur dalam & HTTPS publik) | 16/16 lulus dua jalur |
+| Uji keamanan sinkron (4 uji) | 4/4 lulus |
+| Suite uji penuh aplikasi | 1.492 lulus, 1 dilewati, 0 gagal |
+| Analisa statis (23 aturan) | Bersih |
+| Container server | `healthy`, uid 10001, versi 1.1.0 |
+| Akun uji tersisa di server | 0 (semua dibersihkan) |
+
+Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.14.3-build20.apk`**
+(diuji: HTTP 200, 65.684.711 byte, SHA-256 hasil unduhan **sama** dengan berkas rilis,
+`versionCode 20`, `versionName 1.14.3`, sertifikat sama dengan build 19 — pemasangan menimpa
+tanpa menghapus data).
+
+### Batasan audit ini
+
+Tidak diuji dari perangkat Android asli, tidak ada uji beban skala besar, tidak menilai layanan
+lain di server Austria, analisis CVE dependensi terbatas pada versi terpasang, dan tidak diuji
+pemulihan bencana. Rincian ada di bagian 8 laporan PDF.
 

@@ -1,0 +1,548 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R] /Count 7 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique /Encoding /WinAnsiEncoding >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 10167 >>
+stream
+BT /Helvetica-Bold 17 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 787.89 Tm (Laporan Audit Keamanan) Tj ET
+0.750 0.780 0.820 RG 0.9 w 48.00 779.89 m 547.28 779.89 l S
+BT /Helvetica-Bold 13 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 765.89 Tm (Personal Life OS - Aplikasi APK & Layanan Akun/Sinkron) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 749.29 Tm (Tanggal audit: 26 September 2026 \(diambil 03:54 WIB\)) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 732.69 Tm (Penyusun: Aaron Salahuddin - pakar keamanan siber \(red team & blue team\)) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 716.09 Tm (Lingkup: kode aplikasi Android \(Dart/Flutter\) dan kode layanan server akun & sinkron) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 703.49 Tm (\(Python/FastAPI\) beserta konfigurasi container dan pintu depannya.) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 682.89 Tm (1. Ringkasan eksekutif) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 666.89 Tm (Audit menemukan 18 hal yang perlu diperhatikan: 1 tingkat tinggi, 6 tingkat sedang, 10 tingkat) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 654.29 Tm (rendah, 1 catatan. Sebanyak 14 sudah diperbaiki dan diverifikasi pada hari yang sama; sisanya) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 641.69 Tm (adalah pekerjaan/keputusan lanjutan \(bukan kesalahan yang sedang terbuka lebar\).) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 625.09 Tm (Temuan paling berat ada di sisi APLIKASI, bukan server.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 608.49 Tm (Mesin sinkron menerima nama kolom dari luar lalu memakainya menyusun perintah SQL. Jalur ini bisa) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 595.89 Tm (dicapai lewat berkas sinkron kiriman orang lain, jadi bukan sekadar kemungkinan di atas kertas.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 583.29 Tm (Sudah ditutup dengan daftar-putih kolom dari skema, dan impor berkas tetap bersifat) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 570.69 Tm (semua-atau-tidak-sama-sekali supaya tidak ada data yang masuk setengah.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 554.09 Tm (Sisi server dasarnya sudah kuat: isolasi akun, sandi di-hash scrypt, token disimpan sebagai hash,) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 541.49 Tm (TLS 1.3.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 524.89 Tm (Yang diperbaiki hari ini terutama soal ketahanan: kebocoran lewat waktu di pintu masuk, waktu) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 512.29 Tm (kiriman dari klien yang dipakai mentah, batas ukuran dan kuota, pembatas laju di pintu depan, hak) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 499.69 Tm (akses berkas, proses non-root, catatan peristiwa keamanan, serta dokumentasi API yang sebelumnya) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 487.09 Tm (terbuka.) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 466.49 Tm (2. Metode & ruang lingkup) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 450.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 450.49 Tm (Telaah kode statis: seluruh kode aplikasi \(Dart\) pada pohon rilis dan seluruh kode server) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 437.89 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 437.89 Tm (\(Python, Dockerfile, compose, konfigurasi nginx\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 423.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 423.29 Tm (Pencarian rahasia \(secret hunting\) pada riwayat repo dan berkas konfigurasi.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 408.69 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 408.69 Tm (Uji langsung ke layanan hidup: header, TLS, metode HTTP, percobaan lintas jalur, batas ukuran,) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 396.09 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 396.09 Tm (galat, pembatas percobaan, isolasi antar akun.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 381.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 381.49 Tm (Ujilah-pakai \(proof by test\): uji otomatis baru ditulis untuk setiap perbaikan, dijalankan di) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 368.89 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 368.89 Tm (lingkungan uji terpisah.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 354.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 354.29 Tm (Verifikasi sesudah perbaikan: setiap temuan yang diperbaiki diperiksa ulang pada layanan hidup,) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 341.69 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 341.69 Tm (bukan hanya di kode.) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 323.09 Tm (3. Daftar temuan) Tj ET
+0.130 0.170 0.250 rg 48.00 303.09 499.28 15.00 re f
+BT /Helvetica-Bold 8.0 Tf 1.000 1.000 1.000 rg 1 0 0 1 52.00 307.09 Tm (ID) Tj ET
+BT /Helvetica-Bold 8.0 Tf 1.000 1.000 1.000 rg 1 0 0 1 90.00 307.09 Tm (Tingkat) Tj ET
+BT /Helvetica-Bold 8.0 Tf 1.000 1.000 1.000 rg 1 0 0 1 142.00 307.09 Tm (Temuan) Tj ET
+BT /Helvetica-Bold 8.0 Tf 1.000 1.000 1.000 rg 1 0 0 1 402.00 307.09 Tm (Status) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 294.09 m 547.28 294.09 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 288.09 Tm (A-01) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 288.09 Tm (HIGH) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 288.09 Tm (Suntikan SQL lewat nama kolom pada penerapan data sinkron) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 288.09 Tm (DIPERBAIKI + diuji) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 277.69 m 547.28 277.69 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 271.69 Tm (A-02) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 271.69 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 271.69 Tm (Pembangkit UID memakai acak tidak aman di 4 berkas) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 271.69 Tm (DIPERBAIKI) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 261.29 m 547.28 261.29 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 255.29 Tm (A-03) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 255.29 Tm (INFO) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 255.29 Tm (Penolong uidBaru\(\) tergandang di banyak berkas) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 255.29 Tm (Terbuka \(rendah\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 244.89 m 547.28 244.89 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 238.89 Tm (S-01) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 238.89 Tm (MEDIUM) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 238.89 Tm (Kebocoran lewat waktu pada pintu masuk \(enumerasi email\)) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 238.89 Tm (DIPERBAIKI + diuji) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 228.49 m 547.28 228.49 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 222.49 Tm (S-02) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 222.49 Tm (MEDIUM) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 222.49 Tm (Waktu kiriman \(waktu_klien\) dari klien dipakai mentah) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 222.49 Tm (DIPERBAIKI + diuji) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 212.09 m 547.28 212.09 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 206.09 Tm (S-03) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 206.09 Tm (MEDIUM) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 206.09 Tm (Tanpa batas ukuran catatan & tanpa kuota per akun) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 206.09 Tm (DIPERBAIKI + diuji) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 195.69 m 547.28 195.69 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 189.69 Tm (S-04) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 189.69 Tm (MEDIUM) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 189.69 Tm (Peta pembatas percobaan bisa tumbuh tanpa batas) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 189.69 Tm (DIPERBAIKI) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 179.29 m 547.28 179.29 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 173.29 Tm (S-05) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 173.29 Tm (MEDIUM) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 173.29 Tm (Parameter hash sandi tidak tersimpan & pembandingan tidak) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 162.89 Tm (waktu-tetap) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 173.29 Tm (DIPERBAIKI) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 152.49 m 547.28 152.49 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 146.49 Tm (S-06) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 146.49 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 146.49 Tm (Dokumentasi API terbuka untuk umum) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 146.49 Tm (DIPERBAIKI \(kini 404\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 136.09 m 547.28 136.09 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 130.09 Tm (S-07) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 130.09 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 130.09 Tm (Galat validasi memantulkan isi kiriman) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 130.09 Tm (DIPERBAIKI + diuji \(36 byte, tanpa) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 119.69 Tm (isi\)) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 8701 >>
+stream
+BT /Helvetica-Oblique 8 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 807.89 Tm (Laporan Audit Keamanan - Personal Life OS) Tj ET
+0.850 0.860 0.880 RG 0.6 w 48.00 801.89 m 547.28 801.89 l S
+0.880 0.890 0.910 RG 0.4 w 48.00 797.89 m 547.28 797.89 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 791.89 Tm (S-08) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 791.89 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 791.89 Tm (Berkas basis data dapat dibaca siapa saja & proses berjalan) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 781.49 Tm (sebagai root) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 791.89 Tm (DIPERBAIKI + diverifikasi) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 771.09 m 547.28 771.09 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 765.09 Tm (S-09) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 765.09 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 765.09 Tm (Kesalahan nama variabel lingkungan \(pengaturan tidak berlaku\)) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 765.09 Tm (DIPERBAIKI) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 754.69 m 547.28 754.69 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 748.69 Tm (S-10) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 748.69 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 748.69 Tm (Tanpa pemeriksaan kesehatan container & tanpa rotasi log) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 748.69 Tm (DIPERBAIKI \(status healthy\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 738.29 m 547.28 738.29 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 732.29 Tm (S-11) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 732.29 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 732.29 Tm (Tanpa pembatas laju di lapisan nginx) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 732.29 Tm (DIPERBAIKI + diuji \(49) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 721.89 Tm (permintaan/detik: 328 ditahan\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 711.49 m 547.28 711.49 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 705.49 Tm (S-12) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 705.49 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 705.49 Tm (Tidak ada catatan peristiwa keamanan) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 705.49 Tm (DIPERBAIKI + diverifikasi) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 695.09 m 547.28 695.09 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 689.09 Tm (S-13) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 689.09 Tm (MEDIUM) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 689.09 Tm (Data sinkron disimpan tanpa enkripsi di server) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 689.09 Tm (TERBUKA - butuh keputusan Papi) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 678.69 m 547.28 678.69 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 672.69 Tm (S-14) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 672.69 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 672.69 Tm (Belum ada verifikasi email & sedikit pemeriksaan kekuatan sandi) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 672.69 Tm (Terbuka \(rendah\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 662.29 m 547.28 662.29 l S
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 656.29 Tm (S-15) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 90.00 656.29 Tm (LOW) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 142.00 656.29 Tm (Umur token 90 hari tanpa penyegaran) Tj ET
+BT /Helvetica 8.0 Tf 0.110 0.130 0.160 rg 1 0 0 1 402.00 656.29 Tm (Terbuka \(rendah\)) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 629.89 Tm (4. Rincian temuan & perbaikan) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 613.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 597.29 Tm (A-01 - Suntikan SQL lewat nama kolom pada penerapan data sinkron [HIGH]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 580.69 Tm (Temuan: Mesin sinkron menyusun perintah SQL memakai nama kolom yang datang dari LUAR \(payload server atau) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 568.09 Tm (berkas sinkron kiriman orang lain\). Nilai selalu lewat parameter, tetapi nama kolomnya belum disaring sehingga) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 555.49 Tm (nama kolom palsu ikut menjadi perintah SQL. Jalur ini bisa dicapai lewat berkas sinkron kiriman orang lain) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 542.89 Tm (\(fitur berbagi antar perangkat/keluarga\) atau server yang dikuasai penyerang.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 526.29 Tm (Bukti: lib/core/sinkron/sinkron_semua.dart: UPDATE ... SET $k = ? dan INSERT ... \(kolom.join\(', '\)\) memakai) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 513.69 Tm (kunci dari payload. Diuji: payload memuat kolom 'isi\) VALUES \(SUNTIKAN\) --'.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 497.09 Tm (Perbaikan: Daftar-putih kolom dari skema \(kolomSahTabel\). Nama kolom di luar skema DIBUANG; pada jalur berkas) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 484.49 Tm (impor dibatalkan seluruhnya \(atomic\) agar tidak ada data masuk setengah.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 467.89 Tm (Status: DIPERBAIKI + diuji) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 451.29 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 434.69 Tm (A-02 - Pembangkit UID memakai acak tidak aman di 4 berkas [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 418.09 Tm (Temuan: Empat repositori memakai Random\(\) biasa untuk membuat uid baris, bukan Random.secure\(\).) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 401.49 Tm (Bukti: tagihan_repository.dart:40, jurnal_perjalanan_repository.dart:23, perjalanan_repository.dart:20,) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 388.89 Tm (tanggung_jawab_repository.dart:24.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 372.29 Tm (Perbaikan: Diganti Random.secure\(\) \(uidBaru pada tagihan tetap menerima acak tersuntik untuk uji\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 355.69 Tm (Status: DIPERBAIKI) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 339.09 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 322.49 Tm (A-03 - Penolong uidBaru\(\) tergandang di banyak berkas [INFO]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 305.89 Tm (Temuan: Puluhan berkas menyalin fungsi uidBaru\(\) sendiri-sendiri; ini yang membuat varian acak lemah \(A-02\)) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 293.29 Tm (mudah muncul kembali.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 276.69 Tm (Bukti: Puluhan berkas di lib/data/repository/*.dart memiliki salinan uidBaru\(\).) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 260.09 Tm (Perbaikan: Rekomendasi: satu penolong bersama \(belum dikerjakan, perubahan menyentuh banyak berkas\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 243.49 Tm (Status: Terbuka \(rendah\)) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 226.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 210.29 Tm (S-01 - Kebocoran lewat waktu pada pintu masuk \(enumerasi email\) [MEDIUM]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 193.69 Tm (Temuan: Saat email tidak terdaftar, server langsung menolak tanpa menjalankan scrypt; saat email ada, scrypt) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 181.09 Tm (berjalan. Perbedaan waktu jawaban membocorkan apakah sebuah email punya akun.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 164.49 Tm (Bukti: Biaya hash_sandi\(scrypt n=2^14\) terukur 36,2 ms; email tidak ada dijawab ~0,5 ms.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 147.89 Tm (Perbaikan: samakan_waktu_sandi\(\): scrypt tetap dijalankan walau akun tidak ada. Pembandingan sandi juga) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 135.29 Tm (diganti secrets.compare_digest \(waktu tetap\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 118.69 Tm (Status: DIPERBAIKI + diuji) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 5697 >>
+stream
+BT /Helvetica-Oblique 8 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 807.89 Tm (Laporan Audit Keamanan - Personal Life OS) Tj ET
+0.850 0.860 0.880 RG 0.6 w 48.00 801.89 m 547.28 801.89 l S
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 793.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 777.29 Tm (S-02 - Waktu kiriman \(waktu_klien\) dari klien dipakai mentah [MEDIUM]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 760.69 Tm (Temuan: Penentuan versi menang/kalah membandingkan waktu kiriman sebagai TEKS tanpa validasi. Perangkat dengan) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 748.09 Tm (jam ngawur \(atau klien jahat\) selalu bisa menang atas versi lain, dan format waktu berbeda membuat) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 735.49 Tm (perbandingan salah.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 718.89 Tm (Bukti: main.py: perbandingan lama['waktu_klien'] > p.waktu_klien \(teks\); waktu_klien hanya dibatasi panjang) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 706.29 Tm (10-40 karakter.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 689.69 Tm (Perbaikan: waktu_klien_baku\(\): dibaca sebagai waktu, dibakukan ke UTC milidetik, bentuk tak sah ditolak \(422\),) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 677.09 Tm (waktu > 1 hari ke depan dibatasi.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 660.49 Tm (Status: DIPERBAIKI + diuji) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 643.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 627.29 Tm (S-03 - Tanpa batas ukuran catatan & tanpa kuota per akun [MEDIUM]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 610.69 Tm (Temuan: Satu akun dapat menyimpan catatan sebesar apa pun, tanpa batas jumlah. Kiriman besar berulang dapat) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 598.09 Tm (menghabiskan memori dan ruang disk server \(gangguan layanan\).) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 581.49 Tm (Bukti: main.py: isi = dict bebas; tidak ada batas byte maupun hitungan baris per akun.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 564.89 Tm (Perbaikan: Batas 64 KB per catatan \(HTTP 413\) dan kuota 200.000 catatan per akun \(HTTP 429\) + batas 500) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 552.29 Tm (perubahan per kiriman.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 535.69 Tm (Status: DIPERBAIKI + diuji) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 519.09 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 502.49 Tm (S-04 - Peta pembatas percobaan bisa tumbuh tanpa batas [MEDIUM]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 485.89 Tm (Temuan: Riwayat percobaan masuk yang gagal disimpan di memori per alamat, dan hanya dibersihkan saat alamat) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 473.29 Tm (itu dipakai lagi. Alamat yang tidak kembali lagi tidak pernah dibuang.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 456.69 Tm (Bukti: main.py: _percobaan[ip] = ... tanpa pembersihan menyeluruh/batas jumlah kunci.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 440.09 Tm (Perbaikan: _bersihkan_peta_percobaan\(\): pembersihan menyeluruh tiap 30 detik + batas 20.000 alamat \(yang) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 427.49 Tm (paling lama dibuang lebih dulu\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 410.89 Tm (Status: DIPERBAIKI) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 394.29 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 377.69 Tm (S-05 - Parameter hash sandi tidak tersimpan & pembandingan tidak waktu-tetap [MEDIUM]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 361.09 Tm (Temuan: Nilai hash lama tidak memuat parameter scrypt, sehingga parameter tidak bisa dinaikkan kelak tanpa) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 348.49 Tm (memutus semua sandi. Pembandingan memakai != biasa \(bukan waktu tetap\).) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 331.89 Tm (Bukti: main.py: hash_sandi menghasilkan hex polos; perbandingan != saat masuk/ganti sandi.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 315.29 Tm (Perbaikan: Format baru scrypt$n$r$p$hash + sandi_cocok\(\) dengan secrets.compare_digest; hash lama otomatis) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 302.69 Tm (dinaikkan saat pengguna masuk.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 286.09 Tm (Status: DIPERBAIKI) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 269.49 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 252.89 Tm (S-06 - Dokumentasi API terbuka untuk umum [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 236.29 Tm (Temuan: /docs, /redoc, dan /openapi.json dapat dibuka siapa saja sehingga memetakan seluruh pintu API) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 223.69 Tm (\(memudahkan penyusunan serangan\).) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 207.09 Tm (Bukti: Permintaan ke https://coder.sam.university/lifeos-api/docs menjawab 200.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 190.49 Tm (Perbaikan: Tertutup secara bawaan; hanya terbuka bila LIFEOS_DOKUMEN=1 \(untuk pengembangan\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 173.89 Tm (Status: DIPERBAIKI \(kini 404\)) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 13 0 R >>
+endobj
+13 0 obj
+<< /Length 6147 >>
+stream
+BT /Helvetica-Oblique 8 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 807.89 Tm (Laporan Audit Keamanan - Personal Life OS) Tj ET
+0.850 0.860 0.880 RG 0.6 w 48.00 801.89 m 547.28 801.89 l S
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 793.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 777.29 Tm (S-07 - Galat validasi memantulkan isi kiriman [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 760.69 Tm (Temuan: Jawaban galat 422 memuat kembali isi kiriman \(termasuk data pribadi\) sehingga ukuran jawaban bisa jauh) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 748.09 Tm (lebih besar daripada permintaannya.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 731.49 Tm (Bukti: Kiriman nama 4 MB dijawab 422 dengan isi 'input' ikut dikembalikan.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 714.89 Tm (Perbaikan: Penangan galat khusus: jawaban hanya memuat letak & jenis kesalahan.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 698.29 Tm (Status: DIPERBAIKI + diuji \(36 byte, tanpa isi\)) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 681.69 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 665.09 Tm (S-08 - Berkas basis data dapat dibaca siapa saja & proses berjalan sebagai root [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 648.49 Tm (Temuan: Berkas basis data \(berisi data keuangan & kesehatan\) bermode 644, dan proses aplikasi berjalan sebagai) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 635.89 Tm (root di dalam container.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 619.29 Tm (Bukti: ls -la: -rw-r--r-- lifeos-sync.db; docker exec id -> uid=0\(root\).) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 602.69 Tm (Perbaikan: Berkas diatur 600 \(termasuk WAL/SHM\) dan container berjalan sebagai pengguna biasa uid 10001 \(USER) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 590.09 Tm (lifeos + user: 10001:10001\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 573.49 Tm (Status: DIPERBAIKI + diverifikasi) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 556.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 540.29 Tm (S-09 - Kesalahan nama variabel lingkungan \(pengaturan tidak berlaku\) [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 523.69 Tm (Temuan: Container berjalan dengan variabel LIFEOS_UMUR_TOKEN sementara kode membaca LIFEOS_UMUR_TOKEN_HARI;) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 511.09 Tm (container juga belum dibuat ulang sesudah berkas compose diubah sehingga pengaturan nyata berbeda dari yang) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 498.49 Tm (tertulis \(config drift\).) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 481.89 Tm (Bukti: docker inspect: LIFEOS_UMUR_TOKEN ada; grep kode: LIFEOS_UMUR_TOKEN_HARI.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 465.29 Tm (Perbaikan: Container dibuat ulang dari berkas compose yang benar \(lihat verifikasi /sehat versi 1.1.0\).) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 448.69 Tm (Status: DIPERBAIKI) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 432.09 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 415.49 Tm (S-10 - Tanpa pemeriksaan kesehatan container & tanpa rotasi log [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 398.89 Tm (Temuan: Tidak ada healthcheck sehingga container yang macet tetap tampak berjalan; log container tumbuh tanpa) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 386.29 Tm (batas.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 369.69 Tm (Bukti: docker inspect: Healthcheck TIDAK ADA.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 353.09 Tm (Perbaikan: HEALTHCHECK di Dockerfile + logging max-size 10m, max-file 3.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 336.49 Tm (Status: DIPERBAIKI \(status healthy\)) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 319.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 303.29 Tm (S-11 - Tanpa pembatas laju di lapisan nginx [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 286.69 Tm (Temuan: Pembatas hanya ada di aplikasi \(dan hanya untuk daftar/masuk\). Belum ada jaring pengaman di pintu) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 274.09 Tm (depan untuk menahan banjir permintaan.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 257.49 Tm (Bukti: grep limit_req di /etc/nginx: tidak ada.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 240.89 Tm (Perbaikan: Zona limit_req 20 permintaan/detik dengan lonjakan 40, berlaku di lokasi /lifeos-api/.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 224.29 Tm (Status: DIPERBAIKI + diuji \(49 permintaan/detik: 328 ditahan\)) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 207.69 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 191.09 Tm (S-12 - Tidak ada catatan peristiwa keamanan [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 174.49 Tm (Temuan: Tidak ada rekaman masuk gagal/berhasil, penggantian sandi, penghapusan akun, atau tercapainya batas) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 161.89 Tm (percobaan sehingga serangan tidak bisa ditelusuri.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 145.29 Tm (Bukti: main.py: tidak ada penulisan log peristiwa.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 128.69 Tm (Perbaikan: keamanan.log \(JSON per baris, rotasi 5 MB\): daftar baru, masuk gagal/berhasil, sandi diganti, akun) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 116.09 Tm (dihapus, batas percobaan, kuota penuh. Tidak pernah memuat sandi/token.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 99.49 Tm (Status: DIPERBAIKI + diverifikasi) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 15 0 R >>
+endobj
+15 0 obj
+<< /Length 8333 >>
+stream
+BT /Helvetica-Oblique 8 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 807.89 Tm (Laporan Audit Keamanan - Personal Life OS) Tj ET
+0.850 0.860 0.880 RG 0.6 w 48.00 801.89 m 547.28 801.89 l S
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 793.89 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 777.29 Tm (S-13 - Data sinkron disimpan tanpa enkripsi di server [MEDIUM]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 760.69 Tm (Temuan: Isi sinkron \(keuangan & kesehatan\) disimpan sebagai teks di basis data server. Bila server dikuasai) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 748.09 Tm (pihak lain, seluruh isi keluarga dapat dibaca. Ini keputusan rancangan, bukan kesalahan kode.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 731.49 Tm (Bukti: Berkas lifeos-sync.db berupa SQLite polos; kolom isi berupa JSON teks.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 714.89 Tm (Perbaikan: Rekomendasi \(belum dikerjakan\): enkripsi di sisi aplikasi dengan kunci turunan sandi akun sehingga) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 702.29 Tm (server hanya menyimpan data terenkripsi; atau enkripsi disk server.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 685.69 Tm (Status: TERBUKA - butuh keputusan Papi) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 669.09 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 652.49 Tm (S-14 - Belum ada verifikasi email & sedikit pemeriksaan kekuatan sandi [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 635.89 Tm (Temuan: Siapa pun dapat mendaftar dengan email yang bukan miliknya, dan sandi hanya dibatasi minimal 8) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 623.29 Tm (karakter.) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 606.69 Tm (Bukti: main.py: sandi Field\(min_length=8\); tidak ada verifikasi email.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 590.09 Tm (Perbaikan: Catatan: ambang 8 karakter sejalan panduan NIST, tetapi untuk layanan publik sebaiknya ditambah) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 577.49 Tm (pemeriksaan daftar sandi umum dan verifikasi email.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 560.89 Tm (Status: Terbuka \(rendah\)) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 544.29 Tm () Tj ET
+BT /Helvetica-Bold 10.5 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 527.69 Tm (S-15 - Umur token 90 hari tanpa penyegaran [LOW]) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 511.09 Tm (Temuan: Token berlaku 90 hari tanpa rotasi; ponsel yang hilang tetap bisa mengakses sampai token kedaluwarsa) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 498.49 Tm (\(hanya bisa diputus lewat ganti sandi\).) Tj ET
+BT /Helvetica 9 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 481.89 Tm (Bukti: main.py: UMUR_TOKEN_HARI bawaan 90; belum ada daftar sesi per perangkat.) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 465.29 Tm (Perbaikan: Catatan: pertimbangkan penyegaran token berkala + daftar perangkat aktif yang bisa dicabut satu per) Tj ET
+BT /Helvetica 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 452.69 Tm (satu.) Tj ET
+BT /Helvetica-Bold 9 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 436.09 Tm (Status: Terbuka \(rendah\)) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 415.49 Tm (5. Yang sudah baik \(dipertahankan\)) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 399.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 399.49 Tm (Isolasi akun terbukti: 18/18 pemeriksaan lulus, termasuk akun B tidak dapat melihat data akun A;) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 386.89 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 386.89 Tm (setiap query disaring akun_id.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 372.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 372.29 Tm (Token sesi 32 byte acak, yang tersimpan hanya hash SHA-256; token mati setelah keluar.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 357.69 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 357.69 Tm (Sandi di-hash scrypt \(tanpa sandi mentah di basis data\) dan perbandingan waktu-tetap.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 343.09 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 343.09 Tm (TLS 1.3 aktif, TLS 1.0/1.1 ditolak, sertifikat sah \(Let's Encrypt\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 328.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 328.49 Tm (Header keamanan lengkap di jalur API \(HSTS, nosniff, X-Frame-Options, Referrer-Policy,) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 315.89 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 315.89 Tm (Permissions-Policy\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 301.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 301.29 Tm (Port layanan hanya terikat 127.0.0.1 \(tidak terbuka langsung ke internet\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 286.69 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 286.69 Tm (Percobaan lintas jalur \(path traversal\) ditolak 400/404; metode HTTP tak wajar dijawab 405.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 272.09 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 272.09 Tm (Pembatas percobaan masuk tidak bisa dilewati dengan memalsukan X-Forwarded-For \(diuji\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 257.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 257.49 Tm (Aplikasi: verifikasi sertifikat tidak pernah dimatikan, tanpa alamat http:// untuk data,) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 244.89 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 244.89 Tm (usesCleartextTraffic=false, CA pengguna tidak dipercaya.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 230.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 230.29 Tm (Aplikasi: allowBackup=false + aturan pengambilan data mengecualikan semuanya; FileProvider hanya) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 217.69 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 217.69 Tm (membagikan salinan di cache/bagikan.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 203.09 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 203.09 Tm (Aplikasi: PIN disimpan sebagai turunan PBKDF2-HMAC-SHA256 600.000 putaran \(selaras OWASP\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 188.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 188.49 Tm (Aplikasi: izin minimal \(tanpa akses SMS/kontak\), pemindaian rahasia repo bersih.) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 169.89 Tm (6. Langkah lanjutan yang disarankan) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 153.89 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 153.89 Tm (1. Enkripsi data sinkron di sisi aplikasi \(S-13\) - pekerjaan berikutnya yang paling berdampak.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 141.29 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 141.29 Tm (Kunci diturunkan dari sandi akun sehingga server hanya menyimpan teks terenkripsi.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 126.69 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 126.69 Tm (2. Satu penolong uid bersama untuk seluruh repositori \(A-03\) supaya varian acak lemah tidak) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 114.09 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 114.09 Tm (muncul lagi.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 99.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 99.49 Tm (3. Verifikasi email + pemeriksaan daftar sandi umum saat layanan dibuka untuk publik \(S-14\).) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 17 0 R >>
+endobj
+17 0 obj
+<< /Length 10072 >>
+stream
+BT /Helvetica-Oblique 8 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 807.89 Tm (Laporan Audit Keamanan - Personal Life OS) Tj ET
+0.850 0.860 0.880 RG 0.6 w 48.00 801.89 m 547.28 801.89 l S
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 793.89 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 793.89 Tm (4. Daftar perangkat aktif yang bisa dicabut satu per satu + penyegaran token \(S-15\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 779.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 779.29 Tm (5. Naikkan skala penyimpanan ke PostgreSQL + replika sebelum jumlah pengguna besar; sertakan) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 766.69 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 766.69 Tm (kuota, pemantauan, dan cadangan otomatis.) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 748.09 Tm (7. Hasil pengujian \(bukti\)) Tj ET
+0.130 0.170 0.250 rg 48.00 728.09 499.28 15.00 re f
+BT /Helvetica-Bold 8.4 Tf 1.000 1.000 1.000 rg 1 0 0 1 52.00 732.09 Tm (Pengujian) Tj ET
+BT /Helvetica-Bold 8.4 Tf 1.000 1.000 1.000 rg 1 0 0 1 392.00 732.09 Tm (Hasil) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 719.09 m 547.28 719.09 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 713.09 Tm (Uji API akun & sinkron \(18 pemeriksaan\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 713.09 Tm (18 dari 18 lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 702.69 m 547.28 702.69 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 696.69 Tm (Uji isolasi antar akun \(akun B tidak melihat data A\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 696.69 Tm (Lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 686.29 m 547.28 686.29 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 680.29 Tm (Uji aturan konflik \(versi lebih baru menang, versi kalah disimpan\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 680.29 Tm (Lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 669.89 m 547.28 669.89 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 663.89 Tm (Uji nyata kode APLIKASI ke server, jalur dalam \(16 pemeriksaan\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 663.89 Tm (16 dari 16 lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 653.49 m 547.28 653.49 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 647.49 Tm (Uji nyata kode APLIKASI ke server, jalur HTTPS publik) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 647.49 Tm (16 dari 16 lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 637.09 m 547.28 637.09 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 631.09 Tm (Uji suntikan nama kolom pada penerapan sinkron \(4 uji di aplikasi\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 631.09 Tm (4 dari 4 lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 620.69 m 547.28 620.69 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 614.69 Tm (Daftar putih kolom terisi untuk seluruh 75 jalur sinkron) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 614.69 Tm (Lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 604.29 m 547.28 604.29 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 598.29 Tm (Suite uji penuh aplikasi) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 598.29 Tm (1.492 lulus, 1 dilewati, 0 gagal) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 587.89 m 547.28 587.89 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 581.89 Tm (Analisa statis aplikasi \(23 aturan\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 581.89 Tm (Bersih, tanpa temuan) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 571.49 m 547.28 571.49 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 565.49 Tm (Uji impor berkas sinkron rusak wajib dibatalkan seluruhnya) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 565.49 Tm (Lulus) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 555.09 m 547.28 555.09 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 549.09 Tm (Batas ukuran catatan 64 KB) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 549.09 Tm (HTTP 413 \(ditolak\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 538.69 m 547.28 538.69 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 532.69 Tm (Waktu kiriman tidak sah / tahun 2099) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 532.69 Tm (HTTP 422 / dibatasi ke 2026-09-27) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 522.29 m 547.28 522.29 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 516.29 Tm (Jumlah perubahan 600 dalam satu kiriman) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 516.29 Tm (HTTP 422 \(ditolak\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 505.89 m 547.28 505.89 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 499.89 Tm (Galat validasi tidak memantulkan isi kiriman) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 499.89 Tm (36 byte, tanpa isi) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 489.49 m 547.28 489.49 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 483.49 Tm (Dokumentasi API /docs, /redoc, /openapi.json) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 483.49 Tm (404 \(tertutup\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 473.09 m 547.28 473.09 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 467.09 Tm (Pembatas laju nginx \(49 permintaan/detik\)) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 467.09 Tm (328 permintaan ditahan \(429\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 456.69 m 547.28 456.69 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 450.69 Tm (Hak akses berkas basis data) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 450.69 Tm (600 \(-rw-------\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 440.29 m 547.28 440.29 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 434.29 Tm (Proses container) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 434.29 Tm (uid 10001 \(bukan root\)) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 423.89 m 547.28 423.89 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 417.89 Tm (Pemeriksaan kesehatan container) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 417.89 Tm (healthy) Tj ET
+0.880 0.890 0.910 RG 0.4 w 48.00 407.49 m 547.28 407.49 l S
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 52.00 401.49 Tm (Versi layanan sesudah perbaikan) Tj ET
+BT /Helvetica 8.4 Tf 0.110 0.130 0.160 rg 1 0 0 1 392.00 401.49 Tm (1.1.0) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 375.09 Tm (8. Batasan audit) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 359.09 Tm (Yang TIDAK diuji pada audit ini - disebutkan supaya laporan ini tidak dibaca berlebihan:) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 342.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 342.49 Tm (Tidak diuji dari perangkat Android asli \(perilaku Keystore, migrasi data di HP, notifikasi\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 327.89 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 327.89 Tm (Tidak ada uji beban skala besar; server masih SQLite satu pekerja, batas nyata belum diukur.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 313.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 313.29 Tm (Tidak diuji layanan lain di server Austria - lingkup audit hanya layanan akun & sinkron Personal) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 300.69 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 300.69 Tm (Life OS serta kode aplikasinya.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 286.09 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 286.09 Tm (Analisis CVE dependensi terbatas pada pemeriksaan versi terpasang \(fastapi 0.115.6, uvicorn) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 273.49 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 273.49 Tm (0.34.0, pydantic 2.10.4, starlette 0.41.3\) dengan pencarian sumber terbuka; tidak memakai basis) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 260.89 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 260.89 Tm (data paket \(pip-audit\) karena tidak dipasang.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 246.29 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 246.29 Tm (Tidak diuji pemulihan bencana \(server hilang\), enkripsi disk, dan kebijakan cadangan server.) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 231.69 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 231.69 Tm (Tidak ada pengujian terhadap akun/data nyata: semua uji memakai akun buangan yang langsung) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 219.09 Tm (  ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 219.09 Tm (dihapus \(sisa akun terverifikasi 0\).) Tj ET
+BT /Helvetica 10 Tf 0.420 0.450 0.500 rg 1 0 0 1 54.00 204.49 Tm (- ) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 66.00 204.49 Tm (Kredensial tidak pernah ditampilkan dalam laporan ini; nilai sensitif disamarkan.) Tj ET
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 185.89 Tm (9. Pernyataan otorisasi) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 169.89 Tm (Seluruh pengujian dilakukan pada aset milik Papi sendiri \(aplikasi Personal Life OS dan layanan) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 157.29 Tm (akun di server Austria\). Tidak ada pengujian terhadap aset pihak ketiga. Semua uji memakai akun) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 144.69 Tm (buangan yang dihapus setelah pengujian; data pengguna nyata tidak disentuh. Nilai kredensial tidak) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 132.09 Tm (ditampilkan dalam laporan ini.) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /Helvetica 3 0 R /Helvetica-Bold 4 0 R /Helvetica-Oblique 5 0 R >> >> /Contents 19 0 R >>
+endobj
+19 0 obj
+<< /Length 1399 >>
+stream
+BT /Helvetica-Oblique 8 Tf 0.420 0.450 0.500 rg 1 0 0 1 48.00 807.89 Tm (Laporan Audit Keamanan - Personal Life OS) Tj ET
+0.850 0.860 0.880 RG 0.6 w 48.00 801.89 m 547.28 801.89 l S
+BT /Helvetica-Bold 12.5 Tf 0.120 0.160 0.240 rg 1 0 0 1 48.00 789.89 Tm (10. Disclaimer) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 773.89 Tm (DISCLAIMER: Audit/analisa ini dilakukan HANYA pada aset milik/berizin pemilik dengan tujuan) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 761.29 Tm (keamanan dan edukasi. Temuan dilaporkan untuk diperbaiki, BUKAN untuk dieksploitasi pihak ketiga.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 748.69 Tm (Informasi sensitif \(kredensial, path eksploitasi detail\) tidak dibagikan ke publik. Setiap) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 736.09 Tm (penggunaan informasi ini di luar konteks yang sah sepenuhnya menjadi tanggung jawab pengguna.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 723.49 Tm (Penyusun tidak bertanggung jawab atas kerugian dalam bentuk apa pun yang timbul dari penyalahgunaan) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 710.89 Tm (informasi ini.) Tj ET
+BT /Helvetica 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 694.29 Tm () Tj ET
+BT /Helvetica-Bold 10 Tf 0.110 0.130 0.160 rg 1 0 0 1 48.00 677.69 Tm (Disusun oleh Dato' Dr. H. Sami'an, M.B.A) Tj ET
+endstream
+endobj
+xref
+0 20
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000156 00000 n 
+0000000253 00000 n 
+0000000355 00000 n 
+0000000460 00000 n 
+0000000646 00000 n 
+0000010866 00000 n 
+0000011052 00000 n 
+0000019805 00000 n 
+0000019993 00000 n 
+0000025743 00000 n 
+0000025931 00000 n 
+0000032131 00000 n 
+0000032319 00000 n 
+0000040705 00000 n 
+0000040893 00000 n 
+0000051019 00000 n 
+0000051207 00000 n 
+trailer
+<< /Size 20 /Root 1 0 R >>
+startxref
+52659
+%%EOF
