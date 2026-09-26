@@ -339,7 +339,9 @@ Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
   keputusan dokumen: ditunda ke v20.
 * **Gelombang 2 (lima tabel kesehatan) sudah selesai** — lihat bagian 17.
   **Gelombang 3** (orang + mesin pola) juga sudah selesai — lihat bagian 18.
-* APK yang berlaku sekarang adalah **v1.14.1-build18** (perbaikan 24 Sep 2026) — lihat bagian 19.
+* APK yang berlaku sekarang adalah **v1.14.2-build19** (perbaikan galat basis data 26 Sep 2026)
+  — lihat bagian 20. Sebelumnya `v1.14.1-build18` (perbaikan laporan pengguna 24 Sep 2026) —
+  lihat bagian 19.
   APK versi lama (`v1.13.0-build16`, `v1.12.0-build15`, `v1.11.0-build14`) sudah digantikan;
   semuanya masih bisa diunduh dari `aaron.my.id/unduh/`.
   **Catatan jalur unduh:** pakai `https://aaron.my.id/unduh/personal-life-os-<versi>.apk`.
@@ -360,6 +362,7 @@ penjalanan terakhir gelombang ini.
 | Arsip sumber `lifeos-src-v1.14.1-build18_20260924_142455.tar.gz` (12,1 MB) | pohon kerja penuh v1.14.1+18 (termasuk perbaikan kerapian 24 Sep) | SHA-256 `2fb3064ecacc01ee6508a93c8e76675dbcc58ff6054b6342c347bf109001d55b` |
 | Bundel git `lifeos-main-72ecde2_20260924_142455.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `f55992ed6c3a64e3c341552194bef680b7a479fb364ef7dff7dcba288243c6bc`; diuji bisa dipulihkan dengan `git clone` (613 berkas, commit `72ecde2`) |
 | Arsip berkas di luar git `lifeos-untracked-20260924_142455.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
+| APK `personal-life-os-v1.14.2-build19.apk` (65.684.711 byte) | rilis perbaikan galat basis data 26 Sep 2026 | SHA-256 `cac66e27558ca782d6d157517875320023f66bfa904c426e78275a9ce7b15095`, sertifikat sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.1-build18.apk` (65.684.711 byte) | rilis perbaikan 24 Sep 2026 | SHA-256 `9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`, sertifikat sama dengan versi sebelumnya |
 
 **Arsip sumber** disimpan di tiga tempat: `/opt/data/lifeos/backups/` (OVH),
@@ -554,6 +557,11 @@ SQLite** yang bisa direproduksi di sini — seluruh jalur simpan (kotak masuk, c
 orang) lolos di basis data nyata, termasuk migrasi v2 → v21. Karena itu **jangan hapus data
 aplikasi** kalau masih muncul galat: kirimkan teks galatnya supaya bisa ditelusuri.
 
+> **KOREKSI (26 Sep 2026):** kesimpulan di atas **salah**. Papi mengirim tangkapan layar berisi
+> `SqliteException(1032): attempt to write a readonly database`, dan akar masalahnya memang di
+> basis data — bukan tata letak tombol. Perbaikan + buktinya ada di **bagian 20**. Paragraf ini
+> sengaja dibiarkan utuh sebagai catatan bahwa menyimpulkan dari uji sendiri bisa keliru.
+
 Angka uji rilis ini: `flutter analyze` **bersih** · suite penuh **1.484 lulus / 1 dilewati /
 0 gagal** (67 detik). Sebelumnya, gelombang 3 mencatat 6 kegagalan uji peka tanggal; pada
 rilis ini angkanya **nol gagal**.
@@ -570,4 +578,80 @@ Izin `READ_SMS` **tidak ada** (diperiksa dengan `aapt2 dump permissions`).
 Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.14.1-build18.apk`**
 (diuji: HTTP 200, `content-type: application/octet-stream`, berkas 65.684.711 byte, dan
 SHA-256 hasil unduhan **sama** dengan berkas rilis).
+
+## 20 · "attempt to write a readonly database" — perbaikan 26 Sep 2026 (v1.14.2 build 19)
+
+### Apa yang dilaporkan
+
+Papi mengirim tangkapan layar: menekan **Simpan ke kotak masuk** memunculkan
+
+```
+SqliteException(1032): attempt to write a readonly database, while executing
+INSERT INTO "kotak_masuk" (uid, isi, jenis_media, …) VALUES (?, ?, …)
+```
+
+lengkap dengan perintah SQL dan seluruh nilainya.
+
+### Koreksi catatan bagian 19 — penting, jangan dihapus
+
+Bagian 19 menyimpulkan laporan "galat SQL" tidak bisa direproduksi dan penyebabnya tata letak
+tombol. **Itu keliru.** Tombol memang bisa ditekan; galatnya nyata dan datang dari SQLite.
+Kesalahan saya: menyimpulkan dari uji yang saya buat sendiri, bukan dari pesan galat asli.
+Bukti dari perangkat pengguna membatalkan kesimpulan itu, dan bagian ini mencatatnya apa adanya.
+
+### Akar masalah
+
+`1032` adalah `SQLITE_READONLY_DBMOVED`: berkas basis data sudah **berpindah atau digantikan**
+di luar aplikasi sementara koneksi masih terbuka (mis. pemulihan data oleh Android, aplikasi
+pembersih, atau berkas diganti proses lain). SQLite menandai koneksi itu **tidak sah selamanya**
+— dan aplikasi ini memakai satu koneksi panjang yang dibuka sekali saat aplikasi dijalankan.
+Akibatnya: setiap penyimpanan gagal **sampai aplikasi ditutup**, persis seperti yang Papi alami.
+
+Bahaya yang lebih halus: meneruskan menulis lewat koneksi mati bisa berakhir di berkas yang
+sudah tidak ada (data hilang tanpa pesan). Dan kalau berkasnya **hilang** lalu koneksi dibuka
+ulang begitu saja, SQLite membuat berkas **kosong** — seolah seluruh data hilang.
+
+### Perbaikan
+
+| Bagian | Perbaikan | Berkas |
+|---|---|---|
+| Koneksi | Lapisan `ExecutorPulih`: perintah yang gagal karena berkas berpindah → koneksi lama **diselamatkan isinya** (`VACUUM INTO` ke berkas pemulihan; bila berkas asli hilang, isi lama **dipasang kembali** ke jalur semula), koneksi baru dibuka, perintah **diulang sekali**. Perintah di dalam transaksi sengaja TIDAK diulang (mencegah setengah data). Kalau penyelamatan gagal → galat diteruskan, bukan membuat basis data kosong. | `lib/data/database/executor_pulih.dart` |
+| Titik pemasangan | `LazyDatabase` sekarang membungkus executor dengan penyembuh ini, dengan jalur berkas dikirim eksplisit | `lib/data/database/database.dart` |
+| Pesan ke pengguna | Bukan lagi galat SQLite mentah: kalimat manusia + potongan sebab singkat (dipotong SEBELUM perintah SQL). Teks yang sudah diketik **tidak** dibuang saat gagal simpan. | `lib/core/galat/pesan_galat.dart`, `lib/features/kotak_masuk/kotak_masuk_screen.dart` |
+| Keterbukaan | Layar Cadangan & Pemulihan menampilkan berapa kali penyimpanan dipulihkan otomatis dan di mana berkas penyelamatannya — tidak disembunyikan | `lib/features/pengaturan/backup_screen.dart` |
+
+### Bukti
+
+`test/v3_pulih_basisdata_test.dart` — 4 uji, semuanya lulus:
+
+1. **Reproduksi galat:** koneksi SQLite biasa, berkas dipindah → menulis **gagal** dengan kode
+   `1032` dan pesan memuat `readonly` (persis yang muncul di HP Papi).
+2. **Perbaikan bekerja:** dengan `ExecutorPulih`, setelah berkas dihapus → menulis **berhasil**,
+   `jumlahPemulihanBasisData == 1`, dan berkas di jalur asli berisi **baris lama + baris baru**
+   (`['sebelum','sesudah']`) — jadi data pengguna **tidak hilang**.
+3. **Tidak menutupi galat lain:** galat yang bukan "berkas berpindah" (mis. `no such table`)
+   tetap diteruskan.
+4. **End-to-end:** `AppDatabase` utuh + tabel `kotak_masuk` → setelah berkas dihapus di luar
+   aplikasi, dua baris tetap ada (bukan satu baris di basis data kosong).
+
+Angka rilis ini: `flutter analyze` **bersih** (23 aturan) · suite penuh
+**1.488 lulus / 1 dilewati / 0 gagal**.
+
+### APK rilis perbaikan (v1.14.2 build 19)
+
+`personal-life-os-v1.14.2-build19.apk` — **universal** (arm64-v8a + armeabi-v7a + x86_64),
+**65.684.711 byte**, `versionCode 19`, `versionName 1.14.2`,
+SHA-256 **`cac66e27558ca782d6d157517875320023f66bfa904c426e78275a9ce7b15095`**.
+Sertifikat SHA-256 `7a56a135…506b` — sama dengan rilis sebelumnya, jadi bisa dipasang sebagai
+pembaruan tanpa menghapus data. Izin SMS tetap tidak ada.
+
+Unduhan: **`https://aaron.my.id/unduh/personal-life-os-v1.14.2-build19.apk`**
+(diuji: HTTP 200, berkas 65.684.711 byte, dan SHA-256 hasil unduhan **sama** dengan berkas rilis).
+
+### Yang belum bisa dibuktikan dari sini
+
+Apa **pemicu** berkas berpindah di HP Papi (pemulihan data Android, aplikasi pembersih, atau
+sebab lain) belum bisa dipastikan — tidak ada akses ke perangkat. Yang sudah pasti: mekanisme
+kerusakannya ditangani, data lama diselamatkan otomatis, dan kejadiannya dicatat di layar
+Cadangan supaya bisa dilaporkan bila terulang.
 
