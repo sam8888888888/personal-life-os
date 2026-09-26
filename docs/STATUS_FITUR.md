@@ -363,7 +363,7 @@ penjalanan terakhir gelombang ini.
 | Arsip sumber `lifeos-src-v1.14.1-build18_20260924_142455.tar.gz` (12,1 MB) | pohon kerja penuh v1.14.1+18 (termasuk perbaikan kerapian 24 Sep) | SHA-256 `2fb3064ecacc01ee6508a93c8e76675dbcc58ff6054b6342c347bf109001d55b` |
 | Bundel git `lifeos-main-72ecde2_20260924_142455.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `f55992ed6c3a64e3c341552194bef680b7a479fb364ef7dff7dcba288243c6bc`; diuji bisa dipulihkan dengan `git clone` (613 berkas, commit `72ecde2`) |
 | Arsip berkas di luar git `lifeos-untracked-20260924_142455.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
-| APK `personal-life-os-v1.14.4-build21.apk` | sapaan memakai nama + enkripsi data sinkron (26 Sep 2026) | SHA-256 menyusul di bagian 22, sertifikat `7a56a135...20506b` sama dengan versi sebelumnya |
+| APK `personal-life-os-v1.14.4-build21.apk` (65.750.247 byte) | sapaan memakai nama + enkripsi data sinkron (26 Sep 2026) | SHA-256 `29444a54f85b0e80388217535e9acf36647234707935ca94e5e5c0e3ac902a84` (unduhan dari internet sama), `versionCode 21`, sertifikat `7a56a135...20506b` sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.3-build20.apk` (65.684.711 byte) | rilis perbaikan keamanan hasil audit 26 Sep 2026 | SHA-256 `671d56689343c8f872e3aa3aa53dbe78092613502dcfd3ad09d8da03abd57ebd`, sertifikat `7a56a135...20506b` sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.2-build19.apk` (65.684.711 byte) | rilis perbaikan galat basis data 26 Sep 2026 | SHA-256 `cac66e27558ca782d6d157517875320023f66bfa904c426e78275a9ce7b15095`, sertifikat sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.1-build18.apk` (65.684.711 byte) | rilis perbaikan 24 Sep 2026 | SHA-256 `9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`, sertifikat sama dengan versi sebelumnya |
@@ -784,9 +784,11 @@ membaca seluruh data pengguna.
 |---|---|
 | Uji baru `test/v3_enkripsi_sinkron_test.dart` | **12/12 lulus** dalam 20 detik |
 | Analisa statis (23 aturan) | Bersih |
-| Uji ujung-ke-ujung `tool/uji_enkripsi_server.dart` ke server sungguhan | lihat hasil di laporan obrolan |
-| Server menerima isi polos? | **Tidak** — uji mencari nama tagihan di jawaban server: tidak ketemu |
-| Suite penuh | dijalankan sebelum rilis (hasil di laporan) |
+| Uji ujung-ke-ujung `tool/uji_enkripsi_server.dart` ke server sungguhan | **12/12 lulus** — daftar akun, kirim 2 catatan, tarik, buka amplop, buka isi, sandi salah ditolak, akun dibuang |
+| Server menerima isi polos? | **Tidak** — uji mencari nama tagihan & nominalnya di jawaban server: tidak ketemu |
+| Isi yang benar-benar tersimpan di basis data server | `{"bungkus": "plok1:…"}` (amplop kunci) dan `{"terenkripsi": "plo1:…"}` — diperiksa langsung di dalam container |
+| Suite penuh | **1.504 lulus · 1 dilewati · 0 gagal** (termasuk 12 uji enkripsi baru) |
+| APK v1.14.4 build 21 | 65.750.247 byte · SHA-256 `29444a54…2a84` (unduhan internet sama) · `versionCode 21` · sertifikat sama dengan build lama |
 
 ### 22.4 Batas & pekerjaan lanjutan (jujur)
 
