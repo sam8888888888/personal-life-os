@@ -339,8 +339,9 @@ Batas jujur Gelombang 1 (belum dikerjakan, bukan disembunyikan):
   keputusan dokumen: ditunda ke v20.
 * **Gelombang 2 (lima tabel kesehatan) sudah selesai** — lihat bagian 17.
   **Gelombang 3** (orang + mesin pola) juga sudah selesai — lihat bagian 18.
-* APK yang berlaku sekarang adalah **v1.14.3-build20** (perbaikan keamanan hasil audit 26 Sep
-  2026) — lihat bagian 21. Sebelumnya `v1.14.2-build19` (perbaikan galat basis data) — bagian 20;
+* APK yang berlaku sekarang adalah **v1.14.4-build21** (sapaan memakai nama + enkripsi data
+  sinkron, 26 Sep 2026) — lihat bagian 22. Sebelumnya `v1.14.3-build20` (perbaikan keamanan hasil
+  audit) — bagian 21; `v1.14.2-build19` (perbaikan galat basis data) — bagian 20;
   `v1.14.1-build18` (perbaikan laporan pengguna 24 Sep 2026) — lihat bagian 19.
   APK versi lama (`v1.13.0-build16`, `v1.12.0-build15`, `v1.11.0-build14`) sudah digantikan;
   semuanya masih bisa diunduh dari `aaron.my.id/unduh/`.
@@ -362,6 +363,7 @@ penjalanan terakhir gelombang ini.
 | Arsip sumber `lifeos-src-v1.14.1-build18_20260924_142455.tar.gz` (12,1 MB) | pohon kerja penuh v1.14.1+18 (termasuk perbaikan kerapian 24 Sep) | SHA-256 `2fb3064ecacc01ee6508a93c8e76675dbcc58ff6054b6342c347bf109001d55b` |
 | Bundel git `lifeos-main-72ecde2_20260924_142455.bundle` (41,6 MB) | riwayat git penuh (`--all`, 7 ref) | SHA-256 `f55992ed6c3a64e3c341552194bef680b7a479fb364ef7dff7dcba288243c6bc`; diuji bisa dipulihkan dengan `git clone` (613 berkas, commit `72ecde2`) |
 | Arsip berkas di luar git `lifeos-untracked-20260924_142455.tar.gz` | `.github/` + `batch_audit/` | SHA-256 `bcbbf66b5213595d3fc25133be9f3320bf4a0725f21b6423f6e3bd71faaad037` |
+| APK `personal-life-os-v1.14.4-build21.apk` | sapaan memakai nama + enkripsi data sinkron (26 Sep 2026) | SHA-256 menyusul di bagian 22, sertifikat `7a56a135...20506b` sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.3-build20.apk` (65.684.711 byte) | rilis perbaikan keamanan hasil audit 26 Sep 2026 | SHA-256 `671d56689343c8f872e3aa3aa53dbe78092613502dcfd3ad09d8da03abd57ebd`, sertifikat `7a56a135...20506b` sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.2-build19.apk` (65.684.711 byte) | rilis perbaikan galat basis data 26 Sep 2026 | SHA-256 `cac66e27558ca782d6d157517875320023f66bfa904c426e78275a9ce7b15095`, sertifikat sama dengan versi sebelumnya |
 | APK `personal-life-os-v1.14.1-build18.apk` (65.684.711 byte) | rilis perbaikan 24 Sep 2026 | SHA-256 `9bc6b48d95056521cb0961c3c96dae3033e569e9edc70dce0c3a1d21fd8b1181`, sertifikat sama dengan versi sebelumnya |
@@ -725,4 +727,76 @@ tanpa menghapus data).
 Tidak diuji dari perangkat Android asli, tidak ada uji beban skala besar, tidak menilai layanan
 lain di server Austria, analisis CVE dependensi terbatas pada versi terpasang, dan tidak diuji
 pemulihan bencana. Rincian ada di bagian 8 laporan PDF.
+
+---
+
+## 22 · Sapaan memakai nama + enkripsi data sinkron (26 Sep 2026, v1.14.4 build 21)
+
+Dua permintaan Papi: *"Nama user harus tampil — misal 'selamat pagi, Samian'"* dan
+*"data yang belum dienkripsi, silakan diperbaiki untuk enkripsinya."*
+
+### 22.1 Sapaan memakai nama
+
+- Sebelum ini layar Hari Ini menyapa **"Assalamualaikum, Anda"** — nama pengguna tidak pernah
+  terbaca karena router memasang layar tanpa nama (nilai bawaannya `'Anda'`).
+- Sekarang: **"Selamat pagi, Samian"**, waktunya mengikuti jam perangkat
+  (pagi 04.00–10.59 · siang 11.00–14.59 · sore 15.00–17.59 · malam 18.00–03.59).
+- Sumber nama, berurutan: **isian "Nama panggilan"** di Pengaturan → **nama akun** dari server
+  (terisi sendiri sesudah daftar/masuk) → `"Anda"` bila keduanya kosong. Isian di Pengaturan
+  sengaja diutamakan supaya pilihan pengguna tidak tertimpa nama akun.
+- Nama yang ditulis serba huruf kecil dibesarkan huruf depannya (`samian` → `Samian`); tulisan
+  yang sudah punya huruf besar/kecil dibiarkan apa adanya.
+- Berkas: `lib/core/profil/nama_pengguna.dart` (baru), `lib/features/pengaturan/pengaturan_screen.dart`
+  (tombol *Nama panggilan*), `lib/features/hari_ini/hari_ini_screen.dart`,
+  `lib/core/hari_ini/penyusun_briefing.dart`, provider `namaPanggilanProvider`.
+
+### 22.2 Enkripsi data sinkron (menutup S-13 dari bagian 21)
+
+**Masalahnya:** isi catatan yang naik ke server (keuangan, kesehatan, catatan pribadi) tersimpan
+**apa adanya** di basis data server. Siapa pun yang memegang salinan basis data server bisa
+membaca seluruh data pengguna.
+
+**Cara sekarang:**
+
+| Lapisan | Yang dilakukan |
+|---|---|
+| Kunci data | 32 byte acak per akun, **tidak pernah dikirim** ke server |
+| Amplop kunci | Kunci data dibungkus sandi akun (PBKDF2-HMAC-SHA256 600.000 putaran + AES-256-GCM); yang beredar di server hanya amplopnya |
+| Isi catatan | Setiap catatan disandikan AES-256-GCM sebelum dikirim → server hanya melihat `{"terenkripsi": "plo1:…"}` |
+| Simpanan kunci di HP | Brankas Android Keystore (`lifeos/rahasia`) — salinan basis data HP saja tidak cukup |
+| Perangkat kedua | Masuk dengan email + sandi yang sama → amplop dibuka → kunci sama → data terbaca |
+| Sandi salah | Amplop **tidak dibuka** dan TIDAK dibuatkan kunci baru (dilaporkan apa adanya, supaya data lama tidak ditinggalkan) |
+| Perangkat tanpa kunci | Catatan tersandi **dilewati** (tidak menulis baris kosong) dan hasil sinkron mengatakannya |
+
+- Server **tidak perlu diubah sama sekali**: `/sinkron` memang tidak pernah menafsirkan `isi`,
+  hanya menyimpannya. Jadi tidak ada perubahan pada server Austria untuk fitur ini.
+- Penyandian dikerjakan **murni di Dart** (paket `pointycastle`, AES-256-GCM) — bukan lewat kanal
+  Android — supaya jalur yang diuji di komputer adalah jalur yang sama dengan yang dipakai HP.
+- Sidik isi tetap dihitung dari data **polos**, supaya penyandian tidak membuat baris dianggap
+  berubah terus (kalau tidak, tiap sinkron akan mengirim ulang segalanya).
+- Catatan lama tanpa penanda `terenkripsi` tetap dibaca apa adanya (data lama tidak hilang).
+  Catatan polos tidak bisa lagi terkirim karena tombol *Sinkron sekarang* **menolak jalan tanpa
+  kunci** — bila belum ada kunci, layar Akun menyuruh masuk sekali lagi.
+
+### 22.3 Bukti (bukan klaim)
+
+| Pengujian | Hasil |
+|---|---|
+| Uji baru `test/v3_enkripsi_sinkron_test.dart` | **12/12 lulus** dalam 20 detik |
+| Analisa statis (23 aturan) | Bersih |
+| Uji ujung-ke-ujung `tool/uji_enkripsi_server.dart` ke server sungguhan | lihat hasil di laporan obrolan |
+| Server menerima isi polos? | **Tidak** — uji mencari nama tagihan di jawaban server: tidak ketemu |
+| Suite penuh | dijalankan sebelum rilis (hasil di laporan) |
+
+### 22.4 Batas & pekerjaan lanjutan (jujur)
+
+- **Catatan polos lama di server tidak dipindahkan otomatis.** Hari ini server akun berisi
+  **0 akun / 0 catatan** (diperiksa 26 Sep), jadi tidak ada data polos yang perlu dipindah. Bila
+  kelak ada akun lama berisi catatan polos, jalur pindah-ke-tersandi harus dibuat lebih dulu.
+- Tombol **nyalakan/matikan sinkron per akun** (pilihan Papi) belum dikerjakan.
+- Sisa temuan audit bagian 21 yang belum: verifikasi email (S-14), token 90 hari tanpa penyegaran
+  & daftar perangkat (S-15), penolong `uidBaru` tergandang (A-03).
+- Lupa sandi = data tersinkron di perangkat lain tidak bisa dibuka (kunci tidak bisa dipulihkan
+  server). Ini konsekuensi yang diterima demi "server tidak bisa membaca data"; layar masuk belum
+  memperingatkan hal ini — kandidat perbaikan berikutnya.
 

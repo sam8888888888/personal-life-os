@@ -197,6 +197,20 @@ class _AkunScreenState extends ConsumerState<AkunScreen> {
       _hasilSinkron = null;
     });
     try {
+      // S-13: isi data disandikan di HP sebelum naik ke server, memakai kunci
+      // yang disiapkan saat masuk. Tanpa kunci → jangan sinkron (kalau tidak,
+      // data akan naik dalam bentuk polos).
+      final sesi = await repo.sesiTersimpan();
+      final kunci = sesi == null
+          ? null
+          : await ref.read(kunciSinkronProvider).kunciTersimpan(sesi.email);
+      if (kunci == null) {
+        setState(() => _hasilSinkron =
+            'Masuk sekali lagi (layar Akun → Keluar, lalu Masuk) supaya '
+            'enkripsi data aktif, kemudian coba Sinkron sekarang lagi.');
+        return;
+      }
+      ref.read(sinkronSemuaProvider).pakaiKunci(kunci);
       final hasil = await ref.read(sinkronSemuaProvider).jalan(token: token);
       setState(() => _hasilSinkron = hasil.pesan);
     } on AkunGagal catch (e) {

@@ -18,13 +18,16 @@
 /// * Kunci ini menahan **tampilan**, bukan menyandikan basis data.
 library;
 
+/// PBKDF2-HMAC-SHA256 ada di `pbkdf2.dart` (dipisah supaya modul bebas-Flutter
+/// bisa memakainya). Diteruskan di sini agar pemanggil lama tidak perlu diubah.
+export 'pbkdf2.dart' show hitungPbkdf2, kunciIterasiBawaan;
+
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
-
 import '../../data/repository/pengaturan_repository.dart';
 import '../platform/brankas_rahasia.dart';
+import 'pbkdf2.dart';
 
 // ---------------------------------------------------------------------------
 // Nama pengaturan (k-v) — satu tempat, dipakai layar & uji.
@@ -44,9 +47,6 @@ const int kunciPanjangMin = 6;
 
 /// Panjang PIN paling panjang (menjaga agar tidak jadi sandi).
 const int kunciPanjangMaks = 12;
-
-/// Putaran PBKDF2 bawaan. Uji memakai angka kecil supaya cepat.
-const int kunciIterasiBawaan = 600000;
 
 /// Berapa kali salah sebelum ditahan sementara.
 const int kunciPercobaanMaks = 5;
@@ -295,32 +295,4 @@ class ArgumenPinTidakSah implements Exception {
 
   @override
   String toString() => pesan;
-}
-
-/// PBKDF2-HMAC-SHA256 (dipakai PIN & bisa dipakai fitur lain).
-List<int> hitungPbkdf2(String sandi, List<int> garam,
-    {int iterasi = kunciIterasiBawaan, int panjang = 32}) {
-  final hmac = Hmac(sha256, utf8.encode(sandi));
-  final keluaran = <int>[];
-  var blokKe = 1;
-  while (keluaran.length < panjang) {
-    final awal = <int>[
-      ...garam,
-      (blokKe >> 24) & 0xff,
-      (blokKe >> 16) & 0xff,
-      (blokKe >> 8) & 0xff,
-      blokKe & 0xff,
-    ];
-    var u = hmac.convert(awal).bytes;
-    final t = List<int>.from(u);
-    for (var i = 1; i < iterasi; i++) {
-      u = hmac.convert(u).bytes;
-      for (var j = 0; j < t.length; j++) {
-        t[j] ^= u[j];
-      }
-    }
-    keluaran.addAll(t);
-    blokKe++;
-  }
-  return keluaran.sublist(0, panjang);
 }

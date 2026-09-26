@@ -4,7 +4,9 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repository/akun_repository.dart';
+import '../platform/brankas_rahasia.dart';
 import '../sinkron/sinkron_semua.dart';
+import '../sinkron/kunci_sinkron.dart';
 import '../sinkron/sinkron_tagihan.dart';
 import '../akun/klien_akun.dart';
 import 'app_providers.dart';
@@ -37,3 +39,16 @@ final sinkronSemuaProvider = Provider<SinkronSemua>(
     pengaturan: ref.watch(pengaturanRepoProvider),
   ),
 );
+
+/// S-13 — pengelola kunci data sinkron (data disandikan sebelum naik ke server).
+final kunciSinkronProvider = Provider<KunciSinkron>(
+  (ref) => KunciSinkron(PenyimpanRahasia(ref.watch(pengaturanRepoProvider))),
+);
+
+/// Nama untuk sapaan: isian Pengaturan → nama akun → 'Anda'.
+final namaPanggilanProvider = FutureProvider<String>((ref) async {
+  final sesi = await ref.watch(sesiAkunProvider.future);
+  return ref
+      .watch(namaPenggunaProvider)
+      .baca(namaAkun: sesi?.nama);
+});

@@ -26,6 +26,7 @@ import '../../data/database/database.dart';
 import '../platform/brankas_rahasia.dart';
 import '../../data/repository/pengaturan_repository.dart';
 import '../akun/klien_akun.dart';
+import 'enkripsi_sinkron.dart';
 import 'registri_sinkron.dart';
 import 'sinkron_tagihan.dart' show HasilSinkron;
 
@@ -41,6 +42,18 @@ class SinkronSemua {
   final KlienAkun klien;
   final PengaturanRepository pengaturan;
   final List<JalurSinkron> jalur;
+
+  /// Kunci data (S-13, audit 26 Sep 2026). Bila null → sinkron berjalan apa
+  /// adanya seperti sebelumnya (dipakai uji lama & perangkat yang belum
+  /// menyiapkan kunci). Bila terisi → seluruh isi catatan disandikan
+  /// AES-256-GCM sebelum meninggalkan HP ini.
+  List<int>? kunciData;
+
+  /// Pakai kunci data hasil `KunciSinkron.siapkan`.
+  void pakaiKunci(List<int>? kunci) => kunciData = kunci;
+
+  /// Apakah isi yang dikirim disandikan.
+  bool get terenkripsi => kunciData != null;
 
   static const String kunciRevisi = 'sinkron_revisi';
   static const String kunciTerakhir = 'sinkron_terakhir';
@@ -124,7 +137,7 @@ class SinkronSemua {
       final jawab = await klien.sinkron(
         token: token,
         sejak: revisi,
-        perubahan: paket,
+        perubahan: _siapkanKiriman(paket),
       );
       diterima += (jawab['diterima'] as num?)?.toInt() ?? 0;
       konflik += (jawab['konflik'] as num?)?.toInt() ?? 0;
@@ -150,6 +163,7 @@ class SinkronSemua {
 
     // Terapkan tarikan.
     var diterapkan = 0;
+    var tidakTerbuka = 0;
     final sudah = <String>{};
     for (final butir in tarikan) {
       final nama = _teks(butir['tabel']);
@@ -158,26 +172,71 @@ class SinkronSemua {
       final j = _cari(nama);
       if (j == null) continue;
       if (!sudah.add('$nama|$uid')) continue;
-      final isiMasuk = (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
+      final mentah = (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
+      final isiMasuk = bukaLapisanIsi(mentah);
+      if (isiMasuk == null) {
+        // Catatan tersandi yang TIDAK bisa dibuka (kunci belum ada di HP ini,
+        // atau isinya rusak) → DILEWATI. Tidak dipasang sebagai data kosong.
+        tidakTerbuka++;
+        continue;
+      }
       if (j.saring != null && !j.saring!(isiMasuk)) continue;
-      await _terapkan(j, uid, butir);
+      await _terapkan(j, uid, butir, isiTerbuka: isiMasuk);
       diterapkan++;
     }
 
     await pengaturan.simpan(kunciRevisi, '$revisi');
     await pengaturan.simpan(kunciTerakhir, DateTime.now().toIso8601String());
 
-    final pesan = jumlahBerubah == 0 && diterapkan == 0
+    final pesan = jumlahBerubah == 0 && diterapkan == 0 && tidakTerbuka == 0
         ? 'Sudah sama di semua HP.'
         : 'Dikirim $jumlahBerubah · diterima server $diterima · dipasang '
             'di HP ini $diterapkan'
-            '${konflik > 0 ? ' · $konflik bentrok (versi lama disimpan di server)' : ''}';
+            '${konflik > 0 ? ' · $konflik bentrok (versi lama disimpan di server)' : ''}'
+            '${tidakTerbuka > 0 ? ' · $tidakTerbuka catatan tidak bisa dibuka (kunci belum ada di HP ini)' : ''}';
     return HasilSinkron(
       dikirim: jumlahBerubah,
       diterapkan: diterapkan,
       konflik: konflik,
       pesan: pesan,
     );
+  }
+
+  /// Isi yang benar-benar dikirim ke server.
+  ///
+  /// Bila kunci data tersedia, seluruh peta isi diganti satu teks tersandi
+  /// (`{'terenkripsi': 'plo1:...'}`) sehingga server hanya menyimpan sandi
+  /// acak. Sedangkan **sidik isi tetap dihitung dari peta polos** (lihat
+  /// [jalan]) supaya penyandian tidak membuat baris dianggap berubah terus.
+  List<Map<String, dynamic>> _siapkanKiriman(
+      List<Map<String, dynamic>> paket) {
+    final kunci = kunciData;
+    if (kunci == null) return paket;
+    return paket.map((p) {
+      final isi = p['isi'];
+      final petaPolos =
+          isi is Map ? isi.cast<String, Object?>() : const <String, Object?>{};
+      return <String, dynamic>{
+        ...p,
+        'isi': p['dihapus'] == true
+            ? const <String, dynamic>{}
+            : sandikanPeta(kunci, petaPolos),
+      };
+    }).toList();
+  }
+
+  /// Buka lapisan penyandian pada isi catatan yang datang (server atau berkas).
+  ///
+  /// * Peta polos (catatan lama, sebelum versi ini) → dikembalikan apa adanya,
+  ///   supaya data lama tetap terbaca.
+  /// * Peta tersandi → dibuka dengan kunci data. `null` bila tidak bisa dibuka
+  ///   (kunci belum ada di HP ini atau isinya rusak) — pemanggil WAJIB melewati
+  ///   catatan itu, bukan memasangnya sebagai data kosong.
+  Map<String, Object?>? bukaLapisanIsi(Map<String, Object?> isi) {
+    if (!isi.containsKey(kunciIsiTersandi)) return isi;
+    final kunci = kunciData;
+    if (kunci == null) return null;
+    return bukaPetaTersandi(kunci, isi);
   }
 
   /// Pastikan baris punya uid (dipakai jalur server maupun jalur berkas).
@@ -318,8 +377,7 @@ class SinkronSemua {
             (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
         if (j.saring != null && !j.saring!(isiMasuk)) continue;
         butir['dihapus'] = butir['dihapus'] == true;
-        await _terapkan(j, uid, butir, dariBerkas: true);
-        masuk++;
+        if (await _terapkan(j, uid, butir, dariBerkas: true)) masuk++;
       }
       await _pulihkanTautan();
       return masuk;
@@ -434,15 +492,21 @@ class SinkronSemua {
   /// yang memuat nama kolom tidak dikenal DITOLAK (impor dibatalkan seluruhnya,
   /// tidak ada data masuk setengah) — sedangkan di jalur server kolom yang tidak
   /// dikenal cukup dilewati supaya versi aplikasi berbeda tetap bisa sinkron.
-  Future<void> _terapkan(
+  Future<bool> _terapkan(
       JalurSinkron j, String uid, Map<String, dynamic> butir,
-      {bool dariBerkas = false}) async {
+      {bool dariBerkas = false, Map<String, Object?>? isiTerbuka}) async {
     if (butir['dihapus'] == true) {
       await db.customStatement('DELETE FROM ${j.nama} WHERE ${j.kolomUid.$name} = ?', [uid]);
       await _hapusSidik(j.nama, uid);
-      return;
+      return true;
     }
-    final isi = (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {};
+    final isi = isiTerbuka ??
+        bukaLapisanIsi(
+            (butir['isi'] as Map?)?.cast<String, Object?>() ?? const {});
+    if (isi == null) {
+      // Tersandi tetapi tidak bisa dibuka → jangan tulis apa pun.
+      return false;
+    }
     // KEAMANAN: nama kolom dari luar (server atau berkas sinkron kiriman orang
     // lain) DIBUANG bila tidak ada di skema tabel ini. Tanpa saringan ini,
     // nama kolom palsu bisa ikut menjadi perintah SQL (suntikan lewat
@@ -502,6 +566,7 @@ class SinkronSemua {
       final peta = await _untukServer(j, baris);
       await _simpanSidik(j.nama, uid, _sidikPeta(peta));
     }
+    return true;
   }
 
   Future<Map<String, Object?>?> _bacaSatu(JalurSinkron j, String uid) async {

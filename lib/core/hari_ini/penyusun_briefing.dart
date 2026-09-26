@@ -1,6 +1,7 @@
 /// Morning Briefing (FR-63) — penyusun isi & teks, murni tanpa Flutter.
 library;
 
+import '../profil/nama_pengguna.dart';
 import '../utils/uang_utils.dart';
 import 'model_hari_ini.dart';
 import 'penyusun_hari_ini.dart';
@@ -24,7 +25,7 @@ IsiBriefing susunBriefing(
     total += b.nominalSen ?? 0;
   }
   return IsiBriefing(
-    sapaan: 'Assalamualaikum, ${data.namaPanggilan}',
+    sapaan: sapaanWaktu(data.sekarang, data.namaPanggilan),
     tanggal: data.sekarang,
     hijriah: hijriah,
     jam: jam ?? data.sekarang,

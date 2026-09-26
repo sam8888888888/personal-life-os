@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/akun/klien_akun.dart';
 import '../../core/providers/akun_providers.dart';
+import '../../core/providers/app_providers.dart';
 
 class MasukScreen extends ConsumerStatefulWidget {
   const MasukScreen({super.key, this.mulaiDaftar = false});
@@ -48,10 +49,29 @@ class _MasukScreenState extends ConsumerState<MasukScreen> {
               email: _email.text, nama: _nama.text, sandi: _sandi.text)
           : await klien.masuk(email: _email.text, sandi: _sandi.text);
       await repo.simpanSesi(sesi);
+      // S-13: siapkan kunci data sinkron selagi sandi masih di tangan. Mulai
+      // sekarang isi data disandikan di HP sebelum naik ke server.
+      var catatan = '';
+      try {
+        await ref.read(kunciSinkronProvider).siapkan(
+              klien: klien,
+              token: sesi.token,
+              email: sesi.email,
+              sandi: _sandi.text,
+            );
+        // Nama akun dipakai untuk sapaan bila pengguna belum mengisi sendiri.
+        await ref.read(namaPenggunaProvider).isiDariAkunBilaKosong(sesi.nama);
+      } on AkunGagal catch (e) {
+        catatan = ' Catatan: ${e.pesan}';
+      } catch (_) {
+        catatan = ' Catatan: kunci enkripsi belum siap — masuk sekali lagi '
+            'untuk mengaktifkannya.';
+      }
       ref.invalidate(sesiAkunProvider);
+      ref.invalidate(namaPanggilanProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Berhasil masuk sebagai ${sesi.email}.')),
+        SnackBar(content: Text('Berhasil masuk sebagai ${sesi.email}.$catatan')),
       );
       Navigator.of(context).pop();
     } on AkunGagal catch (e) {

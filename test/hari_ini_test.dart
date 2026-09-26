@@ -316,7 +316,8 @@ void main() {
 
     test('isi briefing: sapaan, agenda maksimal 4, tagihan 7 hari maksimal 3', () {
       final b = susunBriefing(data, hijriah: '2 Rabiul Akhir 1448 H');
-      expect(b.sapaan, 'Assalamualaikum, Boss');
+      // sekarang = 13 Sep 2026 pukul 00.00 → "Selamat malam".
+      expect(b.sapaan, 'Selamat malam, Boss');
       expect(b.agenda.length <= maksAgendaBriefing, isTrue);
       expect(b.tagihanTujuhHari.length <= maksTagihanBriefing, isTrue);
       expect(b.totalTagihanSen > 0, isTrue);

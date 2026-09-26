@@ -17,6 +17,7 @@ import '../../data/repository/pengaturan_repository.dart';
 import '../../data/repository/tagihan_repository.dart';
 import '../kunci/kunci_aplikasi.dart';
 import '../platform/kanal_kunci.dart';
+import '../profil/nama_pengguna.dart';
 import '../profil/profil_providers.dart';
 
 /// Satu instance database untuk seluruh aplikasi.
@@ -66,6 +67,11 @@ final tagihanRepoProvider =
 
 final pengaturanRepoProvider = Provider<PengaturanRepository>(
     (ref) => PengaturanRepository(ref.watch(databaseProvider)));
+
+/// Nama pengguna untuk sapaan (permintaan Papi 26 Sep 2026): layar Hari Ini
+/// menyapa dengan nama, mis. "Selamat pagi, Samian".
+final namaPenggunaProvider = Provider<NamaPengguna>(
+    (ref) => NamaPengguna(ref.watch(pengaturanRepoProvider)));
 
 /// Daftar tagihan aktif (stream).
 final tagihanAktifProvider = StreamProvider.autoDispose<List<TagihanData>>(

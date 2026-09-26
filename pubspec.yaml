@@ -14,7 +14,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.14.3+20
+version: 1.14.4+21
 
 environment:
   sdk: ^3.13.2
@@ -51,6 +51,9 @@ dependencies:
   pdf: ^3.13.0
   # FR-26: PBKDF2-HMAC-SHA256 untuk PIN kunci aplikasi.
   crypto: ^3.0.7
+  # S-13: AES-256-GCM (murni Dart) untuk menyandikan isi data sinkron sebelum
+  # naik ke server, dan untuk membungkus kunci data dengan sandi akun.
+  pointycastle: ^4.0.0
   # Brankas Keystore sebagai PAKET PLUGIN: kanalnya harus ada juga di mesin
   # Flutter milik pekerja latar (Workmanager), bukan hanya di MainActivity.
   lifeos_brankas:

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/profil/nama_pengguna.dart';
+import '../../core/providers/akun_providers.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/mata_uang.dart';
 import 'mode_tema_pengaturan.dart';
@@ -25,6 +27,58 @@ class PengaturanScreen extends ConsumerStatefulWidget {
 class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
   final _pemasukan = TextEditingController();
   bool _terisi = false;
+
+  /// Permintaan Papi 26 Sep 2026: sapaan di layar Hari Ini memakai NAMA
+  /// ("Selamat pagi, Samian"). Isian ini opsional — kosong berarti memakai
+  /// nama akun, dan bila akun belum ada memakai "Anda".
+  Future<void> _aturNamaPanggilan() async {
+    final pengguna = ref.read(namaPenggunaProvider);
+    final pengawas = TextEditingController(text: await pengguna.baca());
+    if (!mounted) {
+      pengawas.dispose();
+      return;
+    }
+    final nama = await showDialog<String>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: const Text('Nama panggilan'),
+        content: TextField(
+          key: const Key('isian_nama_panggilan'),
+          controller: pengawas,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(
+            labelText: 'Nama',
+            helperText: 'Mis. Samian. Kosongkan untuk memakai nama akun.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(c).pop(),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            key: const Key('simpan_nama_panggilan'),
+            onPressed: () => Navigator.of(c).pop(pengawas.text),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+    pengawas.dispose();
+    if (nama == null) return;
+    await pengguna.simpan(nama);
+    ref.invalidate(namaPanggilanProvider);
+    if (!mounted) return;
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(nama.trim().isEmpty
+            ? 'Nama panggilan dikosongkan — sapaan memakai nama akun.'
+            : 'Nama panggilan disimpan: ${nama.trim()}'),
+      ),
+    );
+  }
 
   /// FR-21: simpan pilihan tema (terang / gelap / ikut sistem).
   Future<void> _ubahModeTema(ModeTema m) async {
@@ -192,6 +246,20 @@ class _PengaturanScreenState extends ConsumerState<PengaturanScreen> {
           onPressed: () => context.push('/ibadah/kalender-hijriah'),
           icon: const Icon(Icons.calendar_month),
           label: const Text('Kalender Hijriah'),
+        ),
+        const Divider(height: 40),
+        const Text('Sapaan',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        const Text('Nama yang dipakai menyapa di layar Hari Ini, '
+            'misalnya "Selamat pagi, Samian".'),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          key: const Key('atur_nama_panggilan'),
+          onPressed: _aturNamaPanggilan,
+          icon: const Icon(Icons.badge_outlined),
+          label: Text('Nama panggilan: '
+              '${ref.watch(namaPanggilanProvider).value ?? namaPanggilanBawaan}'),
         ),
         const Divider(height: 40),
         const Text('Kunci, profil & ikon',

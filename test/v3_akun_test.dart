@@ -16,6 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personal_life_os/core/akun/klien_akun.dart';
 import 'package:personal_life_os/core/platform/brankas_rahasia.dart';
+import 'package:personal_life_os/core/sinkron/kunci_sinkron.dart';
 import 'bantuan/gudang_memori.dart';
 import 'package:personal_life_os/core/providers/akun_providers.dart';
 import 'package:personal_life_os/core/providers/app_providers.dart';
@@ -178,6 +179,11 @@ void main() {
         overrides: [
           databaseProvider.overrideWithValue(db),
           akunRepoProvider.overrideWithValue(repo),
+          // Brankas rahasia disuntik memori: kanal Keystore Android tidak pernah
+          // menjawab di dalam waktu tiruan uji, sehingga `pumpAndSettle` habis
+          // waktu — sebabnya sama seperti catatan di `brankas_rahasia.dart`.
+          kunciSinkronProvider.overrideWithValue(
+              KunciSinkron(PenyimpanRahasia(pengaturan, gudang: gudang))),
           if (klien != null) klienAkunProvider.overrideWithValue(klien),
         ],
         child: MaterialApp(

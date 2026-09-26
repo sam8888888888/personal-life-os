@@ -49,7 +49,12 @@ void main() {
     expect(find.text('Lainnya'), findsWidgets);
     // Tab pertama = layar Hari Ini (Modul 0), bukan Ringkasan lagi.
     expect(find.text('Pilar hari ini'), findsOneWidget);
-    expect(find.text('Assalamualaikum, Anda'), findsOneWidget);
+    // Permintaan Papi 26 Sep 2026: sapaan memakai NAMA, bukan "Assalamualaikum".
+    // Jamnya jam nyata, jadi yang diperiksa bentuknya (bukan satu jam tertentu).
+    expect(
+      find.textContaining(RegExp(r'^Selamat (pagi|siang|sore|malam), Anda$')),
+      findsOneWidget,
+    );
 
     // timer drift dituntaskan sebelum pohon widget dibongkar
     await tester.pumpWidget(const SizedBox.shrink());

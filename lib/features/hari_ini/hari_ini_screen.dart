@@ -19,6 +19,8 @@ import '../rumah/rumah_providers.dart';
 import '../../core/ibadah/kalender_hijriah.dart';
 import '../../core/notifikasi/perencana_pengingat.dart';
 import '../../core/notifikasi/tunda_pengingat.dart';
+import '../../core/profil/nama_pengguna.dart';
+import '../../core/providers/akun_providers.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/utils/tanggal_utils.dart';
 import '../../data/repository/notifikasi_riwayat_repository.dart';
@@ -33,7 +35,7 @@ class HariIniScreen extends ConsumerStatefulWidget {
     super.key,
     this.jamSekarang,
     this.ambilJumlahSholatTercatat,
-    this.namaPanggilan = 'Anda',
+    this.namaPanggilan,
   });
 
   /// Jam yang disuntik uji. Dianggap TANGGAL SIPIL perangkat (bukan instan
@@ -43,7 +45,8 @@ class HariIniScreen extends ConsumerStatefulWidget {
   /// Pembacaan catatan sholat (FR-88). null = modul belum dipasang.
   final Future<int?> Function()? ambilJumlahSholatTercatat;
 
-  final String namaPanggilan;
+  /// Nama untuk sapaan. null = dibaca dari pengaturan/akun (namaPanggilanProvider).
+  final String? namaPanggilan;
 
   @override
   ConsumerState<HariIniScreen> createState() => _HariIniScreenState();
@@ -54,6 +57,12 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
   bool _sudahBacaSholat = false;
 
   DateTime get _sekarang => widget.jamSekarang?.call() ?? waktuSekarang();
+
+  /// Nama untuk sapaan: suntikan uji → isian Pengaturan/akun → 'Anda'.
+  String get _namaSapaan =>
+      widget.namaPanggilan ??
+      ref.watch(namaPanggilanProvider).value ??
+      namaPanggilanBawaan;
 
   @override
   void initState() {
@@ -162,7 +171,7 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
       tagihan: tagihan,
       jumlahSholatTercatat: _jumlahSholat,
       statusIzinPengingat: izin == null ? null : (izin.siap ? 'diizinkan' : 'belum'),
-      namaPanggilan: widget.namaPanggilan,
+      namaPanggilan: _namaSapaan,
       garansiAset: [
         for (final a in garansiAset)
           if (a.garansiSampai != null)
@@ -197,7 +206,7 @@ class _HariIniScreenState extends ConsumerState<HariIniScreen> {
         padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
         children: [
           _Kepala(
-            nama: widget.namaPanggilan,
+            nama: _namaSapaan,
             tanggal: _sekarang,
             hijriah: hijri?.label ?? 'Belum ada data Hijriah',
             jumlahPerhatian: ringkas.perhatian.length,
@@ -313,7 +322,7 @@ class _Kepala extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Assalamualaikum, $nama',
+              Text(sapaanWaktu(tanggal, nama),
                   style: tema.textTheme.headlineSmall),
               const SizedBox(height: 6),
               Text(

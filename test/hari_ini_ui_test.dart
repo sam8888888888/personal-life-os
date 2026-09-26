@@ -166,7 +166,8 @@ void main() {
     testWidgets('kepala layar: sapaan, tanggal, Hijriah, catatan perhitungan',
         (t) async {
       await tampilkan(t, HariIniScreen(jamSekarang: () => jamPagi));
-      expect(find.text('Assalamualaikum, Anda'), findsOneWidget);
+      // Sapaan memakai NAMA + waktu (jamPagi = 09.00 → "Selamat pagi").
+      expect(find.text('Selamat pagi, Anda'), findsOneWidget);
       expect(find.textContaining('perhitungan, bukan penetapan resmi'), findsOneWidget);
       expect(find.textContaining('H'), findsWidgets); // label Hijriah
       await tutup(t);
@@ -356,7 +357,7 @@ void main() {
   group('FR-63 Ringkasan pagi', () {
     testWidgets('blok utama tampil + tombol Mulai hari & Tutup', (t) async {
       await tampilkan(t, BriefingPagiScreen(jamSekarang: () => jamPagi));
-      expect(find.text('Assalamualaikum, Anda'), findsOneWidget);
+      expect(find.text('Selamat pagi, Anda'), findsOneWidget);
       expect(find.textContaining('Agenda hari ini'), findsOneWidget);
       expect(find.textContaining('Tagihan 7 hari ke depan'), findsOneWidget);
       // Kartu ibadah pagi (FR-99) menambah tinggi layar, jadi tombolnya
